@@ -21,6 +21,16 @@ class Mercurio26 extends ModelBase
         'orden',
     ];
 
+    public function scopeActivas($query)
+    {
+        return $query->where('estado', 'A');
+    }
+
+    public function scopeSoloImagenes($query)
+    {
+        return $query->where('tipo', '!=', 'V');
+    }
+
     /**
      * Metodo para establecer el valor del campo numero
      *

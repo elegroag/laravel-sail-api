@@ -1,4 +1,5 @@
 import ChangePasswordModalView from './ChangePasswordModalView';
+import { GaleriaCarouselView } from './GaleriaCarouselView';
 import { PrincipalLayout } from './PrincipalLayout';
 import { ServiciosView } from './ServiciosView';
 import { TotalesView } from './TotalesView';
@@ -34,6 +35,9 @@ class ControllerPrincipal {
         this.__buscarServicios({
             callback: (response) => {
                 if (response) {
+                    // Cargar galería de productos y servicios (primera sección visible)
+                    this.__loadGaleriaSection();
+
                     // Cargar sección de totales
                     this.__loadTotalesSection(response.totales);
 
@@ -42,9 +46,6 @@ class ControllerPrincipal {
 
                     // Cargar sección de consultas
                     this.__loadConsultasSection();
-
-                    // Cargar sección de productos
-                    this.__loadProductosSection();
                 }
             },
             silent: false,
@@ -126,33 +127,29 @@ class ControllerPrincipal {
     }
 
     /**
-     * Carga la sección de productos con animación escalonada
+     * Carga la galería principal (Mercurio26) como carrusel
      */
-    __loadProductosSection() {
-        const productos = this.App.Collections.productos;
-        if (!productos || (typeof productos.length === 'number' && productos.length === 0)) {
-            this.layout.markSectionLoaded('productos');
-            return;
-        }
+    __loadGaleriaSection() {
+        this.App.trigger('syncro', {
+            url: this.App.url('principal/galeria'),
+            data: {},
+            silent: true,
+            callback: (response) => {
+                const region = this.layout.getRegion('galeria');
 
-        const region = this.layout.getRegion('productos');
+                if (!response || response.success !== true) {
+                    region.html('<p class="principal-gallery-empty">No se pudo cargar la galería.</p>');
+                    this.layout.markSectionLoaded('productos');
+                    return;
+                }
 
-        // Cargar cada card con delay para animación escalonada
-        productos.forEach((item, index) => {
-            setTimeout(() => {
-                item.tipo = 'productos';
-                const view = new ServiciosView({ model: item });
-                region.append(view);
-            }, index * 100);
-        });
-
-        // Marcar sección como cargada
-        setTimeout(
-            () => {
+                const view = new GaleriaCarouselView({
+                    items: response.data || [],
+                });
+                region.show(view);
                 this.layout.markSectionLoaded('productos');
             },
-            productos.length * 100 + 100,
-        );
+        });
     }
 
     /**

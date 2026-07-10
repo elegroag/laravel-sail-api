@@ -149,6 +149,18 @@ class Mercurio01 extends ModelBase
     }
 
     /**
+     * URL pública bajo el path de almacenamiento (sin prefijo public/).
+     */
+    public function publicUrl(string $relative = ''): string
+    {
+        $base = preg_replace('#^public/#', '', trim($this->path ?? '', '/'));
+        $relative = trim($relative, '/');
+        $path = $relative !== '' ? "{$base}/{$relative}" : $base;
+
+        return asset($path);
+    }
+
+    /**
      * Devuelve el valor del campo ftpserver
      *
      * @return string

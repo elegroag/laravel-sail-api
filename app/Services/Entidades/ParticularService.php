@@ -84,13 +84,6 @@ class ParticularService
                     'imagen' => 'facultativo.jpg',
                 ],
             ],
-            'productos' => [
-                [
-                    'name' => 'P. Complemento_nutricional',
-                    'url' => 'productos/complemento_nutricional',
-                    'imagen' => 'complemento.jpg',
-                ],
-            ],
             'consultas' => false,
         ];
     }

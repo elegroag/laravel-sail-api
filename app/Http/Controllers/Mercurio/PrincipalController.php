@@ -7,8 +7,10 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\SessionCookies;
 use App\Library\Auth\SessionMercurio;
 use App\Models\Adapter\DbBase;
+use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
+use App\Models\Mercurio26;
 use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
@@ -463,6 +465,39 @@ class PrincipalController extends ApplicationController
         }
 
         return response()->json($salida);
+    }
+
+    public function galeria()
+    {
+        try {
+            $mercurio01 = Mercurio01::first();
+            if (! $mercurio01) {
+                throw new DebugException('Configuración básica no encontrada.', 404);
+            }
+
+            $path = $mercurio01->publicUrl('galeria');
+            $galeria = Mercurio26::activas()
+                ->soloImagenes()
+                ->orderBy('orden')
+                ->get();
+
+            $data = $galeria->map(function ($item) use ($path) {
+                return [
+                    'numero' => $item->numero,
+                    'archivo' => $path.'/'.$item->archivo,
+                    'tipo' => $item->tipo,
+                    'nota' => $item->nota,
+                ];
+            })->values();
+
+            return response()->json([
+                'success' => true,
+                'msj' => 'Consulta exitosa',
+                'data' => $data,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
     }
 
     public function validaSyncro()

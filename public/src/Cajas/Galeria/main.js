@@ -9,18 +9,22 @@ const validatorInit = () => {
         rules: {
             archivo: { required: true },
             tipo: { required: true },
+            nota: { maxlength: 500 },
         },
         messages: {
             archivo: 'El archivo es requerido',
             tipo: 'El tipo es requerido',
+            nota: 'La nota no puede superar los 500 caracteres',
         },
     });
 };
 
 const resetForm = () => {
-    $('#form')[0].reset();
+    const $form = $('#form');
+    $form[0].reset();
     $('#archivo').next('.custom-file-label').text('Seleccione un archivo');
-    $('#form :input').prop('disabled', false);
+    $form.find(':input').prop('disabled', false);
+    validator.resetForm();
 };
 
 const detectTipoFromFile = (fileName) => {
@@ -37,8 +41,10 @@ const detectTipoFromFile = (fileName) => {
 $(() => {
     window.App.initialize();
     validatorInit();
+
     const modalZoom = new bootstrap.Modal(document.getElementById('zoomModal'));
-    const $guardarBtn = $("[data-toggle='guardar']");
+    const modalCapture = new bootstrap.Modal(document.getElementById('captureModal'));
+    const $guardarBtn = $('#captureModal').find("[data-toggle='guardar']");
 
     const galeria = () => {
         window.App.trigger('syncro', {
@@ -48,9 +54,17 @@ $(() => {
                     return Messages.display(response?.msg || 'No se pudieron cargar los datos', 'error');
                 }
 
+                const items = response.data || [];
+                if (!items.length) {
+                    $('#galeria').html(
+                        '<div class="galeria-admin-empty">No hay contenido publicado en la galería. Use "Agregar contenido" para comenzar.</div>',
+                    );
+                    return;
+                }
+
                 let html = '';
                 const tmp = _.template(document.getElementById('tmp_galeria').innerHTML);
-                $.each(response.data || [], function (key, value) {
+                $.each(items, function (key, value) {
                     html += tmp({ value });
                 });
                 $('#galeria').html(html);
@@ -61,33 +75,9 @@ $(() => {
         });
     };
 
-    $(document).on({
-        mouseenter: function () {
-            $(this)
-                .css({
-                    outline: '0px solid #6EE0FF',
-                })
-                .stop()
-                .animate(
-                    {
-                        outlineWidth: '2px',
-                        outlineColor: '#6EE0FF',
-                    },
-                    200,
-                );
-        },
-        mouseleave: function () {
-            $(this).stop().animate(
-                {
-                    outlineWidth: '0px',
-                    outlineColor: '#037736',
-                },
-                150,
-            );
-        },
-    },
-    '.thumbnail',
-    );
+    $('#captureModal').on('show.bs.modal', () => {
+        resetForm();
+    });
 
     $(document).on('change', '#archivo', (e) => {
         const file = e.target.files?.[0];
@@ -157,6 +147,7 @@ $(() => {
                 if (response?.flag === true) {
                     Messages.display(response.msg, 'success');
                     resetForm();
+                    modalCapture.hide();
                     galeria();
                 } else {
                     Messages.display(response?.msg || 'Error al guardar', 'error');
@@ -205,7 +196,7 @@ $(() => {
         });
     });
 
-    $(document).on('click', "[data-toggle='show-modal']", (e) => {
+    $(document).on('click', "[data-toggle='preview']", (e) => {
         e.preventDefault();
         const file = $(e.currentTarget).attr('data-file');
         const isVideo = file?.toLowerCase().endsWith('.mp4');

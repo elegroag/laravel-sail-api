@@ -4,7 +4,6 @@ use App\Http\Controllers\Mercurio\CertificadosController;
 use App\Http\Controllers\Mercurio\PrincipalController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::post('/mercurio/principal/ingreso_dirigido', [PrincipalController::class, 'ingresoDirigido']);
 
 // Principal
@@ -27,6 +26,7 @@ Route::prefix('/mercurio/principal')->group(function () {
         Route::post('/traer_categorias_trabajador', [PrincipalController::class, 'traerCategoriasTrabajador']);
         Route::post('/valida_syncro', [PrincipalController::class, 'validaSyncro']);
         Route::post('/servicios', [PrincipalController::class, 'servicios']);
+        Route::post('/galeria', [PrincipalController::class, 'galeria']);
         Route::post('/lista_adress', [PrincipalController::class, 'listaAdress']);
         Route::post('/actualiza_estado_solicitudes', [PrincipalController::class, 'actualizaEstadoSolicitudes']);
         Route::post('/establecer_clave_firma', [PrincipalController::class, 'establecerClaveFirma']);

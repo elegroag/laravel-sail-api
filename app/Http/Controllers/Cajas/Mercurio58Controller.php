@@ -44,13 +44,13 @@ class Mercurio58Controller extends ApplicationController
                 throw new DebugException('Configuración básica no encontrada.');
             }
 
-            $path = url($mercurio01->getPath() . 'galeria');
+            $path = $mercurio01->publicUrl('galeria');
             $galeria = Mercurio58::where('codare', $codare)->orderBy('orden', 'ASC')->get();
 
             $response = $galeria->map(function ($item) use ($path) {
                 return [
                     'numero' => $item->numero,
-                    'archivo' => $path . '/' . $item->archivo,
+                    'archivo' => $path.'/'.$item->archivo,
                 ];
             });
 
@@ -85,8 +85,8 @@ class Mercurio58Controller extends ApplicationController
             if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
                 $file = $request->file('archivo');
                 $extension = $file->getClientOriginalExtension();
-                $fileName = "area_{$codare}_" . $numero . '.' . $extension;
-                $destinationPath = public_path($mercurio01->getPath() . 'galeria');
+                $fileName = "area_{$codare}_".$numero.'.'.$extension;
+                $destinationPath = public_path($mercurio01->getPath().'galeria');
                 $file->move($destinationPath, $fileName);
                 $mercurio58->setArchivo($fileName);
             } else {
@@ -105,7 +105,7 @@ class Mercurio58Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede guardar el Registro: ' . $e->getMessage());
+            $response = parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -144,7 +144,7 @@ class Mercurio58Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede Ordenar el Registro: ' . $e->getMessage());
+            $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -183,7 +183,7 @@ class Mercurio58Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede Ordenar el Registro: ' . $e->getMessage());
+            $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }
@@ -203,7 +203,7 @@ class Mercurio58Controller extends ApplicationController
                 $mercurio01 = Mercurio01::first();
 
                 if ($mercurio01 && ! empty($archivo)) {
-                    $filePath = public_path($mercurio01->getPath() . 'galeria/' . $archivo);
+                    $filePath = public_path($mercurio01->getPath().'galeria/'.$archivo);
                     if (File::exists($filePath)) {
                         File::delete($filePath);
                     }
@@ -219,7 +219,7 @@ class Mercurio58Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             $this->db->rollback();
-            $response = parent::errorFunc('No se puede Borrar el Registro: ' . $e->getMessage());
+            $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }

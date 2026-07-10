@@ -40,7 +40,7 @@ class Mercurio74Controller extends ApplicationController
                 throw new DebugException('Configuración básica no encontrada.');
             }
 
-            $path = url($mercurio01->getPath().'galeria');
+            $path = $mercurio01->publicUrl('galeria');
             $galeria = Mercurio74::where('estado', 'A')->orderBy('orden', 'ASC')->get();
 
             $data = $galeria->map(function ($item) use ($path) {

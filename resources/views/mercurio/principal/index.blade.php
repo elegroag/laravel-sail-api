@@ -22,5 +22,9 @@
 <script type="text/template" id='tmp_totales'>
     @include('mercurio/principal/tmp/tmp_totales')
 </script>
+
+<script type="text/template" id='tmp_galeria_carousel'>
+    @include('mercurio/principal/tmp/tmp_galeria_carousel')
+</script>
 <script src="{{ asset('mercurio/build/Principal.js') }}"></script>
 @endpush

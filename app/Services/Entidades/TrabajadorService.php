@@ -557,13 +557,6 @@ class TrabajadorService
                     'imagen' => 'presentar_certificado.jpg',
                 ],
             ],
-            'productos' => [
-                [
-                    'name' => 'P. Complemento_nutricional',
-                    'url' => 'productos/complemento_nutricional',
-                    'imagen' => 'complemento.jpg',
-                ],
-            ],
             'consultas' => [
                 [
                     'name' => 'Consulta de gíro',

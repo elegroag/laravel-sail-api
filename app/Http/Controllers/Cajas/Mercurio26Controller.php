@@ -41,7 +41,7 @@ class Mercurio26Controller extends ApplicationController
                 throw new DebugException('Configuración básica no encontrada.');
             }
 
-            $path = url($mercurio01->getPath().'galeria');
+            $path = $mercurio01->publicUrl('galeria');
             $galeria = Mercurio26::orderBy('orden', 'ASC')->get();
 
             $data = $galeria->map(function ($item) use ($path) {
@@ -49,6 +49,7 @@ class Mercurio26Controller extends ApplicationController
                     'numero' => $item->numero,
                     'archivo' => $path.'/'.$item->archivo,
                     'tipo' => $item->tipo,
+                    'nota' => $item->nota,
                 ];
             });
 
@@ -70,6 +71,7 @@ class Mercurio26Controller extends ApplicationController
         try {
             $validated = $request->validate([
                 'tipo' => 'required|in:F,V',
+                'nota' => 'nullable|string|max:500',
                 'archivo' => [
                     'required',
                     'file',
@@ -90,6 +92,7 @@ class Mercurio26Controller extends ApplicationController
             $mercurio26->setOrden($orden);
             $mercurio26->setTipo($tipo);
             $mercurio26->setEstado('A');
+            $mercurio26->setNota($validated['nota'] ?? '');
 
             $mercurio01 = Mercurio01::first();
             if (! $mercurio01) {

@@ -3,6 +3,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('cajas/css/galeria-admin.css') }}" />
 @endpush
 
 @section('content')
@@ -14,34 +15,17 @@
             <div class="card">
                 <div class="card-header bg-green-blue p-1"></div>
                 <div class="card-body p-3">
-                    <form id="form" class="validation_form" autocomplete="off" novalidate>
-                        <div class="row">
-                            <div class="col-md-6 ml-auto">
-                                <div class="form-group">
-                                    <label for="archivo" class="form-control-label">Archivo</label>
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="archivo" name="archivo" accept="image/jpeg,image/png,image/jpg,video/mp4" lang="es">
-                                        <label class="custom-file-label" for="archivo">Seleccione un archivo</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="tipo" class="form-control-label">Tipo</label>
-                                    <select id="tipo" name="tipo" class="form-control">
-                                        <option value="">Seleccione</option>
-                                        <option value="F">FOTO</option>
-                                        <option value="V">VIDEO</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mr-auto">
-                                <button type="button" class="btn btn-primary" style="margin-top: 17%" data-toggle="guardar">Agregar</button>
-                            </div>
+                    <div class="galeria-admin-toolbar">
+                        <div>
+                            <h4 class="galeria-admin-toolbar-title mb-0">Contenido publicado</h4>
+                            <p class="galeria-admin-toolbar-subtitle mb-0">Administre fotos y videos de la galería principal.</p>
                         </div>
-                    </form>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#captureModal">
+                            <i class="fas fa-plus mr-1"></i> Agregar contenido
+                        </button>
+                    </div>
 
-                    <div class="row border-top d-flex flex-wrap mt-2 pt-3" id="galeria"></div>
+                    <div class="galeria-admin-grid" id="galeria"></div>
                 </div>
             </div>
         </div>
@@ -50,51 +34,84 @@
 @endsection
 
 @push('scripts')
-    @include("partials.modal_generic", [
-        "titulo" => 'Imagen Zoom',
-        "contenido" => '',
-        "evento" => 'data-toggle="show-modal"',
-        "btnShowModal" => 'btZoomModal',
-        "idModal" => 'zoomModal']
-    )
+    @include('partials.modal_generic', [
+        'titulo' => 'Agregar contenido',
+        'contenido' => view('cajas.mercurio26.partials.form')->render(),
+        'evento' => 'data-toggle="guardar"',
+        'btnShowModal' => 'btCaptureModal',
+        'idModal' => 'captureModal',
+    ])
+
+    @include('partials.modal_generic', [
+        'titulo' => 'Vista previa',
+        'contenido' => '',
+        'hideFooter' => true,
+        'btnShowModal' => 'btZoomModal',
+        'idModal' => 'zoomModal',
+    ])
 
     <script type="text/template" id='tmp_galeria'>
-        <div class="col-lg-3 col-md-4 col-xs-6 mb-3">
+        <article class="galeria-admin-card">
             <button
                 type="button"
-                style="float: right; z-index:9999"
-                class="btn btn-default btn-sm btn-icon-only rounded-circle mt-2"
+                class="galeria-admin-delete"
                 data-toggle="borrar"
-                data-cid="<%=value.numero %>">
-                    <i class="fa fa-times"></i>
+                data-cid="<%= value.numero %>"
+                title="Eliminar"
+                aria-label="Eliminar item <%= value.numero %>">
+                <i class="fa fa-times"></i>
             </button>
 
-            <% if (value.tipo == 'V') { %>
-            <div class="thumbnail" style="position: absolute; width:100%">
-                <video width="90%" height="240" controls> <source src="<%=value.archivo%>" type="video/mp4"></video>
-            <% } else { %>
-            <div class="thumbnail"
-                style="opacity:1;background-image: url('<%=value.archivo%>');background-size: 100% 100%;border-top: solid 1px #e5e5e5;border-right: solid 2px #e5e5e5;border-bottom: solid 2px #e5e5e5;border-left: solid 1px #e5e5e5;border-color: #e5e5e5;cursor: zoom-in;"
-                data-toggle="show-modal"
-                data-cid='<%=value.numero%>'
-                data-file='<%=value.archivo%>'
-                >
-            <% } %>
-                <div class="caption" style="background: rgba(108, 108, 108, 0.6); margin-top: 65%; text-align: center;">
-                    <h4 class="text-white">Imagen N° <%= value.numero%> </h4>
-                    <div class="pb-2">
-                        <button type="button" class="btn btn-icon-only btn-info" data-toggle="arriba" data-cid="<%=value.numero%>">
-                            <i class="fas fa-long-arrow-alt-left"></i>
-                        </button>
-                        <button
-                            type="button" class="btn btn-icon-only btn-info" data-toggle="abajo"
-                            data-cid="<%=value.numero%>">
-                                <i class="fas fa-long-arrow-alt-right"></i>
-                        </button>
-                    </div>
+            <div class="galeria-admin-media-wrap">
+                <span class="galeria-admin-badge"><%= value.tipo === 'V' ? 'Video' : 'Foto' %></span>
+
+                <% if (value.tipo === 'V') { %>
+                <video class="galeria-admin-video" controls preload="metadata">
+                    <source src="<%= value.archivo %>" type="video/mp4">
+                </video>
+                <% } else { %>
+                <div
+                    class="galeria-admin-image"
+                    style="background-image: url('<%= value.archivo %>');"
+                    data-toggle="preview"
+                    data-cid="<%= value.numero %>"
+                    data-file="<%= value.archivo %>"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Ampliar imagen <%= value.numero %>">
                 </div>
+                <% } %>
             </div>
-        </div>
+
+            <footer class="galeria-admin-footer">
+                <div class="galeria-admin-meta">
+                    <span class="galeria-admin-title">Item #<%= value.numero %></span>
+                    <% if (value.nota) { %>
+                    <span class="galeria-admin-note"><%= value.nota %></span>
+                    <% } %>
+                </div>
+                <div class="galeria-admin-actions">
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-info"
+                        data-toggle="arriba"
+                        data-cid="<%= value.numero %>"
+                        title="Mover arriba"
+                        aria-label="Mover arriba">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-info"
+                        data-toggle="abajo"
+                        data-cid="<%= value.numero %>"
+                        title="Mover abajo"
+                        aria-label="Mover abajo">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </footer>
+        </article>
     </script>
 
     <script>

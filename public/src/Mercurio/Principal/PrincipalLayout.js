@@ -12,7 +12,7 @@ class PrincipalLayout extends Layout {
             template: '#tmp_layout',
             tagRegions: options.regions || {
                 afiliaciones: '#show_afiliaciones',
-                productos: '#show_productos',
+                galeria: '#show_galeria',
                 consultas: '#show_consultas',
                 totales: '#show_totales',
             },

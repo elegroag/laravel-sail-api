@@ -58,16 +58,3 @@
 </div>
 
 <% } %>
-
-<% if(tipo == 'productos'){ %>
-
-<div class="card card-stats">
-    <a href="<%= url%>" data-type="profile">
-        <div class="card-header card-header-warning card-header-icon pt-3">
-            <p class="card-category"><%= name%></p>
-            <img src='<%= imagen%>' class="img img-principal" width="100" height="100" />
-        </div>
-    </a>
-</div>
-
-<% } %>

@@ -3,7 +3,13 @@
     <!-- Navegación lateral flotante -->
     <nav class="nav-lateral" id="navLateral">
         <ul class="nav-lateral-list">
-            <li class="nav-lateral-item active" data-section="totales">
+            <li class="nav-lateral-item active" data-section="productos">
+                <a href="#section-productos" class="nav-lateral-link">
+                    <span class="nav-dot"></span>
+                    <span class="nav-label">Productos</span>
+                </a>
+            </li>
+            <li class="nav-lateral-item" data-section="totales">
                 <a href="#section-totales" class="nav-lateral-link">
                     <span class="nav-dot"></span>
                     <span class="nav-label">Resumen</span>
@@ -21,12 +27,6 @@
                     <span class="nav-label">Consultas</span>
                 </a>
             </li>
-            <li class="nav-lateral-item" data-section="productos">
-                <a href="#section-productos" class="nav-lateral-link">
-                    <span class="nav-dot"></span>
-                    <span class="nav-label">Productos</span>
-                </a>
-            </li>
         </ul>
         <!-- Indicador de progreso de scroll -->
         <div class="scroll-progress-container">
@@ -36,6 +36,28 @@
 
     <!-- Contenido principal con secciones -->
     <div class="sections-wrapper" id="sectionsWrapper">
+        <!-- Sección: Productos y Servicios -->
+        <section class="principal-section" id="section-productos" data-section="productos">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="section-title-wrapper">
+                    <h2 class="section-title">Productos y Servicios</h2>
+                    <p class="section-subtitle">Productos y servicios adicionales de la CAJA de Compensación del Caquetá</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <div id="show_galeria">
+                    <div class="loading-placeholder">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Sección: Resumen / Totales -->
         <section class="principal-section" id="section-totales" data-section="totales">
             <div class="section-header">
@@ -90,29 +112,6 @@
             </div>
             <div class="section-content">
                 <div class="cards-grid cards-grid-sm" id="show_consultas">
-                    <!-- Contenido cargado dinámicamente -->
-                    <div class="loading-placeholder">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Sección: Productos y Servicios -->
-        <section class="principal-section" id="section-productos" data-section="productos">
-            <div class="section-header">
-                <div class="section-icon">
-                    <i class="fas fa-box-open"></i>
-                </div>
-                <div class="section-title-wrapper">
-                    <h2 class="section-title">Productos y Servicios</h2>
-                    <p class="section-subtitle">Productos y servicios adicionales de la CAJA de Compensación del Caquetá</p>
-                </div>
-            </div>
-            <div class="section-content">
-                <div class="cards-grid cards-grid-sm" id="show_productos">
                     <!-- Contenido cargado dinámicamente -->
                     <div class="loading-placeholder">
                         <div class="spinner-border text-primary" role="status">
