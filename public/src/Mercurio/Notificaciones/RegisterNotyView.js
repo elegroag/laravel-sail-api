@@ -6,7 +6,7 @@ export default class RegisterNotyView extends ModelView {
     constructor(options = {}) {
         super({
             ...options,
-            className: 'row',
+            className: 'report-form-wrapper',
             onRender: () => this.__afterRender(),
         });
         this.template = _.template(document.getElementById('tmp_formulario').innerHTML);
@@ -41,7 +41,7 @@ export default class RegisterNotyView extends ModelView {
             ],
             tabsize: 2,
             tabDisable: false,
-            height: 100,
+            height: 180,
             lineHeights: ['1', '1.5'],
             callbacks: {
                 onPaste: function (e) {

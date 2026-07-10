@@ -1,8 +1,8 @@
 <% if(tipo == 'afiliacion'){ %>
     <a href="<%= url%>">
         <div class="company-affiliation-card">
-            <div class="header-section">         
-                <img src='<%= imagen%>' class="img img-principal" width="100" height="100"/>
+            <div class="header-section">
+                <img src='<%= imagen%>' class="img img-principal" alt="<%= name%>" loading="lazy" />
             </div>
 
             <h4 class="card-title pt-3"><%= name%></h4>
@@ -47,14 +47,14 @@
 <% } %>
 
 <% if(tipo == 'consultas'){ %>
-
-<div class="card card-stats">
-    <a href="<%= url%>" data-type="profile">
-        <div class="card-header card-header-warning card-header-icon">
-            <p class="card-category"><%= name%></p>
-            <img src='<%= imagen%>' class="img img-principal" width="100" height="100" />
+    <a href="<%= url%>" class="consulta-card-link">
+        <div class="consulta-card">
+            <div class="consulta-card-media">
+                <img src='<%= imagen%>' class="img img-principal" alt="<%= name%>" loading="lazy" />
+            </div>
+            <div class="consulta-card-body">
+                <h4 class="consulta-card-title"><%= name%></h4>
+            </div>
         </div>
     </a>
-</div>
-
 <% } %>

@@ -17,14 +17,14 @@ class GaleriaPromoSeeder extends Seeder
         $items = [
             ['numero' => 1, 'archivo' => 'promo_1.jpg', 'nota' => 'ADULTO MAYOR - CLUB ÉPOCA DORADA'],
             ['numero' => 2, 'archivo' => 'promo_2.jpg', 'nota' => 'GIMNASIO'],
-            ['numero' => 3, 'archivo' => 'promo_3.jpg', 'nota' => 'ESCUELA DE INGLES CONVERSACIONAL'],
-            ['numero' => 4, 'archivo' => 'promo_4.jpg', 'nota' => 'ESCUELA DE FORMACION DANZAS BASICA'],
-            ['numero' => 5, 'archivo' => 'promo_5.jpg', 'nota' => 'ESCUELA DE FORMACION EN ARTES PLASTICAS'],
-            ['numero' => 6, 'archivo' => 'promo_6.jpg', 'nota' => 'ESCUELA DE FORMACION MUSICA ESPECIALIZADA'],
+            ['numero' => 3, 'archivo' => 'promo_3.jpg', 'nota' => 'ESCUELA DE INGLÉS CONVERSACIONAL'],
+            ['numero' => 4, 'archivo' => 'promo_4.jpg', 'nota' => 'ESCUELA DE FORMACIÓN EN DANZAS BÁSICAS'],
+            ['numero' => 5, 'archivo' => 'promo_5.jpg', 'nota' => 'ESCUELA DE FORMACIÓN EN ARTES PLÁSTICAS'],
+            ['numero' => 6, 'archivo' => 'promo_6.jpg', 'nota' => 'ESCUELA DE FORMACIÓN MÚSICA ESPECIALIZADA'],
             ['numero' => 7, 'archivo' => 'promo_7.jpg', 'nota' => 'CURSOS DE COCINA'],
             ['numero' => 8, 'archivo' => 'promo_8.jpg', 'nota' => 'CENTRO RECREACIONAL UIS'],
-            ['numero' => 9, 'archivo' => 'promo_9.jpg', 'nota' => 'SALUD Y NUTRICION'],
-            ['numero' => 10, 'archivo' => 'promo_10.jpg', 'nota' => 'SUBSIDIO FORMACION DEPORTIVA'],
+            ['numero' => 9, 'archivo' => 'promo_9.jpg', 'nota' => 'SALUD Y NUTRICIÓN'],
+            ['numero' => 10, 'archivo' => 'promo_10.jpg', 'nota' => 'SUBSIDIO FORMACIÓN DEPORTIVA'],
         ];
 
         Schema::disableForeignKeyConstraints();

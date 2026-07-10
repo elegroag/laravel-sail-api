@@ -8,9 +8,15 @@ export default class CuotaMonetariaView extends ModelView {
 	}
 
 	afterRender() {
-		if (this.model.cuotas.length == 0) {
+		if (this.tableView) {
+			this.tableView.destroy();
+			this.tableView = null;
+		}
+
+		if (!this.model.cuotas?.length) {
 			return;
 		}
+
 		this.tableView = this.$el.find('#dataTable').DataTable({
 			paging: true,
 			ordering: true,
@@ -19,6 +25,24 @@ export default class CuotaMonetariaView extends ModelView {
 			searching: true,
 			pagingType: 'numbers',
 			language: langDataTable,
+			autoWidth: false,
+			order: [[0, 'desc']],
+			columnDefs: [
+				{ targets: [5, 6], className: 'text-end' },
+			],
+			dom:
+				'<"consulta-dt-toolbar row align-items-center g-2 mb-3"<"col-md-6"l><"col-md-6"f>>' +
+				'rt' +
+				'<"consulta-dt-footer row align-items-center g-2 mt-3"<"col-md-6"i><"col-md-6"p>>',
 		});
+	}
+
+	remove() {
+		if (this.tableView) {
+			this.tableView.destroy();
+			this.tableView = null;
+		}
+
+		return super.remove();
 	}
 }

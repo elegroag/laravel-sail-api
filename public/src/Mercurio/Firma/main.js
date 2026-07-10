@@ -13,10 +13,11 @@ import { $App } from '@/App';
             const fileDivContent = `
                 <label for="${fileUploadId}" class="file-upload">
                     <div>
-                        <b class="material-icons-outlined">Validar Documento</b>
-                        <p>Arrastra y suelta archivo aquí</p>
-                        <span>O</span>
-                        <div>Click buscar archivos</div>
+                        <span class="firma-upload-icon"><i class="fas fa-cloud-upload-alt" aria-hidden="true"></i></span>
+                        <b>Validar documento</b>
+                        <p>Arrastra y suelta el archivo aquí</p>
+                        <span>o</span>
+                        <div>Click para buscar archivos</div>
                     </div>
                     <input type="file" id="${fileUploadId}" name=[] multiple hidden />
                 </label>
@@ -67,8 +68,12 @@ import { $App } from '@/App';
                                 <td>${fileSize}</td>
                                 <td>${fileType}</td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-primary validaBtn" data-cid='${index}'><i class="material-icons-outlined">Validar</i></button>
-                                    <button type="button" class="btn btn-sm btn-danger deleteBtn"><i class="material-icons-outlined">Borrar</i></button>
+                                    <button type="button" class="btn btn-sm btn-primary validaBtn" data-cid='${index}'>
+                                        <i class="fas fa-check-circle me-1" aria-hidden="true"></i>Validar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger deleteBtn">
+                                        <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                                    </button>
                                 </td>
                             </tr>
                         `);
@@ -78,7 +83,7 @@ import { $App } from '@/App';
                     tableBody.find('.deleteBtn').click(function () {
                         $(this).closest('tr').remove();
                         if (tableBody.find('tr').length === 0) {
-                            tableBody.append('<tr><td colspan="6" class="no-file">No files selected!</td></tr>');
+                            tableBody.append('<tr><td colspan="5" class="no-file">No hay archivos seleccionados</td></tr>');
                         }
                     });
 
@@ -139,10 +144,10 @@ $(() => {
 
         if ($card.is(':visible')) {
             $card.slideUp();
-            $btn.html('<i class="fa fa-eye"></i> Mostrar Recuperación de Firma');
+            $btn.html('<i class="fas fa-eye me-1" aria-hidden="true"></i>Mostrar recuperación de firma');
         } else {
             $card.slideDown();
-            $btn.html('<i class="fa fa-eye-slash"></i> Ocultar Recuperación de Firma');
+            $btn.html('<i class="fas fa-eye-slash me-1" aria-hidden="true"></i>Ocultar recuperación de firma');
         }
     });
 

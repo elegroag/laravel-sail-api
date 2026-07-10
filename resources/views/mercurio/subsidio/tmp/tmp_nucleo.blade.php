@@ -1,172 +1,215 @@
-<fieldset class="mb-4">
-    <legend>Afiliación principal</legend>
-    <div class='col-auto'>
-	    <div class='row g-3'>
-	        <div class="col-md-6 col-lg-4 mb-3">
-                <label class="form-control-label"><i class="fas fa-id-card text-muted me-1"></i>NIT</label>
-                <p class="pl-1 description"><%=nit%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-3">
-                <label class="form-control-label"><i class="fas fa-building text-muted me-1"></i>Empresa</label>
-                <p class="pl-1 description"><%=razsoc%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-exchange-alt text-muted me-1"></i>Dispone de Giro</label>
-                <p class="pl-1 description"><%=(giro == 'S') ? 'SI' : 'NO' %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Nombre</label>
-                <p class="pl-1 description"><%=fullname%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Documento</label>
-                <p class="pl-1 description"><%=cedtra%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Nombre</label>
-                <p class="pl-1 description"><%=fullname%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Fecha Nacimiento</label>
-                <p class="pl-1 description"><%=fecnac%></p>
-            </div>
-            <!-- 3x -->
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Fecha Afiliacion</label>
-                <p class="pl-1 description"><%=fecafi%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Fecha Estado</label>
-                <p class="pl-1 description"><%=fecest%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-info-circle text-muted me-1"></i>Estado</label>
-                <p class="pl-1 description"><%=_estado[estado] %></p>
-            </div>
-            <!-- 3x -->
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Email</label>
-                <p class="pl-1 description"><%=email%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Direccion</label>
-                <p class="pl-1 description"><%=direccion%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Telefono</label>
-                <p class="pl-1 description"><%=telefono%></p>
-            </div>
-            <!-- 3x -->
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Ciudad</label>
-                <p class="pl-1 description"><%=_codciu[codciu] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Zona</label>
-                <p class="pl-1 description"><%=_codciu[codzon] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-money-bill-wave text-muted me-1"></i>Salario</label>
-                <p class="pl-1 description"><%=salario%></p>
-            </div>
-            <!-- 3x -->
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Categoria</label>
-                <p class="pl-1 description"><%=_codcat[codcat] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Genero</label>
-                <p class="pl-1 description"><%=_sexo[sexo] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">NIT</label>
-                <p class="pl-1 description"><%=nit%></p>
-            </div>
-            <!-- 3x -->
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Razon Social</label>
-                <p class="pl-1 description"><%=razsoc%></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Estado Civil</label>
-                <p class="pl-1 description"><%=_estciv[estciv] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Ciudad Nacimiento</label>
-                <p class="pl-1 description"><%=_codciu[ciunac] %></p>
-            </div>
-            <!-- 3x -->
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Vivienda</label>
-                <p class="pl-1 description"><%=_vivienda[vivienda] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Rural</label>
-                <p class="pl-1 description"><%=_rural[rural] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label">Nivel Educativo</label>
-                <p class="pl-1 description"><%=_nivedu[nivedu] %></p>
-            </div>
+<%
+    var formatMoney = function (value) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            maximumFractionDigits: 0,
+        }).format(Number(value || 0));
+    };
+    var estadoLabel = _estado[estado] || estado || '-';
+    var estadoClass = estado === 'A' ? 'nucleo-badge-success' : 'nucleo-badge-muted';
+%>
+
+<div class="nucleo-summary-grid">
+    <div class="nucleo-summary-card">
+        <span class="nucleo-summary-label">Trabajador</span>
+        <strong class="nucleo-summary-value"><%= fullname %></strong>
+    </div>
+    <div class="nucleo-summary-card">
+        <span class="nucleo-summary-label">Documento</span>
+        <strong class="nucleo-summary-value"><%= cedtra %></strong>
+    </div>
+    <div class="nucleo-summary-card">
+        <span class="nucleo-summary-label">Empresa</span>
+        <strong class="nucleo-summary-value"><%= razsoc %></strong>
+    </div>
+    <div class="nucleo-summary-card">
+        <span class="nucleo-summary-label">Estado</span>
+        <strong class="nucleo-summary-value"><span class="nucleo-badge <%= estadoClass %>"><%= estadoLabel %></span></strong>
+    </div>
+</div>
+
+<section class="nucleo-section">
+    <header class="nucleo-section-header">
+        <i class="fas fa-id-card"></i>
+        <h3>Identificación y afiliación</h3>
+    </header>
+    <div class="nucleo-field-grid">
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">NIT</span>
+            <strong class="nucleo-field-value"><%= nit %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Empresa</span>
+            <strong class="nucleo-field-value"><%= razsoc %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Documento</span>
+            <strong class="nucleo-field-value"><%= cedtra %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Nombre completo</span>
+            <strong class="nucleo-field-value"><%= fullname %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Estado</span>
+            <strong class="nucleo-field-value"><span class="nucleo-badge <%= estadoClass %>"><%= estadoLabel %></span></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Dispone de giro</span>
+            <strong class="nucleo-field-value"><%= (giro == 'S') ? 'Sí' : 'No' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Fecha afiliación</span>
+            <strong class="nucleo-field-value"><%= fecafi || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Fecha estado</span>
+            <strong class="nucleo-field-value"><%= fecest || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Categoría</span>
+            <strong class="nucleo-field-value"><%= _codcat[codcat] || codcat || '-' %></strong>
         </div>
     </div>
-</fieldset>
+</section>
 
-<fieldset class="mb-4">
-    <legend>Multiafiliación</legend>
-    <div class='col-auto'>
-	    <div class='row justify-content-between'>
-	        <% if(multiafiliacion === true) {%>
-	        <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-building text-muted me-1"></i>Empresa</label>
-                <p class="pl-1 description"><%=multiafiliacion_empresa %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-store-alt text-muted me-1"></i>Sucursal</label>
-                <p class="pl-1 description"><%=multiafiliacion_sucursal %></p>
-            </div>
-
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-calendar-check text-muted me-1"></i>Fecha Afiliacion</label>
-                <p class="pl-1 description"><%=multiafiliacion_fecafi %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-info-circle text-muted me-1"></i>Estado</label>
-                <p class="pl-1 description"><%=_estado[multiafiliacion_estado] %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-money-bill-wave text-muted me-1"></i>Salario</label>
-                <p class="pl-1 description"><%=multiafiliacion_salario %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-exchange-alt text-muted me-1"></i>Giro</label>
-                <p class="pl-1 description"><%=multiafiliacion_codgir %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-building text-muted me-1"></i>Razon Social</label>
-                <p class="pl-1 description"><%=multiafiliacion_razsoc %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-user-tie text-muted me-1"></i>Representante Legal</label>
-                <p class="pl-1 description"><%=multiafiliacion_repleg %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-map-marker-alt text-muted me-1"></i>Direccion</label>
-                <p class="pl-1 description"><%=multiafiliacion_direccion %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-phone text-muted me-1"></i>Telefono</label>
-                <p class="pl-1 description"><%=multiafiliacion_telefono %></p>
-            </div>
-            <div class="col-md-6 col-lg-4 ">
-                <label class="form-control-label"><i class="fas fa-city text-muted me-1"></i>Ciudad</label>
-                <p class="pl-1 description"><%=_codciu[multiafiliacion_codciu] %></p>
-            </div>
-            <% }else {%>
-            <div class="col-md-6 col-lg-4 ">
-                <p class="pl-1 description">No tiene multiafiliación</p>
-            </div>
-            <% } %>
+<section class="nucleo-section">
+    <header class="nucleo-section-header">
+        <i class="fas fa-user"></i>
+        <h3>Datos personales</h3>
+    </header>
+    <div class="nucleo-field-grid">
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Fecha nacimiento</span>
+            <strong class="nucleo-field-value"><%= fecnac || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Ciudad nacimiento</span>
+            <strong class="nucleo-field-value"><%= _codciu[ciunac] || ciunac || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Género</span>
+            <strong class="nucleo-field-value"><%= _sexo[sexo] || sexo || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Estado civil</span>
+            <strong class="nucleo-field-value"><%= _estciv[estciv] || estciv || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Nivel educativo</span>
+            <strong class="nucleo-field-value"><%= _nivedu[nivedu] || nivedu || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Vivienda</span>
+            <strong class="nucleo-field-value"><%= _vivienda[vivienda] || vivienda || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Rural</span>
+            <strong class="nucleo-field-value"><%= _rural[rural] || rural || '-' %></strong>
         </div>
     </div>
-</fieldset>
+</section>
+
+<section class="nucleo-section">
+    <header class="nucleo-section-header">
+        <i class="fas fa-address-book"></i>
+        <h3>Contacto y ubicación</h3>
+    </header>
+    <div class="nucleo-field-grid">
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Email</span>
+            <strong class="nucleo-field-value"><%= email || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Teléfono</span>
+            <strong class="nucleo-field-value"><%= telefono || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Dirección</span>
+            <strong class="nucleo-field-value"><%= direccion || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Ciudad</span>
+            <strong class="nucleo-field-value"><%= _codciu[codciu] || codciu || '-' %></strong>
+        </div>
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Zona</span>
+            <strong class="nucleo-field-value"><%= _codciu[codzon] || codzon || '-' %></strong>
+        </div>
+    </div>
+</section>
+
+<section class="nucleo-section">
+    <header class="nucleo-section-header">
+        <i class="fas fa-briefcase"></i>
+        <h3>Información laboral</h3>
+    </header>
+    <div class="nucleo-field-grid">
+        <div class="nucleo-field">
+            <span class="nucleo-field-label">Salario</span>
+            <strong class="nucleo-field-value"><%= formatMoney(salario) %></strong>
+        </div>
+    </div>
+</section>
+
+<section class="nucleo-section">
+    <header class="nucleo-section-header">
+        <i class="fas fa-layer-group"></i>
+        <h3>Multiafiliación</h3>
+    </header>
+    <% if (multiafiliacion === true) { %>
+        <div class="nucleo-field-grid">
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Empresa</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_empresa %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Sucursal</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_sucursal %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Fecha afiliación</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_fecafi %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Estado</span>
+                <strong class="nucleo-field-value"><%= _estado[multiafiliacion_estado] || multiafiliacion_estado %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Salario</span>
+                <strong class="nucleo-field-value"><%= formatMoney(multiafiliacion_salario) %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Giro</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_codgir %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Razón social</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_razsoc %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Representante legal</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_repleg %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Dirección</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_direccion %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Teléfono</span>
+                <strong class="nucleo-field-value"><%= multiafiliacion_telefono %></strong>
+            </div>
+            <div class="nucleo-field">
+                <span class="nucleo-field-label">Ciudad</span>
+                <strong class="nucleo-field-value"><%= _codciu[multiafiliacion_codciu] || multiafiliacion_codciu %></strong>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="nucleo-empty-state">
+            <i class="fas fa-info-circle" aria-hidden="true"></i>
+            <strong>Sin multiafiliación</strong>
+            <span>El trabajador no registra multiafiliación activa.</span>
+        </div>
+    <% } %>
+</section>

@@ -559,19 +559,19 @@ class TrabajadorService
             ],
             'consultas' => [
                 [
-                    'name' => 'Consulta de gíro',
+                    'name' => 'Consulta de giro',
                     'url' => 'subsidio/consulta_giro_view',
                     'imagen' => 'consulta_giro.jpg',
                 ],
                 [
-                    'name' => 'Consulta nucleo familiar',
+                    'name' => 'Consulta núcleo familiar',
                     'url' => 'subsidio/consulta_nucleo_view',
-                    'imagen' => 'conyuges.jpg',
+                    'imagen' => 'consulta_nucleo.jpg',
                 ],
                 [
                     'name' => 'Consulta planilla',
                     'url' => 'subsidio/consulta_planilla_trabajador_view',
-                    'imagen' => 'consulta_trabajadores.jpg',
+                    'imagen' => 'consulta_planilla.jpg',
                 ],
             ],
         ];

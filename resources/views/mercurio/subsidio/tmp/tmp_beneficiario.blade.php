@@ -1,43 +1,44 @@
-<% _.each(beneficiarios, function(beneficiario) { %>
-<fieldset>
-    <legend>Beneficiario <%=_parent[beneficiario.parent] %> </legend>
-    <div class='col-auto'>
-	    <div class='row g-3 mb-3'>
-	        <div class="col-md-6 col-lg-4 mb-3">
-	                <label class="form-control-label"><i class="fas fa-id-card text-muted me-1"></i>Documento</label>
-	                <p class="pl-1 description"><%=beneficiario.documento%></p>
-	            </div>
-	            <div class="col-md-6 col-lg-4 mb-3">
-	                <label class="form-control-label"><i class="fas fa-user text-muted me-1"></i>Nombre</label>
-	                <p class="pl-1 description"><%=beneficiario.nombre%></p>
-	            </div>
-	            <div class="col-md-6 col-lg-4">
-	                <label class="form-control-label"><i class="fas fa-info-circle text-muted me-1"></i>Estado</label>
-	                <p class="pl-1 description"><%=_estado[beneficiario.estado] %></p>
-	            </div>
-            <!-- 3x -->
-	            <div class="col-md-6 col-lg-4">
-	                <label class="form-control-label"><i class="fas fa-calendar-check text-muted me-1"></i>Fecha Afiliacion</label>
-	                <p class="pl-1 description"><%=beneficiario.fecafi%></p>
-	            </div>
-	            <div class="col-md-6 col-lg-4">
-	                <label class="form-control-label"><i class="fas fa-calendar-day text-muted me-1"></i>Fecha Estado</label>
-	                <p class="pl-1 description"><%=beneficiario.fecret%></p>
-	            </div>
-	            <div class="col-md-6 col-lg-4">
-	                <label class="form-control-label"><i class="fas fa-users text-muted me-1"></i>Parentesco</label>
-	                <p class="pl-1 description"><%=_parent[beneficiario.parent] %></p>
-	            </div>
-            <!-- 3x -->
-	            <div class="col-md-6 col-lg-4">
-	                <label class="form-control-label"><i class="fas fa-calendar-alt text-muted me-1"></i>Fecha Nacimiento</label>
-	                <p class="pl-1 description"><%=beneficiario.fecnac%></p>
-	            </div>
-	            <div class="col-md-6 col-lg-4">
-	                <label class="form-control-label"><i class="fas fa-briefcase text-muted me-1"></i>Capacidad Trabajo</label>
-	                <p class="pl-1 description"><%=_captra[beneficiario.captra] %></p>
-	            </div>
-        </div>
+<% if (!beneficiarios || beneficiarios.length === 0) { %>
+    <div class="nucleo-empty-state">
+        <i class="fas fa-child" aria-hidden="true"></i>
+        <strong>No hay beneficiarios registrados</strong>
+        <span>No se encontró información de beneficiarios asociados al trabajador.</span>
     </div>
-</fieldset>
-<% }) %>
+<% } else { %>
+    <% _.each(beneficiarios, function(beneficiario) { %>
+        <article class="nucleo-member-card">
+            <div class="nucleo-member-title">
+                <h3><%= beneficiario.nombre %></h3>
+                <span class="nucleo-badge <%= beneficiario.estado === 'A' ? 'nucleo-badge-success' : 'nucleo-badge-muted' %>">
+                    <%= _estado[beneficiario.estado] || beneficiario.estado %>
+                </span>
+            </div>
+            <div class="nucleo-field-grid">
+                <div class="nucleo-field">
+                    <span class="nucleo-field-label">Documento</span>
+                    <strong class="nucleo-field-value"><%= beneficiario.documento %></strong>
+                </div>
+                <div class="nucleo-field">
+                    <span class="nucleo-field-label">Parentesco</span>
+                    <strong class="nucleo-field-value"><%= _parent[beneficiario.parent] || beneficiario.parent %></strong>
+                </div>
+                <div class="nucleo-field">
+                    <span class="nucleo-field-label">Fecha afiliación</span>
+                    <strong class="nucleo-field-value"><%= beneficiario.fecafi || '-' %></strong>
+                </div>
+                <div class="nucleo-field">
+                    <span class="nucleo-field-label">Fecha estado</span>
+                    <strong class="nucleo-field-value"><%= beneficiario.fecret || '-' %></strong>
+                </div>
+                <div class="nucleo-field">
+                    <span class="nucleo-field-label">Fecha nacimiento</span>
+                    <strong class="nucleo-field-value"><%= beneficiario.fecnac || '-' %></strong>
+                </div>
+                <div class="nucleo-field">
+                    <span class="nucleo-field-label">Capacidad de trabajo</span>
+                    <strong class="nucleo-field-value"><%= _captra[beneficiario.captra] || beneficiario.captra %></strong>
+                </div>
+            </div>
+        </article>
+    <% }); %>
+<% } %>
