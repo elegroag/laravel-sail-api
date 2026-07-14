@@ -60,7 +60,9 @@ class IndependientesDocuments
         ];
 
         $ocupaciones = ParamsIndependiente::getOcupaciones();
-        $cargo_name = ($this->independiente->cargo) ? $ocupaciones[$this->independiente->cargo] : 'NO APLICA';
+        $cargo_name = ($this->independiente->cargo && isset($ocupaciones[$this->independiente->cargo]))
+            ? $ocupaciones[$this->independiente->cargo]
+            : 'NO APLICA';
 
         // Contexto para los templates
         $today = Carbon::now();

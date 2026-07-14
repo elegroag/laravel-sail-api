@@ -91,7 +91,7 @@ class Mercurio38 extends ModelBase
             'ruuid' => 'required|min:10',
             // date — required
             'fecnac' => 'required|date',
-            'fecing' => 'required|date',
+            'fecing' => 'nullable|date',
             // date — nullable
             'fecest' => 'nullable|date',
             'fecsol' => 'nullable|date',

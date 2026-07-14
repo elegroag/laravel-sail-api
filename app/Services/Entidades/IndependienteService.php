@@ -69,8 +69,6 @@ class IndependienteService
             m41.*,
             concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as razsoc,
             concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as repleg,
-            m41.codzon,
-            m41.codciu,
             (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m41.id = me10.numero) as cantidad_eventos,
             (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m41.id = mr10.numero) as fecha_ultima_solicitud,
             (CASE
@@ -111,8 +109,6 @@ class IndependienteService
             m41.*,
             concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as razsoc,
             concat_ws(' ', m41.prinom, m41.segnom, m41.priape, m41.segape) as repleg,
-            m41.codzon,
-            m41.codciu,
             (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m41.id = me10.numero) as cantidad_eventos,
             (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m41.id = mr10.numero) as fecha_ultima_solicitud,
             (CASE

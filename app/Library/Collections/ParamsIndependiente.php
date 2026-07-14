@@ -138,8 +138,13 @@ class ParamsIndependiente
 
     public static function getOcupaciones()
     {
-        foreach (self::$datos_captura['ocupaciones'] as $data) {
-            self::$ocupaciones["{$data['codocu']}"] = $data['codocu'] . ' ' . $data['detalle'];
+        self::$ocupaciones = [];
+        foreach ((self::$datos_captura['ocupaciones'] ?? []) as $data) {
+            $codocu = $data['codocu'] ?? null;
+            if ($codocu === null || $codocu === '') {
+                continue;
+            }
+            self::$ocupaciones["{$codocu}"] = $codocu . ' ' . ($data['detalle'] ?? '');
         }
 
         return self::$ocupaciones;
@@ -387,8 +392,13 @@ class ParamsIndependiente
 
     public static function getBancos()
     {
-        foreach (self::$datos_captura['bancos'] as $data) {
-            self::$bancos[$data['codban']] = $data['detalle'];
+        self::$bancos = [];
+        foreach ((self::$datos_captura['bancos'] ?? []) as $data) {
+            $codban = $data['codban'] ?? null;
+            if ($codban === null) {
+                continue;
+            }
+            self::$bancos[$codban] = $data['detalle'] ?? '';
         }
 
         return self::$bancos;
