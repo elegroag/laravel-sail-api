@@ -23,7 +23,7 @@ class NotifyEmailServices
         $params = [
             'titulo' => "Cordial saludo, señor@ {$mercurio07->getNombre()}",
             'msj' => $msj,
-            'rutaImg' => 'https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png',
+            'rutaImg' => 'https://comfacaenlinea.com.co/img/header_reporte_ugpp.png',
             'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login/index',
             'mercurio02' => [
                 'razsoc' => $mercurio02->getRazsoc(),
@@ -65,7 +65,7 @@ class NotifyEmailServices
         $params = [
             'titulo' => "Cordial saludo, señor@ {$mercurio07->getNombre()}",
             'msj' => $msj,
-            'rutaImg' => 'https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png',
+            'rutaImg' => 'https://comfacaenlinea.com.co/img/header_reporte_ugpp.png',
             'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login/index',
             'mercurio02' => [
                 'razsoc' => $mercurio02->getRazsoc(),

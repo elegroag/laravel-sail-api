@@ -423,7 +423,8 @@ class PrincipalController extends ApplicationController
                     break;
             }
 
-            if (session('estado_afiliado') == 'I') {
+            $estadoAfiliado = session('estado_afiliado');
+            if ($estadoAfiliado == 'I') {
                 $mservice = new ParticularService;
             }
 
@@ -454,11 +455,20 @@ class PrincipalController extends ApplicationController
                 }
             }
 
+            // El flag de habilitación de consultas se determina por la rama
+            // del servicio que entrega datos. Cuando el usuario está inactivo se
+            // fuerza ParticularService, que devuelve 'consultas' = false; en ese
+            // caso el front muestra un mensaje informativo en lugar del grid.
+            $consultasHabilitadas = is_array($servicios['consultas'] ?? null)
+                && count($servicios['consultas']) > 0;
+
             $salida = [
                 'success' => true,
                 'msj' => 'Proceso completado con éxito',
                 'data' => $servicios,
                 'totales' => $totales,
+                'estado_afiliado' => $estadoAfiliado,
+                'consultas_habilitadas' => $consultasHabilitadas,
             ];
         } catch (\Throwable $e) {
             return $this->handleException($e);

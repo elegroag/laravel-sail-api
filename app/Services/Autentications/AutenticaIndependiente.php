@@ -108,10 +108,10 @@ class AutenticaIndependiente extends AutenticaGeneral
 
             if ($sucurIndepe == false) {
                 $this->message = 'Error acceso incorrecto. El afiliado independiente tiene un error de registro en su afiliación, ' .
-                    'se debe comunicar a la dirección de correo: <b>afiliacionyregistro@comfaca.com</b> indicando la comprobación del estado afiliado independiente. ' .
+                    'se debe comunicar a la dirección de correo: afiliacionyregistro@comfaca.com indicando la comprobación del estado afiliado independiente. ' .
                     'No olvidar el compartir la dirección email, el número de cedula y el nombre del afiliado, para poder identificar al afiliado.';
-
-                return false;
+                $this->estadoAfiliado = 'I';
+                return true;
             }
         }
 

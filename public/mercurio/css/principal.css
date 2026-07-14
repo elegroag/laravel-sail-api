@@ -1154,3 +1154,55 @@ html {
     font-size: 1rem;
     margin: 0;
 }
+
+/* ============================================
+   ESTADO INFORMATIVO: CONSULTAS NO DISPONIBLES
+   (sección Consultas para usuarios inactivos)
+   ============================================ */
+.principal-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    margin: 0 auto;
+    max-width: 640px;
+    background: var(--light-color);
+    border: 1px solid rgba(16, 185, 129, 0.18);
+    border-radius: var(--border-radius);
+    color: var(--secondary-color);
+    animation: fadeIn 0.4s ease;
+}
+
+.principal-empty-state-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--primary-color, #10b981);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+}
+
+.principal-empty-state-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--dark-color, #1f2937);
+    margin: 0 0 0.5rem;
+}
+
+.principal-empty-state-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+    color: var(--secondary-color);
+}
+
+.principal-empty-state-text strong {
+    color: var(--dark-color, #1f2937);
+    font-weight: 600;
+}

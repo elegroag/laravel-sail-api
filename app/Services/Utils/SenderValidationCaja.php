@@ -33,8 +33,8 @@ class SenderValidationCaja
             'msj' => 'La Caja de Compensación Familiar Comfaca, ha recepcionado una solicitud, por medio del sistema comfaca en línea, ' .
                 "emitido por el afiliado: {$entity->razsoc} con identificación: {$entity->nit}.<br>Su solicitud está pendiente de verificación por parte de la CAJA.<br/>" .
                 '<br/>Gracias por preferirnos.',
-            'rutaImg' => 'https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png',
-            'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login/ingreso_persona',
+            'rutaImg' => 'https://comfacaenlinea.com.co/img/header_reporte_ugpp.png',
+            'url_activa' => 'https://comfacaenlinea.com.co/web/login',
             'mercurio02' => [
                 'razsoc' => $mercurio02->getRazsoc(),
                 'direccion' => $mercurio02->getDireccion(),

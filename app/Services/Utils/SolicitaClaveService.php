@@ -144,7 +144,7 @@ class SolicitaClaveService
         $arreglo = [
             'titulo' => "Cordial saludo,<br/>Señor@ {$nombre}",
             'msj' => "Bienvenido a {$mercurio02->getRazsoc()}, a continuación confirmamos sus datos de usuario para el ingreso a nuestro portal web. <br/>",
-            'rutaImg' => 'https://comfacaenlinea.com.co/public/img/header_reporte_ugpp.png',
+            'rutaImg' => 'https://comfacaenlinea.com.co/img/header_reporte_ugpp.png',
             'url_activa' => 'https://comfacaenlinea.com.co/Mercurio/Mercurio/login/index',
             'tipo_documento' => $this->coddoc_detalle,
             'documento' => $this->documento,

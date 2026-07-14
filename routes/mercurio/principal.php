@@ -25,7 +25,7 @@ Route::prefix('/mercurio/principal')->group(function () {
         Route::post('/traer_giros_trabajador', [PrincipalController::class, 'traerGirosTrabajador']);
         Route::post('/traer_categorias_trabajador', [PrincipalController::class, 'traerCategoriasTrabajador']);
         Route::post('/valida_syncro', [PrincipalController::class, 'validaSyncro']);
-        Route::post('/servicios', [PrincipalController::class, 'servicios']);
+        Route::post('/servicios', [PrincipalController::class, 'servicios'])->name('principal.servicios');
         Route::post('/galeria', [PrincipalController::class, 'galeria']);
         Route::post('/lista_adress', [PrincipalController::class, 'listaAdress']);
         Route::post('/actualiza_estado_solicitudes', [PrincipalController::class, 'actualizaEstadoSolicitudes']);

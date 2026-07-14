@@ -58,7 +58,12 @@ const SolicitudesGridView = {
             });
 
             const hasCards = cards.length > 0;
-            const showEmpty = hasCards && matched.length === 0 && state.searchTerm !== '';
+            // Caso A: el servidor no devolvió solicitudes (total = 0).
+            // Caso B: hay tarjetas pero la búsqueda no encontró coincidencias.
+            // En ambos casos mostramos el mensaje vacío configurado en la Blade.
+            const showEmpty =
+                state.total === 0 ||
+                (hasCards && matched.length === 0 && state.searchTerm !== '');
             $empty.toggleClass('d-none', !showEmpty);
         };
 

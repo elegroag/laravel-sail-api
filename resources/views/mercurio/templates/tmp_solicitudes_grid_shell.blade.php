@@ -87,7 +87,7 @@
 </div>
 <div id="consulta" class="solicitudes-grid"></div>
 <div id="solicitudes-empty" class="solicitudes-empty d-none" role="status">
-    No hay solicitudes que coincidan con la búsqueda.
+    ¡No hay solicitudes disponibles para mostrar!
 </div>
 <div id="solicitudes-summary" class="solicitudes-summary" role="status" aria-live="polite">
     Mostrando 0 registros · Total existentes: 0

@@ -119,6 +119,19 @@
                         </div>
                     </div>
                 </div>
+                <!-- Mensaje informativo cuando el usuario está inactivo y no puede
+                     acceder a las consultas. Se muestra/oculta desde Principal.js. -->
+                <div id="show_consultas_message" class="principal-empty-state d-none" role="status">
+                    <div class="principal-empty-state-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3 class="principal-empty-state-title">Consultas no disponibles</h3>
+                    <p class="principal-empty-state-text">
+                        Esta sección solo está disponible para usuarios con afiliación <strong>activa</strong>.
+                        Para acceder a las consultas de afiliados y al historial de servicios, es necesario
+                        que su estado en el sistema principal de Subsidio se encuentre activo.
+                    </p>
+                </div>
             </div>
         </section>
     </div>
