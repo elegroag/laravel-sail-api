@@ -36,6 +36,15 @@ class EcommerceController extends ApplicationController
      */
     public function index()
     {
+        if (config('app.api_mode') === 'production') {
+            set_flashdata('notify', [
+                'msj' => 'El catálogo de servicios aún no está disponible.',
+                'code' => 503,
+            ]);
+
+            return redirect()->route('principal.index');
+        }
+
         return view(
             'mercurio/ecommerce/index',
             [
@@ -145,7 +154,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar servicios: '.$e->getMessage(),
+                    'message' => 'Error al cargar servicios: ' . $e->getMessage(),
                 ]
             );
         }
@@ -205,7 +214,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar tarifa: '.$e->getMessage(),
+                    'message' => 'Error al validar tarifa: ' . $e->getMessage(),
                 ]
             );
         }
@@ -255,7 +264,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar pago: '.$e->getMessage(),
+                    'message' => 'Error al validar pago: ' . $e->getMessage(),
                 ]
             );
         }
@@ -344,7 +353,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al guardar la venta: '.$e->getMessage(),
+                    'message' => 'Error al guardar la venta: ' . $e->getMessage(),
                 ]
             );
         }
@@ -399,7 +408,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar compras: '.$e->getMessage(),
+                    'message' => 'Error al cargar compras: ' . $e->getMessage(),
                 ]
             );
         }
