@@ -28,11 +28,27 @@ class SenderValidationCaja
         ]);
 
         $mercurio02 = Mercurio02::first();
+
+        $fecsolRaw = $entity->fecsol ?? null;
+        $fecsol = $fecsolRaw
+            ? (function ($raw) {
+                try {
+                    return \Carbon\Carbon::parse($raw)->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    return (string) $raw;
+                }
+            })($fecsolRaw)
+            : date('Y-m-d');
+
+        $radicado = $entity->ruuid ?? ($entity->id ?? '');
+
         $arreglo = [
             'titulo' => "Cordial saludo,<br>Señor@ {$entity->repleg}",
             'msj' => 'La Caja de Compensación Familiar Comfaca, ha recepcionado una solicitud, por medio del sistema comfaca en línea, ' .
                 "emitido por el afiliado: {$entity->razsoc} con identificación: {$entity->nit}.<br>Su solicitud está pendiente de verificación por parte de la CAJA.<br/>" .
                 '<br/>Gracias por preferirnos.',
+            'fecsol' => $fecsol,
+            'radicado' => $radicado,
             'rutaImg' => 'https://comfacaenlinea.com.co/img/header_reporte_ugpp.png',
             'url_activa' => 'https://comfacaenlinea.com.co/web/login',
             'mercurio02' => [

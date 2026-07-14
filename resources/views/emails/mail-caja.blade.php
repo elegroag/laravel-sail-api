@@ -20,6 +20,18 @@
                                                     <p style='text-align:left;font-family:Helvetica,Arial;font-size:14px;color:#000;'><?= $titulo ?></p>
                                                     <span style='font-family:Helvetica,Arial;font-size:14px;color:#000;line-height:1.4rem;'>
                                                         <p style='text-align:justify;font-family:Helvetica,Arial;font-size:14px;color:#000;'><?= $msj ?></p>
+                                                        <table cellpadding='6' cellspacing='0' border='0' style='border-collapse:collapse;margin:14px 0;font-family:Helvetica,Arial;font-size:14px;color:#000;'>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style='border:1px solid #e1e1e1;background:#f5f5f5;padding:8px 12px;'><b>Fecha de envío:</b></td>
+                                                                    <td style='border:1px solid #e1e1e1;padding:8px 12px;'><?= $fecsol ?? '' ?></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style='border:1px solid #e1e1e1;background:#f5f5f5;padding:8px 12px;'><b>Radicado:</b></td>
+                                                                    <td style='border:1px solid #e1e1e1;padding:8px 12px;'><?= $radicado ?? '' ?></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                         <p style='text-align:left;font-family:Helvetica,Arial;font-size:14px;'>Ruta de afiliación:<br /><a href="<?= $url_activa ?>" style='color:#10acda;text-decoration:none' target="_blank">Plataforma comfaca en línea aquí &#x1f4ea;</a></p>
                                                     </span>
                                                 </td>
