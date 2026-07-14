@@ -13,6 +13,8 @@ export default defineConfig({
     mode: 'development', // o production
     root: '.',
     base: './',
+    // outDir is inside public/; copying publicDir would recurse into itself.
+    publicDir: false,
     build: {
         chunkSizeWarningLimit: 300,
         sourcemap: true,

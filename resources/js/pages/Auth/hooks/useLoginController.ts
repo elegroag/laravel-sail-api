@@ -65,7 +65,8 @@ const useLoginController = ({ errors }: LoginProps) => {
                 },
                 onError: (errors) => {
                     console.error('Error de autenticación:', errors);
-                    setDialog({ message: 'No fue posible iniciar sesión. Verifique sus datos e intente nuevamente.', type: 'error' });
+                    const message = errors.message || 'No fue posible iniciar sesión. Verifique sus datos e intente nuevamente.';
+                    setDialog({ message, type: 'error' });
                 },
                 onFinish: () => setProcessing(false),
             },

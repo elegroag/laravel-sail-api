@@ -26,4 +26,13 @@ export default defineConfig({
             '@/': resolve(__dirname, 'resources/js'),
         },
     },
+    server: {
+        watch: {
+            ignored: [
+                '**/public/mercurio/build/**',
+                '**/public/cajas/build/**',
+                '**/public/node_modules/**',
+            ],
+        },
+    },
 });
