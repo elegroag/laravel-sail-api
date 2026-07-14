@@ -4,6 +4,18 @@ import { router } from '@inertiajs/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
+// Tipos de usuario para los que se filtra NIT y NUIP del listado de documentos:
+// NIT es exclusivo de empresas y "particulares" con NIT propio; NUIP aplica
+// para menores de edad y no corresponde a un trabajador dependiente adulto,
+// independiente, pensionado o facultativo.
+const NATURAL_USER_TYPES: UserType[] = ['trabajador', 'independiente', 'pensionado', 'facultativo'];
+
+const isNitOption = (opt: DocumentTypeOption) =>
+    opt.label.toLowerCase().includes('nit') || opt.value.toLowerCase() === 'nit';
+
+const isNuipOption = (opt: DocumentTypeOption) =>
+    opt.label.toLowerCase().includes('nuip') || opt.value.toLowerCase() === 'nu';
+
 const useLoginController = ({ errors }: LoginProps) => {
     const [selectedUserType, setSelectedUserType] = useState<UserType | null>(null);
     const [documentType, setDocumentType] = useState('');
@@ -20,17 +32,29 @@ const useLoginController = ({ errors }: LoginProps) => {
         loadParams(setCoddoc);
     }, [errors, setCoddoc]);
 
-    const documentTypeOptions: DocumentTypeOption[] = useMemo(
-        () => Object.entries(Coddoc || {}).map(([value, label]) => ({ value, label }) as DocumentTypeOption),
-        [Coddoc],
-    );
+    const isNaturalLogin = !!selectedUserType && NATURAL_USER_TYPES.includes(selectedUserType);
+
+    const documentTypeOptions: DocumentTypeOption[] = useMemo(() => {
+        const base = Object.entries(Coddoc || {}).map(
+            ([value, label]) => ({ value, label }) as DocumentTypeOption,
+        );
+        // Empresa: muestra todo el catálogo (incluido NIT) para identificarse con NIT.
+        // Persona natural: oculta NIT (empresas) y NUIP (menores de edad).
+        if (!isNaturalLogin) return base;
+        return base.filter((opt) => !isNitOption(opt) && !isNuipOption(opt));
+    }, [Coddoc, isNaturalLogin]);
 
     useEffect(() => {
-        const first = Object.keys(Coddoc || {})[0];
-        if (!documentType && first) {
+        // Si la lista cambió y el documento actualmente seleccionado dejó de estar
+        // disponible (porque el usuario cambió de tipo), limpiamos para no enviar
+        // un valor inválido al backend.
+        if (!documentType) return;
+        const stillAvailable = documentTypeOptions.some((o) => o.value === documentType);
+        if (!stillAvailable) {
+            const first = documentTypeOptions[0]?.value ?? '';
             setDocumentType(first);
         }
-    }, [Coddoc, documentType]);
+    }, [documentTypeOptions, documentType]);
 
     const handleUserTypeSelect = (userType: UserType) => {
         setSelectedUserType(userType);
