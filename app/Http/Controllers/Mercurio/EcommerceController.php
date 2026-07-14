@@ -36,9 +36,9 @@ class EcommerceController extends ApplicationController
      */
     public function index()
     {
-        if (config('app.api_mode') === 'production') {
+        if (config('app.app_mode') === 'production') {
             set_flashdata('notify', [
-                'msj' => 'El catálogo de servicios aún no está disponible.',
+                'msj' => 'Estamos trabajando para habilitar muy pronto el catálogo de servicios. Agradecemos tu comprensión. ' . config('app.api_mode'),
                 'code' => 503,
             ]);
 
