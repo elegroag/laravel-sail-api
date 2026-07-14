@@ -16,6 +16,7 @@ export default class ConfirmPasswordModalView extends Backbone.View {
                 inputAttributes: {
                     autocapitalize: 'off',
                 },
+                recoveryUrl: '/firmas/index',
                 onConfirm: null, // Callback cuando se confirma con la contraseña
                 onCancel: null, // Callback cuando se cancela
             },

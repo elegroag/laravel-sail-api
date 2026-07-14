@@ -187,6 +187,12 @@ export class UsuarioFormView extends Backbone.View {
     }
 
     confirmSend({ title = '', message = '', inputPlaceholder = '', confirmText = '', cancelText = '', inputAttributes = {}, callback = () => {} }) {
+        const recoveryUrl = this.App && typeof this.App.kumbiaURL === 'function'
+            ? this.App.kumbiaURL('firmas/index')
+            : (window.$App && typeof window.$App.kumbiaURL === 'function'
+                ? window.$App.kumbiaURL('firmas/index')
+                : '/firmas/index');
+
         const view = new ConfirmPasswordModalView({
             title,
             message,
@@ -194,6 +200,7 @@ export class UsuarioFormView extends Backbone.View {
             confirmText,
             cancelText,
             inputAttributes,
+            recoveryUrl,
         });
 
         this.App.trigger('show:modal', {
