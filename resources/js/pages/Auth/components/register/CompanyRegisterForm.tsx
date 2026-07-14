@@ -71,7 +71,7 @@ export default function CompanyRegisterForm({
   }
 
   // --- Reglas de documento según categoría de empresa ---
-  // Persona Natural (N): todos menos NIT
+  // Persona Natural (N): todos menos NIT y NUIP
   // Persona Jurídica (J): solo NIT y forzar selección
   const isNatural = values.companyCategory === 'N'
   const isJuridica = values.companyCategory === 'J'
@@ -82,7 +82,33 @@ export default function CompanyRegisterForm({
   const isNitOption = (opt: DocumentTypeOption) =>
     opt.label.toLowerCase().includes('nit') || opt.value.toLowerCase() === 'nit'
 
-  // Forzar selección cuando es Jurídica y limpiar cuando Natural tenga NIT
+  // El representante legal no puede identificarse con NIT (empresas) ni NUIP
+  // (asignado a menores de edad en primera infancia); solo aplica para personas
+  // naturales adultas y extranjeras con documento válido.
+  const isNuipOption = (opt: DocumentTypeOption) =>
+    opt.label.toLowerCase().includes('nuip') || opt.value.toLowerCase() === 'nu'
+
+  const isRepresentativeForbidden = (opt: DocumentTypeOption) =>
+    isNitOption(opt) || isNuipOption(opt)
+
+  const representativeDocumentTypes = React.useMemo(
+    () => (documentTypes || []).filter((opt) => !isRepresentativeForbidden(opt)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [documentTypes],
+  )
+
+  // Para persona natural la empresa NO se identifica con NIT ni con NUIP
+  // (NIT = personas jurídicas; NUIP = menores de edad). Para persona jurídica
+  // el NIT sigue siendo obligatorio y se fuerza desde el useEffect.
+  const companyDocumentTypes = React.useMemo(() => {
+    if (isJuridica) {
+      const nit = (documentTypes || []).find(isNitOption)
+      return nit ? [nit] : documentTypes || []
+    }
+    return (documentTypes || []).filter((opt) => !isNitOption(opt) && !isNuipOption(opt))
+  }, [documentTypes, isJuridica])
+
+  // Forzar selección cuando es Jurídica y limpiar cuando Natural tenga NIT o NUIP
   useEffect(() => {
     if (isJuridicaRepresentative) {
       // Forzar NIT
@@ -91,17 +117,25 @@ export default function CompanyRegisterForm({
         onChange('documentType', nit.value)
       }
     } else if (isNatural || isJuridicaDelegate) {
-      // Limpiar si quedó NIT seleccionado
-      const isNitSelected = (documentTypes || []).some(
-        (o) => isNitOption(o) && o.value === values.documentType
+      // Limpiar si quedó NIT o NUIP seleccionado (no aplican para persona natural)
+      const currentDoc = (documentTypes || []).find(
+        (o) => o.value === values.documentType,
       )
-      if (isNitSelected) {
+      if (currentDoc && (isNitOption(currentDoc) || isNuipOption(currentDoc))) {
         onChange('documentType', '')
       }
       // Si es persona natural, no puede haber delegado: forzar representante
       if (isNatural && values.userRole !== 'representante') {
         onChange('userRole', 'representante')
       }
+    }
+
+    // Limpiar NIT o NUIP si quedó seleccionado en el tipo de documento del representante
+    const repCurrent = (documentTypes || []).find(
+      (o) => o.value === values.documentTypeRep,
+    )
+    if (repCurrent && isRepresentativeForbidden(repCurrent)) {
+      onChange('documentTypeRep', '')
     }
     // Solo dependencias necesarias para evitar bucles
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,7 +155,7 @@ export default function CompanyRegisterForm({
           <DataCompanyRegister
             values={values}
             categoryOptions={categoryOptions}
-            documentTypes={documentTypes}
+            documentTypes={companyDocumentTypes}
             societyOptions={societyOptions}
             errors={errors}
             onChange={onChange}
@@ -154,7 +188,7 @@ export default function CompanyRegisterForm({
             onChange={onChange}
             onNextStep={onNextStep}
             onPrevStep={onPrevStep}
-            documentTypes={documentTypes}
+            documentTypes={representativeDocumentTypes}
           />
         )}
 
