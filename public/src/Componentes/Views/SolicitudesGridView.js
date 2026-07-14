@@ -47,6 +47,12 @@ const SolicitudesGridView = {
         $root.data('solicitudesGridState', state);
 
         const applyClientSearch = () => {
+            // El backend puede inyectar dentro de #consulta un bloque
+            // `.solicitudes-grid__empty` cuando no hay datos. Como la única fuente
+            // canónica del mensaje vacío es el shell (#solicitudes-empty), lo
+            // removemos siempre del DOM para evitar la duplicación.
+            $grid.find('.solicitudes-grid__empty').remove();
+
             const cards = $grid.find('.solicitud-card').toArray();
             const matched = cards.filter((card) => {
                 const haystack = normalizeSearch($(card).attr('data-search') || '');
@@ -60,7 +66,7 @@ const SolicitudesGridView = {
             const hasCards = cards.length > 0;
             // Caso A: el servidor no devolvió solicitudes (total = 0).
             // Caso B: hay tarjetas pero la búsqueda no encontró coincidencias.
-            // En ambos casos mostramos el mensaje vacío configurado en la Blade.
+            // En ambos casos mostramos el mensaje vacío del shell.
             const showEmpty =
                 state.total === 0 ||
                 (hasCards && matched.length === 0 && state.searchTerm !== '');
