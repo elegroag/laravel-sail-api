@@ -28,6 +28,7 @@ export default class PlanillaTrabajadorView extends ModelView {
 			pagingType: 'numbers',
 			language: langDataTable,
 			autoWidth: false,
+			scrollX: true,
 			order: [[1, 'desc']],
 			columnDefs: [
 				{ targets: [3], className: 'text-end' },

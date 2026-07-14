@@ -26,6 +26,7 @@ export default class CuotaMonetariaView extends ModelView {
 			pagingType: 'numbers',
 			language: langDataTable,
 			autoWidth: false,
+			scrollX: true,
 			order: [[0, 'desc']],
 			columnDefs: [
 				{ targets: [5, 6], className: 'text-end' },

@@ -140,7 +140,10 @@
         }
 
         #consulta {
-            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        #consulta .dt-scroll {
             max-width: 100%;
         }
 

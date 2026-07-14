@@ -28,6 +28,7 @@ export default class NoGiroView extends ModelView {
 			pagingType: 'numbers',
 			language: langDataTable,
 			autoWidth: false,
+			scrollX: true,
 			order: [[0, 'desc']],
 			dom:
 				'<"consulta-dt-toolbar row align-items-center g-2 mb-3"<"col-md-6"l><"col-md-6"f>>' +

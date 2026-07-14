@@ -138,6 +138,19 @@
         margin-bottom: 0;
         justify-content: flex-end;
     }
+
+    #consulta {
+        max-width: 100%;
+    }
+
+    #consulta .dt-scroll {
+        max-width: 100%;
+    }
+
+    #consulta .dataTables_wrapper {
+        width: 100%;
+        min-width: 0;
+    }
 </style>
 @endpush
 
@@ -192,8 +205,7 @@
             <span>Ajuste el rango de periodos e intente nuevamente.</span>
         </div>
     <% } else { %>
-        <div class="table-responsive">
-            <table id="dataTable" class="table table-hover consulta-data-table align-middle">
+        <table id="dataTable" class="table table-hover consulta-data-table align-middle">
                 <thead>
                     <tr>
                         <th scope="col">Periodo girado</th>
@@ -219,8 +231,7 @@
                     <% }); %>
                 </tbody>
             </table>
-        </div>
-    <% } %>
+        <% } %>
 </div>
 </script>
 
@@ -280,7 +291,7 @@
                     </div>
                 </div>
             </form>
-            <div id="consulta" class="table-responsive"></div>
+            <div id="consulta"></div>
         </div>
     </div>
 </div>
