@@ -145,3 +145,16 @@ docker compose exec mercurio npm cache clean --force
 docker compose exec mercurio pnpm cache delete
 docker compose exec mercurio pnpm store prune
 ```
+
+### Mandos pnpm gulp
+
+```bash
+# Compilar el modulo con gulp (patron actual del proyecto)
+APP=mercurio npx gulp Ecommerce
+
+# O con sail:
+vendor/bin/sail bash -c "cd public && APP=mercurio npx gulp Ecommerce"
+
+# Debe generar public/mercurio/build/Ecommerce.js
+ls -la public/mercurio/build/Ecommerce.js
+```

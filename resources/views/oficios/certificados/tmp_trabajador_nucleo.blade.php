@@ -68,44 +68,49 @@
 </div>
 
 <p style="font-weight: bold">Beneficiarios afiliados</p>
-<div class="table-container" style="margin-bottom: 1px;">
+<div class="table-container" style="margin-bottom: 1px; padding-bottom: 0;">
     <table class="data-table" width="100%" border="0" cellpadding="2" cellspacing="0">
         <thead>
             <tr>
-                <th width="15%" style="width: 15%; text-align: center;">Parentesco</th>
-                <th width="12%" style="width: 12%; text-align: center;">Estado</th>
-                <th width="15%" style="width: 15%; text-align: center;">Identificación</th>
-                <th width="33%" style="width: 33%; text-align: center;">Nombre completo</th>
+                <th width="13%" style="width: 13%; text-align: center;">Parentesco</th>
+                <th width="11%" style="width: 11%; text-align: center;">Estado</th>
+                <th width="14%" style="width: 14%; text-align: center;">Identificación</th>
+                <th width="26%" style="width: 26%; text-align: center;">Nombre completo</th>
                 <th width="12%" style="width: 12%; text-align: center;" class="center">Fecha Afiliación</th>
-                <th width="13%" style="width: 13%; text-align: center;" class="center">Fecha Retiro</th>
+                <th width="12%" style="width: 12%; text-align: center;" class="center">Fecha Retiro</th>
+                <th width="12%" style="width: 12%; text-align: center;" class="center">Cuota Monetaria</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($beneficiarios as $beneficiario)
             <tr>
-                <td width="15%" style="width: 15%; text-align: center">{{ $beneficiario->parent_detalle ?? 'N/A' }}</td>
-                <td width="12%" style="width: 12%; text-align: center">{{ $beneficiario->estado_detalle ?? 'N/A' }}</td>
-                <td width="15%" style="width: 15%; text-align: center">{{ $beneficiario->documento ?? 'N/A' }}</td>
-                <td width="33%" style="width: 33%;">{{ $beneficiario->nomben ?? 'N/A' }}</td>
+                <td width="13%" style="width: 13%; text-align: center">{{ $beneficiario->parent_detalle ?? 'N/A' }}</td>
+                <td width="11%" style="width: 11%; text-align: center">{{ $beneficiario->estado_detalle ?? 'N/A' }}</td>
+                <td width="14%" style="width: 14%; text-align: center">{{ $beneficiario->documento ?? 'N/A' }}</td>
+                <td width="26%" style="width: 26%;">{{ $beneficiario->nomben ?? 'N/A' }}</td>
                 <td width="12%" style="width: 12%; text-align: center" class="center">{{ $beneficiario->fecpre ?? 'N/A' }}</td>
-                <td width="13%" style="width: 13%; text-align: center" class="center">{{ $beneficiario->fecest ?? '-' }}</td>
+                <td width="12%" style="width: 12%; text-align: center" class="center">{{ $beneficiario->fecest ?? '-' }}</td>
+                <td width="12%" style="width: 12%; text-align: center" class="center">{{ $beneficiario->cuota_monetaria ?? 'NO' }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="center">No hay beneficiarios registrados</td>
+                <td colspan="7" class="center">No hay beneficiarios registrados</td>
             </tr>
             @endforelse
         </tbody>
     </table>
+    <p class="body-text" style="margin-top: 0; padding-top: 0;">La presente certificación se expide en la ciudad de <span class="bold">Florencia</span>, a solicitud del interesado,
+        el día <span class="bold">{{ $fecha }}</span>.
+    </p>
+    
+    <p class="note">Nota: Los beneficiarios pueden encontrarse afiliados y activos; sin embargo, para adquirir el derecho al pago de la cuota monetaria
+        es necesario crear nuevamente la solicitud adjuntando los documentos requeridos.
+    </p>
+    
+    <p class="note">Nota: Este documento es generado electrónicamente. Para validación y trazabilidad interna, el sistema conserva la evidencia
+        de generación del certificado.
+    </p>
 </div>
-
-<p class="body-text">La presente certificación se expide en la ciudad de <span class="bold">Florencia</span>, a solicitud del interesado,
-    el día <span class="bold">{{ $fecha }}</span>.
-</p>
-
-<p class="note">Nota: Este documento es generado electrónicamente. Para validación y trazabilidad interna, el sistema conserva la evidencia
-    de generación del certificado.
-</p>
 @else
 <p class="body-text" style="text-align: center; color: #c00;">No se encontró información del trabajador.</p>
 @endif

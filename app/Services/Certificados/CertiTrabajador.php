@@ -157,6 +157,7 @@ class CertiTrabajador
         CONCAT_WS(" ", subsi22.prinom, subsi22.segnom, subsi22.priape, subsi22.segape) as nomben,
         subsi23.fecafi, 
         subsi23.fecpre, 
+        IF(subsi22.giro = "S", "SI", "NO") as cuota_monetaria,
         CASE
             WHEN subsi22.parent = "1" THEN "HIJO"
             WHEN subsi22.parent = "2" THEN "HERMANO"

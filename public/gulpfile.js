@@ -14,6 +14,7 @@ const appModules = {
     mercurio: [
         'Login',
         'Principal',
+        'Ecommerce',
         'Mercurio31',
         'Mercurio32',
         'Mercurio30',
