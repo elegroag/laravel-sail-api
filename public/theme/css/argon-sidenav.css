@@ -68,6 +68,8 @@
     align-items: center;
     padding: 0;
     margin: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 .sidenav-logo-wrapper {
@@ -76,9 +78,10 @@
     padding: 0;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     border: none;
     box-shadow: none;
+    width: 100%;
 }
 
 .sidenav-logo {
@@ -98,7 +101,18 @@
         color var(--sidenav-transition);
 }
 
-/* Mini logo de imagen, visible solo en modo colapsado */
+/* Abreviatura del logo, visible solo en modo colapsado */
+.sidenav-logo-abbr {
+    display: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+/* Mini logo de imagen, visible solo en modo colapsado (usado por sidebar-cajas) */
 .sidenav-logo-icon {
     display: none;
     width: 28px;
@@ -145,6 +159,15 @@
 
 .sidenav-user-header {
     margin-bottom: 0.5rem;
+}
+
+/* Logo dentro del bloque de información del usuario */
+.sidenav-user-logo {
+    display: block;
+    width: 130px;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 0.25rem;
 }
 
 .sidenav-brand-text {
@@ -475,16 +498,24 @@
 }
 
 .g-sidenav-hidden:not(.g-sidenav-show) .sidenav .sidenav-logo-wrapper {
-    padding: 4px;
-    background: rgba(255, 255, 255, 0.98);
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.8);
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 .g-sidenav-hidden:not(.g-sidenav-show) .sidenav .sidenav-logo {
     display: none;
+}
+
+.g-sidenav-hidden:not(.g-sidenav-show) .sidenav .sidenav-logo-abbr {
+    display: block;
+}
+
+/* Mini logo en modo colapsado (sidebar-cajas) */
+.g-sidenav-hidden:not(.g-sidenav-show) .sidenav .sidenav-logo-wrapper:has(.sidenav-logo-icon) {
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 .g-sidenav-hidden:not(.g-sidenav-show) .sidenav .sidenav-logo-icon {
@@ -537,8 +568,12 @@
         padding: 0 0.9rem;
     }
 
-    .g-sidenav-hidden:not(.g-sidenav-show) .sidenav:hover .sidenav-logo-wrapper {
-        padding: 8px;
+    .g-sidenav-hidden:not(.g-sidenav-show) .sidenav:hover .sidenav-logo {
+        display: block;
+    }
+
+    .g-sidenav-hidden:not(.g-sidenav-show) .sidenav:hover .sidenav-logo-abbr {
+        display: none;
     }
 
     .g-sidenav-hidden:not(.g-sidenav-show) .sidenav:hover .sidenav-logo-icon {

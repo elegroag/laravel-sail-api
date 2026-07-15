@@ -1,8 +1,9 @@
 FROM ubuntu:24.04
 
 LABEL maintainer="Taylor Otwell"
-ARG WWWGROUP
 ARG NODE_VERSION=22
+ARG WWWGROUP=1000
+ARG WWWUSER=1000
 WORKDIR /var/www/html
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -70,7 +71,7 @@ RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.4
 
 RUN userdel -r ubuntu
 RUN groupadd --force -g $WWWGROUP sail
-RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
+RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $WWWUSER sail
 RUN git config --global --add safe.directory /var/www/html
 
 COPY start-container /usr/local/bin/start-container
@@ -79,6 +80,9 @@ COPY php.ini /etc/php/8.4/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
 
 RUN mkdir -p /tmp/php_temp && chmod 777 /tmp/php_temp
+
+RUN chown -R sail:sail /var/www/html/node_modules /var/www/html/public/build /home/sail
+RUN chown -R sail:sail /var/www/html/.pnpm-store
 
 EXPOSE 80/tcp
 EXPOSE 5173/tcp

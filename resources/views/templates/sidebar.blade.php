@@ -16,8 +16,8 @@ $array_tipos = [
         <div class="sidenav-header d-flex align-items-center">
             <a class="navbar-brand text-white" href="{{ route('principal.index') }}">
                 <div class="sidenav-logo-wrapper">
-                    <img src="{{ asset('img/Mercurio/logo-min.png') }}" class="sidenav-logo-icon" alt="Comfaca" />
                     <span class="sidenav-logo">Comfaca En Linea</span>
+                    <span class="sidenav-logo-abbr">CEL</span>
                 </div>
             </a>
             {{-- Botón para colapsar/expandir sidebar (siempre visible) --}}
@@ -47,7 +47,7 @@ $array_tipos = [
                 {{-- Información del Usuario --}}
                 <div class="sidenav-user-info">
                     <div class="sidenav-user-header">
-                        <span class="sidenav-brand-text"></span>
+                        <img src="{{ asset('img/Mercurio/logo-min.png') }}" class="sidenav-user-logo" alt="Comfaca" />
                     </div>
                     <div class="sidenav-user-details">
                         <div class="sidenav-user-detail">
