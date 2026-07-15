@@ -44,6 +44,7 @@ const appModules = {
     cajas: [
         'Glob',
         'Login',
+        'Admservicios',
         'DashBoard',
         'Basicas',
         'DatosCaja',

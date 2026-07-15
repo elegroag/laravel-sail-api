@@ -1,6 +1,7 @@
 <?php
 
 // Importar facades y controlador necesarios
+use App\Http\Controllers\Cajas\AdmserviciosController;
 use App\Http\Controllers\Cajas\Mercurio59Controller;
 use Illuminate\Support\Facades\Route;
 
@@ -16,5 +17,14 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/guardar', [Mercurio59Controller::class, 'guardar'])->name('mercurio59.guardar');
         Route::post('/valide-pk', [Mercurio59Controller::class, 'validePk'])->name('mercurio59.valide-pk');
         Route::get('/reporte/{format?}', [Mercurio59Controller::class, 'reporte'])->name('mercurio59.reporte');
+    });
+
+    // Consulta administrativa de ventas/precompras de servicios del portal
+    Route::prefix('/cajas/admservicios')->group(function () {
+        Route::get('/index', [AdmserviciosController::class, 'index'])->name('admservicios.index');
+        Route::post('/aplicar-filtro', [AdmserviciosController::class, 'aplicarFiltro'])->name('admservicios.aplicar-filtro');
+        Route::post('/change-cantidad-pagina', [AdmserviciosController::class, 'changeCantidadPagina'])->name('admservicios.change-cantidad-pagina');
+        Route::post('/buscar', [AdmserviciosController::class, 'buscar'])->name('admservicios.buscar');
+        Route::get('/reporte/{format?}', [AdmserviciosController::class, 'reporte'])->name('admservicios.reporte');
     });
 });
