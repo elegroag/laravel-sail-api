@@ -28,14 +28,32 @@ class EstadoPrecompra
         self::RECHAZADO => 'Rechazado',
     ];
 
+    /**
+     * Motivos disponibles para desestimar una precompra pendiente.
+     * La clave OTRO habilita un campo de texto libre en el frontend.
+     */
+    public const MOTIVO_OTRO = 'OTRO';
+
+    public const MOTIVOS_DESESTIMACION = [
+        'YA_NO_INTERESA' => 'Ya no estoy interesado en el servicio',
+        'VALOR_ALTO' => 'El valor del servicio es muy alto',
+        'COMPRA_OTRO_MEDIO' => 'Realicé la compra por otro medio',
+        'PROBLEMA_PAGO' => 'Tuve problemas con el medio de pago',
+        self::MOTIVO_OTRO => 'Otro motivo',
+    ];
+
+    /**
+     * El estado DESESTIMADO nunca se asigna automaticamente: queda reservado
+     * para cuando el usuario desestima la compra de forma manual con un motivo.
+     * Mientras el pago no se complete ni sea rechazado por la pasarela,
+     * la precompra permanece PENDIENTE para que el usuario pueda retomarla.
+     */
     public static function desdeCodigoEpayco(int $codigo): string
     {
         return match ($codigo) {
-            1 => self::PAGADO,               // Aceptada
-            3, 8 => self::PENDIENTE,         // Pendiente / Iniciada
-            2, 4, 6, 11, 12 => self::DESESTIMADO, // Rechazada / Fallida / Reversada / Cancelada / Antifraude
-            7, 9, 10 => self::RECHAZADO,     // Retenida / Expirada / Abandonada
-            default => self::RECHAZADO,
+            1 => self::PAGADO,             // Aceptada
+            2, 4, 6, 7, 12 => self::RECHAZADO, // Rechazada / Fallida / Reversada / Retenida / Antifraude
+            default => self::PENDIENTE,    // Pendiente / Iniciada / Expirada / Abandonada / Cancelada
         };
     }
 

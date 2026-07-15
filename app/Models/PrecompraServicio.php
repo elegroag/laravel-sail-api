@@ -27,14 +27,18 @@ class PrecompraServicio extends Model
         'ref_payco',
         'cod_estado_epayco',
         'motivo_epayco',
+        'motivo_desestimacion',
+        'detalle_desestimacion',
         'fecha_precompra',
         'fecha_pago',
+        'fecha_desestimacion',
     ];
 
     protected $casts = [
         'valor' => 'decimal:2',
         'fecha_precompra' => 'datetime',
         'fecha_pago' => 'datetime',
+        'fecha_desestimacion' => 'datetime',
     ];
 
     public function isPendiente(): bool

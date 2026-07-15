@@ -7,6 +7,9 @@ Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/servicios')->group(function () {
         Route::get('/index', [EcommerceController::class, 'index'])->name('servicios.index');
         Route::get('/ver-compras', [EcommerceController::class, 'verCompras'])->name('servicios.ver-compras');
+        Route::get('/compras-pendientes', [EcommerceController::class, 'comprasPendientes'])->name('servicios.compras-pendientes');
+        Route::post('/listar-precompras', [EcommerceController::class, 'listarPrecompras'])->name('servicios.listar-precompras');
+        Route::post('/desestimar-precompra', [EcommerceController::class, 'desestimarPrecompra'])->name('servicios.desestimar-precompra');
         Route::post('/identificar-trabajador', [EcommerceController::class, 'identificarTrabajador'])->name('servicios.identificar-trabajador');
         Route::post('/listar-servicios', [EcommerceController::class, 'listarServicios'])->name('servicios.listar-servicios');
         Route::post('/validar-tarifa', [EcommerceController::class, 'validarTarifa'])->name('servicios.validar-tarifa');

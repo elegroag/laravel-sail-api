@@ -13,9 +13,14 @@
                         Consulte el historial de servicios adquiridos y el estado de cada transacción.
                     </p>
                 </div>
-                <a href="{{ route('servicios.index') }}" class="btn btn-sm servicios-catalog__btn-compras align-self-start align-self-md-center">
-                    <i class="fas fa-store me-1"></i> Volver al catálogo
-                </a>
+                <div class="d-flex gap-2 align-self-start align-self-md-center">
+                    <a href="{{ route('servicios.index') }}" class="btn btn-sm servicios-catalog__btn-compras">
+                        <i class="fas fa-store me-1"></i> Volver al catálogo
+                    </a>
+                    <a href="{{ route('servicios.compras-pendientes') }}" class="btn btn-sm servicios-catalog__btn-compras">
+                        <i class="fas fa-clock me-1"></i> Pendientes de pago
+                    </a>
+                </div>
             </div>
         </div>
 

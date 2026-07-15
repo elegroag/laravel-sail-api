@@ -7,6 +7,7 @@ use App\Models\PrecompraServicio;
 use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Ecommerce\EstadoPrecompra;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -27,10 +28,16 @@ class EcommerceController extends ApplicationController
 
     protected ApiEpayco $epayco;
 
+    protected ?array $user;
+
+    protected ?string $tipo;
+
     public function __construct(ApiEpayco $epayco)
     {
         $this->api = new ApiSubsidio;
         $this->epayco = $epayco;
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
     }
 
     /**
@@ -39,7 +46,7 @@ class EcommerceController extends ApplicationController
      */
     public function index()
     {
-        if (config('app.api_mode') === 'production') {
+        if (config('app.app_mode') === 'production') {
             set_flashdata('notify', [
                 'msj' => 'Estamos trabajando para habilitar muy pronto el catálogo de servicios. Agradecemos tu comprensión.',
                 'code' => 503,
@@ -48,15 +55,35 @@ class EcommerceController extends ApplicationController
             return redirect()->route('principal.index');
         }
 
+        $documento = self::getActUser('documento');
+
         return view(
             'mercurio/ecommerce/index',
             [
                 'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
                 'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? 'true' : 'false',
-                'documento' => self::getActUser('documento'),
+                'documento' => $documento,
+                'pendientesCount' => PrecompraServicio::where('documento', $documento)
+                    ->where('estado', EstadoPrecompra::PENDIENTE)
+                    ->count(),
                 'title' => 'Catálogo de Servicios',
             ]
         );
+    }
+
+    /**
+     * GET /mercurio/servicios/compras-pendientes
+     * Vista de precompras abandonadas (pendientes de pago)
+     */
+    public function comprasPendientes()
+    {
+        return view('mercurio/ecommerce/pendientes', [
+            'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
+            'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? 'true' : 'false',
+            'documento' => self::getActUser('documento'),
+            'motivosDesestimacion' => EstadoPrecompra::MOTIVOS_DESESTIMACION,
+            'title' => 'Compras Pendientes de Pago',
+        ]);
     }
 
     /**
@@ -157,7 +184,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar servicios: '.$e->getMessage(),
+                    'message' => 'Error al cargar servicios: ' . $e->getMessage(),
                 ]
             );
         }
@@ -217,7 +244,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar tarifa: '.$e->getMessage(),
+                    'message' => 'Error al validar tarifa: ' . $e->getMessage(),
                 ]
             );
         }
@@ -272,7 +299,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al registrar la precompra: '.$e->getMessage(),
+                'message' => 'Error al registrar la precompra: ' . $e->getMessage(),
             ]);
         }
     }
@@ -324,7 +351,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar pago: '.$e->getMessage(),
+                    'message' => 'Error al validar pago: ' . $e->getMessage(),
                 ]
             );
         }
@@ -416,7 +443,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al guardar la venta: '.$e->getMessage(),
+                    'message' => 'Error al guardar la venta: ' . $e->getMessage(),
                 ]
             );
         }
@@ -471,9 +498,115 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar compras: '.$e->getMessage(),
+                    'message' => 'Error al cargar compras: ' . $e->getMessage(),
                 ]
             );
+        }
+    }
+
+    /**
+     * POST /mercurio/servicios/listar-precompras
+     * AJAX: Listar precompras pendientes de pago del usuario en sesion
+     */
+    public function listarPrecompras(): JsonResponse
+    {
+        try {
+            $documento = $this->user['documento'] ?? '';
+
+            $precompras = PrecompraServicio::where('documento', $documento)
+                ->where('estado', EstadoPrecompra::PENDIENTE)
+                ->orderByDesc('fecha_precompra')
+                ->get()
+                ->map(fn(PrecompraServicio $precompra) => [
+                    'id' => $precompra->id,
+                    'codser' => $precompra->codser,
+                    'numero' => $precompra->numero,
+                    'codben' => $precompra->codben,
+                    'nota' => $precompra->nota,
+                    'valor' => $precompra->valor,
+                    'estado' => $precompra->estado,
+                    'estado_descripcion' => $precompra->estado_descripcion,
+                    'fecha_precompra' => $precompra->fecha_precompra?->format('Y-m-d H:i'),
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $precompras,
+                'message' => '',
+            ]);
+        } catch (Exception $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar las compras pendientes: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * POST /mercurio/servicios/desestimar-precompra
+     * AJAX: Desestimar una precompra pendiente con un motivo del catalogo.
+     * Si el motivo es OTRO se requiere el detalle en texto libre.
+     */
+    public function desestimarPrecompra(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'precompra_id' => 'required|integer|min:1',
+                'motivo' => 'required|string|in:' . implode(',', array_keys(EstadoPrecompra::MOTIVOS_DESESTIMACION)),
+                'detalle' => 'required_if:motivo,' . EstadoPrecompra::MOTIVO_OTRO . '|nullable|string|max:255',
+            ], [
+                'motivo.required' => 'Debe seleccionar un motivo',
+                'motivo.in' => 'El motivo seleccionado no es válido',
+                'detalle.required_if' => 'Debe indicar el motivo en el campo de texto',
+            ]);
+
+            $documento = self::getActUser('documento');
+
+            $precompra = PrecompraServicio::where('id', $data['precompra_id'])
+                ->where('documento', $documento)
+                ->where('estado', EstadoPrecompra::PENDIENTE)
+                ->first();
+
+            if (! $precompra) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La compra pendiente no existe o ya fue gestionada',
+                ]);
+            }
+
+            $precompra->fill([
+                'estado' => EstadoPrecompra::DESESTIMADO,
+                'motivo_desestimacion' => $data['motivo'],
+                'detalle_desestimacion' => $data['motivo'] === EstadoPrecompra::MOTIVO_OTRO ? trim((string) $data['detalle']) : null,
+                'fecha_desestimacion' => now(),
+            ]);
+            $precompra->save();
+
+            $this->setLogger("Precompra {$precompra->id} desestimada - motivo: {$data['motivo']}, documento: {$documento}");
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $precompra->id,
+                    'estado' => $precompra->estado,
+                ],
+                'message' => 'La compra fue desestimada correctamente',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($e->errors())->flatten()->first() ?? 'Datos inválidos',
+                'errors' => $e->errors(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al desestimar la compra: ' . $e->getMessage(),
+            ]);
         }
     }
 
@@ -526,7 +659,7 @@ class EcommerceController extends ApplicationController
             $this->setLogger("Precompra {$precompra->id} actualizada a estado {$nuevoEstado} (ePayco: {$codEstado}, ref: {$refPayco})");
         } catch (\Throwable $e) {
             // La trazabilidad de la precompra no debe romper el flujo de pago
-            $this->setLogger('Error actualizando precompra: '.$e->getMessage());
+            $this->setLogger('Error actualizando precompra: ' . $e->getMessage());
         }
     }
 }

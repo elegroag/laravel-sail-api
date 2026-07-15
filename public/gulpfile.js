@@ -15,6 +15,7 @@ const appModules = {
         'Login',
         'Principal',
         'Ecommerce',
+        'ComprasPendientes',
         'Mercurio31',
         'Mercurio32',
         'Mercurio30',
