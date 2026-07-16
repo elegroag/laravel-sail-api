@@ -13,36 +13,40 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio19;
 use App\Models\Subsi54;
+use App\Services\Api\ApiWhatsapp;
+use App\Services\Autentications\AutenticaGeneral;
 use App\Services\Autentications\AutenticaService;
 use App\Services\Autentications\VerifyAuthService;
+use App\Services\CajaServices\NotificacionService;
+use App\Services\Entidades\EmpresaService;
+use App\Services\Entidades\TrabajadorService;
 use App\Services\Signup\SignupEmpresas;
 use App\Services\Signup\SignupFacultativos;
 use App\Services\Signup\SignupIndependientes;
 use App\Services\Signup\SignupPensionados;
 use App\Services\Signup\SignupService;
 use App\Services\Srequest;
-use App\Services\Utils\SenderEmail;
-use App\Services\Autentications\AutenticaGeneral;
-use App\Services\CajaServices\NotificacionService;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Entidades\EmpresaService;
-use App\Services\Entidades\TrabajadorService;
-use App\Services\Api\ApiWhatsapp;
+use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class AuthController extends Controller
 {
     private DbBase $db;
+
     private SignupService $signupService;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->signupService = new SignupService();
+        $this->signupService = new SignupService;
     }
 
     public function index()
@@ -69,8 +73,8 @@ class AuthController extends Controller
      * Registrar nuevo usuario en el sistema
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function registerEmpresaAction(Request $request)
     {
@@ -116,13 +120,16 @@ class AuthController extends Controller
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
             $this->db->rollBack();
-            return back()->withErrors(['general' => 'Error del servidor ' . $e->getMessage()])->withInput();
+
+            return back()->withErrors(['general' => 'Error del servidor '.$e->getMessage()])->withInput();
         }
     }
 
@@ -130,8 +137,8 @@ class AuthController extends Controller
      * Registrar nuevo usuario en el sistema
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function registerTrabajadorAction(Request $request)
     {
@@ -164,12 +171,15 @@ class AuthController extends Controller
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
     }
@@ -178,8 +188,8 @@ class AuthController extends Controller
      * Registrar nuevo usuario en el sistema
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function registerParticularAction(Request $request)
     {
@@ -209,12 +219,15 @@ class AuthController extends Controller
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
     }
@@ -223,8 +236,8 @@ class AuthController extends Controller
      * Registrar nuevo usuario en el sistema
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function registerIndependienteAction(Request $request)
     {
@@ -255,12 +268,15 @@ class AuthController extends Controller
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
     }
@@ -269,8 +285,8 @@ class AuthController extends Controller
      * Registrar nuevo usuario en el sistema
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function registerPensionadoAction(Request $request)
     {
@@ -301,12 +317,15 @@ class AuthController extends Controller
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
     }
@@ -315,8 +334,8 @@ class AuthController extends Controller
      * Registrar nuevo usuario en el sistema
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function registerFacultativoAction(Request $request)
     {
@@ -347,12 +366,15 @@ class AuthController extends Controller
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
     }
@@ -361,8 +383,8 @@ class AuthController extends Controller
      * Registrar nuevo usuario en el sistema
      * Este endpoint permite el registro de nuevos usuarios en el sistema CLISISU.
      * Soporta diferentes tipos de usuarios: empresas, trabajadores, independientes, etc.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function registerDomesticoAction(Request $request)
     {
@@ -377,7 +399,7 @@ class AuthController extends Controller
                 'telefono' => 'required|integer|digits_between:6,10',
                 'codciu' => 'required|integer|digits:5',
                 'tipo' => 'required|string|min:1',
-                'contribution_rate' => 'required'
+                'contribution_rate' => 'required',
             ]);
 
             $data = $request->all();
@@ -394,12 +416,15 @@ class AuthController extends Controller
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
             $this->db->rollBack();
+
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
             $this->db->rollBack();
+
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
     }
@@ -446,6 +471,7 @@ class AuthController extends Controller
             }
             $coddoc["{$entity->getCoddoc()}"] = $entity->getDetdoc();
         }
+
         return Inertia::render('Auth/ResetPassword', [
             'Coddoc' => $coddoc,
         ]);
@@ -463,7 +489,10 @@ class AuthController extends Controller
                     'identification' => 'required|integer|digits_between:6,18',
                     'password' => 'required|string|min:8',
                     'tipo' => 'required|string|min:1',
+                    'g-recaptcha-response' => 'required|string',
                 ]);
+
+                $this->verifyRecaptcha($request);
 
                 $service = new AutenticaService;
                 [$access, $message] = $service->execute(
@@ -509,10 +538,28 @@ class AuthController extends Controller
             return Inertia::render('Auth/Login', [
                 'success' => false,
                 'errors' => [
-                    'message' => $e->getMessage()
+                    'message' => $e->getMessage(),
                 ],
-                'tracer' => $e->render($request)
+                'tracer' => $e->render($request),
             ]);
+        }
+    }
+
+    /**
+     * Verifica el token de Google reCAPTCHA v2 contra la API de Google
+     *
+     * @throws DebugException si la verificación falla
+     */
+    private function verifyRecaptcha(Request $request): void
+    {
+        $response = Http::asForm()->post(config('recaptcha.verify_url'), [
+            'secret' => config('recaptcha.secret_key'),
+            'response' => $request->input('g-recaptcha-response'),
+            'remoteip' => $request->ip(),
+        ]);
+
+        if (! $response->json('success')) {
+            throw new DebugException('Verificación reCAPTCHA fallida. Intente nuevamente.');
         }
     }
 
@@ -568,7 +615,9 @@ class AuthController extends Controller
             );
             $senderEmail->send($user07->getEmail(), $html);
         } else {
-            if (config('app.api_mode') == 'development') $user07->setWhatsapp('3157145942');
+            if (config('app.api_mode') == 'development') {
+                $user07->setWhatsapp('3157145942');
+            }
 
             if (! $user07->whatsapp) {
                 throw new DebugException('No se proporcionó número de whatsapp', 501);
@@ -593,8 +642,8 @@ class AuthController extends Controller
     /**
      * Reenviar código de verificación
      * Este método regenera y reenvía el código PIN al usuario
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function resendVerificationCode(Request $request)
     {
@@ -628,7 +677,7 @@ class AuthController extends Controller
             return back()->with('status', 'verification-link-sent');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->withErrors(['general' => 'No fue posible reenviar el código. Intenta nuevamente.']);
         }
     }
@@ -686,7 +735,7 @@ class AuthController extends Controller
             }
 
             return Inertia::render('Auth/VerifyEmail', $payload);
-        } catch (\Exception $err) {
+        } catch (Exception $err) {
             return back()->withErrors([
                 'general' => $err->getMessage(),
             ]);
@@ -696,12 +745,12 @@ class AuthController extends Controller
     public function verify(Request $request)
     {
         try {
-            $verifyAuthService = new VerifyAuthService();
+            $verifyAuthService = new VerifyAuthService;
 
             $request->validate($verifyAuthService->rules());
 
             $rqs = $verifyAuthService->execute($request);
-            if (!$rqs) {
+            if (! $rqs) {
                 $payload = $verifyAuthService->getPayload();
 
                 // Agregar datos necesarios para renderizar la vista
@@ -714,11 +763,12 @@ class AuthController extends Controller
             } else {
                 // caso de exito
                 $url = url($rqs) ?? url('web/auth/login');
+
                 return Inertia::location($url);
             }
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
-        } catch (AuthException | \Exception $e) {
+        } catch (AuthException|Exception $e) {
             return back()->withErrors([
                 'general' => $e->getMessage(),
             ]);
@@ -773,7 +823,7 @@ class AuthController extends Controller
             $telefono = $request->input('telefono');
             $novedad = $request->input('novedad');
 
-            $notificacion = new NotificacionService();
+            $notificacion = new NotificacionService;
 
             $user07 = Mercurio07::whereRaw("documento='{$documento}' and coddoc='{$coddoc}' and tipo='{$tipo}'")->first();
             if (! $user07) {
@@ -831,7 +881,7 @@ class AuthController extends Controller
 
             $salida = [
                 'success' => true,
-                'msj' => 'Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. ' .
+                'msj' => 'Se ha enviado la solicitud de cambio de correo, pronto se contactara con usted para confirmar el cambio. '.
                     'Este proceso puede tardar ya que se requiere de la confirmación de la persona que solicita el cambio por seguridad de la informacion.',
             ];
         } catch (DebugException $e) {
@@ -852,6 +902,7 @@ class AuthController extends Controller
     public function logout()
     {
         SessionCookies::destroyIdentity();
+
         return redirect()->to('web/login');
     }
 
@@ -859,8 +910,8 @@ class AuthController extends Controller
      * Enviar código de recuperación de contraseña
      * Este método envía un código de recuperación de contraseña al usuario
      * por email o WhatsApp para restablecer su contraseña.
-     * @param Request $request
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function recoverySend(Request $request)
     {
@@ -869,18 +920,18 @@ class AuthController extends Controller
                 'documento' => 'required|numeric|digits_between:6,18',
                 'coddoc' => 'required|string|min:1|max:2',
                 'tipo' => 'required|string|size:1',
-                'delivery_method' => 'required|string|min:5|max:15'
+                'delivery_method' => 'required|string|min:5|max:15',
             ]);
 
             $delivery_method = $data['delivery_method'];
             if ($delivery_method == 'email') {
-                //valida email
+                // valida email
                 $request->validate([
                     'email' => 'required|string|email',
                 ]);
                 $data['email'] = $request->input('email');
             } else {
-                //valida whatsapp
+                // valida whatsapp
                 $request->validate([
                     'whatsapp' => 'required|string|numeric|digits_between:6,18',
                 ]);
@@ -901,10 +952,10 @@ class AuthController extends Controller
             if (
                 ($data['tipo'] == 'E' ||
                     $data['tipo'] == 'P' ||
-                    $data['tipo'] == 'S')  && ($user07->whatsapp == null || $user07->email == null)
+                    $data['tipo'] == 'S') && ($user07->whatsapp == null || $user07->email == null)
             ) {
-                //consulta a la api externa 
-                $empresa = (new EmpresaService())->buscarEmpresaSubsidio($user07->documento);
+                // consulta a la api externa
+                $empresa = (new EmpresaService)->buscarEmpresaSubsidio($user07->documento);
                 if ($empresa) {
                     $user07->whatsapp = $empresa['telr'];
                     $user07->email = $empresa['email'];
@@ -917,10 +968,10 @@ class AuthController extends Controller
                     $data['tipo'] == 'I' ||
                     $data['tipo'] == 'F' ||
                     $data['tipo'] == 'O'
-                )  && ($user07->whatsapp == null || $user07->email == null)
+                ) && ($user07->whatsapp == null || $user07->email == null)
             ) {
-                //consulta a la api externa 
-                $trabajador = (new TrabajadorService())->buscarTrabajadorSubsidio($user07->documento);
+                // consulta a la api externa
+                $trabajador = (new TrabajadorService)->buscarTrabajadorSubsidio($user07->documento);
                 if ($trabajador) {
                     $user07->whatsapp = $trabajador['telefono'];
                     $user07->email = $trabajador['email'];
@@ -928,14 +979,14 @@ class AuthController extends Controller
                 }
             }
 
-            //se valida que el email sea igual al que tiene registrado
-            if ($delivery_method == 'email' && strtolower($user07->email ?? '')  != strtolower($data['email'] ?? '')) {
+            // se valida que el email sea igual al que tiene registrado
+            if ($delivery_method == 'email' && strtolower($user07->email ?? '') != strtolower($data['email'] ?? '')) {
                 return back()->withErrors([
                     'email' => 'El email ingresado no coincide con el registrado. Verifique o regístrese para continuar.',
                 ]);
             }
 
-            //se valida que el whatsapp sea igual al que tiene registrado
+            // se valida que el whatsapp sea igual al que tiene registrado
             if ($delivery_method == 'whatsapp' && $user07->whatsapp != $data['whatsapp']) {
                 return back()->withErrors([
                     'whatsapp' => 'El whatsapp ingresado no coincide con el registrado. Verifique o regístrese para continuar.',
@@ -944,7 +995,7 @@ class AuthController extends Controller
 
             $this->generateAndSendVerificationCode($data['documento'], $data['coddoc'], $data['tipo'], $user07, $delivery_method);
 
-            //cambiar clave de usuario
+            // cambiar clave de usuario
             Mercurio07::where('documento', $data['documento'])
                 ->where('coddoc', $data['coddoc'])
                 ->where('tipo', $data['tipo'])
@@ -961,7 +1012,7 @@ class AuthController extends Controller
             ]);
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
-        } catch (DebugException | \Exception $e) {
+        } catch (DebugException|Exception $e) {
             return back()->withErrors([
                 'general' => $e->getMessage(),
             ]);

@@ -9,12 +9,16 @@ import type { LoginProps, UserType } from "@/types/auth"
 import AuthBackgroundShapes from "@/components/ui/auth-background-shapes"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { usePage } from "@inertiajs/react"
 import useLoginController from "./hooks/useLoginController";
 
 export default function Login({
     errors
 }: LoginProps)
 {
+  const { props: pageProps } = usePage<{ recaptcha_site_key?: string }>();
+  const recaptchaSiteKey = pageProps.recaptcha_site_key;
+
   const {
     documentTypeOptions,
     selectedUserType,
@@ -27,6 +31,8 @@ export default function Login({
     documentType,
     identification,
     password,
+    captchaToken,
+    setCaptchaToken,
     setDocumentType,
     setIdentification,
     setPassword,
@@ -86,6 +92,9 @@ export default function Login({
               documentType={documentType}
               identification={identification}
               password={password}
+              recaptchaSiteKey={recaptchaSiteKey}
+              captchaToken={captchaToken}
+              onCaptchaChange={setCaptchaToken}
               onBack={handleBack}
               onDocumentTypeChange={setDocumentType}
               onIdentificationChange={setIdentification}

@@ -67,6 +67,7 @@ class HandleInertiaRequests extends Middleware
                     'success' => fn () => $request->session()->get('success'),
                     'error' => fn () => $request->session()->get('error'),
                 ],
+                'recaptcha_site_key' => fn () => config('recaptcha.site_key'),
             ];
 
             if ($request->is('cajas/*')) {
@@ -94,6 +95,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'recaptcha_site_key' => fn () => config('recaptcha.site_key'),
         ];
     }
 }

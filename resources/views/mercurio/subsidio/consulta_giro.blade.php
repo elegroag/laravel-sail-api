@@ -67,6 +67,17 @@
     .consulta-data-table {
         font-size: 0.84rem;
         margin-bottom: 0;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+
+    .consulta-data-table thead th,
+    .consulta-data-table tbody td {
+        padding: 0.7rem 0.65rem;
+        vertical-align: middle;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
     }
 
     .consulta-data-table thead th {
@@ -77,19 +88,49 @@
         text-transform: uppercase;
         letter-spacing: 0.03em;
         border-bottom: 0;
-        padding: 0.75rem 0.65rem;
         white-space: nowrap;
-        vertical-align: middle;
     }
 
     .consulta-data-table tbody td {
-        padding: 0.7rem 0.65rem;
-        vertical-align: middle;
         color: #334155;
     }
 
     .consulta-data-table tbody tr:hover {
         background: #f8fbff;
+    }
+
+    .consulta-data-table th:nth-child(1),
+    .consulta-data-table td:nth-child(1) {
+        width: 12%;
+    }
+
+    .consulta-data-table th:nth-child(2),
+    .consulta-data-table td:nth-child(2) {
+        width: 10%;
+    }
+
+    .consulta-data-table th:nth-child(3),
+    .consulta-data-table td:nth-child(3),
+    .consulta-data-table th:nth-child(4),
+    .consulta-data-table td:nth-child(4) {
+        width: 20%;
+    }
+
+    .consulta-data-table th:nth-child(5),
+    .consulta-data-table td:nth-child(5) {
+        width: 12%;
+    }
+
+    .consulta-data-table th:nth-child(6),
+    .consulta-data-table td:nth-child(6) {
+        width: 10%;
+        text-align: end;
+    }
+
+    .consulta-data-table th:nth-child(7),
+    .consulta-data-table td:nth-child(7) {
+        width: 16%;
+        text-align: end;
     }
 
     .consulta-badge {
@@ -141,15 +182,23 @@
 
     #consulta {
         max-width: 100%;
+        min-width: 0;
     }
 
-    #consulta .dt-scroll {
+    #consulta .table-responsive {
+        width: 100%;
         max-width: 100%;
+        overflow-x: auto;
     }
 
     #consulta .dataTables_wrapper {
         width: 100%;
         min-width: 0;
+    }
+
+    #consulta .dataTables_wrapper .consulta-data-table {
+        width: 100% !important;
+        margin: 0 !important;
     }
 </style>
 @endpush
@@ -205,7 +254,8 @@
             <span>Ajuste el rango de periodos e intente nuevamente.</span>
         </div>
     <% } else { %>
-        <table id="dataTable" class="table table-hover consulta-data-table align-middle">
+        <div class="table-responsive">
+            <table id="dataTable" class="table table-hover consulta-data-table align-middle w-100">
                 <thead>
                     <tr>
                         <th scope="col">Periodo girado</th>
@@ -231,6 +281,7 @@
                     <% }); %>
                 </tbody>
             </table>
+        </div>
         <% } %>
 </div>
 </script>

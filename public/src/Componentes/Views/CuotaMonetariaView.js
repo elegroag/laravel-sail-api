@@ -26,7 +26,9 @@ export default class CuotaMonetariaView extends ModelView {
 			pagingType: 'numbers',
 			language: langDataTable,
 			autoWidth: false,
-			scrollX: true,
+			// Evitar scrollX: genera cabecera/cuerpo en tablas separadas y desalineadas.
+			// El scroll horizontal lo cubre .table-responsive del template.
+			scrollX: false,
 			order: [[0, 'desc']],
 			columnDefs: [
 				{ targets: [5, 6], className: 'text-end' },
@@ -35,6 +37,9 @@ export default class CuotaMonetariaView extends ModelView {
 				'<"consulta-dt-toolbar row align-items-center g-2 mb-3"<"col-md-6"l><"col-md-6"f>>' +
 				'rt' +
 				'<"consulta-dt-footer row align-items-center g-2 mt-3"<"col-md-6"i><"col-md-6"p>>',
+			initComplete: function () {
+				this.api().columns.adjust();
+			},
 		});
 	}
 

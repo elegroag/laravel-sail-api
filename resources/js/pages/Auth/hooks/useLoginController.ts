@@ -1,5 +1,6 @@
 import { TipoFuncionario } from '@/constants/auth';
 import type { DocumentTypeOption, LoginProps, UserType } from '@/types/auth';
+import { resetRecaptcha } from '@/utils/recaptcha';
 import { router } from '@inertiajs/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
@@ -21,6 +22,7 @@ const useLoginController = ({ errors }: LoginProps) => {
     const [documentType, setDocumentType] = useState('');
     const [identification, setIdentification] = useState('');
     const [password, setPassword] = useState('');
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
     const [Coddoc, setCoddoc] = useState<Record<string, string>>({});
     const [dialog, setDialog] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -65,6 +67,7 @@ const useLoginController = ({ errors }: LoginProps) => {
         setDocumentType('');
         setIdentification('');
         setPassword('');
+        setCaptchaToken(null);
         setDialog(null);
     };
 
@@ -82,6 +85,7 @@ const useLoginController = ({ errors }: LoginProps) => {
                 password,
                 identification: identification ? parseInt(identification) : null,
                 tipo: tipoValue,
+                'g-recaptcha-response': captchaToken,
             },
             {
                 onSuccess: (response) => {
@@ -92,7 +96,12 @@ const useLoginController = ({ errors }: LoginProps) => {
                     const message = errors.message || 'No fue posible iniciar sesión. Verifique sus datos e intente nuevamente.';
                     setDialog({ message, type: 'error' });
                 },
-                onFinish: () => setProcessing(false),
+                onFinish: () => {
+                    setProcessing(false);
+                    // El token de reCAPTCHA es de un solo uso: se resetea el widget tras cada intento
+                    resetRecaptcha();
+                    setCaptchaToken(null);
+                },
             },
         );
     };
@@ -133,6 +142,8 @@ const useLoginController = ({ errors }: LoginProps) => {
         documentType,
         identification,
         password,
+        captchaToken,
+        setCaptchaToken,
         setDocumentType,
         setIdentification,
         setPassword,

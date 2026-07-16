@@ -1,11 +1,12 @@
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import TextLink from "@/components/text-link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DocumentTypeOption } from "@/types/auth"
+import { loadRecaptcha } from "@/utils/recaptcha"
 import HeaderLogin from "./HeaderLogin"
 
 // Componente reutilizable para el formulario de login según el tipo de usuario seleccionado
@@ -18,6 +19,9 @@ interface LoginFormProps {
   identification: string
   password: string,
   processing: boolean,
+  recaptchaSiteKey?: string
+  captchaToken: string | null
+  onCaptchaChange: (token: string | null) => void
   onBack: () => void
   onDocumentTypeChange: (value: string) => void
   onIdentificationChange: (value: string) => void
@@ -33,6 +37,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
   documentType,
   identification,
   password,
+  recaptchaSiteKey,
+  captchaToken,
+  onCaptchaChange,
   onBack,
   onDocumentTypeChange,
   onIdentificationChange,
@@ -42,6 +49,32 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   // Sección UI del formulario
   const [showPassword, setShowPassword] = useState(false)
+  const recaptchaRef = useRef<HTMLDivElement>(null)
+  const widgetIdRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!recaptchaSiteKey || widgetIdRef.current !== null) return
+
+    let cancelled = false
+    loadRecaptcha()
+      .then((grecaptcha) => {
+        if (cancelled || !recaptchaRef.current || widgetIdRef.current !== null) return
+        widgetIdRef.current = grecaptcha.render(recaptchaRef.current, {
+          sitekey: recaptchaSiteKey,
+          callback: (token: string) => onCaptchaChange(token),
+          'expired-callback': () => onCaptchaChange(null),
+          'error-callback': () => onCaptchaChange(null),
+        })
+      })
+      .catch((error) => {
+        console.error('Error al cargar reCAPTCHA:', error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recaptchaSiteKey])
 
   return (
     <>
@@ -121,11 +154,17 @@ const LoginForm: React.FC<LoginFormProps> = ({
             </div>
           </div>
 
+          {recaptchaSiteKey && (
+            <div className="flex justify-center pb-4">
+              <div ref={recaptchaRef} />
+            </div>
+          )}
+
           <div className="flex items-center justify-center">
           <Button
             type="submit"
             className="w-50 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-3 rounded-lg font-medium shadow-lg"
-            disabled={!documentType || !identification || !password || processing}
+            disabled={!documentType || !identification || !password || (!!recaptchaSiteKey && !captchaToken) || processing}
           >
             {processing ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </Button>
