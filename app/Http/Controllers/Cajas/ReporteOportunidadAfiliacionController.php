@@ -6,7 +6,6 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Requests\Cajas\ReporteOportunidadAfiliacionRequest;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio09;
-use App\Models\Mercurio11;
 use App\Services\Reports\OportunidadAfiliacionExcelExporter;
 use App\Services\Reports\OportunidadAfiliacionService;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +32,6 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
         return view('cajas.reporte_oportunidad.index', [
             'title' => 'Reporte Oportunidad Afiliaciones',
             'mercurio09' => Mercurio09::whereIn('tipopc', ['1', '2', '3', '4', '9', '10', '11'])->get(),
-            'estados' => Mercurio11::all(),
             'umbralDias' => (int) config('reportes.oportunidad_umbral_dias', 3),
         ]);
     }

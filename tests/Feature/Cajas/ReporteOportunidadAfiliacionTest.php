@@ -92,13 +92,14 @@ class ReporteOportunidadAfiliacionTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_filtro_solo_pendientes_pasa_parametro_al_servicio(): void
+    public function test_filtro_cedcon_se_pasa_al_servicio(): void
     {
         $this->mock(OportunidadAfiliacionService::class, function ($mock): void {
             $mock->shouldReceive('buildResumen')
                 ->once()
                 ->withArgs(function (array $filtros): bool {
-                    return ($filtros['solo_pendientes'] ?? false) === true;
+                    return ($filtros['tipafis'] ?? null) === [3]
+                        && ($filtros['cedcon'] ?? null) === '1234567890';
                 })
                 ->andReturn([
                     'total' => 1,
@@ -111,11 +112,12 @@ class ReporteOportunidadAfiliacionTest extends TestCase
         $response = $this->getJson(route('cajas.reporte-oportunidad.previsualizar', [
             'fecini' => '2026-06-01',
             'fecfin' => '2026-06-29',
-            'solo_pendientes' => 1,
+            'tipafis' => 3,
+            'cedcon' => '1234567890',
         ]));
 
         $response->assertOk();
-        $response->assertJsonPath('resumen.en_tramite', 1);
+        $response->assertJsonPath('resumen.total', 1);
     }
 
     public function test_validacion_fechas_invalidas(): void

@@ -7,7 +7,6 @@ use App\Support\AfiliacionNormalizer;
 use App\Support\DiasHabilesCalculator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 class OportunidadAfiliacionService
 {
@@ -17,13 +16,12 @@ class OportunidadAfiliacionService
     public function buildDataset(array $filtros = []): array
     {
         $tipos = $this->resolveTipos($filtros['tipafis'] ?? null);
-        $estados = $this->normalizeEstados($filtros['estado'] ?? null);
         $fecini = $filtros['fecini'] ?? null;
         $fecfin = $filtros['fecfin'] ?? null;
         $nit = isset($filtros['nit']) ? trim((string) $filtros['nit']) : '';
         $cedtra = isset($filtros['cedtra']) ? trim((string) $filtros['cedtra']) : '';
-        $soloVencidos = filter_var($filtros['solo_vencidos'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $soloPendientes = filter_var($filtros['solo_pendientes'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $cedcon = isset($filtros['cedcon']) ? trim((string) $filtros['cedcon']) : '';
+        $numdoc = isset($filtros['numdoc']) ? trim((string) $filtros['numdoc']) : '';
         $umbral = (int) config('reportes.oportunidad_umbral_dias', 3);
 
         $titularesIndex = $this->buildTitularesIndex();
@@ -39,26 +37,7 @@ class OportunidadAfiliacionService
                 ]);
             }
 
-            if (! empty($estados)) {
-                $query->whereIn('estado', $estados);
-            }
-
-            if ($nit !== '') {
-                $query->where('nit', $nit);
-            }
-
-            if ($cedtra !== '') {
-                $query->where(function (Builder $builder) use ($cedtra): void {
-                    $builder->where('cedtra', $cedtra)
-                        ->orWhere('cedcon', $cedtra)
-                        ->orWhere('numdoc', $cedtra)
-                        ->orWhere('documento', $cedtra);
-                });
-            }
-
-            if ($soloPendientes && $this->hasColumn($config['model'], 'fecapr')) {
-                $this->aplicarFiltroSinFechaAprobacion($query);
-            }
+            $this->aplicarFiltrosDocumento($query, $config, $nit, $cedtra, $cedcon, $numdoc);
 
             $query->orderBy('fecsol')->orderBy('id');
 
@@ -72,10 +51,6 @@ class OportunidadAfiliacionService
                     $record['dias_habiles'],
                     $umbral
                 );
-
-                if ($soloVencidos && $record['estado_oportunidad'] !== 'VENCIDO') {
-                    continue;
-                }
 
                 $dataset[] = $record;
             }
@@ -118,6 +93,38 @@ class OportunidadAfiliacionService
     }
 
     /**
+     * Aplica filtros de documento según el tipo (doc_field del config).
+     *
+     * @param  array<string, mixed>  $config
+     */
+    private function aplicarFiltrosDocumento(
+        Builder $query,
+        array $config,
+        string $nit,
+        string $cedtra,
+        string $cedcon,
+        string $numdoc
+    ): void {
+        $docField = (string) ($config['doc_field'] ?? '');
+
+        if ($nit !== '' && $docField === 'nit') {
+            $query->where('nit', $nit);
+        }
+
+        if ($cedtra !== '' && $docField === 'cedtra') {
+            $query->where('cedtra', $cedtra);
+        }
+
+        if ($cedcon !== '' && $docField === 'cedcon') {
+            $query->where('cedcon', $cedcon);
+        }
+
+        if ($numdoc !== '' && $docField === 'numdoc') {
+            $query->where('numdoc', $numdoc);
+        }
+    }
+
+    /**
      * @return array<string, string>
      */
     private function buildTitularesIndex(): array
@@ -143,14 +150,6 @@ class OportunidadAfiliacionService
             ->all();
     }
 
-    private function aplicarFiltroSinFechaAprobacion(Builder $query): void
-    {
-        $query->where(function (Builder $builder): void {
-            $builder->whereNull('fecapr')
-                ->orWhere('fecapr', '0000-00-00');
-        });
-    }
-
     private function resolverEstadoOportunidad(?string $fecapr, ?int $diasHabiles, int $umbral): string
     {
         if ($diasHabiles === null) {
@@ -165,10 +164,10 @@ class OportunidadAfiliacionService
     }
 
     /**
-     * @param  array<int|string>|string|null  $tipafis
+     * @param  array<int|string>|string|int|null  $tipafis
      * @return array<int, array<string, mixed>>
      */
-    private function resolveTipos(array|string|null $tipafis): array
+    private function resolveTipos(array|string|int|null $tipafis): array
     {
         $tipos = config('reportes.oportunidad_tipos', []);
 
@@ -176,8 +175,8 @@ class OportunidadAfiliacionService
             return $tipos;
         }
 
-        if (is_string($tipafis)) {
-            $tipafis = array_filter(array_map('trim', explode(',', $tipafis)));
+        if (is_int($tipafis) || is_string($tipafis)) {
+            $tipafis = array_filter(array_map('trim', explode(',', (string) $tipafis)), static fn ($v) => $v !== '');
         }
 
         $selected = [];
@@ -188,38 +187,6 @@ class OportunidadAfiliacionService
             }
         }
 
-        return $selected ?: $tipos;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function normalizeEstados(mixed $estado): array
-    {
-        if ($estado === null || $estado === '' || $estado === []) {
-            return [];
-        }
-
-        if (is_array($estado)) {
-            return array_values(array_filter(array_map('strval', $estado)));
-        }
-
-        return array_values(array_filter(array_map('trim', explode(',', (string) $estado))));
-    }
-
-    /**
-     * @param  class-string<Model>  $modelClass
-     */
-    private function hasColumn(string $modelClass, string $column): bool
-    {
-        try {
-            $instance = new $modelClass;
-            $table = $instance->getTable();
-            $schema = $instance->getConnection()->getSchemaBuilder();
-
-            return $schema->hasColumn($table, $column);
-        } catch (\Throwable) {
-            return false;
-        }
+        return $selected !== [] ? $selected : $tipos;
     }
 }

@@ -33,19 +33,9 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="estado" class="form-control-label">Estado solicitud</label>
-                                    <select id="estado" name="estado" class="form-control">
-                                        <option value="">Todos</option>
-                                        @foreach ($estados as $estado)
-                                            <option value="{{ $estado->codest }}">{{ $estado->detalle }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
                                     <label for="tipafis" class="form-control-label">Tipo de afiliacion</label>
-                                    <select id="tipafis" name="tipafis[]" class="form-control" multiple>
+                                    <select id="tipafis" name="tipafis" class="form-control">
+                                        <option value="">Todos</option>
                                         @foreach ($mercurio09 as $tipo)
                                             <option value="{{ $tipo->tipopc }}">{{ $tipo->detalle }}</option>
                                         @endforeach
@@ -54,32 +44,28 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-3 d-none" id="campo-nit-aportante">
                                 <div class="form-group">
                                     <label for="nit" class="form-control-label">Aportante (NIT)</label>
                                     <input type="text" id="nit" name="nit" class="form-control" maxlength="20">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 d-none" id="campo-cedtra-trabajador">
                                 <div class="form-group">
                                     <label for="cedtra" class="form-control-label">Documento trabajador</label>
                                     <input type="text" id="cedtra" name="cedtra" class="form-control" maxlength="20">
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group mt-4 pt-2">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="solo_pendientes" name="solo_pendientes" value="1">
-                                        <label class="custom-control-label" for="solo_pendientes">Solo pendientes (sin fecha de aprobacion)</label>
-                                    </div>
+                            <div class="col-md-3 d-none" id="campo-cedcon-conyuge">
+                                <div class="form-group">
+                                    <label for="cedcon" class="form-control-label">Cedula conyuge</label>
+                                    <input type="text" id="cedcon" name="cedcon" class="form-control" maxlength="20">
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group mt-4 pt-2">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="solo_vencidos" name="solo_vencidos" value="1">
-                                        <label class="custom-control-label" for="solo_vencidos">Solo vencidos</label>
-                                    </div>
+                            <div class="col-md-3 d-none" id="campo-numdoc-beneficiario">
+                                <div class="form-group">
+                                    <label for="numdoc" class="form-control-label">Identificacion beneficiario</label>
+                                    <input type="text" id="numdoc" name="numdoc" class="form-control" maxlength="20">
                                 </div>
                             </div>
                         </div>

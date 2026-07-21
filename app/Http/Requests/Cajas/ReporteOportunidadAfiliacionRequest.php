@@ -21,26 +21,40 @@ class ReporteOportunidadAfiliacionRequest extends FormRequest
             'fecfin' => ['required', 'date_format:Y-m-d', 'after_or_equal:fecini'],
             'tipafis' => ['nullable', 'array'],
             'tipafis.*' => ['integer', 'in:1,2,3,4,9,10,11'],
-            'estado' => ['nullable'],
             'nit' => ['nullable', 'string', 'max:20'],
             'cedtra' => ['nullable', 'string', 'max:20'],
-            'solo_vencidos' => ['nullable', 'boolean'],
-            'solo_pendientes' => ['nullable', 'boolean'],
+            'cedcon' => ['nullable', 'string', 'max:20'],
+            'numdoc' => ['nullable', 'string', 'max:20'],
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        if ($this->has('tipafis') && is_string($this->input('tipafis'))) {
-            $this->merge([
-                'tipafis' => array_values(array_filter(array_map('intval', explode(',', $this->input('tipafis'))))),
-            ]);
+        if (! $this->has('tipafis')) {
+            return;
         }
 
-        $this->merge([
-            'solo_vencidos' => filter_var($this->input('solo_vencidos', false), FILTER_VALIDATE_BOOLEAN),
-            'solo_pendientes' => filter_var($this->input('solo_pendientes', false), FILTER_VALIDATE_BOOLEAN),
-        ]);
+        $raw = $this->input('tipafis');
+
+        if ($raw === null || $raw === '' || $raw === []) {
+            $this->merge(['tipafis' => null]);
+
+            return;
+        }
+
+        if (is_array($raw)) {
+            $values = array_values(array_filter(array_map('intval', $raw), static fn (int $v) => $v > 0));
+            $this->merge(['tipafis' => $values === [] ? null : $values]);
+
+            return;
+        }
+
+        $values = array_values(array_filter(
+            array_map('intval', explode(',', (string) $raw)),
+            static fn (int $v) => $v > 0
+        ));
+
+        $this->merge(['tipafis' => $values === [] ? null : $values]);
     }
 
     /**
