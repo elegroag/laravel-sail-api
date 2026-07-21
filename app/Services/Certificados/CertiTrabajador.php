@@ -10,15 +10,19 @@ use App\Services\LegacyDatabaseService;
  */
 class CertiTrabajador
 {
-    public $cedtra;
-    public $tipo;
-    public $data = [];
-    public $template = '';
+    public string $cedtra;
+
+    public string $tipo;
+
+    public array $data = [];
+
+    public string $template = '';
 
     /**
      * Constructor que inicializa los datos según el tipo de certificado
-     * @param string $cedtra Cédula del trabajador
-     * @param string $tipo Tipo de certificado (A=principal, I=nucleo, T=multi, P=planillas)
+     *
+     * @param  string  $cedtra  Cédula del trabajador
+     * @param  string  $tipo  Tipo de certificado (A=principal, I=nucleo, T=multi, P=planillas)
      */
     public function __construct($cedtra, $tipo)
     {
@@ -68,7 +72,7 @@ class CertiTrabajador
      */
     public function getFileName(): string
     {
-        return "certificado_trabajador_{$this->cedtra}_" . date('YmdHis') . ".pdf";
+        return "certificado_trabajador_{$this->cedtra}_" . date('YmdHis') . '.pdf';
     }
 
     /**
@@ -93,7 +97,6 @@ class CertiTrabajador
         LEFT JOIN subsi02 ON subsi02.nit = subsi15.nit 
         WHERE subsi15.cedtra = ?', [$this->cedtra]);
 
-
         $trayectorias = $legacy->select('SELECT subsi16.*, 
         subsi02.razsoc 
         FROM subsi16 
@@ -113,9 +116,9 @@ class CertiTrabajador
         // Convertir Collection de trayectorias a array de objetos
         $trayectoriasObj = $trayectorias->map(fn($t) => (object) $t)->toArray();
 
-        $trabajadorObj->ultper = $ultper->isNotEmpty() ? $ultper->first()['ultper'] : "";
-        $trabajadorObj->estapo = "Al día";
-        $trabajadorObj->calemp = "NO";
+        $trabajadorObj->ultper = $ultper->isNotEmpty() ? $ultper->first()['ultper'] : '';
+        $trabajadorObj->estapo = 'Al día';
+        $trabajadorObj->calemp = 'NO';
 
         return [
             'trabajador' => $trabajadorObj,
@@ -155,9 +158,11 @@ class CertiTrabajador
 
         $beneficiarios = $legacy->select('SELECT subsi22.*,
         CONCAT_WS(" ", subsi22.prinom, subsi22.segnom, subsi22.priape, subsi22.segape) as nomben,
-        subsi23.fecafi, 
-        subsi23.fecpre, 
+        subsi23.fecafi,
+        subsi23.fecpre,
         IF(subsi22.giro = "S", "SI", "NO") as cuota_monetaria,
+        subsi22.codgir,
+        subsi41.detalle as motivo_no_giro,
         CASE
             WHEN subsi22.parent = "1" THEN "HIJO"
             WHEN subsi22.parent = "2" THEN "HERMANO"
@@ -168,17 +173,26 @@ class CertiTrabajador
             WHEN subsi22.estado = "A" THEN "ACTIVO"
             WHEN subsi22.estado = "B" THEN "INACTIVO"
             WHEN subsi22.estado = "M" THEN "MUERTO"
-            ELSE "OTRO" 
-        END as estado_detalle 
-        FROM subsi23 
-        INNER JOIN subsi22 ON subsi22.codben = subsi23.codben 
+            ELSE "OTRO"
+        END as estado_detalle
+        FROM subsi23
+        INNER JOIN subsi22 ON subsi22.codben = subsi23.codben
+        LEFT JOIN subsi41 ON subsi41.codgir = subsi22.codgir
         WHERE subsi23.cedtra = ? AND subsi22.estado = ?', [$this->cedtra, 'A']);
 
         $legacy->disconnect();
+
+        $beneficiariosObj = $beneficiarios->map(fn($b) => (object) $b)->toArray();
+        $beneficiariosSinGiro = array_values(array_filter(
+            $beneficiariosObj,
+            static fn($b) => ($b->cuota_monetaria ?? 'NO') === 'NO' || ($b->giro ?? 'N') === 'N'
+        ));
+
         return [
-            'trabajador' => (object) $trabajador->first(),
+            'trabajador' => $trabajador->isNotEmpty() ? (object) $trabajador->first() : null,
             'conyuges' => $conyuges->map(fn($c) => (object) $c)->toArray(),
-            'beneficiarios' => $beneficiarios->map(fn($b) => (object) $b)->toArray(),
+            'beneficiarios' => $beneficiariosObj,
+            'beneficiarios_sin_giro' => $beneficiariosSinGiro,
             'fecha' => date('Y-m-d'),
         ];
     }
@@ -228,6 +242,7 @@ class CertiTrabajador
             WHERE s168.cedtra =? AND s168.estado = ?", [$this->cedtra, 'A']);
 
         $legacy->disconnect();
+
         return [
             'trabajador' => (object) $trabajador->first(),
             'multiAfiliacion' => $multiAfiliacion->map(fn($m) => (object) $m)->toArray(),
@@ -252,7 +267,7 @@ class CertiTrabajador
         LEFT JOIN subsi02 ON subsi02.nit = subsi15.nit 
         WHERE subsi15.cedtra = ?', [$this->cedtra]);
 
-        $empresasAportes = $legacy->select("SELECT 
+        $empresasAportes = $legacy->select('SELECT 
 			subsi64.nitpla, 
 			subsi64.nit, 
 			subsi64.digver  
@@ -260,9 +275,9 @@ class CertiTrabajador
 			INNER JOIN subsi64 ON subsi65.numero = subsi64.numero  
 			WHERE subsi65.cedtra = ? 
 			GROUP BY 1, 2 
-			ORDER BY periodo, fecrec DESC", [$this->cedtra]);
+			ORDER BY periodo, fecrec DESC', [$this->cedtra]);
 
-        $devoluciones = $legacy->select("SELECT subsi196.*, 
+        $devoluciones = $legacy->select('SELECT subsi196.*, 
             subsi64.nit, 
             subsi64.digver, 
             subsi64.fecrec,
@@ -276,12 +291,11 @@ class CertiTrabajador
             INNER JOIN subsi65 ON subsi196.cedtra=subsi65.cedtra and subsi64.numero=subsi65.numero
             WHERE subsi196.cedtra=? 
             GROUP BY subsi65.cedtra, subsi64.nit, subsi196.marca, subsi196.documento 
-            ORDER BY subsi196.fecpag", [$this->cedtra]);
-
+            ORDER BY subsi196.fecpag', [$this->cedtra]);
 
         $aportesPlanilla = [];
         foreach ($empresasAportes->toArray() as $aportes) {
-            $query =  $legacy->select("SELECT 
+            $query = $legacy->select('SELECT 
                 subsi64.tippla,   
                 subsi65.valnom, 
                 subsi65.valapo, 
@@ -301,10 +315,10 @@ class CertiTrabajador
                 subsi65.cedtra = ? AND 
                 (subsi64.nitpla = ? OR subsi64.nit = ?) 
                 ORDER BY subsi64.perapo DESC
-			", [
+			', [
                 $this->cedtra,
                 $aportes['nitpla'],
-                $aportes['nit']
+                $aportes['nit'],
             ]);
 
             foreach ($query->toArray() as $item) {
@@ -317,6 +331,7 @@ class CertiTrabajador
         }
 
         $legacy->disconnect();
+
         return [
             'trabajador' => $trabajador->isNotEmpty() ? (object) $trabajador->first() : null,
             'devoluciones' => $devoluciones->map(fn($d) => (object) $d)->toArray(),

@@ -99,14 +99,37 @@
             @endforelse
         </tbody>
     </table>
+
+    @if(!empty($beneficiarios_sin_giro))
+    <p style="font-weight: bold; margin-top: 8px;">Beneficiarios con giro NO (sin derecho a cuota monetaria)</p>
+    <div class="table-container" style="margin-bottom: 1px;">
+        <table class="data-table" width="100%" border="0" cellpadding="2" cellspacing="0">
+            <thead>
+                <tr>
+                    <th width="16%" style="width: 16%; text-align: center;">Identificación</th>
+                    <th width="34%" style="width: 34%; text-align: center;">Nombre completo</th>
+                    <th width="12%" style="width: 12%; text-align: center;">Código</th>
+                    <th width="38%" style="width: 38%; text-align: center;">Motivo no giro</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($beneficiarios_sin_giro as $beneficiario)
+                <tr>
+                    <td width="16%" style="width: 16%; text-align: center">{{ $beneficiario->documento ?? 'N/A' }}</td>
+                    <td width="34%" style="width: 34%;">{{ $beneficiario->nomben ?? 'N/A' }}</td>
+                    <td width="12%" style="width: 12%; text-align: center">{{ $beneficiario->codgir ?? 'N/A' }}</td>
+                    <td width="38%" style="width: 38%;">{{ $beneficiario->motivo_no_giro ?? 'Sin descripción' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
     <p class="body-text" style="margin-top: 0; padding-top: 0;">La presente certificación se expide en la ciudad de <span class="bold">Florencia</span>, a solicitud del interesado,
         el día <span class="bold">{{ $fecha }}</span>.
     </p>
-    
-    <p class="note">Nota: Los beneficiarios pueden encontrarse afiliados y activos; sin embargo, para adquirir el derecho al pago de la cuota monetaria
-        es necesario crear nuevamente la solicitud adjuntando los documentos requeridos.
-    </p>
-    
+
     <p class="note">Nota: Este documento es generado electrónicamente. Para validación y trazabilidad interna, el sistema conserva la evidencia
         de generación del certificado.
     </p>
