@@ -37,7 +37,56 @@ class AuditoriaSolicitudResolver
         '13' => Mercurio41::class,
     ];
 
+    /**
+     * Tipopc soportados para el informe PDF de solicitud.
+     *
+     * @return array<int, string>
+     */
+    public static function tipopcsInforme(): array
+    {
+        return ['1', '2', '3', '4', '9', '10', '11', '13'];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function labelsInforme(): array
+    {
+        return [
+            '1' => 'Trabajador',
+            '2' => 'Empresa',
+            '3' => 'Cónyuge',
+            '4' => 'Beneficiario',
+            '9' => 'Pensionado',
+            '10' => 'Facultativo',
+            '11' => 'Comunitaria',
+            '13' => 'Independiente',
+        ];
+    }
+
     public static function resolve(string $tipopc, int $id): ?object
+    {
+        $modelClass = self::modelClass($tipopc);
+
+        return $modelClass::where('id', $id)->first();
+    }
+
+    public static function resolveByRuuid(string $tipopc, string $ruuid): ?object
+    {
+        $modelClass = self::modelClass($tipopc);
+        $ruuid = trim($ruuid);
+
+        if ($ruuid === '') {
+            return null;
+        }
+
+        return $modelClass::where('ruuid', $ruuid)->first();
+    }
+
+    /**
+     * @return class-string
+     */
+    private static function modelClass(string $tipopc): string
     {
         $modelClass = self::MODEL_MAP[$tipopc] ?? null;
 
@@ -45,6 +94,6 @@ class AuditoriaSolicitudResolver
             throw new InvalidArgumentException("Tipo de operación no válido: {$tipopc}");
         }
 
-        return $modelClass::where('id', $id)->first();
+        return $modelClass;
     }
 }

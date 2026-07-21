@@ -3,10 +3,11 @@
 namespace App\Services\Reports;
 
 use App\Models\Mercurio31;
+use App\Services\LegacyDatabaseService;
 use App\Support\AfiliacionNormalizer;
 use App\Support\DiasHabilesCalculator;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use Throwable;
 
 class OportunidadAfiliacionService
 {
@@ -18,17 +19,17 @@ class OportunidadAfiliacionService
         $tipos = $this->resolveTipos($filtros['tipafis'] ?? null);
         $fecini = $filtros['fecini'] ?? null;
         $fecfin = $filtros['fecfin'] ?? null;
-        $nit = isset($filtros['nit']) ? trim((string) $filtros['nit']) : '';
-        $cedtra = isset($filtros['cedtra']) ? trim((string) $filtros['cedtra']) : '';
-        $cedcon = isset($filtros['cedcon']) ? trim((string) $filtros['cedcon']) : '';
-        $numdoc = isset($filtros['numdoc']) ? trim((string) $filtros['numdoc']) : '';
         $umbral = (int) config('reportes.oportunidad_umbral_dias', 3);
 
         $titularesIndex = $this->buildTitularesIndex();
+        $tipdocIndex = $this->buildTipdocIndex();
         $dataset = [];
 
         foreach ($tipos as $tipopc => $config) {
             $query = $config['model']::query();
+
+            // Excluir solicitudes inactivas
+            $query->where('estado', '!=', 'I');
 
             if ($fecini && $fecfin) {
                 $query->whereBetween('fecsol', [
@@ -37,12 +38,11 @@ class OportunidadAfiliacionService
                 ]);
             }
 
-            $this->aplicarFiltrosDocumento($query, $config, $nit, $cedtra, $cedcon, $numdoc);
-
             $query->orderBy('fecsol')->orderBy('id');
 
             foreach ($query->cursor() as $model) {
                 $record = AfiliacionNormalizer::normalize($model, (int) $tipopc, $config, $titularesIndex);
+                $record = $this->enrichIdentificacion($record, $tipdocIndex);
 
                 $fin = $record['fecha_cierre'];
                 $record['dias_habiles'] = DiasHabilesCalculator::between($record['fecsol'], $fin);
@@ -93,38 +93,6 @@ class OportunidadAfiliacionService
     }
 
     /**
-     * Aplica filtros de documento según el tipo (doc_field del config).
-     *
-     * @param  array<string, mixed>  $config
-     */
-    private function aplicarFiltrosDocumento(
-        Builder $query,
-        array $config,
-        string $nit,
-        string $cedtra,
-        string $cedcon,
-        string $numdoc
-    ): void {
-        $docField = (string) ($config['doc_field'] ?? '');
-
-        if ($nit !== '' && $docField === 'nit') {
-            $query->where('nit', $nit);
-        }
-
-        if ($cedtra !== '' && $docField === 'cedtra') {
-            $query->where('cedtra', $cedtra);
-        }
-
-        if ($cedcon !== '' && $docField === 'cedcon') {
-            $query->where('cedcon', $cedcon);
-        }
-
-        if ($numdoc !== '' && $docField === 'numdoc') {
-            $query->where('numdoc', $numdoc);
-        }
-    }
-
-    /**
      * @return array<string, string>
      */
     private function buildTitularesIndex(): array
@@ -148,6 +116,65 @@ class OportunidadAfiliacionService
                 return [$cedtra => $nombre];
             })
             ->all();
+    }
+
+    /**
+     * Catálogo de tipos de documento desde gener18 (legacy comfaca).
+     * Indexa por coddoc y codrua para resolver tipdoc de mercurio.
+     *
+     * @return array<string, string> codigo => etiqueta corta (codrua)
+     */
+    private function buildTipdocIndex(): array
+    {
+        try {
+            $legacy = new LegacyDatabaseService('comfaca');
+            $rows = $legacy->select('SELECT coddoc, detdoc, codrua FROM gener18');
+            $legacy->disconnect();
+        } catch (Throwable) {
+            return [];
+        }
+
+        $index = [];
+        foreach ($rows as $row) {
+            $coddoc = trim((string) ($row['coddoc'] ?? ''));
+            $codrua = trim((string) ($row['codrua'] ?? ''));
+            $detdoc = trim((string) ($row['detdoc'] ?? ''));
+            $label = $codrua !== '' ? $codrua : ($detdoc !== '' ? $detdoc : $coddoc);
+
+            if ($coddoc !== '') {
+                $index[$coddoc] = $label;
+            }
+
+            if ($codrua !== '') {
+                $index[$codrua] = $label;
+                $index[strtoupper($codrua)] = $label;
+            }
+        }
+
+        return $index;
+    }
+
+    /**
+     * Separa tipo y número de identificación, resolviendo tipdoc contra gener18.
+     *
+     * @param  array<string, mixed>  $record
+     * @param  array<string, string>  $tipdocIndex
+     * @return array<string, mixed>
+     */
+    private function enrichIdentificacion(array $record, array $tipdocIndex): array
+    {
+        $tipdocCode = trim((string) ($record['tipdoc'] ?? ''));
+        $numero = trim((string) ($record['documento'] ?? ''));
+
+        $tipo = $tipdocIndex[$tipdocCode]
+            ?? $tipdocIndex[strtoupper($tipdocCode)]
+            ?? $tipdocCode;
+
+        $record['tipo_documento'] = $tipo;
+        $record['numero_identificacion'] = $numero;
+        $record['tipo_identificacion'] = trim($tipo.' '.$numero);
+
+        return $record;
     }
 
     private function resolverEstadoOportunidad(?string $fecapr, ?int $diasHabiles, int $umbral): string

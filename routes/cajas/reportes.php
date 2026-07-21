@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Cajas\InformeSolicitudController;
 use App\Http\Controllers\Cajas\ReporteOportunidadAfiliacionController;
 use App\Http\Controllers\Cajas\ReportesolController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,14 @@ Route::middleware(['cajas.auth'])->group(function () {
 
         Route::post('/exportar', [ReporteOportunidadAfiliacionController::class, 'exportar'])
             ->name('cajas.reporte-oportunidad.exportar');
+    });
+
+    Route::prefix('/cajas/informe-solicitud')->group(function () {
+        Route::get('/', [InformeSolicitudController::class, 'index'])
+            ->name('cajas.informe-solicitud.index');
+
+        Route::match(['get', 'post'], '/pdf', [InformeSolicitudController::class, 'pdf'])
+            ->name('cajas.informe-solicitud.pdf');
     });
 
     Route::get('/cajas/reportesol/index', [ReportesolController::class, 'index'])

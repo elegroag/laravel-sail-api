@@ -31,7 +31,7 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
     {
         return view('cajas.reporte_oportunidad.index', [
             'title' => 'Reporte Oportunidad Afiliaciones',
-            'mercurio09' => Mercurio09::whereIn('tipopc', ['1', '2', '3', '4', '9', '10', '11'])->get(),
+            'mercurio09' => Mercurio09::whereIn('tipopc', ['1', '2', '3', '4', '9', '10'])->get(),
             'umbralDias' => (int) config('reportes.oportunidad_umbral_dias', 3),
         ]);
     }
@@ -46,58 +46,91 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
 
     public function exportar(ReporteOportunidadAfiliacionRequest $request): StreamedResponse
     {
-        $dataset = $this->oportunidadAfiliacionService->buildDataset($request->filtros());
+        $filtros = $request->filtros();
+        $dataset = $this->oportunidadAfiliacionService->buildDataset($filtros);
+        $incluirAportante = $this->debeIncluirCamposAportante($filtros);
 
         return OportunidadAfiliacionExcelExporter::stream(
-            $this->headers(),
-            $this->mapRows($dataset),
+            $this->headers($incluirAportante),
+            $this->mapRows($dataset, $incluirAportante),
             $this->buildFilename()
         );
     }
 
     /**
+     * Cónyuges y beneficiarios no tienen NIT / razón social aportante.
+     *
+     * @param  array<string, mixed>  $filtros
+     */
+    private function debeIncluirCamposAportante(array $filtros): bool
+    {
+        $tipafis = $filtros['tipafis'] ?? null;
+
+        if ($tipafis === null || $tipafis === [] || $tipafis === '') {
+            return true;
+        }
+
+        if (! is_array($tipafis)) {
+            $tipafis = [(int) $tipafis];
+        }
+
+        $tipafis = array_values(array_unique(array_map('intval', $tipafis)));
+
+        // Solo un tipo y es cónyuge (3) o beneficiario (4).
+        return ! (count($tipafis) === 1 && in_array($tipafis[0], [3, 4], true));
+    }
+
+    /**
      * @return array<int, string>
      */
-    private function headers(): array
+    private function headers(bool $incluirAportante = true): array
     {
-        return [
-            '# Solicitud',
-            'Tipo de afiliacion',
+        $headers = [
+            'RUUID',
             'Estado',
             'Fecha de solicitud',
             'Fecha de aprobacion',
             'Dias habiles tramite',
-            'Estado oportunidad',
-            'NIT aportante',
-            'Razon social aportante',
-            'Cedula titular',
-            'Trabajador titular',
-            'Tipo y No. identificacion',
-            'Nombres y apellidos',
         ];
+
+        if ($incluirAportante) {
+            $headers[] = 'NIT aportante';
+            $headers[] = 'Razon social aportante';
+        }
+
+        $headers[] = 'Tipo identificacion';
+        $headers[] = 'No. identificacion';
+        $headers[] = 'Nombres y apellidos';
+
+        return $headers;
     }
 
     /**
      * @param  array<int, array<string, mixed>>  $dataset
      * @return array<int, array<int, mixed>>
      */
-    private function mapRows(array $dataset): array
+    private function mapRows(array $dataset, bool $incluirAportante = true): array
     {
-        return array_map(fn (array $row): array => [
-            $row['id'],
-            $row['label'],
-            $row['estado'],
-            $row['fecsol'],
-            $row['fecha_cierre'],
-            $row['dias_habiles'],
-            $row['estado_oportunidad'],
-            $row['nit'],
-            $row['razsoc'],
-            $row['cedtra_titular'],
-            $row['nombre_titular'],
-            $row['tipo_identificacion'],
-            $row['nombre'],
-        ], $dataset);
+        return array_map(function (array $row) use ($incluirAportante): array {
+            $mapped = [
+                $row['ruuid'] ?? '',
+                $row['estado'],
+                $row['fecsol'],
+                $row['fecha_cierre'],
+                $row['dias_habiles'],
+            ];
+
+            if ($incluirAportante) {
+                $mapped[] = $row['nit'];
+                $mapped[] = $row['razsoc'];
+            }
+
+            $mapped[] = $row['tipo_documento'] ?? $row['tipdoc'] ?? '';
+            $mapped[] = $row['numero_identificacion'] ?? $row['documento'] ?? '';
+            $mapped[] = $row['nombre'];
+
+            return $mapped;
+        }, $dataset);
     }
 
     private function buildFilename(): string

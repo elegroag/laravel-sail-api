@@ -21,10 +21,6 @@ class ReporteOportunidadAfiliacionRequest extends FormRequest
             'fecfin' => ['required', 'date_format:Y-m-d', 'after_or_equal:fecini'],
             'tipafis' => ['nullable', 'array'],
             'tipafis.*' => ['integer', 'in:1,2,3,4,9,10,11'],
-            'nit' => ['nullable', 'string', 'max:20'],
-            'cedtra' => ['nullable', 'string', 'max:20'],
-            'cedcon' => ['nullable', 'string', 'max:20'],
-            'numdoc' => ['nullable', 'string', 'max:20'],
         ];
     }
 

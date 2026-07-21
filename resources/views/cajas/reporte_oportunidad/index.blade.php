@@ -3,102 +3,216 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.min.css') }}" />
+    <style>
+        .oportunidad-page-card {
+            border: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 14px rgba(15, 23, 42, 0.08);
+        }
+
+        .oportunidad-page-card .card-header {
+            border: 0;
+            background: linear-gradient(120deg, #0d6efd 0%, #0a58ca 55%, #084298 100%);
+            color: #ffffff;
+            padding: 1.1rem 1.35rem;
+        }
+
+        .oportunidad-page-card .card-header h2,
+        .oportunidad-page-card .card-header p,
+        .oportunidad-page-card .card-header strong {
+            color: #ffffff !important;
+        }
+
+        .oportunidad-page-card .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .oportunidad-page-card .card-header p {
+            margin: 0.35rem 0 0;
+            opacity: 0.95;
+            font-size: 0.875rem;
+        }
+
+        .oportunidad-info {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            background: #f0f7ff;
+            border: 1px solid rgba(13, 110, 253, 0.18);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            color: #334155;
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .oportunidad-info i {
+            color: #0d6efd;
+            margin-top: 0.15rem;
+        }
+
+        .oportunidad-section-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.85rem;
+        }
+
+        .oportunidad-filters {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem 1.1rem 0.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .oportunidad-filters .form-control-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .oportunidad-filters .form-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .oportunidad-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            padding-top: 0.25rem;
+        }
+
+        .oportunidad-actions .btn {
+            min-width: 200px;
+            min-height: 44px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+        }
+
+        .oportunidad-actions .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        .oportunidad-feedback {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .oportunidad-feedback.is-visible {
+            display: block;
+        }
+
+        .oportunidad-feedback .alert {
+            margin-bottom: 0;
+            border-radius: 10px;
+            font-size: 0.875rem;
+        }
+    </style>
 @endpush
 
 @section('content')
 @include('cajas/templates/tmp_header_adapter', ['sub_title' => $title, 'filtrar' => false, 'listar' => false, 'salir' => false, 'add' => false])
 <div class="container-fluid mt--9 pb-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body p-0 m-3">
-                    <p class="text-muted small mb-3">
-                        Control de oportunidad: dias habiles entre la fecha de solicitud y la fecha de aprobacion.
-                        Umbral configurado: <strong>{{ $umbralDias }}</strong> dias habiles.
-                    </p>
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="card oportunidad-page-card">
+                <div class="card-header text-white">
+                    <h2 class="text-white mb-0">{{ $title ?? 'Reporte Oportunidad Afiliaciones' }}</h2>
+                    <p class="text-white mb-0">Exporte el control de oportunidad de afiliaciones según el rango de fechas y filtros opcionales.</p>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <div class="oportunidad-info" role="note">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        <div>
+                            Se calculan los <strong>días hábiles</strong> entre la fecha de solicitud y la fecha de aprobación.
+                            Umbral configurado: <strong>{{ $umbralDias }} días hábiles</strong>.
+                            Los registros inactivos no se incluyen en el archivo.
+                        </div>
+                    </div>
+
                     <form id="form" autocomplete="off" novalidate>
                         @csrf
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="fecini" class="form-control-label">Fecha solicitud inicial</label>
-                                    <input type="text" id="fecini" name="fecini" class="form-control datepicker" placeholder="YYYY-MM-DD" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="fecfin" class="form-control-label">Fecha solicitud final</label>
-                                    <input type="text" id="fecfin" name="fecfin" class="form-control datepicker" placeholder="YYYY-MM-DD" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="tipafis" class="form-control-label">Tipo de afiliacion</label>
-                                    <select id="tipafis" name="tipafis" class="form-control">
-                                        <option value="">Todos</option>
-                                        @foreach ($mercurio09 as $tipo)
-                                            <option value="{{ $tipo->tipopc }}">{{ $tipo->detalle }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3 d-none" id="campo-nit-aportante">
-                                <div class="form-group">
-                                    <label for="nit" class="form-control-label">Aportante (NIT)</label>
-                                    <input type="text" id="nit" name="nit" class="form-control" maxlength="20">
-                                </div>
-                            </div>
-                            <div class="col-md-3 d-none" id="campo-cedtra-trabajador">
-                                <div class="form-group">
-                                    <label for="cedtra" class="form-control-label">Documento trabajador</label>
-                                    <input type="text" id="cedtra" name="cedtra" class="form-control" maxlength="20">
-                                </div>
-                            </div>
-                            <div class="col-md-3 d-none" id="campo-cedcon-conyuge">
-                                <div class="form-group">
-                                    <label for="cedcon" class="form-control-label">Cedula conyuge</label>
-                                    <input type="text" id="cedcon" name="cedcon" class="form-control" maxlength="20">
-                                </div>
-                            </div>
-                            <div class="col-md-3 d-none" id="campo-numdoc-beneficiario">
-                                <div class="form-group">
-                                    <label for="numdoc" class="form-control-label">Identificacion beneficiario</label>
-                                    <input type="text" id="numdoc" name="numdoc" class="form-control" maxlength="20">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2 mt-3">
-                            <button type="button" class="btn btn-primary mr-2" data-toggle="previsualizar_reporte">Previsualizar</button>
-                            <button type="button" class="btn btn-danger" data-toggle="exportar_reporte" disabled>Descargar Excel</button>
-                        </div>
-                    </form>
 
-                    <div id="resumen" class="mt-4 d-none">
-                        <h5 class="mb-3">Resumen del periodo</h5>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered mb-0">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Total solicitudes</th>
-                                        <th>En termino</th>
-                                        <th>Vencidas</th>
-                                        <th>En tramite</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td id="resumen_total">0</td>
-                                        <td id="resumen_en_termino">0</td>
-                                        <td id="resumen_vencido">0</td>
-                                        <td id="resumen_en_tramite">0</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="oportunidad-filters">
+                            <div class="oportunidad-section-title">Filtros requeridos</div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="fecini" class="form-control-label">
+                                            Fecha solicitud inicial <span class="text-danger">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="fecini"
+                                            name="fecini"
+                                            class="form-control datepicker"
+                                            placeholder="YYYY-MM-DD"
+                                            required
+                                            aria-required="true"
+                                            autocomplete="off">
+                                        <small class="form-text">Inicio del periodo a consultar.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="fecfin" class="form-control-label">
+                                            Fecha solicitud final <span class="text-danger">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="fecfin"
+                                            name="fecfin"
+                                            class="form-control datepicker"
+                                            placeholder="YYYY-MM-DD"
+                                            required
+                                            aria-required="true"
+                                            autocomplete="off">
+                                        <small class="form-text">Fin del periodo a consultar.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="tipafis" class="form-control-label">Tipo de afiliación</label>
+                                        <select id="tipafis" name="tipafis" class="form-control" aria-describedby="tipafis-help">
+                                            <option value="">Todos</option>
+                                            @foreach ($mercurio09 as $tipo)
+                                                <option value="{{ $tipo->tipopc }}">{{ $tipo->detalle }}</option>
+                                            @endforeach
+                                        </select>
+                                        <small id="tipafis-help" class="form-text">Opcional. Deje “Todos” para incluir todos los tipos.</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-muted small mt-2 mb-0" id="resumen_nota"></p>
-                    </div>
+
+                        <div class="oportunidad-actions">
+                            <button
+                                type="button"
+                                class="btn btn-success"
+                                data-toggle="exportar_reporte"
+                                disabled
+                                aria-disabled="true">
+                                <i class="fas fa-file-excel" aria-hidden="true"></i>
+                                <span data-role="btn-label">Descargar Excel</span>
+                            </button>
+                        </div>
+
+                        <div id="oportunidad-feedback" class="oportunidad-feedback" role="status" aria-live="polite"></div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -110,7 +224,6 @@
     <script>
         window.ServerController = 'reporte-oportunidad';
         window.ReporteOportunidadRoutes = {
-            previsualizar: @json(route('cajas.reporte-oportunidad.previsualizar')),
             exportar: @json(route('cajas.reporte-oportunidad.exportar')),
         };
     </script>

@@ -82,11 +82,16 @@ class AfiliacionNormalizer
             self::value($model, 'segape'),
             self::value($model, 'prinom'),
             self::value($model, 'segnom'),
-            self::value($model, 'razsoc'),
-            self::value($model, 'repleg'),
-        ], fn ($parte) => $parte !== null && $parte !== '');
+        ], fn ($parte) => $parte !== null && trim((string) $parte) !== '');
 
-        return trim(implode(' ', $partes));
+        $nombre = trim(implode(' ', $partes));
+        if ($nombre !== '') {
+            return $nombre;
+        }
+
+        // Empresa u otros: representante legal si no hay nombres desglosados.
+        // No mezclar con razsoc (tiene columna propia) ni con partes ya usadas.
+        return trim((string) (self::value($model, 'repleg') ?? ''));
     }
 
     public static function nit(object $model): string

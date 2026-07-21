@@ -32,10 +32,61 @@ class OportunidadAfiliacionServiceTest extends TestCase
             ['999' => 'Maria Lopez']
         );
 
+        $this->assertSame('CC', $normalized['tipdoc']);
+        $this->assertSame('5555555', $normalized['documento']);
         $this->assertSame('CC 5555555', $normalized['tipo_identificacion']);
         $this->assertSame('999', $normalized['cedtra_titular']);
         $this->assertSame('Maria Lopez', $normalized['nombre_titular']);
         $this->assertArrayNotHasKey('sat_fecapr', $normalized);
+    }
+
+    public function test_nombre_empresa_no_duplica_repleg_ni_razsoc(): void
+    {
+        $model = Mercurio30::factory()->make([
+            'nit' => '900123456',
+            'razsoc' => 'MINI-MARKET JUANCHITO',
+            'repleg' => 'GIOVANNI BOLAÑOS ARTUNDUAGA',
+            'priape' => 'BOLAÑOS ARTUNDUAGA',
+            'segape' => null,
+            'prinom' => 'GIOVANNI',
+            'segnom' => null,
+        ]);
+
+        $normalized = AfiliacionNormalizer::normalize(
+            $model,
+            2,
+            config('reportes.oportunidad_tipos')[2],
+            []
+        );
+
+        $this->assertSame('BOLAÑOS ARTUNDUAGA GIOVANNI', $normalized['nombre']);
+        $this->assertSame('MINI-MARKET JUANCHITO', $normalized['razsoc']);
+        $this->assertStringNotContainsString('MINI-MARKET', $normalized['nombre']);
+        $this->assertSame(1, substr_count($normalized['nombre'], 'GIOVANNI'));
+        $this->assertSame(1, substr_count($normalized['nombre'], 'BOLAÑOS'));
+    }
+
+    public function test_nombre_empresa_usa_repleg_si_no_hay_nombres(): void
+    {
+        $model = Mercurio30::factory()->make([
+            'nit' => '900123456',
+            'razsoc' => 'Empresa Demo',
+            'repleg' => 'Ana Perez',
+            'priape' => null,
+            'segape' => null,
+            'prinom' => null,
+            'segnom' => null,
+        ]);
+
+        $normalized = AfiliacionNormalizer::normalize(
+            $model,
+            2,
+            config('reportes.oportunidad_tipos')[2],
+            []
+        );
+
+        $this->assertSame('Ana Perez', $normalized['nombre']);
+        $this->assertSame('Empresa Demo', $normalized['razsoc']);
     }
 
     public function test_service_expone_metodos_de_dataset_y_resumen(): void
@@ -457,6 +508,19 @@ class OportunidadAfiliacionServiceTest extends TestCase
                     $tipopc = $this->detectarTipopc($model);
                     $config = config("reportes.oportunidad_tipos.{$tipopc}");
                     $record = AfiliacionNormalizer::normalize($model, $tipopc, $config, []);
+
+                    // Simula resolución de tipdoc (gener18) sin tocar legacy DB.
+                    $tipdocCode = trim((string) ($record['tipdoc'] ?? ''));
+                    $numero = trim((string) ($record['documento'] ?? ''));
+                    $tipo = match ($tipdocCode) {
+                        '1', 'CC' => 'CC',
+                        '2', 'TI' => 'TI',
+                        '3', 'NI', 'NIT' => 'NI',
+                        default => $tipdocCode,
+                    };
+                    $record['tipo_documento'] = $tipo;
+                    $record['numero_identificacion'] = $numero;
+                    $record['tipo_identificacion'] = trim($tipo.' '.$numero);
 
                     $fin = $record['fecha_cierre'];
                     $record['dias_habiles'] = DiasHabilesCalculator::between($record['fecsol'], $fin);
