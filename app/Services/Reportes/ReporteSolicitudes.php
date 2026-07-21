@@ -122,7 +122,6 @@ class ReporteSolicitudes
             'Tipo sociedad',
             'Codigo estado',
             'Fecha aprobacion',
-            'Tiempo de respuesta',
             'Usuario',
             'Direccion principal',
             'Ciudad principal',
@@ -142,7 +141,7 @@ class ReporteSolicitudes
             'Tipo empresa',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
             $m->ruuid,
             $this->lookupEstado($m->getEstado()),
             $this->formatFecha($m->getFecsol()),
@@ -167,7 +166,6 @@ class ReporteSolicitudes
             $m->getTipsoc(),
             $m->getCodest(),
             $this->fechaAprobacion($m),
-            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
             $this->lookup($this->catalogoUsuarios(), $m->getUsuario()),
             $m->getDirpri(),
             $m->getCiupri(),
@@ -222,7 +220,6 @@ class ReporteSolicitudes
             'Email',
             'Fecha solicitud',
             'Fecha aprobacion',
-            'Tiempo de respuesta',
             'Fecha ingreso',
             'Salario',
             'Captra',
@@ -257,7 +254,7 @@ class ReporteSolicitudes
             'Tipo cuenta',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
             $m->ruuid,
             $this->lookupEstado($m->getEstado()),
             $m->getNit(),
@@ -283,7 +280,6 @@ class ReporteSolicitudes
             $m->getEmail(),
             $this->formatFecha($m->getFecsol()),
             $this->fechaAprobacion($m),
-            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
             $this->formatFecha($m->getFecing()),
             $m->getSalario(),
             $this->lookup(captra_array(), $m->getCaptra()),
@@ -369,13 +365,12 @@ class ReporteSolicitudes
             'Tipo salario',
             'Fecha solicitud',
             'Fecha aprobacion',
-            'Tiempo de respuesta',
             'Tipo pago',
             'Numero cuenta',
             'Empresa labora',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
             $m->ruuid,
             $m->getId(),
             $m->getCedtra(),
@@ -414,7 +409,6 @@ class ReporteSolicitudes
             $this->lookup(tipsal_array(), $m->getTipsal()),
             $this->formatFecha($m->getFecsol()),
             $this->fechaAprobacion($m),
-            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
             $this->lookup(tipo_pago_array(), $m->getTippag()),
             $m->getNumcue(),
             $m->getEmpresalab(),
@@ -467,10 +461,9 @@ class ReporteSolicitudes
             'Cedula acude',
             'Fecha solicitud',
             'Fecha aprobacion',
-            'Tiempo de respuesta',
         ];
 
-        $rows = $models->map(fn($m) => [
+        $rows = $models->map(fn ($m) => [
             $m->ruuid,
             $this->lookupEstado($m->getEstado()),
             $m->getId(),
@@ -505,7 +498,6 @@ class ReporteSolicitudes
             $m->getCedacu(),
             $this->formatFecha($m->getFecsol()),
             $this->fechaAprobacion($m),
-            $this->tiempoRespuesta($this->formatFecha($m->getFecsol()), $this->fechaAprobacion($m)),
         ])->all();
 
         return [
@@ -529,23 +521,6 @@ class ReporteSolicitudes
         $fecest = method_exists($model, 'getFecest') ? $model->getFecest() : null;
 
         return $this->formatFecha($fecest);
-    }
-
-    /**
-     * Diferencia en dias entre la fecha de solicitud y la fecha de aprobacion.
-     * Devuelve `null` si alguna de las dos fechas no esta disponible.
-     */
-    private function tiempoRespuesta(?string $fecsol, ?string $fecapr): ?int
-    {
-        if ($fecsol === null || $fecapr === null) {
-            return null;
-        }
-
-        try {
-            return (int) abs(Carbon::parse($fecapr)->diffInDays(Carbon::parse($fecsol)));
-        } catch (\Throwable) {
-            return null;
-        }
     }
 
     /**

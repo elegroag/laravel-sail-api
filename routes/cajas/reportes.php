@@ -3,6 +3,7 @@
 use App\Http\Controllers\Cajas\InformeSolicitudController;
 use App\Http\Controllers\Cajas\ReporteOportunidadAfiliacionController;
 use App\Http\Controllers\Cajas\ReportesolController;
+use App\Http\Controllers\Cajas\ReporteSolicitudesEmpresaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['cajas.auth'])->group(function () {
@@ -23,6 +24,14 @@ Route::middleware(['cajas.auth'])->group(function () {
 
         Route::match(['get', 'post'], '/pdf', [InformeSolicitudController::class, 'pdf'])
             ->name('cajas.informe-solicitud.pdf');
+    });
+
+    Route::prefix('/cajas/reporte-solicitudes-empresa')->group(function () {
+        Route::get('/index', [ReporteSolicitudesEmpresaController::class, 'index'])
+            ->name('cajas.reporte-solicitudes-empresa.index');
+
+        Route::post('/consultar', [ReporteSolicitudesEmpresaController::class, 'consultar'])
+            ->name('cajas.reporte-solicitudes-empresa.consultar');
     });
 
     Route::get('/cajas/reportesol/index', [ReportesolController::class, 'index'])

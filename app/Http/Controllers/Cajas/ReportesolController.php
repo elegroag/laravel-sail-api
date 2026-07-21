@@ -37,11 +37,12 @@ class ReportesolController extends ApplicationController
 
     public function index()
     {
-        $m09 = (new Mercurio09)->get();
+        $m09 = Mercurio09::whereIn('tipopc', ['1', '2', '3', '4', '5', '6', '8', '9', '10'])->get();
         $tipo_solicitudes = [];
         foreach ($m09 as $model09) {
             $tipo_solicitudes[$model09->getTipopc()] = $model09->getDetalle();
         }
+
         return view('cajas.reportesol.index', [
             'title' => 'Reportes de Solicitudes',
             'tipo_solicitudes' => $tipo_solicitudes,
