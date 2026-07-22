@@ -11,7 +11,7 @@
         </td>
         <td style="width: 78%; text-align: right;">
             <p class="title-company">CAJA DE COMPENSACIÓN FAMILIAR DEL CAQUETÁ</p>
-            <p class="nit">NIT: 891.190.346-1</p>
+            <p class="nit">NIT: 891.190.047</p>
         </td>
     </tr>
 </table>

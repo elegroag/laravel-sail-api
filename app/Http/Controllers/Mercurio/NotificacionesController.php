@@ -10,16 +10,17 @@ use App\Models\Mercurio07;
 use App\Services\Entidades\NotificacionService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\SenderEmail;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class NotificacionesController extends ApplicationController
 {
-    protected $db;
+    protected ?DbBase $db = null;
 
-    protected $user;
+    protected ?array $user = null;
 
-    protected $tipo;
+    protected ?string $tipo = null;
 
     public function __construct()
     {
@@ -37,6 +38,56 @@ class NotificacionesController extends ApplicationController
             'codciu' => $this->user['codciu'],
             'tipo' => $this->tipo,
         ]);
+    }
+
+    /**
+     * Lista las notificaciones propias del usuario Mercurio autenticado.
+     */
+    public function consulta()
+    {
+        $documento = $this->user['documento'] ?? null;
+        $notificacionService = new NotificacionService;
+        $notificaciones = $documento
+            ? $notificacionService->getNotificacionesMercurio($documento)
+            : collect();
+
+        return view('mercurio.notificaciones.consulta', [
+            'hide_header' => true,
+            'title' => 'Mis notificaciones',
+            'documento' => $documento,
+            'notificaciones' => $notificaciones,
+            'pendientes' => $documento
+                ? $notificacionService->countPendientesMercurio($documento)
+                : 0,
+        ]);
+    }
+
+    /**
+     * Endpoint AJAX para refrescar badge/listado breve en el header.
+     */
+    public function refresh()
+    {
+        try {
+            $documento = $this->user['documento'] ?? null;
+            if (! $documento) {
+                throw new DebugException('Sesión de usuario no válida', 401);
+            }
+
+            $notificacionService = new NotificacionService;
+            $notificaciones = $notificacionService->getNotificacionesMercurio($documento, 5);
+            $pendientes = $notificacionService->countPendientesMercurio($documento);
+
+            $salida = [
+                'success' => true,
+                'msj' => 'Consulta de notificaciones exitosa',
+                'data' => $notificaciones->values(),
+                'badgenum' => $pendientes,
+            ];
+        } catch (Exception $e) {
+            return $this->handleException($e, request());
+        }
+
+        return response()->json($salida);
     }
 
     public function procesarNotificacion(Request $request, Response $response)
@@ -128,7 +179,7 @@ class NotificacionesController extends ApplicationController
                 'success' => true,
 
             ];
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
 

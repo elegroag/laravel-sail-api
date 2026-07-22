@@ -11,6 +11,8 @@ Route::post('/mercurio/download_docs/{archivo}', [DocumentosController::class, '
 Route::prefix('/mercurio/notificaciones')->group(function () {
     Route::middleware(['mercurio.auth'])->group(function () {
         Route::get('/index', [NotificacionesController::class, 'index'])->name('mercurio.notificaciones.index');
+        Route::get('/consulta', [NotificacionesController::class, 'consulta'])->name('mercurio.notificaciones.consulta');
+        Route::get('/refresh', [NotificacionesController::class, 'refresh'])->name('mercurio.notificaciones.refresh');
         Route::post('/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacion']);
     });
 });

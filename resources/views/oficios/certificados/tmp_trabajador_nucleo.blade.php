@@ -11,7 +11,7 @@
         </td>
         <td style="width: 78%; text-align: right;">
             <p class="title-company">CAJA DE COMPENSACIÓN FAMILIAR DEL CAQUETÁ</p>
-            <p class="nit">NIT: 891.190.346-1</p>
+            <p class="nit">NIT: 891.190.047</p>
         </td>
     </tr>
 </table>
@@ -34,6 +34,8 @@
 <p class="body-text">Condición de afiliación: <span class="bold">{{ $trabajador->tipafi ?? 'DEPENDIENTE' }}</span>.
     Estado: <span class="bold">{{ $trabajador->estado_detalle ?? 'ACTIVO' }}</span>.
     Categoría: <span class="bold">{{ $trabajador->codcat ?? 'N/A' }}</span>.
+    Empresa: <span class="bold">{{ $trabajador->razsoc ?? 'N/A' }}</span>
+    con NIT <span class="bold">{{ $trabajador->nit ?? 'N/A' }}</span>.
     A continuación se relaciona el nucleo familiar registrado:
 </p>
 

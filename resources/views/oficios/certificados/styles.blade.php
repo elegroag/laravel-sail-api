@@ -72,7 +72,7 @@
         font-size: 11px;
         line-height: 1.55;
         margin: 0 0 8px 0;
-        text-align: justify;
+        text-align: left;
     }
     .table-container {
         margin-top: 2px;
