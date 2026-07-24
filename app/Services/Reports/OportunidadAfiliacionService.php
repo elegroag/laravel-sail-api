@@ -91,6 +91,12 @@ class OportunidadAfiliacionService
                 $record['dias_habiles'],
                 $umbral
             );
+            // Estado = solicitud (no el evento Mercurio10 P).
+            $record['estado'] = (string) ($record['estado'] ?? '');
+            $estadoSolicitud = strtoupper((string) ($record['estado_codigo'] ?? $solicitud->estado ?? ''));
+            $radicadoCerrado = strtoupper((string) ($evento->cerrada ?? 'N')) === 'S'
+                || $estadoSolicitud === 'A';
+            $record['estado_radicado'] = $radicadoCerrado ? 'Cerrado' : 'Enviado';
             $record['usuario'] = $usuario;
             $record['nombre_usuario'] = $usuario !== ''
                 ? (string) ($usuariosIndex[$usuario] ?? '')

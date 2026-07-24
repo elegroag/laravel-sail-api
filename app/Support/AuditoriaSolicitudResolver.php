@@ -86,6 +86,14 @@ class AuditoriaSolicitudResolver
     /**
      * @return class-string
      */
+    public static function modelClassFor(string $tipopc): string
+    {
+        return self::modelClass($tipopc);
+    }
+
+    /**
+     * @return class-string
+     */
     private static function modelClass(string $tipopc): string
     {
         $modelClass = self::MODEL_MAP[$tipopc] ?? null;

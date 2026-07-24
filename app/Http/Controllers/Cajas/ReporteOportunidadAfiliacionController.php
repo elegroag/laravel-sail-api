@@ -88,6 +88,7 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
         $headers = [
             'RUUID',
             'Estado',
+            'Estado radicado',
             'Fecha envio a caja',
             'Fecha de aprobacion',
             'Dias habiles tramite',
@@ -117,6 +118,7 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
             $mapped = [
                 $row['ruuid'] ?? '',
                 $row['estado'],
+                $row['estado_radicado'] ?? '',
                 $row['fecsol'],
                 $row['fecapr'] ?? '',
                 $row['dias_habiles'],

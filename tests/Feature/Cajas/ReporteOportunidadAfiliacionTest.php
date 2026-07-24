@@ -67,22 +67,24 @@ class ReporteOportunidadAfiliacionTest extends TestCase
 
         $this->assertSame('RUUID', $rows[0][0]);
         $this->assertSame('Estado', $rows[0][1]);
-        $this->assertSame('Fecha envio a caja', $rows[0][2]);
-        $this->assertSame('Fecha de aprobacion', $rows[0][3]);
-        $this->assertSame('Dias habiles tramite', $rows[0][4]);
-        $this->assertSame('Tipo identificacion', $rows[0][7]);
-        $this->assertSame('No. identificacion', $rows[0][8]);
-        $this->assertSame('Nombres y apellidos', $rows[0][9]);
-        $this->assertSame('Usuario', $rows[0][10]);
-        $this->assertSame('Nombre usuario', $rows[0][11]);
+        $this->assertSame('Estado radicado', $rows[0][2]);
+        $this->assertSame('Fecha envio a caja', $rows[0][3]);
+        $this->assertSame('Fecha de aprobacion', $rows[0][4]);
+        $this->assertSame('Dias habiles tramite', $rows[0][5]);
+        $this->assertSame('Tipo identificacion', $rows[0][8]);
+        $this->assertSame('No. identificacion', $rows[0][9]);
+        $this->assertSame('Nombres y apellidos', $rows[0][10]);
+        $this->assertSame('Usuario', $rows[0][11]);
+        $this->assertSame('Nombre usuario', $rows[0][12]);
         $this->assertSame('ruuid-trabajador-10', $rows[1][0]);
         $this->assertSame('Aprobado', $rows[1][1]);
-        $this->assertEquals(4, $rows[1][4]);
-        $this->assertSame('CC', $rows[1][7]);
-        $this->assertSame('1010101010', $rows[1][8]);
-        $this->assertSame('Vega Mateo', $rows[2][9]);
-        $this->assertSame('101', $rows[1][10]);
-        $this->assertSame('Asesor Demo', $rows[1][11]);
+        $this->assertSame('Cerrado', $rows[1][2]);
+        $this->assertEquals(4, $rows[1][5]);
+        $this->assertSame('CC', $rows[1][8]);
+        $this->assertSame('1010101010', $rows[1][9]);
+        $this->assertSame('Vega Mateo', $rows[2][10]);
+        $this->assertSame('101', $rows[1][11]);
+        $this->assertSame('Asesor Demo', $rows[1][12]);
     }
 
     public function test_exportar_conyuge_omite_nit_y_razon_social(): void
@@ -99,6 +101,7 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                     'fecapr' => '2026-03-12',
                     'fecha_cierre' => '2026-03-12',
                     'estado' => 'Aprobado',
+                    'estado_radicado' => 'Cerrado',
                     'tipo_documento' => 'CC',
                     'numero_identificacion' => '5555555',
                     'nombre' => 'Ana Gomez',
@@ -122,19 +125,21 @@ class ReporteOportunidadAfiliacionTest extends TestCase
         $rows = $sheet->toArray();
 
         $this->assertSame('RUUID', $rows[0][0]);
-        $this->assertSame('Dias habiles tramite', $rows[0][4]);
-        $this->assertSame('Tipo identificacion', $rows[0][5]);
-        $this->assertSame('No. identificacion', $rows[0][6]);
-        $this->assertSame('Nombres y apellidos', $rows[0][7]);
-        $this->assertSame('Usuario', $rows[0][8]);
-        $this->assertSame('Nombre usuario', $rows[0][9]);
+        $this->assertSame('Estado radicado', $rows[0][2]);
+        $this->assertSame('Dias habiles tramite', $rows[0][5]);
+        $this->assertSame('Tipo identificacion', $rows[0][6]);
+        $this->assertSame('No. identificacion', $rows[0][7]);
+        $this->assertSame('Nombres y apellidos', $rows[0][8]);
+        $this->assertSame('Usuario', $rows[0][9]);
+        $this->assertSame('Nombre usuario', $rows[0][10]);
         $this->assertNotContains('NIT aportante', $rows[0]);
         $this->assertNotContains('Razon social aportante', $rows[0]);
-        $this->assertSame('CC', $rows[1][5]);
-        $this->assertSame('5555555', $rows[1][6]);
-        $this->assertSame('Ana Gomez', $rows[1][7]);
-        $this->assertSame('202', $rows[1][8]);
-        $this->assertSame('Asesor Conyuge', $rows[1][9]);
+        $this->assertSame('Cerrado', $rows[1][2]);
+        $this->assertSame('CC', $rows[1][6]);
+        $this->assertSame('5555555', $rows[1][7]);
+        $this->assertSame('Ana Gomez', $rows[1][8]);
+        $this->assertSame('202', $rows[1][9]);
+        $this->assertSame('Asesor Conyuge', $rows[1][10]);
     }
 
     public function test_exportar_beneficiario_omite_nit_y_razon_social(): void
@@ -151,6 +156,7 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                     'fecapr' => '2026-04-03',
                     'fecha_cierre' => '2026-04-03',
                     'estado' => 'Aprobado',
+                    'estado_radicado' => 'Enviado',
                     'tipo_documento' => 'TI',
                     'numero_identificacion' => '1098765432',
                     'nombre' => 'Mateo Vega',
@@ -175,12 +181,14 @@ class ReporteOportunidadAfiliacionTest extends TestCase
 
         $this->assertNotContains('NIT aportante', $rows[0]);
         $this->assertNotContains('Razon social aportante', $rows[0]);
-        $this->assertSame('Tipo identificacion', $rows[0][5]);
-        $this->assertSame('TI', $rows[1][5]);
-        $this->assertSame('1098765432', $rows[1][6]);
-        $this->assertSame('Mateo Vega', $rows[1][7]);
-        $this->assertSame('303', $rows[1][8]);
-        $this->assertSame('Asesor Beneficiario', $rows[1][9]);
+        $this->assertSame('Estado radicado', $rows[0][2]);
+        $this->assertSame('Tipo identificacion', $rows[0][6]);
+        $this->assertSame('Enviado', $rows[1][2]);
+        $this->assertSame('TI', $rows[1][6]);
+        $this->assertSame('1098765432', $rows[1][7]);
+        $this->assertSame('Mateo Vega', $rows[1][8]);
+        $this->assertSame('303', $rows[1][9]);
+        $this->assertSame('Asesor Beneficiario', $rows[1][10]);
     }
 
     public function test_filtro_por_tipo_solo_trabajador(): void
@@ -239,6 +247,7 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                 'fecest' => null,
                 'fecha_cierre' => '2026-03-06',
                 'estado' => 'Aprobado',
+                'estado_radicado' => 'Cerrado',
                 'tipdoc' => '1',
                 'documento' => '1010101010',
                 'tipo_documento' => 'CC',
@@ -264,6 +273,7 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                 'fecest' => null,
                 'fecha_cierre' => '2026-04-12',
                 'estado' => 'Pendiente',
+                'estado_radicado' => 'Enviado',
                 'tipdoc' => '1',
                 'documento' => '5050505050',
                 'tipo_documento' => 'CC',

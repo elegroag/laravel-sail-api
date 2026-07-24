@@ -158,3 +158,37 @@ vendor/bin/sail bash -c "cd public && APP=mercurio npx gulp Ecommerce"
 # Debe generar public/mercurio/build/Ecommerce.js
 ls -la public/mercurio/build/Ecommerce.js
 ```
+
+### Cerrar evento Mercuro10
+
+```bash
+# Simular (recomendado primero)
+php artisan mercurio10:cerrar-historicos --dry-run --cerrar-pendientes
+
+# Aplicar: cierra A/X/D y los P asociados
+php artisan mercurio10:cerrar-historicos --cerrar-pendientes
+
+# Otros estados (ej. incluir R)
+php artisan mercurio10:cerrar-historicos --estados=A,D,R --cerrar-pendientes
+```
+
+### Crear ruuid de Mercurio10 vacio
+
+````bash
+Comando listo: `mercurio10:backfill-ruuid`.
+
+**Qué hace:** a eventos `P` sin `ruuid` les pone `{solicitud.ruuid}-{item:02d}` (igual que `SenderValidationCaja`), resolviendo la solicitud con `tipopc` + `numero`.
+
+**Uso**
+
+```bash
+php artisan mercurio10:backfill-ruuid --dry-run
+php artisan mercurio10:backfill-ruuid
+php artisan mercurio10:backfill-ruuid --tipopc=1
+````
+
+**Dry-run actual:** ~128 243 a actualizar; 3 621 sin solicitud; 142 solicitud sin `ruuid`; 2 tipopc no mapeado.
+
+```
+
+```
