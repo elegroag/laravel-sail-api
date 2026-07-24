@@ -2,6 +2,7 @@
 
 namespace App\Services\Reports;
 
+use App\Models\Gener02;
 use App\Models\Mercurio10;
 use App\Models\Mercurio31;
 use App\Services\LegacyDatabaseService;
@@ -45,6 +46,7 @@ class OportunidadAfiliacionService
 
         $cierresIndex = $this->buildCierresIndex($eventosP);
         $solicitudesIndex = $this->buildSolicitudesIndex($eventosP, $tipos);
+        $usuariosIndex = $this->buildUsuariosIndex($solicitudesIndex);
         $titularesIndex = $this->buildTitularesIndex();
         $tipdocIndex = $this->buildTipdocIndex();
         $dataset = [];
@@ -77,6 +79,7 @@ class OportunidadAfiliacionService
                 ? $fechaCierre
                 : null;
 
+            $usuario = trim((string) ($solicitud->usuario ?? ''));
             $record['ruuid'] = $evento->ruuid ?: '';
             $record['item'] = $evento->item;
             $record['fecsol'] = $fechaInicio;
@@ -88,6 +91,10 @@ class OportunidadAfiliacionService
                 $record['dias_habiles'],
                 $umbral
             );
+            $record['usuario'] = $usuario;
+            $record['nombre_usuario'] = $usuario !== ''
+                ? (string) ($usuariosIndex[$usuario] ?? '')
+                : '';
 
             $dataset[] = $record;
         }
@@ -210,6 +217,34 @@ class OportunidadAfiliacionService
         }
 
         return $index;
+    }
+
+    /**
+     * Índice gener02: usuario => nombre.
+     *
+     * @param  array<string, object>  $solicitudesIndex
+     * @return array<string, string>
+     */
+    private function buildUsuariosIndex(array $solicitudesIndex): array
+    {
+        $usuarios = collect($solicitudesIndex)
+            ->map(fn ($solicitud) => trim((string) ($solicitud->usuario ?? '')))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($usuarios === []) {
+            return [];
+        }
+
+        return Gener02::query()
+            ->whereIn('usuario', $usuarios)
+            ->get(['usuario', 'nombre'])
+            ->mapWithKeys(fn (Gener02 $asesor): array => [
+                (string) $asesor->usuario => trim((string) $asesor->nombre),
+            ])
+            ->all();
     }
 
     /**

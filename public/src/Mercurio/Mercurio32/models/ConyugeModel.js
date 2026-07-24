@@ -35,7 +35,7 @@ class ConyugeModel extends Backbone.Model {
             estado: void 0,
             numcue: '',
             codban: '',
-            tippag: '',
+            tippag: 'T',
             nit: '',
             zoneurbana: 'N',
         };
@@ -64,6 +64,7 @@ class ConyugeModel extends Backbone.Model {
             email: { required: false },
             nivedu: { required: true },
             codocu: { required: true },
+            tippag: { required: true },
         },
         messages: {
             cedcon: { required: 'Se requiere del campo cedula conyuge' },
@@ -88,6 +89,7 @@ class ConyugeModel extends Backbone.Model {
             email: { required: 'Se requiere del campo email' },
             nivedu: { required: 'Se requiere del campo nivel educativo' },
             codocu: { required: 'Se requiere del campo ocupación' },
+            tippag: { required: 'Se requiere del campo tipo pago' },
         },
     };
 

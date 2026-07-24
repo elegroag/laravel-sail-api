@@ -101,6 +101,8 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
         $headers[] = 'Tipo identificacion';
         $headers[] = 'No. identificacion';
         $headers[] = 'Nombres y apellidos';
+        $headers[] = 'Usuario';
+        $headers[] = 'Nombre usuario';
 
         return $headers;
     }
@@ -128,6 +130,8 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
             $mapped[] = $row['tipo_documento'] ?? $row['tipdoc'] ?? '';
             $mapped[] = $row['numero_identificacion'] ?? $row['documento'] ?? '';
             $mapped[] = $row['nombre'];
+            $mapped[] = $row['usuario'] ?? '';
+            $mapped[] = $row['nombre_usuario'] ?? '';
 
             return $mapped;
         }, $dataset);

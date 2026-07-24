@@ -19,21 +19,15 @@ class ActualizaEmpresaService
 {
     use PaginatesSolicitudQueries;
 
-    private $tipopc = '5';
+    private string $tipopc = '5';
 
-    private $user;
+    private ?array $user;
 
-    private $db;
+    private ?DbBase $db;
 
-    /**
-     * __construct function
-     *
-     * @param  bool  $init
-     * @param  Services  $servicios
-     */
     public function __construct()
     {
-        $this->user = session('user');
+        $this->user = session('user') ?? null;
         $this->db = DbBase::rawConnect();
     }
 
@@ -131,8 +125,7 @@ class ActualizaEmpresaService
      * buscarEmpresaSubsidio function
      * buscar empresa en subsidio sin importar el estado
      *
-     * @param [type] $nit
-     * @return void
+     * @param  string  $nit
      */
     public function buscarEmpresaSubsidio($nit)
     {
@@ -435,7 +428,11 @@ class ActualizaEmpresaService
         $condi_extra = $request->getParam('condi_extra');
         $usuario = $request->getParam('usuario');
         $numero = $request->getParam('numero');
-        $tipact = 'E';
+        $tipact = match ((string) (int) $tipopc) {
+            '5' => 'E',
+            '14' => 'T',
+            default => $request->getParam('tipact') ?? 'E',
+        };
 
         switch ($tipo_consulta) {
             case 'auditoria':
@@ -465,8 +462,8 @@ class ActualizaEmpresaService
                 $response['datos'] = Mercurio47::whereRaw("usuario='{$usuario}' and estado='P' and tipact='$tipact'")->get();
                 break;
             case 'count':
-                $res = Mercurio47::where('mercurio47.usuario', $usuario)
-                    ->where('mercurio47.tipact', $tipact)
+                $res = Mercurio47::where('usuario', $usuario)
+                    ->where('tipact', $tipact)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
                         if (is_array($condi_extra)) {
                             $q->where($condi_extra);

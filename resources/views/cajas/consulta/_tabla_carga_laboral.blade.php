@@ -1,10 +1,14 @@
+@php
+    $esEmpresa = in_array((string) (int) $tipopc, ['2', '5'], true);
+    $colNombre = $esEmpresa ? 'Razón social' : 'Nombre';
+@endphp
 <div class="table-responsive">
     <table id="tablaSolicitudesCarga" class="table table-sm table-hover table-bordered align-middle w-100 carga-solicitudes-table">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Documento</th>
-                <th>Nombre</th>
+                <th>{{ $esEmpresa ? 'NIT' : 'Documento' }}</th>
+                <th>{{ $colNombre }}</th>
                 <th>Fecha sol.</th>
                 <th>Días</th>
                 <th>Estado</th>

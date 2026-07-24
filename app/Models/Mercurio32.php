@@ -1010,7 +1010,7 @@ class Mercurio32 extends ModelBase
             "tipsal"     => "max:1",
             "captra"     => "max:1",
             "codest"     => "max:2",
-            "tippag"     => "max:1",
+            "tippag"     => "required|max:1",
             "codban"     => "max:4",
             "resguardo_id" => "min:1",
             "pub_indigena_id" => "min:1",

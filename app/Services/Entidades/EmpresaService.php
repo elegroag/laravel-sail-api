@@ -37,16 +37,10 @@ class EmpresaService
 
     private DbBase $db;
 
-    /**
-     * __construct function
-     *
-     * @param  bool  $init
-     * @param  Services  $servicios
-     */
     public function __construct()
     {
-        $this->user = session('user');
-        $this->tipo = session('tipo');
+        $this->user = session('user') ?? null;
+        $this->tipo = session('tipo') ?? null;
         $this->db = DbBase::rawConnect();
     }
 
@@ -300,7 +294,7 @@ class EmpresaService
         $empresa = $this->findById($id);
         if ($empresa != false) {
             $empresa->fill($data);
-            $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
+            $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
             $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
             $empresa->tipo = $this->tipo;
             $empresa->coddoc = $this->user['coddoc'];
@@ -326,7 +320,7 @@ class EmpresaService
     {
         $empresa = new Mercurio30;
         $empresa->fill($data);
-        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
+        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = session('tipo');
         $empresa->coddoc = $this->user['coddoc'];
@@ -350,7 +344,7 @@ class EmpresaService
     {
         $empresa = new Mercurio30($data);
         $empresa->regenerateUuid();
-        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
+        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = $this->tipo;
         $empresa->coddoc = $this->user['coddoc'];

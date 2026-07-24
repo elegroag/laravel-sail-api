@@ -27,26 +27,21 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaUpTrabajadorController extends ApplicationController
 {
-    protected $tipopc = '14';
+    protected string $tipopc = '14';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipfun;
+    protected ?string $tipfun;
 
-    /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
+    protected mixed $services;
 
     public function __construct()
     {
         $this->db = DbBase::rawConnect();
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        $this->user = session('user') ?? null;
+        $this->tipfun = session('tipfun') ?? null;
     }
 
     public function aplicarFiltro(Request $request, string $estado = 'P')
@@ -116,6 +111,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
         $_codciu = ParamsTrabajador::getCiudades();
         $_ciunac = $_codciu;
+        $_codzon = [];
         foreach (ParamsTrabajador::getZonas() as $ai => $valor) {
             if ($ai < 19001 && $ai >= 18001) {
                 $_codzon[$ai] = $valor;
@@ -141,7 +137,6 @@ class ApruebaUpTrabajadorController extends ApplicationController
             '_tipafi' => ParamsTrabajador::getTipoAfiliado(),
             '_trasin' => ParamsTrabajador::getSindicalizado(),
             '_bancos' => ParamsTrabajador::getBancos(),
-            '_tipafi' => ParamsTrabajador::getTipoAfiliado(),
             '_cargo' => ParamsTrabajador::getOcupaciones(),
             '_orisex' => ParamsTrabajador::getOrientacionSexual(),
             '_facvul' => ParamsTrabajador::getVulnerabilidades(),
@@ -152,7 +147,6 @@ class ApruebaUpTrabajadorController extends ApplicationController
             '_tipcue' => ParamsTrabajador::getTipoCuenta(),
             '_giro' => ParamsTrabajador::getGiro(),
             '_codgir' => ParamsTrabajador::getCodigoGiro(),
-            '_bancos' => ParamsTrabajador::getBancos(),
             'tipo' => 'T',
             'tipopc' => $this->tipopc,
         ];
@@ -351,8 +345,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
             $id = $request->input('id');
             $nota = $request->input('nota');
             $codest = $request->input('codest');
-
-            $response = $this->db->begin();
+            $this->db->begin();
             $today = Carbon::now();
             $mercurio33 = Mercurio33::where("id", $id)->first();
             $mercurio33->update([

@@ -480,7 +480,11 @@ class DatosTrabajadorService
         $condi_extra = $request->getParam('condi_extra');
         $usuario = $request->getParam('usuario');
         $numero = $request->getParam('numero');
-        $tipact = 'T';
+        $tipact = match ((string) (int) $tipopc) {
+            '5' => 'E',
+            '14' => 'T',
+            default => 'T',
+        };
 
         switch ($tipo_consulta) {
             case 'auditoria':
@@ -530,13 +534,7 @@ class DatosTrabajadorService
                 break;
             case 'info':
                 $mercurio = Mercurio47::where('id', $numero)->first();
-                break;
-            case 'one':
-                $response['datos'] = Mercurio47::whereRaw("id='$numero' and estado='P' and tipact='$tipact'")->first();
-                break;
-            case 'info':
-                $mercurio = Mercurio47::where('id', $numero)->first();
-                $response['consulta'] = $this->buscarEmpresaSubsidio($mercurio->getNit());
+                $response['consulta'] = $this->buscarTrabajadorSubsidio($mercurio->getDocumento());
                 break;
             default:
                 $response = false;

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Cajas;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
+use App\Models\Mercurio07;
 use App\Models\Mercurio09;
+use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio46;
 use App\Services\ReportGenerator\ReportService;
@@ -145,40 +147,160 @@ class ConsultaController extends ApplicationController
 
     private function resolverDocumentoNombreCarga(string $tipopc, $item): array
     {
-        return match ($tipopc) {
-            '1', '9', '10', '11', '12', '13' => [
-                $item->cedtra ?? $item->documento ?? '',
-                $item->nombre ?? $item->nomtra ?? '',
-            ],
-            '2' => [
-                $item->nit ?? $item->documento ?? '',
-                $item->razsoc ?? $item->nombre ?? '',
-            ],
-            '3' => [
-                $item->cedcon ?? $item->documento ?? '',
-                $item->nombre ?? '',
-            ],
-            '4' => [
-                $item->numdoc ?? $item->documento ?? '',
-                $item->nombre ?? '',
-            ],
-            '5', '6' => [
-                $item->documento ?? $item->nit ?? '',
-                $item->nombre ?? $item->razsoc ?? '',
-            ],
-            '7' => [
-                $item->cedtra ?? $item->documento ?? '',
-                $item->nomtra ?? $item->nombre ?? '',
-            ],
-            '8' => [
-                $item->codben ?? $item->documento ?? $item->cedtra ?? '',
-                $item->nombre ?? '',
-            ],
-            default => [
-                $item->documento ?? $item->cedtra ?? $item->nit ?? '',
-                $item->nombre ?? $item->razsoc ?? $item->nomtra ?? '',
-            ],
+        $tipopc = (string) (int) $tipopc;
+
+        $documento = match ($tipopc) {
+            '1', '7', '9', '10', '11', '12', '13' => $item->cedtra ?? $item->documento ?? '',
+            '2' => $item->nit ?? $item->documento ?? '',
+            '3' => $item->cedcon ?? $item->documento ?? '',
+            '4' => $item->numdoc ?? $item->documento ?? '',
+            '5', '6', '14' => $item->documento ?? $item->nit ?? '',
+            '8' => $item->codben ?? $item->documento ?? $item->cedtra ?? '',
+            default => $item->documento
+                ?? $item->cedtra
+                ?? $item->nit
+                ?? $item->cedcon
+                ?? $item->numdoc
+                ?? '',
         };
+
+        return [(string) $documento, $this->resolverNombreCarga($item, $tipopc)];
+    }
+
+    private function resolverNombreCarga($item, string $tipopc = ''): string
+    {
+        // Empresas / actualización empresa: mostrar razón social.
+        if (in_array($tipopc, ['2', '5'], true)) {
+            $razsoc = $this->resolverRazsocEmpresa($item);
+            if ($razsoc !== '') {
+                return $razsoc;
+            }
+        }
+
+        // Actualización de datos trabajador: nombre del solicitante.
+        if (in_array($tipopc, ['6', '14'], true)) {
+            $nombreSolicitante = $this->resolverNombreSolicitante($item);
+            if ($nombreSolicitante !== '') {
+                return $nombreSolicitante;
+            }
+        }
+
+        if (is_object($item) && method_exists($item, 'getNombreCompleto')) {
+            $nombre = $this->normalizarNombre($item->getNombreCompleto());
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        if (is_object($item) && method_exists($item, 'getNombre')) {
+            $nombre = $this->normalizarNombre($item->getNombre());
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        $partes = array_filter([
+            $item->priape ?? null,
+            $item->segape ?? null,
+            $item->prinom ?? null,
+            $item->segnom ?? null,
+        ], static fn ($valor) => filled($valor));
+
+        if ($partes !== []) {
+            return $this->normalizarNombre(implode(' ', $partes));
+        }
+
+        foreach (['razsoc', 'nomtra', 'nombre'] as $campo) {
+            $nombre = $this->normalizarNombre($item->{$campo} ?? '');
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        if (is_object($item) && method_exists($item, 'getRazsoc')) {
+            $nombre = $this->normalizarNombre($item->getRazsoc());
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        if (is_object($item) && method_exists($item, 'getNomtra')) {
+            $nombre = $this->normalizarNombre($item->getNomtra());
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        return '';
+    }
+
+    private function resolverRazsocEmpresa($item): string
+    {
+        if (is_object($item) && method_exists($item, 'getRazsoc')) {
+            $nombre = $this->normalizarNombre($item->getRazsoc());
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        $nombre = $this->normalizarNombre($item->razsoc ?? '');
+        if ($nombre !== '') {
+            return $nombre;
+        }
+
+        $nit = $item->nit ?? $item->documento ?? null;
+        if (filled($nit)) {
+            $razsoc = Mercurio30::query()
+                ->where('nit', $nit)
+                ->orderByDesc('id')
+                ->value('razsoc');
+
+            $nombre = $this->normalizarNombre($razsoc ?? '');
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        $documento = $item->documento ?? null;
+        if (filled($documento)) {
+            $query = Mercurio07::query()->where('documento', $documento);
+            if (filled($item->coddoc ?? null)) {
+                $query->where('coddoc', $item->coddoc);
+            }
+            if (filled($item->tipo ?? null)) {
+                $query->where('tipo', $item->tipo);
+            }
+
+            $nombre = $this->normalizarNombre($query->value('nombre') ?? '');
+            if ($nombre !== '') {
+                return $nombre;
+            }
+        }
+
+        return '';
+    }
+
+    private function resolverNombreSolicitante($item): string
+    {
+        $documento = $item->documento ?? null;
+        if (! filled($documento)) {
+            return '';
+        }
+
+        $query = Mercurio07::query()->where('documento', $documento);
+        if (filled($item->coddoc ?? null)) {
+            $query->where('coddoc', $item->coddoc);
+        }
+        if (filled($item->tipo ?? null)) {
+            $query->where('tipo', $item->tipo);
+        }
+
+        return $this->normalizarNombre($query->value('nombre') ?? '');
+    }
+
+    private function normalizarNombre(mixed $nombre): string
+    {
+        return trim(preg_replace('/\s+/', ' ', (string) $nombre) ?? '');
     }
 
     public function reporteExcelCargaLaboral(ReportService $reportService)

@@ -2182,6 +2182,7 @@ class GeneralService
                 $entityService = new ActualizaEmpresaService;
                 break;
             case '6':
+            case '14':
                 $entityService = new DatosTrabajadorService;
                 break;
             case '7':

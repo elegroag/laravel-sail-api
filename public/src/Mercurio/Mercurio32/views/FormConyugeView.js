@@ -121,6 +121,7 @@ export class FormConyugeView extends FormView {
             this.form.find('#captra2').prop('checked', true);
             this.$el.find('#show_tipdis').addClass('d-none');
             this.$el.find('#tipdis').val('00');
+            this.$el.find('#tippag').val('T');
             $.each(
                 this.selectores,
                 (index, element) => (this.choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
