@@ -6,13 +6,12 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
 use App\Models\Mercurio09;
-use App\Models\Mercurio20;
 use App\Models\Mercurio31;
 use App\Models\Mercurio46;
+use App\Services\ReportGenerator\ReportService;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
-use App\Services\ReportGenerator\ReportService;
-use Generator;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,6 +41,7 @@ class ConsultaController extends ApplicationController
     {
         $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
             ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
+            ->distinct()
             ->get();
 
         $generalService = new GeneralService;
@@ -59,22 +59,132 @@ class ConsultaController extends ApplicationController
             ->get()
             ->map(function ($item) use ($generalService) {
                 $item = $item->toArray();
-                $out =  $generalService->consultaTipopc($item['tipopc'], 'count', '', $item['usuario']);
+                $out = $generalService->consultaTipopc(
+                    $item['tipopc'],
+                    'count',
+                    '',
+                    $item['usuario'],
+                    ['estado' => 'P']
+                );
                 $item['cantidad'] = $out['count'];
+
                 return $item;
             });
 
         return view('cajas.consulta.carga_laboral', [
             'title' => 'Carga Laboral',
             'gener02' => $gener02,
-            'mercurio09' => $mercurio09
+            'mercurio09' => $mercurio09,
         ]);
+    }
+
+    public function solicitudesCargaLaboral(Request $request)
+    {
+        $tipopc = (string) $request->input('tipopc');
+        $usuario = (string) $request->input('usuario');
+        $detalle = (string) $request->input('detalle', '');
+
+        if ($tipopc === '' || $usuario === '') {
+            return response()->json([
+                'success' => false,
+                'msj' => 'Parámetros incompletos.',
+            ], 422);
+        }
+
+        try {
+            $generalService = new GeneralService;
+            $out = $generalService->consultaTipopc($tipopc, 'alluser', '', $usuario);
+            $datos = collect($out['datos'] ?? []);
+
+            $solicitudes = $datos->map(function ($item) use ($tipopc) {
+                [$documento, $nombre] = $this->resolverDocumentoNombreCarga($tipopc, $item);
+                $fecsol = $item->fecsol ?? null;
+                $fecsolFmt = $fecsol
+                    ? (Carbon::parse($fecsol)->format('Y-m-d'))
+                    : '';
+
+                $dias = '';
+                if ($fecsol) {
+                    $dias = (string) Carbon::parse($fecsol)
+                        ->startOfDay()
+                        ->diffInDays(now()->startOfDay());
+                }
+
+                return [
+                    'id' => $item->id,
+                    'documento' => $documento,
+                    'nombre' => $nombre,
+                    'fecsol' => $fecsolFmt,
+                    'dias' => $dias,
+                    'estado' => $item->estado ?? 'P',
+                ];
+            })->values();
+
+            if ($detalle === '') {
+                $detalle = (string) optional(Mercurio09::find($tipopc))->detalle;
+            }
+
+            $html = view('cajas.consulta._tabla_carga_laboral', [
+                'solicitudes' => $solicitudes,
+                'tipopc' => $tipopc,
+            ])->render();
+
+            return response()->json([
+                'success' => true,
+                'detalle' => $detalle,
+                'count' => $solicitudes->count(),
+                'html' => $html,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function resolverDocumentoNombreCarga(string $tipopc, $item): array
+    {
+        return match ($tipopc) {
+            '1', '9', '10', '11', '12', '13' => [
+                $item->cedtra ?? $item->documento ?? '',
+                $item->nombre ?? $item->nomtra ?? '',
+            ],
+            '2' => [
+                $item->nit ?? $item->documento ?? '',
+                $item->razsoc ?? $item->nombre ?? '',
+            ],
+            '3' => [
+                $item->cedcon ?? $item->documento ?? '',
+                $item->nombre ?? '',
+            ],
+            '4' => [
+                $item->numdoc ?? $item->documento ?? '',
+                $item->nombre ?? '',
+            ],
+            '5', '6' => [
+                $item->documento ?? $item->nit ?? '',
+                $item->nombre ?? $item->razsoc ?? '',
+            ],
+            '7' => [
+                $item->cedtra ?? $item->documento ?? '',
+                $item->nomtra ?? $item->nombre ?? '',
+            ],
+            '8' => [
+                $item->codben ?? $item->documento ?? $item->cedtra ?? '',
+                $item->nombre ?? '',
+            ],
+            default => [
+                $item->documento ?? $item->cedtra ?? $item->nit ?? '',
+                $item->nombre ?? $item->razsoc ?? $item->nomtra ?? '',
+            ],
+        };
     }
 
     public function reporteExcelCargaLaboral(ReportService $reportService)
     {
         $fecha = new \DateTime;
-        $filename = 'reporte_carga_laboral' . $fecha->format('Ymd') . '.xlsx';
+        $filename = 'reporte_carga_laboral'.$fecha->format('Ymd').'.xlsx';
 
         $mercurio09 = Mercurio09::all();
         $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
@@ -92,7 +202,7 @@ class ConsultaController extends ApplicationController
             foreach ($gener02 as $mgener02) {
                 $row = [$mgener02->getNombre()];
                 foreach ($mercurio09 as $mmercurio09) {
-                    $condi = ["estado" => 'P'];
+                    $condi = ['estado' => 'P'];
                     $result = $generalService->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
                     $row[] = $result['count'];
                 }
@@ -106,7 +216,7 @@ class ConsultaController extends ApplicationController
     public function reporteExcelIndicadores($fecini, $fecfin, ReportService $reportService)
     {
         $fecha = new \DateTime;
-        $filename = 'reporte_indicadores' . $fecha->format('Ymd') . '.xlsx';
+        $filename = 'reporte_indicadores'.$fecha->format('Ymd').'.xlsx';
 
         $mercurio09 = Mercurio09::all();
         $estados = (new Mercurio31)->getEstadoArray();
@@ -119,10 +229,10 @@ class ConsultaController extends ApplicationController
             $headers = ['Usuario/Movimiento'];
             foreach ($mercurio09 as $mmercurio09) {
                 foreach ($estados as $label) {
-                    $headers[] = $mmercurio09->getDetalle() . ' - ' . $label;
+                    $headers[] = $mmercurio09->getDetalle().' - '.$label;
                 }
-                $headers[] = $mmercurio09->getDetalle() . ' - TOT';
-                $headers[] = $mmercurio09->getDetalle() . ' - VEN';
+                $headers[] = $mmercurio09->getDetalle().' - TOT';
+                $headers[] = $mmercurio09->getDetalle().' - VEN';
             }
             yield $headers;
 
@@ -170,7 +280,7 @@ class ConsultaController extends ApplicationController
     public function indicadores()
     {
         return view('cajas.consulta.indicadores', [
-            'title' => 'Consulta Indicadores'
+            'title' => 'Consulta Indicadores',
         ]);
     }
 
@@ -178,7 +288,7 @@ class ConsultaController extends ApplicationController
     {
         $fecini = $request->input('fecini');
         $fecfin = $request->input('fecfin');
-        $generalService = new GeneralService();
+        $generalService = new GeneralService;
         $data_indicadores = Gener02::select(
             'gener02.usuario',
             'gener02.nombre',
@@ -243,6 +353,7 @@ class ConsultaController extends ApplicationController
                 }
 
                 $item['total_vencido'] = $total_vencido;
+
                 return $item;
             });
 
@@ -253,9 +364,10 @@ class ConsultaController extends ApplicationController
             ]
         )
             ->render();
+
         return response()->json([
             'html' => $html,
-            "success" => true
+            'success' => true,
         ]);
     }
 
@@ -288,7 +400,7 @@ class ConsultaController extends ApplicationController
             $html .= "<td>{$mmercurio->getNit()}</td>";
             $html .= "<td>{$mmercurio->getFecsis()}</td>";
             $html .= '<td>';
-            $html .= "<a href='#' onclick='descarga_activacion(this)'>" . $mmercurio->getArchivo() . '</a>';
+            $html .= "<a href='#' onclick='descarga_activacion(this)'>".$mmercurio->getArchivo().'</a>';
             $html .= '</td>';
             $html .= '</tr>';
         }

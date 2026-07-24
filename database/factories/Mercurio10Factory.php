@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Mercurio10;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Mercurio10>
+ * @extends Factory<Mercurio10>
  */
 class Mercurio10Factory extends Factory
 {
@@ -27,6 +28,12 @@ class Mercurio10Factory extends Factory
         $codest = $this->faker->optional()->randomElement(['01', '02', '03', '04']);
         $fecsis = $this->faker->date('Y-m-d');
         $camposCorregir = $this->faker->optional()->text(200);
+        $ruuid = $estado === 'P'
+            ? strtoupper($this->faker->lexify('???'))
+                .'-'.now()->year
+                .'-'.$this->faker->numerify('#####')
+                .'-'.str_pad((string) $item, 2, '0', STR_PAD_LEFT)
+            : null;
 
         return [
             'tipopc' => $tipopc,
@@ -37,6 +44,7 @@ class Mercurio10Factory extends Factory
             'codest' => $codest,
             'fecsis' => $fecsis,
             'campos_corregir' => $camposCorregir,
+            'ruuid' => $ruuid,
         ];
     }
 

@@ -20,21 +20,19 @@ use App\Services\CajaServices\UpDatosEmpresaServices;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
-use App\Services\Utils\Comman;
 use App\Services\Utils\Pagination;
-use App\Services\View;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ApruebaUpEmpresaController extends ApplicationController
 {
-    protected $tipopc = '5';
+    protected string $tipopc = '5';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipo;
+    protected ?string $tipo;
 
     public function __construct()
     {
@@ -111,7 +109,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         $help = 'Esta opcion permite manejar los ';
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprobacion Empresa');
-        $mercurio30 = Mercurio30::whereRaw("estado='{$estado}' AND usuario=" . $this->user['usuario'])->orderBy('fecini', 'ASC')->get();
+        $mercurio30 = Mercurio30::whereRaw("estado='{$estado}' AND usuario=".$this->user['usuario'])->orderBy('fecini', 'ASC')->get();
         $empresas = [];
         foreach ($mercurio30 as $ai => $mercurio) {
             $background = '';
@@ -123,7 +121,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = config('app.url') . 'Cajas/aprobacionemp/info_empresa/' . $mercurio->getId();
+            $url = config('app.url').'Cajas/aprobacionemp/info_empresa/'.$mercurio->getId();
             $sat = 'NORMAL';
             if ($mercurio->getDocumentoRepresentanteSat() > 0) {
                 $sat = 'SAT';
@@ -226,9 +224,9 @@ class ApruebaUpEmpresaController extends ApplicationController
             if (! $mercurio10->save()) {
                 $msj = '';
                 foreach ($mercurio10->getMessages() as $key => $message) {
-                    $msj .= $message . '<br/>';
+                    $msj .= $message.'<br/>';
                 }
-                throw new DebugException('Error ' . $msj, 501);
+                throw new DebugException('Error '.$msj, 501);
             }
             Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update([
                 'campos_corregir' => $campos_corregir,
@@ -293,9 +291,9 @@ class ApruebaUpEmpresaController extends ApplicationController
             if (! $mercurio10->save()) {
                 $msj = '';
                 foreach ($mercurio10->getMessages() as $key => $mess) {
-                    $msj .= $mess->getMessage() . '<br/>';
+                    $msj .= $mess->getMessage().'<br/>';
                 }
-                throw new DebugException('Error ' . $msj, 501);
+                throw new DebugException('Error '.$msj, 501);
             }
 
             $this->db->commit();
@@ -357,7 +355,7 @@ class ApruebaUpEmpresaController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -435,7 +433,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         }
         $_codact = [];
         foreach ($datos_captura['actividades'] as $data) {
-            $_codact["{$data['codact']}"] = $data['codact'] . ' - ' . $data['detalle'];
+            $_codact["{$data['codact']}"] = $data['codact'].' - '.$data['detalle'];
         }
 
         $_coddocrepleg = [];
@@ -582,8 +580,8 @@ class ApruebaUpEmpresaController extends ApplicationController
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
-            $mercurio47 = Mercurio47::where("id", $id)->where("tipact", 'E')->first();
-            $mercurio33 = Mercurio33::where("actualizacion", $id)->get();
+            $mercurio47 = Mercurio47::where('id', $id)->where('tipact', 'E')->first();
+            $mercurio33 = Mercurio33::where('actualizacion', $id)->get();
             $dataItems = [];
 
             foreach ($mercurio33 as $row) {
@@ -591,7 +589,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                 $dataItems["{$campo}"] = $row->getValor();
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -607,7 +605,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                 'mercurio47' => $mercurio47,
                 'dataItems' => $dataItems,
                 'mercurio01' => Mercurio01::first(),
-                'det_tipo' => Mercurio06::where("tipo", $mercurio47->getTipo())->first()->getDetalle(),
+                'det_tipo' => Mercurio06::where('tipo', $mercurio47->getTipo())->first()->getDetalle(),
                 '_coddoc' => ParamsEmpresa::getTipoDocumentos(),
                 '_calemp' => ParamsEmpresa::getCalidadEmpresa(),
                 '_codciu' => ParamsEmpresa::getCiudades(),
@@ -617,7 +615,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                 '_tipdoc' => ParamsEmpresa::getTipoDocumentos(),
             ])->render();
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',

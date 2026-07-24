@@ -138,9 +138,10 @@
                     <div class="oportunidad-info" role="note">
                         <i class="fas fa-info-circle" aria-hidden="true"></i>
                         <div>
-                            Se calculan los <strong>días hábiles</strong> entre la fecha de solicitud y la fecha de aprobación.
+                            Se calculan los <strong>días hábiles</strong> entre el <strong>envío a caja</strong> (evento P)
+                            y la <strong>aprobación o rechazo</strong> (evento A/X) de la misma solicitud.
                             Umbral configurado: <strong>{{ $umbralDias }} días hábiles</strong>.
-                            Los registros inactivos no se incluyen en el archivo.
+                            Cada fila corresponde a un envío; las solicitudes inactivas no se incluyen.
                         </div>
                     </div>
 
@@ -153,7 +154,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="fecini" class="form-control-label">
-                                            Fecha solicitud inicial <span class="text-danger">*</span>
+                                            Fecha envío a caja inicial <span class="text-danger">*</span>
                                         </label>
                                         <input
                                             type="text"
@@ -164,13 +165,13 @@
                                             required
                                             aria-required="true"
                                             autocomplete="off">
-                                        <small class="form-text">Inicio del periodo a consultar.</small>
+                                        <small class="form-text">Inicio del periodo según fecha del evento P.</small>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="fecfin" class="form-control-label">
-                                            Fecha solicitud final <span class="text-danger">*</span>
+                                            Fecha envío a caja final <span class="text-danger">*</span>
                                         </label>
                                         <input
                                             type="text"
@@ -181,7 +182,7 @@
                                             required
                                             aria-required="true"
                                             autocomplete="off">
-                                        <small class="form-text">Fin del periodo a consultar.</small>
+                                        <small class="form-text">Fin del periodo según fecha del evento P.</small>
                                     </div>
                                 </div>
                                 <div class="col-md-4">

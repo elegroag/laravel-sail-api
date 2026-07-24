@@ -67,6 +67,8 @@ class ReporteOportunidadAfiliacionTest extends TestCase
 
         $this->assertSame('RUUID', $rows[0][0]);
         $this->assertSame('Estado', $rows[0][1]);
+        $this->assertSame('Fecha envio a caja', $rows[0][2]);
+        $this->assertSame('Fecha de aprobacion', $rows[0][3]);
         $this->assertSame('Dias habiles tramite', $rows[0][4]);
         $this->assertSame('Tipo identificacion', $rows[0][7]);
         $this->assertSame('No. identificacion', $rows[0][8]);

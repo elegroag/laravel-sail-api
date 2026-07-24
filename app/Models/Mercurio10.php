@@ -31,6 +31,7 @@ class Mercurio10 extends ModelBase
         'fecsis',
         'codest',
         'campos_corregir',
+        'ruuid',
     ];
 
     protected function rules()
@@ -58,6 +59,16 @@ class Mercurio10 extends ModelBase
     public function getCamposCorregir()
     {
         return $this->campos_corregir;
+    }
+
+    public function setRuuid(?string $ruuid): void
+    {
+        $this->ruuid = $ruuid;
+    }
+
+    public function getRuuid(): ?string
+    {
+        return $this->ruuid;
     }
 
     /**

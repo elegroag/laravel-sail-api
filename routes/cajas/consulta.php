@@ -8,6 +8,7 @@ Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/consulta')->group(function () {
         Route::get('/masivas', [ConsultaController::class, 'index']);
         Route::get('/carga_laboral', [ConsultaController::class, 'cargaLaboral'])->name('consulta.cargaLaboral');
+        Route::post('/solicitudes_carga_laboral', [ConsultaController::class, 'solicitudesCargaLaboral'])->name('consulta.solicitudesCargaLaboral');
         Route::post('/reporte_excel_carga_laboral', [ConsultaController::class, 'reporteExcelCargaLaboral']);
         Route::post('/reporte_excel_indicadores', [ConsultaController::class, 'reporteExcelIndicadores']);
         Route::get('/indicadores', [ConsultaController::class, 'indicadores']);

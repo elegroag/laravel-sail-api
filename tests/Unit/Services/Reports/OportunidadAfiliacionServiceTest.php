@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Reports;
 
+use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
@@ -112,7 +113,7 @@ class OportunidadAfiliacionServiceTest extends TestCase
         $this->assertSame(3, config('reportes.oportunidad_umbral_dias'));
     }
 
-    public function test_dias_habiles_usa_fecha_actual_cuando_no_hay_fecapr(): void
+    public function test_dias_habiles_usa_fecha_actual_cuando_no_hay_cierre(): void
     {
         $dias = DiasHabilesCalculator::between('2026-01-01', null);
 
@@ -120,330 +121,252 @@ class OportunidadAfiliacionServiceTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $dias);
     }
 
-    public function test_filtro_sin_fecha_aprobacion_no_usa_cadena_vacia_en_sql(): void
-    {
-        $query = Mercurio32::query()->whereBetween('fecsol', ['2026-01-01', '2026-12-31']);
-        $service = new OportunidadAfiliacionService;
-
-        $method = new \ReflectionMethod($service, 'aplicarFiltroSinFechaAprobacion');
-        $method->invoke($service, $query);
-
-        $sql = strtolower($query->toSql());
-
-        $this->assertStringContainsString('`fecapr` is null', $sql);
-        $this->assertStringContainsString('`fecapr` = ?', $sql);
-        $this->assertStringNotContainsString("= ''", $sql);
-        $this->assertContains('0000-00-00', $query->getBindings());
-    }
-
-    public function test_dias_habiles_desde_fecsol_hasta_fecapr_para_solicitud_trabajador(): void
+    public function test_evento_p_cerrado_por_a_fuera_del_umbral_es_vencido(): void
     {
         Carbon::setTestNow('2026-06-29 10:00:00');
 
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 100,
-                'nit' => '900123456',
-                'razsoc' => 'Empresa Demo',
-                'cedtra' => '1234567890',
-                'tipdoc' => 'CC',
-                'priape' => 'Perez',
-                'prinom' => 'Juan',
-                'fecsol' => '2026-06-01',
-                'fecapr' => '2026-06-10',
-                'fecest' => null,
-                'estado' => 'A',
-            ]),
+        $solicitud = Mercurio31::factory()->make([
+            'id' => 100,
+            'nit' => '900123456',
+            'razsoc' => 'Empresa Demo',
+            'cedtra' => '1234567890',
+            'tipdoc' => 'CC',
+            'priape' => 'Perez',
+            'prinom' => 'Juan',
+            'fecsol' => '2026-05-01',
+            'fecapr' => '2026-06-10',
+            'estado' => 'A',
+        ]);
+
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 100, 1, 'P', '2026-06-01', 'TRA-2026-00100-01'),
+                'evento_cierre' => $this->evento(1, 100, 2, 'A', '2026-06-10'),
+            ],
         ]);
 
         $this->assertCount(1, $dataset);
         $registro = $dataset[0];
 
+        $this->assertSame('TRA-2026-00100-01', $registro['ruuid']);
         $this->assertSame('2026-06-01', $registro['fecsol']);
         $this->assertSame('2026-06-10', $registro['fecapr']);
-        $this->assertSame(7, $registro['dias_habiles'], 'lun 01 a mie 10 = 7 habiles');
-        $this->assertSame('VENCIDO', $registro['estado_oportunidad'], 'mas de 3 habiles con fecapr = VENCIDO');
+        $this->assertSame(7, $registro['dias_habiles']);
+        $this->assertSame('VENCIDO', $registro['estado_oportunidad']);
 
         Carbon::setTestNow();
     }
 
-    public function test_dias_habiles_desde_fecsol_hasta_fecest_cuando_no_hay_fecapr(): void
+    public function test_evento_p_cerrado_dentro_del_umbral_es_en_termino(): void
     {
         Carbon::setTestNow('2026-06-29 10:00:00');
 
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio32::factory()->make([
-                'id' => 200,
-                'cedtra' => '999',
-                'cedcon' => '888',
-                'tipdoc' => 'CC',
-                'priape' => 'Gomez',
-                'prinom' => 'Ana',
-                'fecsol' => '2026-06-15',
-                'fecapr' => null,
-                'fecest' => '2026-06-19',
-                'estado' => 'A',
-            ]),
+        $solicitud = Mercurio31::factory()->make([
+            'id' => 101,
+            'nit' => '900123456',
+            'razsoc' => 'Empresa Demo',
+            'cedtra' => '111',
+            'tipdoc' => 'CC',
+            'fecsol' => '2026-06-01',
+            'estado' => 'A',
+        ]);
+
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 101, 1, 'P', '2026-06-01', 'TRA-2026-00101-01'),
+                'evento_cierre' => $this->evento(1, 101, 2, 'A', '2026-06-02'),
+            ],
         ]);
 
         $this->assertCount(1, $dataset);
-        $registro = $dataset[0];
-
-        $this->assertSame('2026-06-15', $registro['fecsol']);
-        $this->assertSame('2026-06-19', $registro['fecest']);
-        $this->assertNull($registro['fecapr']);
-        $this->assertSame(4, $registro['dias_habiles'], 'lun 15 a vie 19 = 4 habiles (sin contar inicio)');
-        $this->assertSame('VENCIDO', $registro['estado_oportunidad'], 'sin fecapr y mas de 3 habiles = VENCIDO');
+        $this->assertSame(1, $dataset[0]['dias_habiles']);
+        $this->assertSame('EN_TERMINO', $dataset[0]['estado_oportunidad']);
 
         Carbon::setTestNow();
     }
 
-    public function test_pendiente_no_toma_fecest_y_cuenta_hasta_hoy(): void
+    public function test_evento_p_sin_cierre_cuenta_hasta_hoy(): void
     {
         Carbon::setTestNow('2026-06-26 12:00:00');
 
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 210,
-                'nit' => '900111000',
-                'razsoc' => 'Pendiente Historica',
-                'cedtra' => '1500001',
-                'tipdoc' => 'CC',
-                'priape' => 'Diaz',
-                'prinom' => 'Camilo',
-                'fecsol' => '2026-06-15',
-                'fecapr' => null,
-                'fecest' => '2026-06-19',
-                'estado' => 'P',
-            ]),
+        $solicitud = Mercurio31::factory()->make([
+            'id' => 210,
+            'nit' => '900111000',
+            'razsoc' => 'Pendiente Historica',
+            'cedtra' => '1500001',
+            'tipdoc' => 'CC',
+            'priape' => 'Diaz',
+            'prinom' => 'Camilo',
+            'fecsol' => '2026-06-01',
+            'fecapr' => null,
+            'estado' => 'P',
+        ]);
+
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 210, 1, 'P', '2026-06-15', 'TRA-2026-00210-01'),
+                'evento_cierre' => null,
+            ],
         ]);
 
         $this->assertCount(1, $dataset);
         $registro = $dataset[0];
 
-        $this->assertSame('Pendiente', $registro['estado']);
-        $this->assertNull($registro['fecapr'], 'pendiente no debe mostrar fecapr');
-        $this->assertNull($registro['fecest'], 'pendiente no debe mostrar fecest');
-        $this->assertNull($registro['fecha_cierre'], 'pendiente no debe tener fecha_cierre');
-        $this->assertSame(9, $registro['dias_habiles'], 'lun 15 a vie 26 = 9 habiles (sin contar inicio)');
+        $this->assertNull($registro['fecapr']);
+        $this->assertNull($registro['fecha_cierre']);
+        $this->assertSame(9, $registro['dias_habiles']);
         $this->assertSame('VENCIDO', $registro['estado_oportunidad']);
         $this->assertSame('2026-06-15', $registro['fecsol']);
+
+        Carbon::setTestNow();
     }
 
-    public function test_devuelto_no_toma_fecest_y_cuenta_hasta_hoy(): void
-    {
-        Carbon::setTestNow('2026-06-23 10:00:00');
-
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 220,
-                'nit' => '900222000',
-                'razsoc' => 'Devuelta',
-                'cedtra' => '1600001',
-                'tipdoc' => 'CC',
-                'priape' => 'Reyes',
-                'prinom' => 'Sara',
-                'fecsol' => '2026-06-22',
-                'fecapr' => null,
-                'fecest' => '2026-06-30',
-                'estado' => 'D',
-            ]),
-        ]);
-
-        $this->assertCount(1, $dataset);
-        $registro = $dataset[0];
-
-        $this->assertSame('Devuelto', $registro['estado']);
-        $this->assertNull($registro['fecapr']);
-        $this->assertNull($registro['fecest']);
-        $this->assertNull($registro['fecha_cierre']);
-        $this->assertSame(1, $registro['dias_habiles'], 'lun 22 a mar 23 = 1 habil (sin contar inicio)');
-    }
-
-    public function test_temporal_no_toma_fecest_y_cuenta_hasta_hoy(): void
+    public function test_varios_eventos_p_de_misma_solicitud_generan_varias_filas(): void
     {
         Carbon::setTestNow('2026-06-29 10:00:00');
 
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio32::factory()->make([
-                'id' => 230,
-                'cedtra' => '1700001',
-                'cedcon' => '1700002',
-                'tipdoc' => 'CC',
-                'priape' => 'Luna',
-                'prinom' => 'Ana',
-                'fecsol' => '2026-06-15',
-                'fecapr' => null,
-                'fecest' => '2026-06-19',
-                'estado' => 'T',
-            ]),
+        $solicitud = Mercurio31::factory()->make([
+            'id' => 300,
+            'nit' => '900999999',
+            'razsoc' => 'Reenviada SA',
+            'cedtra' => '555000111',
+            'tipdoc' => 'CC',
+            'estado' => 'A',
         ]);
 
-        $this->assertCount(1, $dataset);
-        $registro = $dataset[0];
-
-        $this->assertSame('TEMPORAL', $registro['estado']);
-        $this->assertNull($registro['fecapr']);
-        $this->assertNull($registro['fecest']);
-        $this->assertNull($registro['fecha_cierre']);
-        $this->assertSame(10, $registro['dias_habiles'], 'lun 15 a lun 29 = 10 habiles');
-        $this->assertSame('VENCIDO', $registro['estado_oportunidad']);
-    }
-
-    public function test_dias_habiles_usan_hoy_cuando_no_hay_fecapr_ni_fecest(): void
-    {
-        Carbon::setTestNow('2026-06-26 12:00:00');
-
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 300,
-                'nit' => '900999999',
-                'razsoc' => 'Pendiente SA',
-                'cedtra' => '555000111',
-                'tipdoc' => 'CC',
-                'priape' => 'Lopez',
-                'prinom' => 'Maria',
-                'fecsol' => '2026-06-22',
-                'fecapr' => null,
-                'fecest' => null,
-                'estado' => 'P',
-            ]),
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 300, 1, 'P', '2026-06-01', 'TRA-2026-00300-01'),
+                'evento_cierre' => $this->evento(1, 300, 2, 'A', '2026-06-02'),
+            ],
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 300, 3, 'P', '2026-06-10', 'TRA-2026-00300-03'),
+                'evento_cierre' => $this->evento(1, 300, 4, 'A', '2026-06-15'),
+            ],
         ]);
 
-        $this->assertCount(1, $dataset);
-        $this->assertSame(4, $dataset[0]['dias_habiles'], 'lun 22 a vie 26 = 4 habiles (lun-mar-mie-jue-vie, menos 1)');
-        $this->assertSame('VENCIDO', $dataset[0]['estado_oportunidad'], 'sin fecapr y mas de 3 habiles = VENCIDO');
+        $this->assertCount(2, $dataset);
+        $this->assertSame('TRA-2026-00300-01', $dataset[0]['ruuid']);
+        $this->assertSame(1, $dataset[0]['item']);
+        $this->assertSame('TRA-2026-00300-03', $dataset[1]['ruuid']);
+        $this->assertSame(3, $dataset[1]['item']);
 
         Carbon::setTestNow();
     }
 
-    public function test_dias_habiles_no_incluyen_fines_de_semana(): void
+    public function test_solicitud_inactiva_se_excluye(): void
     {
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio30::factory()->make([
-                'id' => 400,
-                'nit' => '800111222',
-                'razsoc' => 'Empresa Beta',
-                'cedtra' => null,
-                'fecsol' => '2026-06-01',
-                'fecapr' => '2026-06-12',
-                'fecest' => null,
-                'estado' => 'A',
-            ]),
+        $solicitud = Mercurio31::factory()->make([
+            'id' => 400,
+            'nit' => '900000400',
+            'cedtra' => '400',
+            'estado' => 'I',
         ]);
 
-        $this->assertCount(1, $dataset);
-        $this->assertSame(9, $dataset[0]['dias_habiles'], 'lun 01 a vie 12 = 9 habiles (saltando 2 fines de semana)');
-        $this->assertSame('VENCIDO', $dataset[0]['estado_oportunidad'], '9 habiles > 3 = VENCIDO');
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 400, 1, 'P', '2026-06-01', 'TRA-2026-00400-01'),
+                'evento_cierre' => null,
+            ],
+        ]);
+
+        $this->assertCount(0, $dataset);
     }
 
-    public function test_aprobada_sin_fecapr_cae_a_fecest_en_columna_y_calculo(): void
+    public function test_cierre_por_rechazo_x_no_muestra_fecha_aprobacion(): void
     {
         Carbon::setTestNow('2026-06-29');
 
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 500,
-                'nit' => '900555000',
-                'razsoc' => 'Aprobada Legacy',
-                'cedtra' => '7000001',
-                'tipdoc' => 'CC',
-                'priape' => 'Rojas',
-                'prinom' => 'Pedro',
-                'fecsol' => '2026-06-01',
-                'fecapr' => null,
-                'fecest' => '2026-06-04',
-                'estado' => 'A',
-            ]),
+        $solicitud = Mercurio30::factory()->make([
+            'id' => 50,
+            'nit' => '800111222',
+            'razsoc' => 'Empresa Beta',
+            'ruuid' => 'EMP-2026-00050',
+            'estado' => 'X',
+        ]);
+
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 2,
+                'evento_p' => $this->evento(2, 50, 1, 'P', '2026-06-01', 'EMP-2026-00050-01'),
+                'evento_cierre' => $this->evento(2, 50, 2, 'X', '2026-06-12'),
+            ],
         ]);
 
         $this->assertCount(1, $dataset);
-        $registro = $dataset[0];
+        $this->assertSame('2026-06-12', $dataset[0]['fecha_cierre']);
+        $this->assertNull($dataset[0]['fecapr'], 'rechazo X no debe llenar fecha de aprobacion');
+        $this->assertSame(9, $dataset[0]['dias_habiles']);
+        $this->assertSame('VENCIDO', $dataset[0]['estado_oportunidad']);
 
-        $this->assertSame('Aprobado', $registro['estado']);
-        $this->assertNull($registro['fecapr'], 'fecapr queda null cuando no existe aprobacion real');
-        $this->assertSame('2026-06-04', $registro['fecest']);
-        $this->assertSame('2026-06-04', $registro['fecha_cierre'], 'fecha_cierre cae a fecest cuando fecapr es null');
-        $this->assertSame(3, $registro['dias_habiles'], 'lun 01 a jue 04 = 3 habiles');
-        $this->assertSame('EN_TRAMITE', $registro['estado_oportunidad'], 'estado se evalua con fecapr real (null), no con fecha_cierre');
+        Carbon::setTestNow();
     }
 
-    public function test_aprobada_sin_fecapr_ni_fecest_usa_hoy(): void
+    public function test_ruuid_usa_solo_mercurio10_sin_fallback_a_solicitud(): void
     {
-        Carbon::setTestNow('2026-06-25 12:00:00');
+        $solicitud = Mercurio31::factory()->make([
+            'id' => 88,
+            'nit' => '900000088',
+            'cedtra' => '880088',
+            'ruuid' => 'TRA-2026-00088',
+            'estado' => 'P',
+        ]);
 
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 600,
-                'nit' => '900666000',
-                'razsoc' => 'Sin Fechas',
-                'cedtra' => '8000001',
-                'tipdoc' => 'CC',
-                'priape' => 'Mora',
-                'prinom' => 'Luis',
-                'fecsol' => '2026-06-22',
-                'fecapr' => null,
-                'fecest' => null,
-                'estado' => 'A',
-            ]),
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 88, 1, 'P', '2026-06-01', null),
+                'evento_cierre' => null,
+            ],
         ]);
 
         $this->assertCount(1, $dataset);
-        $registro = $dataset[0];
-
-        $this->assertSame('Aprobado', $registro['estado']);
-        $this->assertNull($registro['fecapr']);
-        $this->assertNull($registro['fecest']);
-        $this->assertNull($registro['fecha_cierre'], 'sin fecapr ni fecest, fecha_cierre es null');
-        $this->assertSame(3, $registro['dias_habiles'], 'lun 22 a jue 25 = 3 habiles (mar, mie, jue)');
-    }
-
-    public function test_aprobada_con_fecapr_prevalece_sobre_fecest(): void
-    {
-        Carbon::setTestNow('2026-06-29');
-
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 700,
-                'nit' => '900777000',
-                'razsoc' => 'Con Fecapr',
-                'cedtra' => '9000001',
-                'tipdoc' => 'CC',
-                'fecsol' => '2026-06-01',
-                'fecapr' => '2026-06-02',
-                'fecest' => '2026-06-30',
-                'estado' => 'A',
-            ]),
-        ]);
-
-        $this->assertCount(1, $dataset);
-        $this->assertSame('2026-06-02', $dataset[0]['fecapr']);
-        $this->assertSame('2026-06-02', $dataset[0]['fecha_cierre'], 'fecapr prevalece sobre fecest');
+        $this->assertSame('', $dataset[0]['ruuid']);
+        $this->assertNotSame('TRA-2026-00088', $dataset[0]['ruuid']);
     }
 
     #[DataProvider('casosDiasHabilesProvider')]
-    public function test_calculo_dias_habiles_entre_fecsol_y_fecapr(string $fecsol, string $fecapr, int $esperado): void
+    public function test_calculo_dias_habiles_entre_evento_p_y_cierre(string $fecsisP, string $fecsisCierre, int $esperado): void
     {
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make([
-                'id' => 500 + abs(crc32($fecsol.$fecapr)) % 1000,
-                'nit' => '900000001',
-                'razsoc' => 'Calculo SA',
-                'cedtra' => '1010101010',
-                'tipdoc' => 'CC',
-                'fecsol' => $fecsol,
-                'fecapr' => $fecapr,
-                'fecest' => null,
-                'estado' => 'A',
-            ]),
+        $solicitud = Mercurio31::factory()->make([
+            'id' => 500 + abs(crc32($fecsisP.$fecsisCierre)) % 1000,
+            'nit' => '900000001',
+            'razsoc' => 'Calculo SA',
+            'cedtra' => '1010101010',
+            'tipdoc' => 'CC',
+            'estado' => 'A',
         ]);
 
-        $this->assertSame($esperado, $dataset[0]['dias_habiles'], "{$fecsol} -> {$fecapr}");
+        $id = (int) $solicitud->id;
+
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, $id, 1, 'P', $fecsisP, "TRA-2026-{$id}-01"),
+                'evento_cierre' => $this->evento(1, $id, 2, 'A', $fecsisCierre),
+            ],
+        ]);
+
+        $this->assertSame($esperado, $dataset[0]['dias_habiles'], "{$fecsisP} -> {$fecsisCierre}");
     }
 
     public static function casosDiasHabilesProvider(): array
     {
-        // 2026-06-01 = lunes, 2026-06-06 = sabado, 2026-06-07 = domingo
         return [
             'mismo dia' => ['2026-06-01', '2026-06-01', 0],
             'lunes a viernes misma semana' => ['2026-06-01', '2026-06-05', 4],
@@ -452,47 +375,80 @@ class OportunidadAfiliacionServiceTest extends TestCase
         ];
     }
 
-    public function test_resumen_cuenta_estados_segun_dias_habiles(): void
+    public function test_resumen_cuenta_estados_segun_dias_habiles_de_eventos(): void
     {
-        // Con umbral de 3:
-        //   - id=1 fecsol=2026-06-01 lun -> fecapr=2026-06-02 mar = 0 habiles = EN_TERMINO
-        //   - id=2 fecsol=2026-06-01 lun -> fecapr=2026-06-15 lun = 10 habiles = VENCIDO
-        //   - id=3 fecsol=2026-06-22 lun -> sin fecapr ni fecest, hoy=2026-06-23 mar = 0 habiles = EN_TRAMITE
         Carbon::setTestNow('2026-06-23 12:00:00');
 
-        $dataset = $this->ejecutarServicioConModelos([
-            Mercurio31::factory()->make(['id' => 1, 'nit' => '900000001', 'razsoc' => 'Aprobada', 'cedtra' => '1', 'fecsol' => '2026-06-01', 'fecapr' => '2026-06-02', 'fecest' => null, 'estado' => 'A']),
-            Mercurio31::factory()->make(['id' => 2, 'nit' => '900000002', 'razsoc' => 'Vencida', 'cedtra' => '2', 'fecsol' => '2026-06-01', 'fecapr' => '2026-06-15', 'fecest' => null, 'estado' => 'A']),
-            Mercurio31::factory()->make(['id' => 3, 'nit' => '900000003', 'razsoc' => 'Tramite', 'cedtra' => '3', 'fecsol' => '2026-06-22', 'fecapr' => null, 'fecest' => null, 'estado' => 'P']),
+        $s1 = Mercurio31::factory()->make(['id' => 1, 'nit' => '900000001', 'cedtra' => '1', 'estado' => 'A']);
+        $s2 = Mercurio31::factory()->make(['id' => 2, 'nit' => '900000002', 'cedtra' => '2', 'estado' => 'A']);
+        $s3 = Mercurio31::factory()->make(['id' => 3, 'nit' => '900000003', 'cedtra' => '3', 'estado' => 'P']);
+
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $s1,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 1, 1, 'P', '2026-06-01', 'TRA-2026-00001-01'),
+                'evento_cierre' => $this->evento(1, 1, 2, 'A', '2026-06-02'),
+            ],
+            [
+                'solicitud' => $s2,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 2, 1, 'P', '2026-06-01', 'TRA-2026-00002-01'),
+                'evento_cierre' => $this->evento(1, 2, 2, 'A', '2026-06-15'),
+            ],
+            [
+                'solicitud' => $s3,
+                'tipopc' => 1,
+                'evento_p' => $this->evento(1, 3, 1, 'P', '2026-06-22', 'TRA-2026-00003-01'),
+                'evento_cierre' => null,
+            ],
         ]);
 
         $this->assertCount(3, $dataset);
 
         $estados = array_count_values(array_column($dataset, 'estado_oportunidad'));
-        $this->assertSame(1, $estados['EN_TERMINO'] ?? 0, '0 habiles con fecapr = EN_TERMINO');
-        $this->assertSame(1, $estados['VENCIDO'] ?? 0, 'mas de 3 habiles = VENCIDO');
-        $this->assertSame(1, $estados['EN_TRAMITE'] ?? 0, 'sin aprobar y dentro del umbral = EN_TRAMITE');
+        $this->assertSame(1, $estados['EN_TERMINO'] ?? 0);
+        $this->assertSame(1, $estados['VENCIDO'] ?? 0);
+        $this->assertSame(1, $estados['EN_TRAMITE'] ?? 0);
 
         Carbon::setTestNow();
     }
 
     /**
-     * Ejecuta el servicio contra un dataset en memoria inyectado,
-     * evitando la conexion a la base de datos.
+     * @param  array<string, mixed>  $attrs
+     */
+    private function evento(int $tipopc, int $numero, int $item, string $estado, string $fecsis, ?string $ruuid = null): Mercurio10
+    {
+        $evento = new Mercurio10;
+        $evento->forceFill([
+            'tipopc' => (string) $tipopc,
+            'numero' => $numero,
+            'item' => $item,
+            'estado' => $estado,
+            'fecsis' => $fecsis,
+            'nota' => 'test',
+            'ruuid' => $ruuid,
+        ]);
+
+        return $evento;
+    }
+
+    /**
+     * Simula buildDataset por eventos Mercurio10 sin tocar la BD.
      *
-     * @param  array<int, object>  $modelos
+     * @param  array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10, evento_cierre: ?Mercurio10}>  $casos
      * @return array<int, array<string, mixed>>
      */
-    private function ejecutarServicioConModelos(array $modelos): array
+    private function ejecutarServicioConEventos(array $casos): array
     {
-        $serviceMock = new class($modelos) extends OportunidadAfiliacionService
+        $serviceMock = new class($casos) extends OportunidadAfiliacionService
         {
-            /** @var array<int, object> */
-            private array $modelosInyectados;
+            /** @var array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10, evento_cierre: ?Mercurio10}> */
+            private array $casos;
 
-            public function __construct(array $modelos)
+            public function __construct(array $casos)
             {
-                $this->modelosInyectados = $modelos;
+                $this->casos = $casos;
             }
 
             public function buildDataset(array $filtros = []): array
@@ -502,14 +458,22 @@ class OportunidadAfiliacionServiceTest extends TestCase
                 $resolver->setAccessible(true);
 
                 $umbral = (int) config('reportes.oportunidad_umbral_dias', 3);
-
                 $dataset = [];
-                foreach ($this->modelosInyectados as $model) {
-                    $tipopc = $this->detectarTipopc($model);
-                    $config = config("reportes.oportunidad_tipos.{$tipopc}");
-                    $record = AfiliacionNormalizer::normalize($model, $tipopc, $config, []);
 
-                    // Simula resolución de tipdoc (gener18) sin tocar legacy DB.
+                foreach ($this->casos as $caso) {
+                    $solicitud = $caso['solicitud'];
+                    $estadoSolicitud = strtoupper(trim((string) ($solicitud->estado ?? '')));
+                    if ($estadoSolicitud === 'I') {
+                        continue;
+                    }
+
+                    $tipopc = (int) $caso['tipopc'];
+                    $config = config("reportes.oportunidad_tipos.{$tipopc}");
+                    $eventoP = $caso['evento_p'];
+                    $cierre = $caso['evento_cierre'];
+
+                    $record = AfiliacionNormalizer::normalize($solicitud, $tipopc, $config, []);
+
                     $tipdocCode = trim((string) ($record['tipdoc'] ?? ''));
                     $numero = trim((string) ($record['documento'] ?? ''));
                     $tipo = match ($tipdocCode) {
@@ -522,30 +486,31 @@ class OportunidadAfiliacionServiceTest extends TestCase
                     $record['numero_identificacion'] = $numero;
                     $record['tipo_identificacion'] = trim($tipo.' '.$numero);
 
-                    $fin = $record['fecha_cierre'];
-                    $record['dias_habiles'] = DiasHabilesCalculator::between($record['fecsol'], $fin);
-                    $record['estado_oportunidad'] = $resolver->invoke($this, $record['fecapr'], $record['dias_habiles'], $umbral);
+                    $fechaInicio = Carbon::parse($eventoP->fecsis)->format('Y-m-d');
+                    $fechaCierre = $cierre
+                        ? Carbon::parse($cierre->fecsis)->format('Y-m-d')
+                        : null;
+                    $fechaAprobacion = ($cierre && strtoupper((string) $cierre->estado) === 'A')
+                        ? $fechaCierre
+                        : null;
+
+                    $record['ruuid'] = $eventoP->ruuid ?: '';
+                    $record['item'] = $eventoP->item;
+                    $record['fecsol'] = $fechaInicio;
+                    $record['fecapr'] = $fechaAprobacion;
+                    $record['fecha_cierre'] = $fechaCierre;
+                    $record['dias_habiles'] = DiasHabilesCalculator::between($fechaInicio, $fechaCierre);
+                    $record['estado_oportunidad'] = $resolver->invoke(
+                        $this,
+                        $fechaCierre,
+                        $record['dias_habiles'],
+                        $umbral
+                    );
+
                     $dataset[] = $record;
                 }
 
                 return $dataset;
-            }
-
-            private function detectarTipopc(object $model): int
-            {
-                $map = [
-                    Mercurio31::class => 1,
-                    Mercurio30::class => 2,
-                    Mercurio32::class => 3,
-                ];
-
-                foreach ($map as $class => $tipopc) {
-                    if ($model instanceof $class) {
-                        return $tipopc;
-                    }
-                }
-
-                return 1;
             }
         };
 

@@ -5,6 +5,7 @@ namespace App\Services\Utils;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio10;
+use Carbon\Carbon;
 
 require_once 'SenderEmail.php';
 
@@ -14,11 +15,11 @@ class SenderValidationCaja
 
     public function __construct() {}
 
-    public function send($tipopc, $entity)
+    public function send(?string $tipopc, mixed $entity): void
     {
         $this->email_pruebas = config('mail.dev', 'enlinea@comfaca.com');
 
-        Mercurio10::create([
+        $mercurio10 = Mercurio10::create([
             'tipopc' => $tipopc,
             'numero' => $entity->id,
             'item' => $entity->item,
@@ -27,30 +28,31 @@ class SenderValidationCaja
             'fecsis' => date('Y-m-d'),
         ]);
 
-        $mercurio02 = Mercurio02::first();
+        if ($mercurio10->estado === 'P') {
+            $base = $entity->ruuid ?? null;
+            if ($base) {
+                $sufijo = str_pad((string) $mercurio10->item, 2, '0', STR_PAD_LEFT);
+                $mercurio10->setRuuid($base.'-'.$sufijo);
+                $mercurio10->save();
+            }
+        }
 
-        $fecsolRaw = $entity->fecsol ?? null;
-        $fecsol = $fecsolRaw
-            ? (function ($raw) {
-                try {
-                    return \Carbon\Carbon::parse($raw)->format('Y-m-d');
-                } catch (\Throwable $e) {
-                    return (string) $raw;
-                }
-            })($fecsolRaw)
+        $mercurio02 = Mercurio02::first();
+        $fecsol = $entity->fecsol
+            ? Carbon::parse($entity->fecsol)->format('Y-m-d')
             : date('Y-m-d');
 
         $radicado = $entity->ruuid ?? ($entity->id ?? '');
 
         $arreglo = [
             'titulo' => "Cordial saludo,<br>Señor@ {$entity->repleg}",
-            'msj' => 'La Caja de Compensación Familiar Comfaca, ha recepcionado una solicitud, por medio del sistema comfaca en línea, ' .
-                "emitido por el afiliado: {$entity->razsoc} con identificación: {$entity->nit}.<br>Su solicitud está pendiente de verificación por parte de la CAJA.<br/>" .
+            'msj' => 'La Caja de Compensación Familiar Comfaca, ha recepcionado una solicitud, por medio del sistema comfaca en línea, '.
+                "emitido por el afiliado: {$entity->razsoc} con identificación: {$entity->nit}.<br>Su solicitud está pendiente de verificación por parte de la CAJA.<br/>".
                 '<br/>Gracias por preferirnos.',
             'fecsol' => $fecsol,
             'radicado' => $radicado,
-            'rutaImg' => 'https://comfacaenlinea.com.co/img/header_reporte_ugpp.png',
-            'url_activa' => 'https://comfacaenlinea.com.co/web/login',
+            'rutaImg' => config('app.url').'/img/header_reporte_ugpp.png',
+            'url_activa' => config('app.url').'/web/login',
             'mercurio02' => [
                 'razsoc' => $mercurio02->getRazsoc(),
                 'direccion' => $mercurio02->getDireccion(),
@@ -65,7 +67,7 @@ class SenderValidationCaja
         $this->sendEmail('Proceso Afiliación Caja de Compensación Familiar COMFACA', $html, $destinatario);
     }
 
-    public function sendEmail($asunto, $html, $destinatario)
+    public function sendEmail(string $asunto, string $html, string $destinatario): void
     {
         $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
