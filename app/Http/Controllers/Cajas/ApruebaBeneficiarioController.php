@@ -20,6 +20,7 @@ use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
@@ -89,13 +90,8 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     /**
      * index function
-     *
      * @changed [2023-12-20]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  string  $estado
-     * @return void
      */
     public function index()
     {
@@ -122,12 +118,8 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     /**
      * buscar function
-     *
      * @changed [2023-12-20]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return void
      */
     public function buscar(Request $request, string $estado = 'P')
     {
@@ -192,8 +184,8 @@ class ApruebaBeneficiarioController extends ApplicationController
             // Columnas de Mercurio34
             $columns = [
                 'Identificación' => 'numdoc',
-                'Nombres' => fn ($r) => trim(($r->prinom ?? '').' '.($r->segnom ?? '')),
-                'Apellidos' => fn ($r) => trim(($r->priape ?? '').' '.($r->segape ?? '')),
+                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
+                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
                 'Cédula Trabajador' => 'cedtra',
                 'Estado' => 'estado',
                 'Fecha Solicitud' => 'fecsol',
@@ -203,7 +195,7 @@ class ApruebaBeneficiarioController extends ApplicationController
             $gen = (new ReportGenerator($strategy))
                 ->for(Mercurio34::query())
                 ->columns($columns)
-                ->filename('mercurio34_'.now()->format('Ymd_His').'.'.$ext)
+                ->filename('mercurio34_' . now()->format('Ymd_His') . '.' . $ext)
                 ->filter(function ($q) use ($filtro) {
                     if (is_string($filtro) && trim($filtro) !== '') {
                         $q->whereRaw($filtro);
@@ -725,6 +717,8 @@ class ApruebaBeneficiarioController extends ApplicationController
             $mercurio10->fecsis = $today->format('Y-m-d H:i:s');
             $mercurio10->save();
 
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+
             $beneficiario = Mercurio34::where('id', $id)->first();
 
             $procesadorComando = new ApiSubsidio;
@@ -760,7 +754,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
                 'comando' => $comando,
                 'errors' => $e->render($request),
             ];
@@ -991,7 +985,7 @@ class ApruebaBeneficiarioController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),

@@ -9,7 +9,6 @@ use App\Http\Resources\ErrorResource;
 use App\Library\Collections\ParamsIndependiente;
 use App\Library\Collections\ParamsPensionado;
 use App\Models\Adapter\DbBase;
-use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
 use App\Models\Mercurio10;
@@ -18,19 +17,18 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Aprueba\ApruebaSolicitud;
+use App\Services\CajaServices\PensionadoServices;
 use App\Services\Reports\CsvReportStrategy;
 use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
-use App\Services\Aprueba\ApruebaSolicitud;
-use App\Services\CajaServices\PensionadoServices;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 
 class ApruebaPensionadoController extends ApplicationController
 {
@@ -106,7 +104,7 @@ class ApruebaPensionadoController extends ApplicationController
     {
         try {
             $format = $request->query('format', 'csv');
-            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $strategy = $format === 'excel' ? new ExcelReportStrategy : new CsvReportStrategy;
             $ext = $format === 'excel' ? 'xlsx' : 'csv';
 
             // Base del filtro igual que en buscar/aplicarFiltro
@@ -129,8 +127,8 @@ class ApruebaPensionadoController extends ApplicationController
             // Columnas de Mercurio38
             $columns = [
                 'Cédula' => 'cedtra',
-                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
-                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
+                'Nombres' => fn ($r) => trim(($r->prinom ?? '').' '.($r->segnom ?? '')),
+                'Apellidos' => fn ($r) => trim(($r->priape ?? '').' '.($r->segape ?? '')),
                 'Nit Empresa' => 'cedtra',
                 'Estado' => 'estado',
                 'Fecha Solicitud' => 'fecsol',
@@ -140,7 +138,7 @@ class ApruebaPensionadoController extends ApplicationController
             $gen = (new ReportGenerator($strategy))
                 ->for(Mercurio38::query())
                 ->columns($columns)
-                ->filename('mercurio38_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filename('mercurio38_'.now()->format('Ymd_His').'.'.$ext)
                 ->filter(function ($q) use ($filtro) {
                     if (is_string($filtro) && trim($filtro) !== '') {
                         $q->whereRaw($filtro);
@@ -262,9 +260,9 @@ class ApruebaPensionadoController extends ApplicationController
             }
 
             $pensionadoServices = new PensionadoServices;
-            $mercurio38 = Mercurio38::where("id", $id)->first();
+            $mercurio38 = Mercurio38::where('id', $id)->first();
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -274,7 +272,7 @@ class ApruebaPensionadoController extends ApplicationController
             $paramsPensionado = new ParamsPensionado;
             $paramsPensionado->setDatosCaptura($ps->toArray());
 
-            $det_tipo = Mercurio06::where("tipo", $mercurio38->tipo)->first()->getDetalle();
+            $det_tipo = Mercurio06::where('tipo', $mercurio38->tipo)->first()->getDetalle();
 
             $this->setParamToView('adjuntos', $pensionadoServices->adjuntos($mercurio38));
 
@@ -300,7 +298,7 @@ class ApruebaPensionadoController extends ApplicationController
                 '_codgir' => ParamsPensionado::getCodigoGiro(),
             ])->render();
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -347,16 +345,13 @@ class ApruebaPensionadoController extends ApplicationController
 
     /**
      * aprueba function
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function aprueba(Request $request): JsonResponse
     {
         $this->db->begin();
         try {
             try {
-                $apruebaSolicitud = new ApruebaSolicitud();
+                $apruebaSolicitud = new ApruebaSolicitud;
                 $calemp = 'P';
                 $solicitud = $apruebaSolicitud->main(
                     $calemp,
@@ -369,10 +364,12 @@ class ApruebaPensionadoController extends ApplicationController
                 return ApiResource::success([], 'Registro completado con éxito')->response();
             } catch (DebugException $e) {
                 $this->db->rollback();
+
                 return response()->json($e->render($request));
             }
         } catch (\Exception $e) {
             $this->db->rollback();
+
             return ErrorResource::errorResponse($e->getMessage(), $e->getTraceAsString())->response();
         }
     }
@@ -456,12 +453,12 @@ class ApruebaPensionadoController extends ApplicationController
             $nota = $request->input('nota');
             $today = Carbon::now();
 
-            Mercurio38::where("id", $id)->update([
+            Mercurio38::where('id', $id)->update([
                 'estado' => 'A',
                 'fecest' => $today->format('Y-m-d'),
             ]);
 
-            $item = Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->max('item') + 1;
+            $item = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
             $mercurio10 = new Mercurio10;
             $mercurio10->tipopc = $this->tipopc;
             $mercurio10->numero = $id;
@@ -471,6 +468,8 @@ class ApruebaPensionadoController extends ApplicationController
             $mercurio10->fecsis = $today->format('Y-m-d');
             $mercurio10->save();
 
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+
             $response = [
                 'success' => true,
                 'msj' => 'Movimiento realizado con éxito',
@@ -478,12 +477,12 @@ class ApruebaPensionadoController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
             ];
         } catch (\Exception $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
             ];
         }
 
@@ -517,7 +516,7 @@ class ApruebaPensionadoController extends ApplicationController
             exit();
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -566,7 +565,7 @@ class ApruebaPensionadoController extends ApplicationController
         $this->setParamToView('idModel', $id);
         $this->setParamToView('det_tipo', Mercurio06::whereRaw("tipo = '{$mercurio38->getTipo()}'")->first()->getDetalle());
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -579,7 +578,7 @@ class ApruebaPensionadoController extends ApplicationController
 
         // $this->loadParametrosView();
         $this->pensionadoServices->loadDisplay($mercurio38);
-        $this->setParamToView('title', 'Editar Ficha Pensionado ' . $mercurio38->getCedtra());
+        $this->setParamToView('title', 'Editar Ficha Pensionado '.$mercurio38->getCedtra());
     }
 
     public function editaEmpresa(Request $request)
@@ -700,7 +699,7 @@ class ApruebaPensionadoController extends ApplicationController
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
 
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'AportesEmpresas',
@@ -721,7 +720,7 @@ class ApruebaPensionadoController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
             ];
         }
 
@@ -748,7 +747,7 @@ class ApruebaPensionadoController extends ApplicationController
                 throw new DebugException('Los datos del pensionado no son validos para procesar.', 501);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -762,7 +761,7 @@ class ApruebaPensionadoController extends ApplicationController
             $out = $ps->toArray();
             $pensionadoSisu = $out['data'];
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -828,7 +827,7 @@ class ApruebaPensionadoController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
@@ -843,7 +842,7 @@ class ApruebaPensionadoController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',

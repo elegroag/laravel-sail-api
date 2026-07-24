@@ -45,6 +45,7 @@ class Mercurio10Factory extends Factory
             'fecsis' => $fecsis,
             'campos_corregir' => $camposCorregir,
             'ruuid' => $ruuid,
+            'cerrada' => $this->faker->randomElement(['S', 'N']),
         ];
     }
 

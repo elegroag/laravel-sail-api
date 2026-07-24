@@ -8,6 +8,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio45;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\Table;
 use Carbon\Carbon;
@@ -99,11 +100,11 @@ class CertificadosServices
                 $id = $entity->getId();
 
                 $this->table->add_row(
-                    "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>" .
-                        "<a data-cid='{$id}' data-toggle='file' class='btn btn-xs btn-success text-white' data-path='{$mercurio01->getPath()}' data-file='{$entity->getArchivo()}'>" .
+                    "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>".
+                        "<a data-cid='{$id}' data-toggle='file' class='btn btn-xs btn-success text-white' data-path='{$mercurio01->getPath()}' data-file='{$entity->getArchivo()}'>".
                         "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span></a>",
                     "<i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span>",
-                    $entity->getCedtra() . ' | ' . $entity->getNombre(),
+                    $entity->getCedtra().' | '.$entity->getNombre(),
                     $entity->getFecha(),
                     $entity->getNomcer()
                 );
@@ -180,10 +181,12 @@ class CertificadosServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage() . '<br/>';
+                $msj .= $mess->getMessage().'<br/>';
             }
-            throw new DebugException('Error ' . $msj, 501);
+            throw new DebugException('Error '.$msj, 501);
         }
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -225,11 +228,13 @@ class CertificadosServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message . '<br/>';
+                $msj .= $message.'<br/>';
             }
-            throw new Exception('Error ' . $msj, 501);
+            throw new Exception('Error '.$msj, 501);
         }
         Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -247,10 +252,10 @@ class CertificadosServices
      */
     public function msjDevolver($mercurio45, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por el trabajador: {$mercurio45->getPrinom()} {$mercurio45->getSegnom()} {$mercurio45->getPriape()} {$mercurio45->getSegape()} con identificación: {$mercurio45->getCedtra()}.<br/>" .
-            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por el trabajador: {$mercurio45->getPrinom()} {$mercurio45->getSegnom()} {$mercurio45->getPriape()} {$mercurio45->getSegape()} con identificación: {$mercurio45->getCedtra()}.<br/>".
+            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -267,10 +272,10 @@ class CertificadosServices
      */
     public function msjRechazar($mercurio45, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por el trabajador:  {$mercurio45->getPrinom()} {$mercurio45->getSegnom()} {$mercurio45->getPriape()} {$mercurio45->getSegape()} con identificación: {$mercurio45->getCedtra()}.<br/>" .
-            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por el trabajador:  {$mercurio45->getPrinom()} {$mercurio45->getSegnom()} {$mercurio45->getPriape()} {$mercurio45->getSegape()} con identificación: {$mercurio45->getCedtra()}.<br/>".
+            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 

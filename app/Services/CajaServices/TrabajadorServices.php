@@ -7,6 +7,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio31;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\Table;
 use Carbon\Carbon;
@@ -14,25 +15,15 @@ use Exception;
 
 class TrabajadorServices
 {
-    private $orderpag = 'fecsol';
+    private string $orderpag = 'fecsol';
 
-    private $tipopc = '1';
+    private string $tipopc = '1';
 
-    private $controller_name;
+    private string $controller_name;
 
-    /**
-     * registroSeguimiento variable
-     *
-     * @var RegistroSeguimiento
-     */
-    private $registroSeguimiento;
+    private RegistroSeguimiento $registroSeguimiento;
 
-    /**
-     * table variable
-     *
-     * @var Table
-     */
-    private $table;
+    private Table $table;
 
     public function __construct()
     {
@@ -47,11 +38,8 @@ class TrabajadorServices
      * @changed [2023-12-19]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $query
-     * @return void
      */
-    public function findPagination($query)
+    public function findPagination(string $query): mixed
     {
         return Mercurio31::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
@@ -62,11 +50,8 @@ class TrabajadorServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  object  $paginate
-     * @return void
      */
-    public function showTabla($paginate)
+    public function showTabla(object $paginate): string
     {
         $this->table->set_template($this->getTemplateTable());
         $this->table->set_heading(
@@ -102,7 +87,7 @@ class TrabajadorServices
                     "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>",
                     " <i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span> ",
                     $entity->getCedtra(),
-                    $entity->getPrinom() . ' ' . $entity->getSegnom() . ' ' . $entity->getPriape() . ' ' . $entity->getSegape(),
+                    $entity->getPrinom().' '.$entity->getSegnom().' '.$entity->getPriape().' '.$entity->getSegape(),
                     $entity->getNit(),
                     $entity->getEstadoDetalle(),
                     $entity->getFecsol()
@@ -120,13 +105,10 @@ class TrabajadorServices
      * getTemplateTable function
      *
      * @changed [2023-12-19]
-
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return void
      */
-    public function getTemplateTable()
+    public function getTemplateTable(): array
     {
         return Table::TmpGeneral();
     }
@@ -137,11 +119,8 @@ class TrabajadorServices
      * @changed [2023-12-19]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio31  $mercurio31
-     * @return void
      */
-    public function loadDisplay($mercurio31)
+    public function loadDisplay(Mercurio31 $mercurio31): void
     {
         Tag::displayTo('tipdoc', $mercurio31->getTipdoc());
         Tag::displayTo('nit', $mercurio31->getNit());
@@ -167,13 +146,8 @@ class TrabajadorServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio31
-     * @param [type] $nota
-     * @param [type] $codest
-     * @return void
      */
-    public function rechazar($mercurio31, $nota, $codest)
+    public function rechazar(Mercurio31 $mercurio31, string $nota, string $codest): bool
     {
         $today = Carbon::now();
         $id = $mercurio31->getId();
@@ -196,10 +170,12 @@ class TrabajadorServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage() . '<br/>';
+                $msj .= $mess->getMessage().'<br/>';
             }
-            throw new DebugException('Error ' . $msj, 501);
+            throw new DebugException('Error '.$msj, 501);
         }
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -210,15 +186,13 @@ class TrabajadorServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio31
-     * @param [type] $nota
-     * @param [type] $codest
-     * @param  string  $campos_corregir
-     * @return void
      */
-    public function devolver($mercurio31, $nota, $codest, $campos_corregir = '')
-    {
+    public function devolver(
+        Mercurio31 $mercurio31,
+        string $nota,
+        string $codest,
+        ?string $campos_corregir = null
+    ): bool {
         $today = Carbon::now();
         $id = $mercurio31->getId();
         $fecest = $today->format('Y-m-d');
@@ -241,11 +215,13 @@ class TrabajadorServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message . '<br/>';
+                $msj .= $message.'<br/>';
             }
-            throw new Exception('Error ' . $msj, 501);
+            throw new Exception('Error '.$msj, 501);
         }
         Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -256,17 +232,13 @@ class TrabajadorServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio31
-     * @param [type] $nota
-     * @return void
      */
-    public function msjDevolver($mercurio31, $nota)
+    public function msjDevolver(Mercurio31 $mercurio31, string $nota): string
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por el trabajador: {$mercurio31->getPrinom()} {$mercurio31->getSegnom()} {$mercurio31->getPriape()} {$mercurio31->getSegape()} con identificación: {$mercurio31->getCedtra()}.<br/>" .
-            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por el trabajador: {$mercurio31->getPrinom()} {$mercurio31->getSegnom()} {$mercurio31->getPriape()} {$mercurio31->getSegape()} con identificación: {$mercurio31->getCedtra()}.<br/>".
+            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -276,17 +248,13 @@ class TrabajadorServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio31
-     * @param [type] $nota
-     * @return void
      */
-    public function msjRechazar($mercurio31, $nota)
+    public function msjRechazar(Mercurio31 $mercurio31, string $nota): string
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por el trabajador:  {$mercurio31->getPrinom()} {$mercurio31->getSegnom()} {$mercurio31->getPriape()} {$mercurio31->getSegape()} con identificación: {$mercurio31->getCedtra()}.<br/>" .
-            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por el trabajador:  {$mercurio31->getPrinom()} {$mercurio31->getSegnom()} {$mercurio31->getPriape()} {$mercurio31->getSegape()} con identificación: {$mercurio31->getCedtra()}.<br/>".
+            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -296,11 +264,8 @@ class TrabajadorServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio31
-     * @return void
      */
-    public function adjuntos($mercurio31)
+    public function adjuntos(Mercurio31 $mercurio31): mixed
     {
         return $this->registroSeguimiento->loadAdjuntos($this->tipopc, $mercurio31);
     }
@@ -311,11 +276,8 @@ class TrabajadorServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio31
-     * @return void
      */
-    public function seguimiento($mercurio31)
+    public function seguimiento(Mercurio31 $mercurio31): mixed
     {
         return $this->registroSeguimiento->consultaSeguimiento($this->tipopc, $mercurio31);
     }

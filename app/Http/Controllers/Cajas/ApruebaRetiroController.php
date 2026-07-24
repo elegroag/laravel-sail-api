@@ -7,11 +7,9 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
-use App\Models\Mercurio11;
 use App\Models\Mercurio35;
-use App\Services\Tag;
-use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\SenderEmail;
 use Illuminate\Http\Request;
 
@@ -64,6 +62,7 @@ class ApruebaRetiroController extends ApplicationController
             'cedtra' => 'Cedula',
             'nomtra' => 'Nombre',
         ];
+
         return view('cajas.aprobacionretiro.index', [
             'campo_filtro' => $campo_field,
             'title' => 'Aprobacion Retiro Trabajadores',
@@ -74,7 +73,7 @@ class ApruebaRetiroController extends ApplicationController
     {
         $this->setResponse('ajax');
         $pagina = $request->input('pagina', 1);
-        $paginate = Mercurio35::whereRaw("$this->query and estado='P' AND usuario = " . parent::getActUser())
+        $paginate = Mercurio35::whereRaw("$this->query and estado='P' AND usuario = ".parent::getActUser())
             ->paginate($this->cantidad_pagina, ['*'], 'page', $pagina);
 
         $html = $this->showTabla($paginate);
@@ -91,7 +90,7 @@ class ApruebaRetiroController extends ApplicationController
     {
         $this->setResponse('ajax');
         $id = $request->input('id');
-        $mercurio35 = Mercurio35::where("id", $id)->first();
+        $mercurio35 = Mercurio35::where('id', $id)->first();
         $response = '';
 
         $consultasOldServices = new GeneralService;
@@ -176,7 +175,7 @@ class ApruebaRetiroController extends ApplicationController
 
             $response = $this->db->begin();
             $today = new \DateTime;
-            $mercurio35 = Mercurio35::where("id", $id)->first();
+            $mercurio35 = Mercurio35::where('id', $id)->first();
             if (! $fecest) {
                 $fecest = $today->format('Y-m-d');
             }
@@ -196,7 +195,10 @@ class ApruebaRetiroController extends ApplicationController
             if (! $mercurio10->save()) {
 
                 $this->db->rollback();
+            } else {
+                Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
             }
+
             $params['nit'] = $mercurio35->getNit();
             $params['cedtra'] = $mercurio35->getCedtra();
             $params['codest'] = $mercurio35->getCodest();
@@ -262,7 +264,10 @@ class ApruebaRetiroController extends ApplicationController
             if (! $mercurio10->save()) {
 
                 $this->db->rollback();
+            } else {
+                Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
             }
+
             $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio35->getTipo()}' and coddoc='{$mercurio35->getCoddoc()}' and documento = '{$mercurio35->getDocumento()}'")->first();
             $asunto = 'Retiro Trabajador';
             $msj = 'acabas de utilizar';

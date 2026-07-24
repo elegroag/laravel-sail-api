@@ -8,27 +8,25 @@ use App\Models\Mercurio37;
 
 class SignupFacultativos implements SignupInterface
 {
-    /**
-     * solicitud variable
-     *
-     * @var Mercurio36
-     */
-    protected $solicitud;
+    protected ?Mercurio36 $solicitud;
 
-    private $tipopc = 10;
+    private string $tipopc = '10';
 
     public function __construct() {}
 
-    public function getTipopc()
+    public function getTipopc(): ?string
     {
         return $this->tipopc;
     }
 
-    public function findByDocumentTemp($documento, $coddoc, $calemp = '')
-    {
-        $this->solicitud = Mercurio36::where("coddoc", $coddoc)
-            ->where("documento", $documento)
-            ->where("estado", 'T')
+    public function findByDocumentTemp(
+        int $documento,
+        int $coddoc,
+        string $calemp = ''
+    ): mixed {
+        $this->solicitud = Mercurio36::where('coddoc', $coddoc)
+            ->where('documento', $documento)
+            ->where('estado', 'T')
             ->first();
 
         if ($this->solicitud == false) {
@@ -38,13 +36,7 @@ class SignupFacultativos implements SignupInterface
         return $this->solicitud;
     }
 
-    /**
-     * create function
-     *
-     * @param  array  $data
-     * @return void
-     */
-    public function createSignupService($data)
+    public function createSignupService(?array $data = null): void
     {
         $solicitud = new Mercurio36($data);
         $solicitud->documento = $data['documento'];
@@ -92,6 +84,8 @@ class SignupFacultativos implements SignupInterface
 
         $segnom = '';
         $segape = '';
+        $prinom = '';
+        $priape = '';
         if (strlen($data['repleg']) > 0) {
             $exp = explode(' ', trim($data['repleg']));
             switch (count($exp)) {
@@ -101,13 +95,13 @@ class SignupFacultativos implements SignupInterface
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4] . ' ' . $exp[5];
+                    $segape = $exp[3].' '.$exp[4].' '.$exp[5];
                     break;
                 case 5:
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4];
+                    $segape = $exp[3].' '.$exp[4];
                     break;
                 case 4:
                     $prinom = $exp[0];
@@ -117,7 +111,7 @@ class SignupFacultativos implements SignupInterface
                     break;
                 case 3:
                     $prinom = $exp[0];
-                    $priape = $exp[1] . ' ' . $exp[2];
+                    $priape = $exp[1].' '.$exp[2];
                     break;
                 case 2:
                     $prinom = $exp[0];
@@ -142,8 +136,8 @@ class SignupFacultativos implements SignupInterface
         $this->solicitud = $solicitud;
     }
 
-    public function getSolicitud()
+    public function getSolicitud(): mixed
     {
-        return $this->solicitud;
+        return $this->solicitud ?? null;
     }
 }

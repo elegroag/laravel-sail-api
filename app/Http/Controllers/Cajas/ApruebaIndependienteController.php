@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsIndependiente;
 use App\Models\Adapter\DbBase;
-use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio06;
@@ -23,8 +22,8 @@ use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Utils\CalculatorDias;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
@@ -79,6 +78,7 @@ class ApruebaIndependienteController extends ApplicationController
         set_flashdata('filter_independiente', $query, true);
         set_flashdata('filter_mercurio41', $pagination->filters, true);
         $response = $pagination->render(new IndependienteServices);
+
         return response()->json($response);
     }
 
@@ -90,7 +90,7 @@ class ApruebaIndependienteController extends ApplicationController
     {
         try {
             $format = $request->query('format', 'csv');
-            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $strategy = $format === 'excel' ? new ExcelReportStrategy : new CsvReportStrategy;
             $ext = $format === 'excel' ? 'xlsx' : 'csv';
 
             // Base del filtro igual que en buscar/aplicarFiltro
@@ -123,7 +123,7 @@ class ApruebaIndependienteController extends ApplicationController
             $gen = (new ReportGenerator($strategy))
                 ->for(Mercurio41::query())
                 ->columns($columns)
-                ->filename('mercurio41_' . now()->format('Ymd_His') . '.' . $ext)
+                ->filename('mercurio41_'.now()->format('Ymd_His').'.'.$ext)
                 ->filter(function ($q) use ($filtro) {
                     if (is_string($filtro) && trim($filtro) !== '') {
                         $q->whereRaw($filtro);
@@ -175,7 +175,7 @@ class ApruebaIndependienteController extends ApplicationController
         $help = 'Esta opcion permite manejar los ';
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprobacion Empresa');
-        $mercurio41 = Mercurio41::whereRaw("estado='{$estado}' AND usuario=" . $this->user['usuario'])->orderBy('fecini', 'ASC')->get();
+        $mercurio41 = Mercurio41::whereRaw("estado='{$estado}' AND usuario=".$this->user['usuario'])->orderBy('fecini', 'ASC')->get();
         $empresas = [];
         foreach ($mercurio41 as $ai => $mercurio) {
             $background = '';
@@ -190,9 +190,9 @@ class ApruebaIndependienteController extends ApplicationController
             }
 
             if ($mercurio->getEstado() == 'A') {
-                $url = config('app.url') . 'Cajas/aprobaindepen/infoAprobadoView/' . $mercurio->getId();
+                $url = config('app.url').'Cajas/aprobaindepen/infoAprobadoView/'.$mercurio->getId();
             } else {
-                $url = config('app.url') . 'Cajas/aprobaindepen/info_empresa/' . $mercurio->getId();
+                $url = config('app.url').'Cajas/aprobaindepen/info_empresa/'.$mercurio->getId();
             }
 
             $sat = 'NORMAL';
@@ -270,7 +270,7 @@ class ApruebaIndependienteController extends ApplicationController
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio41 = Mercurio41::where("id", $id)->first();
+            $mercurio41 = Mercurio41::where('id', $id)->first();
             if ($mercurio41->estado == 'D') {
                 throw new DebugException('El registro ya se encuentra devuelto, no se requiere de repetir la acción.', 201);
             }
@@ -345,12 +345,12 @@ class ApruebaIndependienteController extends ApplicationController
             $nota = $request->input('nota');
             $today = Carbon::now();
 
-            Mercurio41::where("id", $id)->update([
+            Mercurio41::where('id', $id)->update([
                 'estado' => 'A',
                 'fecest' => $today->format('Y-m-d'),
             ]);
 
-            $item = Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->max('item') + 1;
+            $item = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
             $mercurio10 = new Mercurio10;
             $mercurio10->tipopc = $this->tipopc;
             $mercurio10->numero = $id;
@@ -360,6 +360,8 @@ class ApruebaIndependienteController extends ApplicationController
             $mercurio10->fecsis = $today->format('Y-m-d');
             $mercurio10->save();
 
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+
             $response = [
                 'success' => true,
                 'msj' => 'Movimiento realizado con éxito',
@@ -367,12 +369,12 @@ class ApruebaIndependienteController extends ApplicationController
         } catch (DebugException $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
             ];
         } catch (\Exception $e) {
             $response = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$e->getMessage()."\n ".$e->getLine(),
             ];
         }
 
@@ -428,7 +430,7 @@ class ApruebaIndependienteController extends ApplicationController
                 throw new DebugException('Los datos de la empresa no está disponible en SISUWEB.', 503);
             }
 
-            $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: ' . $mercurio41->getCedtra();
+            $asunto = 'Afiliacion de la empresa realizada con Exito. Nit: '.$mercurio41->getCedtra();
             $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio41->getTipo()}' and coddoc='{$mercurio41->getCoddoc()}' and documento='{$mercurio41->getDocumento()}'")->first();
             if (! $mercurio07) {
                 throw new DebugException('Error no hay usuario empresa para el servicio de autogestión de comfaca en línea.', 504);
@@ -557,8 +559,6 @@ class ApruebaIndependienteController extends ApplicationController
     /**
      * infor function
      * mostrar la ficha de afiliación de la empresa
-     *
-     * @return JsonResponse
      */
     public function infor(Request $request): JsonResponse
     {
@@ -569,8 +569,8 @@ class ApruebaIndependienteController extends ApplicationController
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
-            $mercurio41 = Mercurio41::where("id", $id)->first();
-            $procesadorComando = new ApiSubsidio();
+            $mercurio41 = Mercurio41::where('id', $id)->first();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -585,7 +585,7 @@ class ApruebaIndependienteController extends ApplicationController
             $htmlEmpresa = view('cajas/aprobaindepen/tmp/consulta', [
                 'mercurio41' => $mercurio41,
                 'mercurio01' => Mercurio01::first(),
-                'det_tipo' => Mercurio06::where("tipo", $mercurio41->tipo)->first()->getDetalle(),
+                'det_tipo' => Mercurio06::where('tipo', $mercurio41->tipo)->first()->getDetalle(),
                 '_coddoc' => ParamsIndependiente::getTipoDocumentos(),
                 '_calemp' => ParamsIndependiente::getCalidadEmpresa(),
                 '_codciu' => ParamsIndependiente::getCiudades(),
@@ -601,7 +601,7 @@ class ApruebaIndependienteController extends ApplicationController
                 '_tipafi' => ParamsIndependiente::getTipoAfiliado(),
             ])->render();
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -647,7 +647,7 @@ class ApruebaIndependienteController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -718,7 +718,7 @@ class ApruebaIndependienteController extends ApplicationController
         $this->setParamToView('seguimiento', $this->independienteServices->seguimiento($mercurio41));
 
         $mercurio01 = Mercurio01::first();
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -735,7 +735,7 @@ class ApruebaIndependienteController extends ApplicationController
         $this->setParamToView('idModel', $id);
         $this->setParamToView('det_tipo', Mercurio06::whereRaw("tipo = '{$mercurio41->getTipo()}'")->first()->getDetalle());
         $this->setParamToView('mercurio01', $mercurio01);
-        $this->setParamToView('title', 'Editar Ficha Independiente ' . $mercurio41->getCedtra());
+        $this->setParamToView('title', 'Editar Ficha Independiente '.$mercurio41->getCedtra());
     }
 
     public function editaEmpresa()
@@ -831,7 +831,7 @@ class ApruebaIndependienteController extends ApplicationController
             exit();
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -951,7 +951,7 @@ class ApruebaIndependienteController extends ApplicationController
         $this->db->begin();
         try {
             try {
-                $apruebaSolicitud = new ApruebaSolicitud();
+                $apruebaSolicitud = new ApruebaSolicitud;
                 $postData = $request->all();
                 $idSolicitud = $request->input('id');
                 $calemp = 'I';
@@ -981,6 +981,7 @@ class ApruebaIndependienteController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
+
         return response()->json($salida);
     }
 
@@ -1013,14 +1014,14 @@ class ApruebaIndependienteController extends ApplicationController
                 'code' => 201,
             ]);
 
-            return redirect('aprobaindepen/info/' . $id);
+            return redirect('aprobaindepen/info/'.$id);
             exit();
         }
 
         $this->setParamToView('hide_header', true);
         $this->setParamToView('idModel', $id);
         $this->setParamToView('cedtra', $mercurio41->getCedtra());
-        $this->setParamToView('title', 'Aportes de empresa ' . $mercurio41->getCedtra());
+        $this->setParamToView('title', 'Aportes de empresa '.$mercurio41->getCedtra());
     }
 
     /**
@@ -1040,7 +1041,7 @@ class ApruebaIndependienteController extends ApplicationController
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
 
-                $procesadorComando = new ApiSubsidio();
+                $procesadorComando = new ApiSubsidio;
                 $procesadorComando->send(
                     [
                         'servicio' => 'AportesEmpresas',
@@ -1061,7 +1062,7 @@ class ApruebaIndependienteController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
             ];
         }
 
@@ -1083,7 +1084,7 @@ class ApruebaIndependienteController extends ApplicationController
                 throw new DebugException('La empresa no se encuentra aprobada para consultar sus datos.', 501);
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -1094,7 +1095,7 @@ class ApruebaIndependienteController extends ApplicationController
             $paramsEmpresa = new ParamsIndependiente;
             $paramsEmpresa->setDatosCaptura($datos_captura);
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -1142,7 +1143,7 @@ class ApruebaIndependienteController extends ApplicationController
             $this->setParamToView('hide_header', true);
             $this->setParamToView('idModel', $id);
             $this->setParamToView('nit', $mercurio41->getCedtra());
-            $this->setParamToView('title', 'Empresa Aprobada ' . $mercurio41->getCedtra());
+            $this->setParamToView('title', 'Empresa Aprobada '.$mercurio41->getCedtra());
         } catch (DebugException $err) {
             set_flashdata('error', [
                 'msj' => $err->getMessage(),
@@ -1166,12 +1167,12 @@ class ApruebaIndependienteController extends ApplicationController
 
         try {
             $id = $request->input('id');
-            $mercurio41 = Mercurio41::where("id", $id)->first();
+            $mercurio41 = Mercurio41::where('id', $id)->first();
             if (! $mercurio41) {
                 throw new DebugException('Los datos de la empresa no son validos para procesar.', 501);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -1255,7 +1256,7 @@ class ApruebaIndependienteController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
                 'isDeleteTrayecto' => false,

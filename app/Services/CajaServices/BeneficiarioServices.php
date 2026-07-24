@@ -5,8 +5,8 @@ namespace App\Services\CajaServices;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio10;
 use App\Models\Mercurio34;
-use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\Table;
 use Carbon\Carbon;
@@ -14,25 +14,11 @@ use Exception;
 
 class BeneficiarioServices
 {
-    private $orderpag = 'fecsol';
-
-    private $tipopc = '4';
-
-    private $controller_name;
-
-    /**
-     * registroSeguimiento variable
-     *
-     * @var RegistroSeguimiento
-     */
-    private $registroSeguimiento;
-
-    /**
-     * table variable
-     *
-     * @var Table
-     */
-    private $table;
+    private string $orderpag = 'fecsol';
+    private string $tipopc = '4';
+    private string $controller_name;
+    private RegistroSeguimiento $registroSeguimiento;
+    private Table $table;
 
     public function __construct()
     {
@@ -43,30 +29,20 @@ class BeneficiarioServices
 
     /**
      * findPagination function
-     *
      * @changed [2023-12-19]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $query
-     * @return void
      */
-    public function findPagination($query)
+    public function findPagination(string $query): mixed
     {
         return Mercurio34::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
     /**
      * showTabla function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  object  $paginate
-     * @return void
      */
-    public function showTabla($paginate)
+    public function showTabla(object $paginate): string
     {
         $this->table->set_template($this->getTemplateTable());
         $this->table->set_heading(
@@ -117,62 +93,30 @@ class BeneficiarioServices
 
     /**
      * getTemplateTable function
-     *
      * @changed [2023-12-19]
-
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return void
      */
-    public function getTemplateTable()
+    public function getTemplateTable(): array
     {
         return Table::TmpGeneral();
     }
 
     /**
      * loadDisplay function
-     *
-     * @changed [2023-12-19]
-     *
-     * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio34  $mercurio34
-     * @return void
      */
-    public function loadDisplay($mercurio34)
-    {
-        /* Tag::displayTo("tipdoc", $mercurio34->getTipdoc());
-        Tag::displayTo("cedtra", $mercurio34->getCedtra());
-        Tag::displayTo("cedcon", $mercurio34->getCedcon());
-        Tag::displayTo("id", $mercurio34->getId());
-        Tag::displayTo("telefono", $mercurio34->getTelefono());
-        Tag::displayTo("celular", $mercurio34->getCelular());
-        Tag::displayTo("email", $mercurio34->getEmail());
-        Tag::displayTo("prinom", $mercurio34->getPrinom());
-        Tag::displayTo("segnom", $mercurio34->getSegnom());
-        Tag::displayTo("priape", $mercurio34->getPriape());
-        Tag::displayTo("segape", $mercurio34->getSegape());
-        Tag::displayTo("direccion", $mercurio34->getDireccion());
-        Tag::displayTo("fecsol", $mercurio34->getFecsol()->getCurrentDate());
-        Tag::displayTo("codciu", $mercurio34->getCodciu());
-        Tag::displayTo("codzon", $mercurio34->getCodzon()); */
-    }
+    public function loadDisplay() {}
 
     /**
      * rechazar function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio34
-     * @param [type] $nota
-     * @param [type] $codest
-     * @return void
+     * @return bool
      */
-    public function rechazar($mercurio34, $nota, $codest)
-    {
+    public function rechazar(
+        Mercurio34 $mercurio34,
+        string $nota,
+        string $codest
+    ): bool {
         $today = Carbon::now();
         $id = $mercurio34->getId();
         $mercurio34->setEstado('X');
@@ -199,24 +143,22 @@ class BeneficiarioServices
             throw new DebugException('Error ' . $msj, 501);
         }
 
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+
         return true;
     }
 
     /**
      * devolver function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio34
-     * @param [type] $nota
-     * @param [type] $codest
-     * @param  string  $campos_corregir
-     * @return void
      */
-    public function devolver($mercurio34, $nota, $codest, $campos_corregir = '')
-    {
+    public function devolver(
+        Mercurio34 $mercurio34,
+        string $nota,
+        string $codest,
+        ?string $campos_corregir = null
+    ): bool {
         $today = Carbon::now();
         $id = $mercurio34->getId();
         $fecest = $today->format('Y-m-d');
@@ -244,21 +186,17 @@ class BeneficiarioServices
             throw new Exception('Error ' . $msj, 501);
         }
         Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+
         return true;
     }
 
     /**
      * msjDevolver function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio34
-     * @param [type] $nota
-     * @return void
      */
-    public function msjDevolver($mercurio34, $nota)
+    public function msjDevolver(Mercurio34 $mercurio34, string $nota): string
     {
         return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
             "emitida por el trabajador: {$mercurio34->getPrinom()} {$mercurio34->getSegnom()} {$mercurio34->getPriape()} {$mercurio34->getSegape()} con identificación: {$mercurio34->getCedtra()}.<br/>" .
@@ -269,16 +207,10 @@ class BeneficiarioServices
 
     /**
      * msjRechazar function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio34
-     * @param [type] $nota
-     * @return void
      */
-    public function msjRechazar($mercurio34, $nota)
+    public function msjRechazar(Mercurio34 $mercurio34, string $nota): string
     {
         return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
             "emitida por el trabajador:  {$mercurio34->getPrinom()} {$mercurio34->getSegnom()} {$mercurio34->getPriape()} {$mercurio34->getSegape()} con identificación: {$mercurio34->getCedtra()}.<br/>" .
@@ -289,46 +221,33 @@ class BeneficiarioServices
 
     /**
      * adjuntos function
-     *
      * @changed [2023-12-27]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio34
-     * @return void
      */
-    public function adjuntos($mercurio34)
+    public function adjuntos(Mercurio34 $mercurio34): mixed
     {
         return $this->registroSeguimiento->loadAdjuntos($this->tipopc, $mercurio34);
     }
 
     /**
      * seguimiento function
-     *
      * @changed [2023-12-27]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio34
-     * @return void
      */
-    public function seguimiento($mercurio34)
+    public function seguimiento(Mercurio34 $mercurio34): mixed
     {
         return $this->registroSeguimiento->consultaSeguimiento($this->tipopc, $mercurio34);
     }
 
     /**
      * dataOptional function
-     *
      * @changed [2023-12-00]
-     *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  array  $mercurio34
-     * @return void
      */
-    public function dataOptional($mercurio34, $estado = 'P')
-    {
+    public function dataOptional(
+        Mercurio34 $mercurio34,
+        string $estado = 'P'
+    ): ?array {
         $beneficiarios = [];
         foreach ($mercurio34 as $ai => $mercurio) {
             $background = '';

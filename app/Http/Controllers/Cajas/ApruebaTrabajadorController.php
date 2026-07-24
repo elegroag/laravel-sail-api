@@ -22,6 +22,7 @@ use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
@@ -932,6 +933,8 @@ class ApruebaTrabajadorController extends ApplicationController
             $mercurio10->setNota($nota);
             $mercurio10->setFecsis($today->format('Y-m-d'));
             $mercurio10->save();
+
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
             $response = [
                 'success' => true,

@@ -2,9 +2,7 @@
 
 namespace App\Services\Utils;
 
-use App\Models\Mercurio01;
 use App\Models\Mercurio10;
-use App\Models\Mercurio12;
 use App\Models\Mercurio37;
 use Illuminate\Support\Facades\DB;
 
@@ -35,6 +33,10 @@ class RegistroSeguimiento
         $mercurio10->setNota($nota);
         $mercurio10->setFecsis(date('Y-m-d'));
         $mercurio10->save();
+
+        if (in_array(strtoupper((string) $estado), Mercurio10Cierre::ESTADOS_CIERRE, true)) {
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+        }
     }
 
     /**
@@ -46,7 +48,6 @@ class RegistroSeguimiento
      *
      * @param  int  $tipopc
      * @param  object  $mercurio
-     * @return string
      */
     public function consultaSeguimiento($tipopc, $mercurio): string
     {
@@ -103,7 +104,7 @@ class RegistroSeguimiento
             ->join('mercurio12', 'mercurio37.coddoc', '=', 'mercurio12.coddoc')
             ->get();
 
-        return view('partials.adjuntos', compact('mercurio37', 'id'))->render();;
+        return view('partials.adjuntos', compact('mercurio37', 'id'))->render();
     }
 
     public function getTemplateTable()

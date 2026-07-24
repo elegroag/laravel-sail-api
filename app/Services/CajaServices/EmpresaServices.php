@@ -6,8 +6,8 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Services\Srequest;
-use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\Table;
 use Carbon\Carbon;
@@ -15,25 +15,15 @@ use Exception;
 
 class EmpresaServices
 {
-    private $orderpag = 'fecini';
+    private string $orderpag = 'fecini';
 
-    private $tipopc = '2';
+    private string $tipopc = '2';
 
-    private $controller_name;
+    private string $controller_name;
 
-    /**
-     * registroSeguimiento variable
-     *
-     * @var RegistroSeguimiento
-     */
-    private $registroSeguimiento;
+    private RegistroSeguimiento $registroSeguimiento;
 
-    /**
-     * table variable
-     *
-     * @var Table
-     */
-    private $table;
+    private Table $table;
 
     public function __construct()
     {
@@ -45,11 +35,8 @@ class EmpresaServices
 
     /**
      * showTabla function
-     *
-     * @param  object  $paginate
-     * @return string
      */
-    public function showTabla($paginate)
+    public function showTabla(object $paginate): string
     {
         $this->table->set_template($this->getTemplateTable());
         $this->table->set_heading(
@@ -95,25 +82,17 @@ class EmpresaServices
         return $this->table->generate();
     }
 
-    public function findPagination($query)
+    public function findPagination(string $query): mixed
     {
         return Mercurio30::whereRaw($query)->orderBy($this->orderpag, 'asc')->get();
     }
 
-    public function getTemplateTable()
+    public function getTemplateTable(): array
     {
         return Table::TmpGeneral();
     }
 
-    /**
-     * rechazar function
-     *
-     * @param  Mercurio30  $entity
-     * @param [type] $nota
-     * @param [type] $codest
-     * @return void
-     */
-    public function rechazar($entity, $nota, $codest)
+    public function rechazar(Mercurio30 $entity, string $nota, string $codest): bool
     {
         $today = Carbon::now();
         $id = $entity->getId();
@@ -136,25 +115,25 @@ class EmpresaServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage() . '<br/>';
+                $msj .= $mess->getMessage().'<br/>';
             }
-            throw new DebugException('Error ' . $msj, 501);
+            throw new DebugException('Error '.$msj, 501);
         }
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
 
     /**
      * devolver function
-     *
-     * @param  Mercurio30  $entity
-     * @param  string  $nota
-     * @param  string  $codest
-     * @param  string  $campos_corregir
-     * @return void
      */
-    public function devolver($entity, $nota, $codest, $campos_corregir = '')
-    {
+    public function devolver(
+        Mercurio30 $entity,
+        string $nota,
+        string $codest,
+        ?string $campos_corregir = null
+    ): bool {
         $today = Carbon::now();
         $id = $entity->getId();
         $fecest = $today->format('Y-m-d');
@@ -177,11 +156,13 @@ class EmpresaServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message . '<br/>';
+                $msj .= $message.'<br/>';
             }
-            throw new Exception('Error ' . $msj, 501);
+            throw new Exception('Error '.$msj, 501);
         }
         Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -192,17 +173,13 @@ class EmpresaServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio30  $mercurio30
-     * @param  string  $nota
-     * @return void
      */
-    public function msjDevolver($mercurio30, $nota)
+    public function msjDevolver(Mercurio30 $mercurio30, string $nota): string
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>" .
-            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>".
+            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -212,17 +189,13 @@ class EmpresaServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio30  $mercurio30
-     * @param  string  $nota
-     * @return void
      */
-    public function msjRechazar($mercurio30, $nota)
+    public function msjRechazar(Mercurio30 $mercurio30, string $nota): string
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>" .
-            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por la empresa: {$mercurio30->getRazsoc()} con NIT: {$mercurio30->getNit()}.<br/>".
+            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -232,11 +205,8 @@ class EmpresaServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio30  $mercurio30
-     * @return mixed
      */
-    public function adjuntos($mercurio30)
+    public function adjuntos(Mercurio30 $mercurio30): mixed
     {
         return $this->registroSeguimiento->loadAdjuntos($this->tipopc, $mercurio30);
     }
@@ -247,11 +217,8 @@ class EmpresaServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio30  $mercurio30
-     * @return mixed
      */
-    public function seguimiento($mercurio30)
+    public function seguimiento(Mercurio30 $mercurio30): mixed
     {
         return $this->registroSeguimiento->consultaSeguimiento($this->tipopc, $mercurio30);
     }
@@ -262,12 +229,11 @@ class EmpresaServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  array  $mercurio30
-     * @return void
      */
-    public function dataOptional($mercurio30, $estado = 'P')
-    {
+    public function dataOptional(
+        Mercurio30 $mercurio30,
+        string $estado = 'P'
+    ): ?array {
         $empresas = [];
         foreach ($mercurio30 as $ai => $mercurio) {
             $background = '';
@@ -281,9 +247,9 @@ class EmpresaServices
             }
 
             if ($mercurio->getEstado() == 'A') {
-                $url = config('app.url') . '/cajas/' . $this->controller_name . '/infoAprobadoView/' . $mercurio->getId();
+                $url = config('app.url').'/cajas/'.$this->controller_name.'/infoAprobadoView/'.$mercurio->getId();
             } else {
-                $url = config('app.url') . '/cajas/' . $this->controller_name . '/info/' . $mercurio->getId();
+                $url = config('app.url').'/cajas/'.$this->controller_name.'/info/'.$mercurio->getId();
             }
 
             $sat = 'NORMAL';
@@ -302,10 +268,10 @@ class EmpresaServices
             ];
         }
 
-        return $empresas;
+        return $empresas ?? null;
     }
 
-    public function findByUserAndEstado(Srequest $request)
+    public function findByUserAndEstado(Srequest $request): ?array
     {
         $filtro = $request->getParam('filtro');
         $usuario = $request->getParam('usuario');
@@ -333,7 +299,7 @@ class EmpresaServices
                 $style = '#61b5ff';
             }
             $method = ($row->getEstado() == 'A') ? 'infoAprobadoView' : 'info';
-            $url = config('app.url') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $row->getId();
+            $url = config('app.url').'/cajas/'.$this->controller_name.'/'.$method.'/'.$row->getId();
 
             $sat = ($row->getDocumentoRepresentanteSat() > 0) ? 'SAT' : 'NORMAL';
 
@@ -354,7 +320,7 @@ class EmpresaServices
         return $requests;
     }
 
-    private function estadoDetalleFromCode($code)
+    private function estadoDetalleFromCode(string $code): string
     {
         switch ($code) {
             case 'T':

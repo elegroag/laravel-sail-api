@@ -4,30 +4,15 @@ namespace App\Services\Signup;
 
 interface SignupInterface
 {
-    /**
-     * findByDocumentTemp function
-     *
-     * @param  int  $documento
-     * @param  int  $coddoc
-     * @param  string  $calemp
-     * @return object
-     */
-    public function findByDocumentTemp($documento, $coddoc, $calemp = '');
+    public function findByDocumentTemp(
+        int $documento,
+        int $coddoc,
+        string $calemp = ''
+    ): mixed;
 
-    /**
-     * createSignupService function
-     *
-     * @param  array  $data
-     * @return void
-     */
-    public function createSignupService($data);
+    public function createSignupService(?array $data = null): void;
 
-    /**
-     * getSolicitud function
-     *
-     * @return object
-     */
-    public function getSolicitud();
+    public function getSolicitud(): mixed;
 
-    public function getTipopc();
+    public function getTipopc(): ?string;
 }

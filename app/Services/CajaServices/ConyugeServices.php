@@ -7,6 +7,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio32;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\Table;
 use Carbon\Carbon;
@@ -38,9 +39,6 @@ class ConyugeServices
      * @changed [2023-12-19]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $query
-     * @return void
      */
     public function findPagination(string $query): Collection
     {
@@ -53,9 +51,6 @@ class ConyugeServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  object  $paginate
-     * @return void
      */
     public function showTabla(object $paginate): string
     {
@@ -93,7 +88,7 @@ class ConyugeServices
                     "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>",
                     " <i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span> ",
                     $entity->getCedcon(),
-                    $entity->getPrinom() . ' ' . $entity->getSegnom() . ' ' . $entity->getPriape() . ' ' . $entity->getSegape(),
+                    $entity->getPrinom().' '.$entity->getSegnom().' '.$entity->getPriape().' '.$entity->getSegape(),
                     $entity->getCedtra(),
                     $entity->getEstadoDetalle(),
                     $entity->getFecsol()
@@ -111,11 +106,8 @@ class ConyugeServices
      * getTemplateTable function
      *
      * @changed [2023-12-19]
-
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @return void
      */
     public function getTemplateTable(): array
     {
@@ -153,11 +145,6 @@ class ConyugeServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio32
-     * @param [type] $nota
-     * @param [type] $codest
-     * @return void
      */
     public function rechazar(Mercurio32 $mercurio32, string $nota, string $codest): bool
     {
@@ -182,10 +169,12 @@ class ConyugeServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage() . '<br/>';
+                $msj .= $mess->getMessage().'<br/>';
             }
-            throw new DebugException('Error ' . $msj, 501);
+            throw new DebugException('Error '.$msj, 501);
         }
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -196,14 +185,13 @@ class ConyugeServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio32
-     * @param [type] $nota
-     * @param [type] $codest
-     * @return void
      */
-    public function devolver(Mercurio32 $mercurio32, string $nota, string $codest, string $campos_corregir = ''): bool
-    {
+    public function devolver(
+        Mercurio32 $mercurio32,
+        string $nota,
+        string $codest,
+        ?string $campos_corregir = null
+    ): bool {
         $today = Carbon::now();
         $id = $mercurio32->getId();
         $fecest = $today->format('Y-m-d');
@@ -226,11 +214,13 @@ class ConyugeServices
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message . '<br/>';
+                $msj .= $message.'<br/>';
             }
-            throw new Exception('Error ' . $msj, 501);
+            throw new Exception('Error '.$msj, 501);
         }
         Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -241,17 +231,13 @@ class ConyugeServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio32
-     * @param [type] $nota
-     * @return void
      */
     public function msjDevolver(Mercurio32 $mercurio32, string $nota): string
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por el trabajador: {$mercurio32->getPrinom()} {$mercurio32->getSegnom()} {$mercurio32->getPriape()} {$mercurio32->getSegape()} con identificación: {$mercurio32->getCedtra()}.<br/>" .
-            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por el trabajador: {$mercurio32->getPrinom()} {$mercurio32->getSegnom()} {$mercurio32->getPriape()} {$mercurio32->getSegape()} con identificación: {$mercurio32->getCedtra()}.<br/>".
+            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -261,17 +247,13 @@ class ConyugeServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param [type] $mercurio32
-     * @param [type] $nota
-     * @return void
      */
     public function msjRechazar(Mercurio32 $mercurio32, string $nota): string
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por el trabajador:  {$mercurio32->getPrinom()} {$mercurio32->getSegnom()} {$mercurio32->getPriape()} {$mercurio32->getSegape()} con identificación: {$mercurio32->getCedtra()}.<br/>" .
-            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por el trabajador:  {$mercurio32->getPrinom()} {$mercurio32->getSegnom()} {$mercurio32->getPriape()} {$mercurio32->getSegape()} con identificación: {$mercurio32->getCedtra()}.<br/>".
+            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -281,11 +263,8 @@ class ConyugeServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio32  $mercurio32
-     * @return mixed
      */
-    public function adjuntos(Mercurio32 $mercurio32): string
+    public function adjuntos(Mercurio32 $mercurio32): mixed
     {
         return $this->registroSeguimiento->loadAdjuntos($this->tipopc, $mercurio32);
     }
@@ -296,11 +275,8 @@ class ConyugeServices
      * @changed [2023-12-27]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Mercurio32  $mercurio32
-     * @return mixed
      */
-    public function seguimiento(Mercurio32 $mercurio32): string
+    public function seguimiento(Mercurio32 $mercurio32): mixed
     {
         return $this->registroSeguimiento->consultaSeguimiento($this->tipopc, $mercurio32);
     }
@@ -311,9 +287,6 @@ class ConyugeServices
      * @changed [2023-12-00]
      *
      * @author elegroag <elegroag@ibero.edu.co>
-     *
-     * @param  Collection  $mercurio32
-     * @return array
      */
     public function dataOptional(Collection $mercurio32, string $estado = 'P'): array
     {
@@ -330,7 +303,7 @@ class ConyugeServices
             }
 
             $method = ($mercurio->getEstado() == 'A') ? 'infoAprobadoView' : 'info';
-            $url = config('app.url') . '/cajas/' . $this->controller_name . '/' . $method . '/' . $mercurio->getId();
+            $url = config('app.url').'/cajas/'.$this->controller_name.'/'.$method.'/'.$mercurio->getId();
 
             $sat = 'NORMAL';
             $conyuges[] = [

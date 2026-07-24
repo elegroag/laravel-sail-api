@@ -4,45 +4,47 @@ namespace App\Services\Signup;
 
 use App\Exceptions\DebugException;
 use App\Models\Mercurio07;
+use App\Services\Api\ApiSubsidio;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Api\ApiSubsidio;
 
 class SignupService
 {
-    private $cedrep;
+    private ?string $cedrep;
 
-    private $documento;
+    private ?string $documento;
 
-    private $coddoc;
+    private ?string $coddoc;
 
-    private $repleg;
+    private ?string $repleg;
 
-    private $email;
+    private ?string $email;
 
-    private $codciu;
+    private ?string $codciu;
 
-    private $tipper;
+    private ?string $tipper;
 
-    private $telefono;
+    private ?string $telefono;
 
-    private $tipo;
+    private ?string $tipo;
 
-    private $calemp;
+    private ?string $calemp;
 
-    private $tipsoc;
+    private ?string $tipsoc;
 
-    private $razsoc;
+    private ?string $razsoc;
 
-    private $coddocrepleg;
+    private ?string $coddocrepleg;
 
-    private $nit;
+    private ?string $nit;
 
-    private $password;
+    private ?string $password;
 
-    public function execute(?SignupInterface $signupEntity, Srequest $request)
-    {
+    public function execute(
+        ?SignupInterface $signupEntity,
+        Srequest $request
+    ): array {
         $this->coddoc = $request->getParam('coddoc');
         $this->email = $request->getParam('email');
         $this->codciu = $request->getParam('codciu');
@@ -72,7 +74,7 @@ class SignupService
             if ($this->tipo == 'T') {
                 $res = $this->validaTrabajadorEmpresa();
                 if ($res == false) {
-                    throw new DebugException('Error al validar el trabajador no está afiliado a la empresa con nit: ' . $this->nit, 501);
+                    throw new DebugException('Error al validar el trabajador no está afiliado a la empresa con nit: '.$this->nit, 501);
                 }
             }
             $signupParticular = new SignupParticular(
@@ -115,7 +117,7 @@ class SignupService
                         'razsoc' => $this->razsoc,
                         'usuario' => $usuario,
                         'password' => $this->password,
-                        'tipo' => $this->tipo
+                        'tipo' => $this->tipo,
                     ]
                 )
             );
@@ -133,12 +135,12 @@ class SignupService
         /**
          * Temporalmente deshabilitada la auto firma digital
          */
-        //$this->autoFirma();
+        // $this->autoFirma();
 
         return [
             'success' => true,
-            'msj' => 'El proceso de registro como persona particular, se ha completado con éxito, ' .
-                'las credenciales de acceso le serán enviadas al respectivo correo registrado. ' .
+            'msj' => 'El proceso de registro como persona particular, se ha completado con éxito, '.
+                'las credenciales de acceso le serán enviadas al respectivo correo registrado. '.
                 "Vamos a continuar.\n",
             'documento' => $solicitud->getDocumento(),
             'coddoc' => $solicitud->getCoddoc(),
@@ -148,15 +150,10 @@ class SignupService
         ];
     }
 
-    /**
-     * crearSolicitud function
-     *
-     * @return object
-     */
     public function crearSolicitud(
         SignupInterface $signupEntity,
         Srequest $request
-    ) {
+    ): mixed {
         $empresaSisuweb = $this->buscaEmpresaSisu($request->getParam('nit'));
         $documentoSolicitud = $request->getParam('tipper') === 'J'
             ? $request->getParam('nit')
@@ -213,15 +210,9 @@ class SignupService
         return $solicitud;
     }
 
-    /**
-     * buscaEmpresaSisu function
-     *
-     * @param  int  $nit
-     * @return array|bool
-     */
-    public function buscaEmpresaSisu($nit)
+    public function buscaEmpresaSisu(?string $nit = null): array|bool
     {
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -236,10 +227,14 @@ class SignupService
         }
         $out = $ps->toArray();
         $isSuccess = $out['success'] ?? null;
-        if (!$isSuccess) return false;
+        if (! $isSuccess) {
+            return false;
+        }
 
         $data = $out['data'] ?? null;
-        if (!$data) return false;
+        if (! $data) {
+            return false;
+        }
 
         return $data;
     }
@@ -265,13 +260,9 @@ class SignupService
         }
     }
 
-    /**
-     * validaTrabajadorEmpresa function
-     * @return array|bool
-     */
-    public function validaTrabajadorEmpresa()
+    public function validaTrabajadorEmpresa(): array|bool
     {
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -281,11 +272,15 @@ class SignupService
                 ],
             ]
         );
-        if ($ps->isJson() == false) return false;
+        if ($ps->isJson() == false) {
+            return false;
+        }
 
         $out = $ps->toArray();
         $isSuccess = $out['success'] ?? null;
-        if (!$isSuccess) return false;
+        if (! $isSuccess) {
+            return false;
+        }
 
         $ps->send(
             [
@@ -297,14 +292,20 @@ class SignupService
             ]
         );
 
-        if ($ps->isJson() == false) return false;
+        if ($ps->isJson() == false) {
+            return false;
+        }
 
         $out = $ps->toArray();
         $isSuccess = $out['success'] ?? null;
-        if (!$isSuccess) return false;
+        if (! $isSuccess) {
+            return false;
+        }
 
         $data = $out['data'] ?? null;
-        if (!$data) return false;
+        if (! $data) {
+            return false;
+        }
 
         return ($data['nit'] == $this->nit) ? $data : false;
     }

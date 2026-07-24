@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
-use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -14,11 +13,11 @@ use App\Models\Mercurio45;
 use App\Services\Aprueba\ApruebaCertificado;
 use App\Services\CajaServices\CertificadosServices;
 use App\Services\Srequest;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\Pagination;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 
 class ApruebaCertificadoController extends ApplicationController
 {
@@ -131,7 +130,7 @@ class ApruebaCertificadoController extends ApplicationController
             if (! $id) {
                 throw new DebugException('Error no se puede identificar el identificador de la solicitud.', 501);
             }
-            $mercurio45 = Mercurio45::where("id", $id)->first();
+            $mercurio45 = Mercurio45::where('id', $id)->first();
             $html = view(
                 'cajas/aprobacioncer/tmp/consulta',
                 [
@@ -201,6 +200,7 @@ class ApruebaCertificadoController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
+
         return response()->json($salida);
     }
 
@@ -214,12 +214,12 @@ class ApruebaCertificadoController extends ApplicationController
             $codest = $request->input('codest');
             $today = Carbon::now();
 
-            $mercurio45 = Mercurio45::where("id", $id)->first();
+            $mercurio45 = Mercurio45::where('id', $id)->first();
             $mercurio45->update([
-                "estado" => "X",
-                "motivo" => $nota,
-                "codest" => $codest,
-                "fecest" => $today->format('Y-m-d H:i:s'),
+                'estado' => 'X',
+                'motivo' => $nota,
+                'codest' => $codest,
+                'fecest' => $today->format('Y-m-d H:i:s'),
             ]);
             $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
             $mercurio10 = new Mercurio10;
@@ -233,6 +233,8 @@ class ApruebaCertificadoController extends ApplicationController
             $mercurio10->fecsis = $today->format('Y-m-d H:i:s');
             $mercurio10->save();
 
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+
             $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio45->getTipo()}' and coddoc='{$mercurio45->getCoddoc()}' and documento = '{$mercurio45->getDocumento()}'")->first();
             $body = 'Certificado rechazado no es valido';
 
@@ -240,7 +242,7 @@ class ApruebaCertificadoController extends ApplicationController
                 new Srequest([
                     'email_emisor' => $mercurio07->getEmail(),
                     'email_clave' => $mercurio07->getClave(),
-                    'asunto' => "Certificado rechazado",
+                    'asunto' => 'Certificado rechazado',
                 ])
             );
 
@@ -258,6 +260,7 @@ class ApruebaCertificadoController extends ApplicationController
                 'errors' => $e->render($request),
             ];
         }
+
         return response()->json($response);
     }
 }

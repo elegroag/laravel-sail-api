@@ -7,6 +7,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio47;
 use App\Services\Tag;
 use App\Services\Utils\CalculatorDias;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\Table;
 use Carbon\Carbon;
@@ -186,10 +187,12 @@ class UpDatosTrabajadorService
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage() . '<br/>';
+                $msj .= $mess->getMessage().'<br/>';
             }
-            throw new DebugException('Error ' . $msj, 501);
+            throw new DebugException('Error '.$msj, 501);
         }
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -227,11 +230,13 @@ class UpDatosTrabajadorService
         if (! $mercurio10->save()) {
             $msj = '';
             foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message . '<br/>';
+                $msj .= $message.'<br/>';
             }
-            throw new Exception('Error ' . $msj, 501);
+            throw new Exception('Error '.$msj, 501);
         }
         Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
+
+        Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
         return true;
     }
@@ -249,10 +254,10 @@ class UpDatosTrabajadorService
      */
     public function msjDevolver($mercurio47, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por la empresa: {$mercurio47->getRazsoc()} con NIT: {$mercurio47->getNit()}.<br/>" .
-            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por la empresa: {$mercurio47->getRazsoc()} con NIT: {$mercurio47->getNit()}.<br/>".
+            "E informamos que su solicitud fue devuelta por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 
@@ -269,10 +274,10 @@ class UpDatosTrabajadorService
      */
     public function msjRechazar($mercurio47, $nota)
     {
-        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, ' .
-            "emitida por la empresa: {$mercurio47->getRazsoc()} con NIT: {$mercurio47->getNit()}.<br/>" .
-            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}" .
-            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>' .
+        return 'La Caja de Compensación Familiar Comfaca, ha recepcionado y validado la solicitud de afiliación, '.
+            "emitida por la empresa: {$mercurio47->getRazsoc()} con NIT: {$mercurio47->getNit()}.<br/>".
+            "E informamos que su solicitud fue rechazada por el siguiente motivo:<br/> {$nota}".
+            '<p>En caso de requerir el acompañamiento de algún asesor técnico para hacer la actualización, puede comunicarse a la línea de atención 4366300,1066.</p>'.
             '<br/>Gracias por preferirnos.';
     }
 

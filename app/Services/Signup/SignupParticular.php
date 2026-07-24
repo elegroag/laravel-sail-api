@@ -10,49 +10,48 @@ use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\Generales;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 class SignupParticular
 {
-    public $coddoc;
+    public ?string $coddoc;
 
-    public $documento;
+    public ?string $documento;
 
-    public $tipo;
+    public ?string $tipo;
 
-    public $cedrep;
+    public ?string $cedrep;
 
-    public $tipdoc;
+    public ?string $tipdoc;
 
-    public $repleg;
+    public ?string $repleg;
 
-    public $email;
+    public ?string $email;
 
-    public $codciu;
+    public ?string $codciu;
 
-    public $tipper;
+    public ?string $tipper;
 
-    public $telefono;
+    public ?string $telefono;
 
-    public $calemp;
+    public ?string $calemp;
 
-    public $tipsoc;
+    public ?string $tipsoc;
 
-    public $coddocrepleg;
+    public ?string $coddocrepleg;
 
-    public $razsoc;
+    public ?string $razsoc;
 
-    public $usuario;
+    public ?string $usuario;
 
-    public $tipemp;
+    public ?string $tipemp;
 
-    public $nit;
+    public ?string $nit;
 
-    public $nombre;
+    public ?string $nombre;
 
-    private $codigo_verify;
+    private ?string $codigo_verify;
 
-    public $password;
+    public ?string $password;
 
     public function __construct(?Srequest $params = null)
     {
@@ -70,12 +69,7 @@ class SignupParticular
         }
     }
 
-    /**
-     * main function
-     *
-     * @return SignupParticular
-     */
-    public function main()
+    public function main(): SignupParticular
     {
         $coddocReps = coddoc_repleg_array();
         if ($this->calemp == 'E') {
@@ -99,23 +93,18 @@ class SignupParticular
         return $this;
     }
 
-    /**
-     * createUserMercurio function
-     *
-     * @return Mercurio07
-     */
-    public function createUserMercurio()
+    public function createUserMercurio(): Mercurio07
     {
         try {
             $this->generaCode();
 
             if (empty($this->password)) {
-                throw new DebugException('La contraseña no está definida. Valores: tipo=' . $this->tipo . ', coddoc=' . $this->coddoc . ', documento=' . $this->documento, 400);
+                throw new DebugException('La contraseña no está definida. Valores: tipo='.$this->tipo.', coddoc='.$this->coddoc.', documento='.$this->documento, 400);
             }
 
             $usuarioParticular = Mercurio07::where(['tipo' => $this->tipo, 'coddoc' => $this->coddoc, 'documento' => $this->documento])->first();
 
-            if (!$usuarioParticular) {
+            if (! $usuarioParticular) {
                 $hash = clave_hash($this->password);
                 $crearUsuario = new CrearUsuario;
                 $crearUsuario->setters(
@@ -132,9 +121,9 @@ class SignupParticular
                 $crearUsuario->crearOpcionesRecuperacion($this->codigo_verify);
             } else {
                 if ($usuarioParticular->getEstado() == 'A') {
-                    throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. ' .
-                        'Compruebe las credenciales de acceso en la dirección de correo registrada previamente: ' .
-                        mask_email($usuarioParticular->getEmail()) . '. En caso de no poder ingresar puede recuperar su contraseña desde la opción "Olvidé mi clave" en el inicio de sesión.', 501);
+                    throw new DebugException('El usuario ya existe y se encuentra registrado en el sistema. '.
+                        'Compruebe las credenciales de acceso en la dirección de correo registrada previamente: '.
+                        mask_email($usuarioParticular->getEmail()).'. En caso de no poder ingresar puede recuperar su contraseña desde la opción "Olvidé mi clave" en el inicio de sesión.', 501);
                 }
             }
             $this->preparaMail($usuarioParticular, $this->password);
@@ -145,15 +134,17 @@ class SignupParticular
         }
     }
 
-    public function preparaMail($usuario, $clave)
-    {
+    public function preparaMail(
+        Mercurio07 $usuario,
+        string $clave
+    ): void {
         $coddoc_detalle = Generales::TipoDocumento($usuario);
         $url_activa = config('app.url');
-        $date = Carbon::now();
+        $fecha = Carbon::now()->format('d - M - Y');
         $html = view(
             'templates/tmp_register',
             [
-                'fecha' => $date->format('d - M - Y'),
+                'fecha' => $fecha,
                 'asunto' => 'Acceso a usuario, Comfaca En Linea',
                 'tipo' => ($this->tipo == 'P') ? 'Usuario' : 'Usuario Empresa',
                 'nombre' => $this->nombre,
@@ -184,7 +175,7 @@ class SignupParticular
         $senderEmail->send($usuario->email, $html);
     }
 
-    public function generaCode()
+    public function generaCode(): void
     {
         $this->codigo_verify = genera_code();
     }

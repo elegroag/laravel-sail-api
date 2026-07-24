@@ -32,6 +32,7 @@ class Mercurio10 extends ModelBase
         'codest',
         'campos_corregir',
         'ruuid',
+        'cerrada',
     ];
 
     protected function rules()
@@ -69,6 +70,16 @@ class Mercurio10 extends ModelBase
     public function getRuuid(): ?string
     {
         return $this->ruuid;
+    }
+
+    public function setCerrada(?string $cerrada): void
+    {
+        $this->cerrada = $cerrada;
+    }
+
+    public function getCerrada(): ?string
+    {
+        return $this->cerrada;
     }
 
     /**
@@ -197,31 +208,25 @@ class Mercurio10 extends ModelBase
         return $this->codest;
     }
 
-    public function getDetalleEstado()
+    public function getDetalleEstado(): string|bool
     {
         switch ($this->estado) {
             case 'T':
                 return 'Temporal';
-                break;
             case 'D':
                 return 'Devuelto';
-                break;
             case 'A':
                 return 'Aprobado';
-                break;
             case 'X':
                 return 'Rechazado';
-                break;
             case 'P':
                 return 'Pendiente de verificación';
-                break;
             default:
                 return false;
-                break;
         }
     }
 
-    public function getArrayEstados()
+    public function getArrayEstados(): array
     {
         return [
             'T' => 'Temporal',

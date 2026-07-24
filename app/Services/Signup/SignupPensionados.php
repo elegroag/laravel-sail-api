@@ -8,28 +8,26 @@ use App\Models\Mercurio38;
 
 class SignupPensionados implements SignupInterface
 {
-    /**
-     * solicitud variable
-     *
-     * @var Mercurio38
-     */
-    protected $solicitud;
+    protected ?Mercurio38 $solicitud;
 
-    private $tipopc = 9;
+    private string $tipopc = '9';
 
     public function __construct() {}
 
-    public function getTipopc()
+    public function getTipopc(): ?string
     {
         return $this->tipopc;
     }
 
-    public function findByDocumentTemp($documento, $coddoc, $calemp = '')
-    {
-        $this->solicitud = Mercurio38::where("coddoc", $coddoc)
-            ->where("documento", $documento)
-            ->where("cedtra", $documento)
-            ->where("estado", 'T')
+    public function findByDocumentTemp(
+        int $documento,
+        int $coddoc,
+        string $calemp = ''
+    ): mixed {
+        $this->solicitud = Mercurio38::where('coddoc', $coddoc)
+            ->where('documento', $documento)
+            ->where('cedtra', $documento)
+            ->where('estado', 'T')
             ->first();
 
         if ($this->solicitud == false) {
@@ -41,11 +39,8 @@ class SignupPensionados implements SignupInterface
 
     /**
      * create function
-     *
-     * @param  array  $data
-     * @return void
      */
-    public function createSignupService($data)
+    public function createSignupService(?array $data = null): void
     {
         $repleg = $data['repleg'];
         unset($data['repleg']); // dato no hace parte del modelo
@@ -64,6 +59,8 @@ class SignupPensionados implements SignupInterface
 
         $segnom = '';
         $segape = '';
+        $prinom = '';
+        $priape = '';
         if (strlen($repleg) > 0) {
             $exp = explode(' ', trim($repleg));
             switch (count($exp)) {
@@ -73,13 +70,13 @@ class SignupPensionados implements SignupInterface
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4] . ' ' . $exp[5];
+                    $segape = $exp[3].' '.$exp[4].' '.$exp[5];
                     break;
                 case 5:
                     $prinom = $exp[0];
                     $segnom = $exp[1];
                     $priape = $exp[2];
-                    $segape = $exp[3] . ' ' . $exp[4];
+                    $segape = $exp[3].' '.$exp[4];
                     break;
                 case 4:
                     $prinom = $exp[0];
@@ -89,7 +86,7 @@ class SignupPensionados implements SignupInterface
                     break;
                 case 3:
                     $prinom = $exp[0];
-                    $priape = $exp[1] . ' ' . $exp[2];
+                    $priape = $exp[1].' '.$exp[2];
                     break;
                 case 2:
                     $prinom = $exp[0];
@@ -142,14 +139,17 @@ class SignupPensionados implements SignupInterface
         $solicitud->captra = 'N';
         $solicitud->save();
 
-        Mercurio37::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
+        Mercurio37::where('tipopc', $this->tipopc)
+            ->where('numero', $solicitud->id)->delete();
+
+        Mercurio10::where('tipopc', $this->tipopc)
+            ->where('numero', $solicitud->id)->delete();
 
         $this->solicitud = $solicitud;
     }
 
-    public function getSolicitud()
+    public function getSolicitud(): mixed
     {
-        return $this->solicitud;
+        return $this->solicitud ?? null;
     }
 }

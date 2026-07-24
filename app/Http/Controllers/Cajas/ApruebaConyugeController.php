@@ -18,6 +18,7 @@ use App\Services\Reports\CsvReportStrategy;
 use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
@@ -759,6 +760,8 @@ class ApruebaConyugeController extends ApplicationController
             $mercurio10->setNota($nota);
             $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
             $mercurio10->save();
+
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
             $mercurio32 = Mercurio32::where('id', $id)->first();
 
             $procesadorComando = new ApiSubsidio;

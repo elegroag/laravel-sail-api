@@ -22,6 +22,7 @@ use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
 use App\Services\Utils\GeneralService;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
@@ -30,15 +31,15 @@ use Illuminate\Http\Request;
 
 class ApruebaEmpresaController extends ApplicationController
 {
-    protected $tipopc = '2';
+    protected string $tipopc = '2';
 
-    protected $services;
+    protected mixed $services;
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipfun;
+    protected ?string $tipfun;
 
     /**
      * independienteServices variable
@@ -132,7 +133,6 @@ class ApruebaEmpresaController extends ApplicationController
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param  string  $estado
      * @return void
      */
     public function changeCantidadPagina(Request $request, string $estado = 'P')
@@ -462,7 +462,7 @@ class ApruebaEmpresaController extends ApplicationController
             $id = $validated['id'];
 
             $mercurio30 = Mercurio30::where('id', $id)->first();
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -477,7 +477,7 @@ class ApruebaEmpresaController extends ApplicationController
             $adjuntos = $empresaServices->adjuntos($mercurio30);
             $seguimiento = $empresaServices->seguimiento($mercurio30);
 
-            $mercurio06 = Mercurio06::where("tipo", $mercurio30->tipo)->first();
+            $mercurio06 = Mercurio06::where('tipo', $mercurio30->tipo)->first();
             $_tipsoc = ParamsEmpresa::getTipoSociedades();
             $tipsoc_detalle = $_tipsoc[$mercurio30->tipsoc];
 
@@ -496,7 +496,7 @@ class ApruebaEmpresaController extends ApplicationController
                 ]
             )->render();
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -542,7 +542,7 @@ class ApruebaEmpresaController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -705,7 +705,7 @@ class ApruebaEmpresaController extends ApplicationController
      */
     public function buscarEnSisuView($id, $nit)
     {
-        $mercurio30 = Mercurio30::where("nit", $nit)->first();
+        $mercurio30 = Mercurio30::where('nit', $nit)->first();
         if (! $mercurio30) {
             set_flashdata('error', [
                 'msj' => 'La empresa no se encuentra registrada.',
@@ -716,7 +716,7 @@ class ApruebaEmpresaController extends ApplicationController
             exit();
         }
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -743,7 +743,7 @@ class ApruebaEmpresaController extends ApplicationController
             'empresa' => $response['data'],
             'trayectoria' => $response['trayectoria'],
             'sucursales' => $response['sucursales'],
-            'listas' => $response['listas']
+            'listas' => $response['listas'],
         ]);
     }
 
@@ -757,7 +757,7 @@ class ApruebaEmpresaController extends ApplicationController
     {
         try {
             $format = $request->query('format', 'csv');
-            $strategy = $format === 'excel' ? new ExcelReportStrategy() : new CsvReportStrategy();
+            $strategy = $format === 'excel' ? new ExcelReportStrategy : new CsvReportStrategy;
             $ext = $format === 'excel' ? 'xlsx' : 'csv';
 
             // Base del filtro igual que en listar/aplicarFiltro
@@ -802,7 +802,7 @@ class ApruebaEmpresaController extends ApplicationController
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
         }
     }
@@ -812,7 +812,7 @@ class ApruebaEmpresaController extends ApplicationController
         $this->db->begin();
         try {
             try {
-                $apruebaSolicitud = new ApruebaSolicitud();
+                $apruebaSolicitud = new ApruebaSolicitud;
                 $postData = $request->all();
                 $idSolicitud = $request->input('id');
                 $calemp = 'E';
@@ -828,10 +828,12 @@ class ApruebaEmpresaController extends ApplicationController
                 return ApiResource::success([], 'Registro completado con éxito')->response();
             } catch (DebugException $err) {
                 $this->db->rollback();
+
                 return response()->json($err->render($request));
             }
         } catch (\Exception $e) {
             $this->db->rollback();
+
             return ErrorResource::errorResponse($e->getMessage(), $e->getTraceAsString())->response();
         }
     }
@@ -858,7 +860,7 @@ class ApruebaEmpresaController extends ApplicationController
                 throw new DebugException('La empresa no se encuentra registrada.', 201);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'AportesEmpresas',
@@ -900,7 +902,7 @@ class ApruebaEmpresaController extends ApplicationController
                 throw new DebugException('La empresa no se encuentra aprobada para consultar sus datos.', 501);
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -911,7 +913,7 @@ class ApruebaEmpresaController extends ApplicationController
             $paramsEmpresa = new ParamsEmpresa;
             $paramsEmpresa->setDatosCaptura($datos_captura);
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -1000,7 +1002,7 @@ class ApruebaEmpresaController extends ApplicationController
                 throw new DebugException('Los datos de la empresa no son validos para procesar.', 501);
             }
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -1014,7 +1016,7 @@ class ApruebaEmpresaController extends ApplicationController
             $out = $procesadorComando->toArray();
             $empresaSisu = $out['data'];
 
-            $procesadorComando = new ApiSubsidio();
+            $procesadorComando = new ApiSubsidio;
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -1106,12 +1108,12 @@ class ApruebaEmpresaController extends ApplicationController
             $nota = $request->input('nota');
             $today = Carbon::now();
 
-            Mercurio30::where("id", $id)->update([
+            Mercurio30::where('id', $id)->update([
                 'estado' => 'A',
                 'fecest' => $today->format('Y-m-d'),
             ]);
 
-            $item = Mercurio10::where("tipopc", $this->tipopc)->where("numero", $id)->max('item') + 1;
+            $item = Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
             $mercurio10 = new Mercurio10;
             $mercurio10->tipopc = $this->tipopc;
             $mercurio10->numero = $id;
@@ -1120,6 +1122,8 @@ class ApruebaEmpresaController extends ApplicationController
             $mercurio10->nota = $nota;
             $mercurio10->fecsis = $today->format('Y-m-d');
             $mercurio10->save();
+
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
             $response = [
                 'success' => true,
@@ -1131,6 +1135,7 @@ class ApruebaEmpresaController extends ApplicationController
                 'msj' => 'No se pudo realizar el movimiento ' . "\n" . $e->getMessage() . "\n " . $e->getLine(),
             ];
         }
+
         return response()->json($response);
     }
 }
