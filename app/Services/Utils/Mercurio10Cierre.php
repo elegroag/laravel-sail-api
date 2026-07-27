@@ -46,6 +46,9 @@ class Mercurio10Cierre
         $evento->save();
     }
 
+    /**
+     * Cierra todos los eventos P abiertos de la solicitud (gestión en vivo).
+     */
     public static function cerrarPendientes(string $tipopc, int|string $numero): void
     {
         Mercurio10::query()

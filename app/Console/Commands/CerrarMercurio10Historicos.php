@@ -3,19 +3,26 @@
 namespace App\Console\Commands;
 
 use App\Models\Mercurio10;
-use App\Services\Utils\Mercurio10Cierre;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CerrarMercurio10Historicos extends Command
 {
+    /**
+     * Estados de respuesta a marcar como cerrados en el backfill histórico.
+     *
+     * @var array<int, string>
+     */
+    private const ESTADOS_RESPUESTA = ['A', 'X', 'D'];
+
     protected $signature = 'mercurio10:cerrar-historicos
                             {--dry-run : Solo cuenta, no escribe}
                             {--estados= : Estados de respuesta a marcar (por defecto A,X,D)}
-                            {--cerrar-pendientes : También cierra eventos P de esas solicitudes}';
+                            {--cerrar-pendientes : También cierra eventos P previos de esas solicitudes}';
 
-    protected $description = 'Marca cerrada=S en Mercurio10 históricos (A/X/D) y opcionalmente sus P abiertos';
+    protected $description = 'Backfill histórico: cierra A/X/D y P previos; el último ítem en P queda abierto sin feccie';
 
     public function handle(): int
     {
@@ -27,7 +34,7 @@ class CerrarMercurio10Historicos extends Command
 
         $dryRun = (bool) $this->option('dry-run');
         $estados = $this->resolverEstados();
-        $hoy = Mercurio10Cierre::fechaCierreHoy();
+        $hoy = Carbon::now()->toDateString();
         $conFeccie = Schema::hasColumn('mercurio10', 'feccie');
 
         if ($estados === []) {
@@ -66,6 +73,8 @@ class CerrarMercurio10Historicos extends Command
             $this->cerrarPendientesAsociados($estados, $dryRun, $hoy, $conFeccie);
         }
 
+        $this->reabrirUltimosPendientes($dryRun, $conFeccie);
+
         if ($conFeccie) {
             $this->completarFeccieEnCerrados($dryRun);
         }
@@ -83,7 +92,7 @@ class CerrarMercurio10Historicos extends Command
         $raw = $this->option('estados');
 
         if ($raw === null || trim((string) $raw) === '') {
-            return Mercurio10Cierre::ESTADOS_CIERRE;
+            return self::ESTADOS_RESPUESTA;
         }
 
         return collect(explode(',', (string) $raw))
@@ -95,6 +104,9 @@ class CerrarMercurio10Historicos extends Command
     }
 
     /**
+     * Cierra P previos de solicitudes con respuesta A/X/D.
+     * El último ítem en P no se cierra (sigue abierto, sin feccie).
+     *
      * @param  array<int, string>  $estados
      */
     private function cerrarPendientesAsociados(array $estados, bool $dryRun, string $hoy, bool $conFeccie): void
@@ -111,12 +123,18 @@ class CerrarMercurio10Historicos extends Command
                 FROM mercurio10
                 WHERE estado IN ({$placeholders})
             ) r ON r.tipopc = p.tipopc AND r.numero = p.numero
+            INNER JOIN (
+                SELECT tipopc, numero, MAX(item) AS max_item
+                FROM mercurio10
+                GROUP BY tipopc, numero
+            ) last ON last.tipopc = p.tipopc AND last.numero = p.numero
             WHERE p.estado = 'P'
+              AND p.item <> last.max_item
               AND (p.cerrada IS NULL OR p.cerrada = '' OR p.cerrada = 'N')
         ";
 
         $countP = (int) (DB::selectOne($countSql, $estados)->aggregate ?? 0);
-        $this->info("Pendientes P asociados a cerrar: {$countP}");
+        $this->info("Pendientes P previos a cerrar (excl. último ítem): {$countP}");
 
         if ($dryRun || $countP === 0) {
             return;
@@ -132,25 +150,88 @@ class CerrarMercurio10Historicos extends Command
                 FROM mercurio10
                 WHERE estado IN ({$placeholders})
             ) r ON r.tipopc = p.tipopc AND r.numero = p.numero
+            INNER JOIN (
+                SELECT tipopc, numero, MAX(item) AS max_item
+                FROM mercurio10
+                GROUP BY tipopc, numero
+            ) last ON last.tipopc = p.tipopc AND last.numero = p.numero
             SET p.cerrada = 'S'{$setFeccie}
             WHERE p.estado = 'P'
+              AND p.item <> last.max_item
               AND (p.cerrada IS NULL OR p.cerrada = '' OR p.cerrada = 'N')
         ", $bindings);
 
-        $this->info("Actualizados (P): {$updatedP}");
+        $this->info("Actualizados (P previos): {$updatedP}");
+    }
+
+    /**
+     * Si el último evento está en P, fuerza cerrada=N y sin feccie.
+     */
+    private function reabrirUltimosPendientes(bool $dryRun, bool $conFeccie): void
+    {
+        $feccieCond = $conFeccie ? ' OR p.feccie IS NOT NULL' : '';
+
+        $countSql = "
+            SELECT COUNT(*) AS aggregate
+            FROM mercurio10 p
+            INNER JOIN (
+                SELECT tipopc, numero, MAX(item) AS max_item
+                FROM mercurio10
+                GROUP BY tipopc, numero
+            ) last ON last.tipopc = p.tipopc
+               AND last.numero = p.numero
+               AND last.max_item = p.item
+            WHERE p.estado = 'P'
+              AND (p.cerrada = 'S'{$feccieCond})
+        ";
+
+        $count = (int) (DB::selectOne($countSql)->aggregate ?? 0);
+        $this->info("Últimos P mal cerrados a reabrir: {$count}");
+
+        if ($dryRun || $count === 0) {
+            return;
+        }
+
+        $setFeccie = $conFeccie ? ', p.feccie = NULL' : '';
+
+        $updated = DB::update("
+            UPDATE mercurio10 p
+            INNER JOIN (
+                SELECT tipopc, numero, MAX(item) AS max_item
+                FROM mercurio10
+                GROUP BY tipopc, numero
+            ) last ON last.tipopc = p.tipopc
+               AND last.numero = p.numero
+               AND last.max_item = p.item
+            SET p.cerrada = 'N'{$setFeccie}
+            WHERE p.estado = 'P'
+              AND (p.cerrada = 'S'{$feccieCond})
+        ");
+
+        $this->info("Reabiertos (último P): {$updated}");
     }
 
     /**
      * Completa feccie en filas ya cerradas sin fecha (usa fecsis del propio evento).
+     * No toca el último ítem si sigue en P.
      */
     private function completarFeccieEnCerrados(bool $dryRun): void
     {
-        $query = Mercurio10::query()
-            ->where('cerrada', 'S')
-            ->whereNull('feccie')
-            ->whereNotNull('fecsis');
+        $countSql = '
+            SELECT COUNT(*) AS aggregate
+            FROM mercurio10 m
+            INNER JOIN (
+                SELECT tipopc, numero, MAX(item) AS max_item
+                FROM mercurio10
+                GROUP BY tipopc, numero
+            ) last ON last.tipopc = m.tipopc AND last.numero = m.numero
+            WHERE m.cerrada = \'S\'
+              AND m.feccie IS NULL
+              AND m.fecsis IS NOT NULL
+              AND NOT (m.estado = \'P\' AND m.item = last.max_item)
+        ';
 
-        $count = (clone $query)->count();
+        $count = (int) (DB::selectOne($countSql)->aggregate ?? 0);
         $this->info("Cerrados sin feccie a completar (con fecsis): {$count}");
 
         if ($dryRun || $count === 0) {
@@ -158,11 +239,17 @@ class CerrarMercurio10Historicos extends Command
         }
 
         $updated = DB::update('
-            UPDATE mercurio10
-            SET feccie = fecsis
-            WHERE cerrada = \'S\'
-              AND feccie IS NULL
-              AND fecsis IS NOT NULL
+            UPDATE mercurio10 m
+            INNER JOIN (
+                SELECT tipopc, numero, MAX(item) AS max_item
+                FROM mercurio10
+                GROUP BY tipopc, numero
+            ) last ON last.tipopc = m.tipopc AND last.numero = m.numero
+            SET m.feccie = m.fecsis
+            WHERE m.cerrada = \'S\'
+              AND m.feccie IS NULL
+              AND m.fecsis IS NOT NULL
+              AND NOT (m.estado = \'P\' AND m.item = last.max_item)
         ');
 
         $this->info("Completados feccie desde fecsis: {$updated}");
