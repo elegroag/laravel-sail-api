@@ -41,6 +41,7 @@ return [
         10 => ['model' => Mercurio38::class, 'audit_model' => AuditoriaMercurio38::class],
         11 => ['model' => Mercurio39::class, 'audit_model' => AuditoriaMercurio39::class],
         13 => ['model' => Mercurio41::class, 'audit_model' => AuditoriaMercurio41::class],
+        14 => ['model' => Mercurio47::class, 'audit_model' => AuditoriaMercurio47::class],
     ],
 
     'oportunidad_tipos' => [
@@ -76,6 +77,30 @@ return [
             'afiliacion_field' => 'fecapr',
             'titular_field' => 'cedtra',
         ],
+        5 => [
+            'model' => Mercurio47::class,
+            'audit_model' => AuditoriaMercurio47::class,
+            'label' => 'ACTUALIZA EMPRESA',
+            'doc_field' => 'documento',
+            'afiliacion_field' => 'fecapr',
+            'titular_field' => null,
+        ],
+        6 => [
+            'model' => Mercurio47::class,
+            'audit_model' => AuditoriaMercurio47::class,
+            'label' => 'ACTUALIZACION',
+            'doc_field' => 'documento',
+            'afiliacion_field' => 'fecapr',
+            'titular_field' => null,
+        ],
+        8 => [
+            'model' => Mercurio45::class,
+            'audit_model' => AuditoriaMercurio45::class,
+            'label' => 'CERTIFICADO',
+            'doc_field' => 'cedtra',
+            'afiliacion_field' => 'fecapr',
+            'titular_field' => null,
+        ],
         9 => [
             'model' => Mercurio36::class,
             'audit_model' => AuditoriaMercurio36::class,
@@ -95,8 +120,24 @@ return [
         11 => [
             'model' => Mercurio39::class,
             'audit_model' => AuditoriaMercurio39::class,
+            'label' => 'COMUNITARIA',
+            'doc_field' => 'cedtra',
+            'afiliacion_field' => 'fecapr',
+            'titular_field' => null,
+        ],
+        13 => [
+            'model' => Mercurio41::class,
+            'audit_model' => AuditoriaMercurio41::class,
             'label' => 'INDEPENDIENTE',
             'doc_field' => 'cedtra',
+            'afiliacion_field' => 'fecapr',
+            'titular_field' => null,
+        ],
+        14 => [
+            'model' => Mercurio47::class,
+            'audit_model' => AuditoriaMercurio47::class,
+            'label' => 'ACTUALIZA TRABAJADOR',
+            'doc_field' => 'documento',
             'afiliacion_field' => 'fecapr',
             'titular_field' => null,
         ],

@@ -57,6 +57,11 @@ class InformeSolicitudPdfService
         $label = AuditoriaSolicitudResolver::labelsInforme()[$tipopc]
             ?? ($config['label'] ?? 'Solicitud');
 
+        $archivado = AuditoriaSolicitudResolver::isArchivado($solicitud);
+        $deletedAt = $archivado
+            ? $this->formatEventoFecha($solicitud->deleted_at ?? null)
+            : null;
+
         $cabecera = [
             'tipopc' => $tipopc,
             'tipo_label' => $label,
@@ -71,6 +76,13 @@ class InformeSolicitudPdfService
             'tipdoc' => $normalized['tipdoc'] ?? '',
             'nit' => $normalized['nit'] ?? '',
             'razsoc' => $normalized['razsoc'] ?? '',
+            'archivado' => $archivado,
+            'vigencia' => $archivado ? 'Archivado' : 'Vigente',
+            'vigencia_nota' => $archivado
+                ? 'Registro archivado: proviene de auditoría y ya no se tiene en cuenta para procesos de afiliación.'
+                    .($deletedAt ? " Fecha de archivo: {$deletedAt}." : '')
+                : 'Registro vigente: la solicitud está activa en el sistema y aplica para procesos de afiliación.',
+            'deleted_at' => $deletedAt,
         ];
 
         return [
@@ -94,6 +106,7 @@ class InformeSolicitudPdfService
 
         if ($rows->isEmpty()) {
             return [[
+                'ruuid' => '',
                 'fecha' => $fecsol ?: now()->format('Y-m-d'),
                 'estado' => 'Radicado/enviado',
                 'nota' => 'Solicitud enviada. Sin eventos de seguimiento registrados.',
@@ -104,6 +117,7 @@ class InformeSolicitudPdfService
             $detalle = $row->getDetalleEstado();
 
             return [
+                'ruuid' => trim((string) ($row->getRuuid() ?? '')),
                 'fecha' => $this->formatEventoFecha($row->getFecsis()),
                 'estado' => is_string($detalle) && $detalle !== '' ? $detalle : (string) $row->getEstado(),
                 'nota' => trim(strip_tags((string) $row->getNota())),
@@ -138,6 +152,8 @@ class InformeSolicitudPdfService
                 2 => 'nit',
                 3 => 'cedcon',
                 4 => 'numdoc',
+                5, 6, 14 => 'documento',
+                8, 13 => 'cedtra',
                 default => 'cedtra',
             },
             'afiliacion_field' => 'fecapr',

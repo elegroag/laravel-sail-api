@@ -53,10 +53,11 @@ class AfiliacionNormalizer
     public static function documento(object $model, int $tipopc, array $config): string
     {
         return match ($tipopc) {
-            1, 9, 10, 11 => (string) self::value($model, 'cedtra'),
+            1, 8, 9, 10, 11, 13 => (string) self::value($model, 'cedtra'),
             2 => (string) self::value($model, 'nit'),
             3 => (string) self::value($model, 'cedcon'),
             4 => (string) (self::value($model, 'numdoc') ?: self::value($model, 'documento')),
+            5, 6, 14 => (string) self::value($model, 'documento'),
             default => (string) (self::value($model, $config['doc_field'] ?? 'documento') ?: self::value($model, 'documento')),
         };
     }

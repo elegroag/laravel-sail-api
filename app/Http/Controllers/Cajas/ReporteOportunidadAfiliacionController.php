@@ -31,7 +31,7 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
     {
         return view('cajas.reporte_oportunidad.index', [
             'title' => 'Reporte Oportunidad Afiliaciones',
-            'mercurio09' => Mercurio09::whereIn('tipopc', ['1', '2', '3', '4', '9', '10'])->get(),
+            'mercurio09' => Mercurio09::whereIn('tipopc', ['1', '2', '3', '4', '5', '6', '8', '9', '10', '13', '14'])->get(),
             'umbralDias' => (int) config('reportes.oportunidad_umbral_dias', 3),
         ]);
     }

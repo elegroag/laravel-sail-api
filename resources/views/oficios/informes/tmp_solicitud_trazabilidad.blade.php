@@ -96,6 +96,20 @@
             <td class="value">{{ $cabecera['estado'] }}</td>
         </tr>
         <tr>
+            <td class="label">Vigencia del registro:</td>
+            <td class="value"><span class="bold">{{ $cabecera['vigencia'] ?? 'Vigente' }}</span></td>
+        </tr>
+        @if (!empty($cabecera['archivado']) && !empty($cabecera['deleted_at']))
+        <tr>
+            <td class="label">Fecha de archivo:</td>
+            <td class="value">{{ $cabecera['deleted_at'] }}</td>
+        </tr>
+        @endif
+        <tr>
+            <td class="label">Nota de vigencia:</td>
+            <td class="value">{{ $cabecera['vigencia_nota'] ?? 'Registro vigente: la solicitud está activa en el sistema y aplica para procesos de afiliación.' }}</td>
+        </tr>
+        <tr>
             <td class="label">Fecha solicitud:</td>
             <td class="value">{{ $cabecera['fecsol'] ?: '—' }}</td>
         </tr>
@@ -153,21 +167,23 @@
     <table class="data-table trace-table" width="100%" border="0" cellpadding="3" cellspacing="0">
         <thead>
             <tr>
-                <th width="18%">Fecha</th>
-                <th width="22%">Estado</th>
-                <th width="60%">Observación</th>
+                <th width="28%">RUUID</th>
+                <th width="14%">Fecha</th>
+                <th width="18%">Estado</th>
+                <th width="40%">Observación</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($eventos as $evento)
             <tr>
-                <td width="18%">{{ $evento['fecha'] }}</td>
-                <td width="22%">{{ $evento['estado'] }}</td>
-                <td width="60%">{{ $evento['nota'] !== '' ? $evento['nota'] : '—' }}</td>
+                <td width="28%">{{ ($evento['ruuid'] ?? '') !== '' ? $evento['ruuid'] : '—' }}</td>
+                <td width="14%">{{ $evento['fecha'] }}</td>
+                <td width="18%">{{ $evento['estado'] }}</td>
+                <td width="40%">{{ $evento['nota'] !== '' ? $evento['nota'] : '—' }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="3" class="center">Sin eventos de seguimiento</td>
+                <td colspan="4" class="center">Sin eventos de seguimiento</td>
             </tr>
             @endforelse
         </tbody>
@@ -178,5 +194,10 @@
 
 <p class="note" style="margin-top: 4px; font-size: 8px; color: #666;">
     Este documento es generado electrónicamente para control interno. La trazabilidad se obtiene del registro de seguimiento de la solicitud.
+    @if (!empty($cabecera['archivado']))
+        <strong>Nota:</strong> {{ $cabecera['vigencia_nota'] }}
+    @else
+        <strong>Nota:</strong> {{ $cabecera['vigencia_nota'] ?? 'Registro vigente.' }}
+    @endif
 </p>
 </body>

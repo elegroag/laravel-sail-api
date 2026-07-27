@@ -57,6 +57,28 @@ class InformeSolicitudTest extends TestCase
         $response->assertJsonPath('message', 'No se encontró la solicitud con el RUUID y tipo indicados.');
     }
 
+    public function test_pdf_redirige_al_index_con_flash_cuando_no_existe_solicitud(): void
+    {
+        $this->mock(InformeSolicitudPdfService::class, function ($mock): void {
+            $mock->shouldReceive('generate')
+                ->once()
+                ->andThrow(new NotFoundHttpException('No se encontró la solicitud con el RUUID y tipo indicados.'));
+        });
+
+        $response = $this->get(route('cajas.informe-solicitud.pdf', [
+            'ruuid' => 'ruuid-inexistente-xyz',
+            'tipopc' => 1,
+        ]));
+
+        $response->assertRedirect(route('cajas.informe-solicitud.index'));
+        $flash = get_flashdata();
+        $this->assertIsArray($flash);
+        $this->assertSame(
+            'No se encontró la solicitud con el RUUID y tipo indicados.',
+            $flash['error']['msj'] ?? null
+        );
+    }
+
     public function test_pdf_devuelve_application_pdf(): void
     {
         $tempFile = tempnam(sys_get_temp_dir(), 'informe_pdf_');

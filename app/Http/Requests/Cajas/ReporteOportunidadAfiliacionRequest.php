@@ -20,7 +20,7 @@ class ReporteOportunidadAfiliacionRequest extends FormRequest
             'fecini' => ['required', 'date_format:Y-m-d'],
             'fecfin' => ['required', 'date_format:Y-m-d', 'after_or_equal:fecini'],
             'tipafis' => ['nullable', 'array'],
-            'tipafis.*' => ['integer', 'in:1,2,3,4,9,10,11'],
+            'tipafis.*' => ['integer', 'in:1,2,3,4,5,6,8,9,10,11,13,14'],
         ];
     }
 

@@ -8,6 +8,7 @@ use App\Models\Mercurio09;
 use App\Services\Reports\InformeSolicitudPdfService;
 use App\Support\AuditoriaSolicitudResolver;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -46,7 +47,7 @@ class InformeSolicitudController extends ApplicationController
         ]);
     }
 
-    public function pdf(InformeSolicitudRequest $request): BinaryFileResponse|JsonResponse|Response
+    public function pdf(InformeSolicitudRequest $request): BinaryFileResponse|JsonResponse|Response|RedirectResponse
     {
         try {
             $result = $this->informeSolicitudPdfService->generate(
@@ -54,11 +55,20 @@ class InformeSolicitudController extends ApplicationController
                 (string) $request->validated('ruuid')
             );
         } catch (NotFoundHttpException $e) {
+            $message = $e->getMessage() !== ''
+                ? $e->getMessage()
+                : 'No se encontró la solicitud con el RUUID y tipo indicados.';
+
             if ($request->expectsJson()) {
-                return response()->json(['message' => $e->getMessage()], 404);
+                return response()->json(['message' => $message], 404);
             }
 
-            abort(404, $e->getMessage());
+            set_flashdata('error', [
+                'msj' => $message,
+                'code' => 404,
+            ]);
+
+            return redirect()->route('cajas.informe-solicitud.index');
         }
 
         return response()->file($result['path'], [

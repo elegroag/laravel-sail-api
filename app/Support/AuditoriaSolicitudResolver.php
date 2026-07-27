@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\AuditoriaSolicitudBase;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
@@ -35,6 +36,7 @@ class AuditoriaSolicitudResolver
         '11' => Mercurio39::class,
         '12' => Mercurio40::class,
         '13' => Mercurio41::class,
+        '14' => Mercurio47::class,
     ];
 
     /**
@@ -44,7 +46,7 @@ class AuditoriaSolicitudResolver
      */
     public static function tipopcsInforme(): array
     {
-        return ['1', '2', '3', '4', '9', '10', '11', '13'];
+        return ['1', '2', '3', '4', '5', '6', '8', '9', '10', '11', '13', '14'];
     }
 
     /**
@@ -57,10 +59,14 @@ class AuditoriaSolicitudResolver
             '2' => 'Empresa',
             '3' => 'Cónyuge',
             '4' => 'Beneficiario',
+            '5' => 'Actualiza Empresa',
+            '6' => 'Actualización',
+            '8' => 'Certificado',
             '9' => 'Pensionado',
             '10' => 'Facultativo',
             '11' => 'Comunitaria',
             '13' => 'Independiente',
+            '14' => 'Actualiza Trabajador',
         ];
     }
 
@@ -68,7 +74,16 @@ class AuditoriaSolicitudResolver
     {
         $modelClass = self::modelClass($tipopc);
 
-        return $modelClass::where('id', $id)->first();
+        $solicitud = $modelClass::where('id', $id)->first();
+        if ($solicitud !== null) {
+            return $solicitud;
+        }
+
+        return self::resolveFromAuditoria($tipopc, fn ($auditModel) => $auditModel::query()
+            ->where('id', $id)
+            ->orderByDesc('deleted_at')
+            ->orderByDesc('audit_id')
+            ->first());
     }
 
     public static function resolveByRuuid(string $tipopc, string $ruuid): ?object
@@ -80,7 +95,24 @@ class AuditoriaSolicitudResolver
             return null;
         }
 
-        return $modelClass::where('ruuid', $ruuid)->first();
+        $solicitud = $modelClass::where('ruuid', $ruuid)->first();
+        if ($solicitud !== null) {
+            return $solicitud;
+        }
+
+        return self::resolveFromAuditoria($tipopc, fn ($auditModel) => $auditModel::query()
+            ->where('ruuid', $ruuid)
+            ->orderByDesc('deleted_at')
+            ->orderByDesc('audit_id')
+            ->first());
+    }
+
+    /**
+     * Indica si el registro proviene de una tabla auditoria_* (solicitud borrada/archivada).
+     */
+    public static function isArchivado(object $solicitud): bool
+    {
+        return $solicitud instanceof AuditoriaSolicitudBase;
     }
 
     /**
@@ -89,6 +121,20 @@ class AuditoriaSolicitudResolver
     public static function modelClassFor(string $tipopc): string
     {
         return self::modelClass($tipopc);
+    }
+
+    /**
+     * @param  callable(class-string): (?object)  $finder
+     */
+    private static function resolveFromAuditoria(string $tipopc, callable $finder): ?object
+    {
+        $auditModel = config('reportes.solicitud_auditoria')[(int) $tipopc]['audit_model'] ?? null;
+
+        if ($auditModel === null || ! class_exists($auditModel)) {
+            return null;
+        }
+
+        return $finder($auditModel);
     }
 
     /**

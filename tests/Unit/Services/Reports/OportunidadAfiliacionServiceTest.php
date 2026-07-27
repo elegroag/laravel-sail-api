@@ -113,12 +113,26 @@ class OportunidadAfiliacionServiceTest extends TestCase
         $this->assertArrayHasKey(2, $tipos);
         $this->assertArrayHasKey(3, $tipos);
         $this->assertArrayHasKey(4, $tipos);
+        $this->assertArrayHasKey(5, $tipos);
+        $this->assertArrayHasKey(6, $tipos);
+        $this->assertArrayHasKey(8, $tipos);
         $this->assertArrayHasKey(9, $tipos);
         $this->assertArrayHasKey(10, $tipos);
         $this->assertArrayHasKey(11, $tipos);
+        $this->assertArrayHasKey(13, $tipos);
+        $this->assertArrayHasKey(14, $tipos);
         $this->assertArrayNotHasKey('has_sat_fecapr', $tipos[1]);
         $this->assertSame(3, config('reportes.oportunidad_umbral_dias'));
         $this->assertSame(AuditoriaMercurio31::class, $tipos[1]['audit_model']);
+        $this->assertSame(Mercurio47::class, $tipos[5]['model']);
+        $this->assertSame(Mercurio45::class, $tipos[8]['model']);
+        $this->assertSame(Mercurio41::class, $tipos[13]['model']);
+        $this->assertSame(Mercurio47::class, $tipos[14]['model']);
+        $this->assertSame('COMUNITARIA', $tipos[11]['label']);
+        $this->assertSame('INDEPENDIENTE', $tipos[13]['label']);
+        $this->assertSame(AuditoriaMercurio41::class, $tipos[13]['audit_model']);
+        $this->assertSame(AuditoriaMercurio45::class, $tipos[8]['audit_model']);
+        $this->assertSame(AuditoriaMercurio47::class, $tipos[5]['audit_model']);
 
         $auditoria = config('reportes.solicitud_auditoria');
         $this->assertSame(AuditoriaMercurio41::class, $auditoria[13]['audit_model']);
@@ -127,6 +141,7 @@ class OportunidadAfiliacionServiceTest extends TestCase
         $this->assertSame(Mercurio41::class, $auditoria[13]['model']);
         $this->assertSame(Mercurio45::class, $auditoria[8]['model']);
         $this->assertSame(Mercurio47::class, $auditoria[5]['model']);
+        $this->assertSame(Mercurio47::class, $auditoria[14]['model']);
     }
 
     public function test_modelos_auditoria_solicitudes_incluyen_41_45_47(): void

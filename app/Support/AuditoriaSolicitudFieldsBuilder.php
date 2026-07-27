@@ -21,7 +21,7 @@ class AuditoriaSolicitudFieldsBuilder
             '2' => $this->buildEmpresa($solicitud),
             '3' => $this->buildConyuge($solicitud),
             '4' => $this->buildBeneficiario($solicitud),
-            '5', '6' => $this->buildActualizacion($solicitud),
+            '5', '6', '14' => $this->buildActualizacion($solicitud),
             '7' => $this->buildRetiro($solicitud),
             '8' => $this->buildCertificado($solicitud),
             '9', '10', '11', '12', '13' => $this->buildAfiliadoPersona($solicitud),
@@ -324,11 +324,22 @@ class AuditoriaSolicitudFieldsBuilder
 
     private function get(object $m, string $getter): mixed
     {
-        if (! method_exists($m, $getter)) {
-            return null;
+        if (method_exists($m, $getter)) {
+            try {
+                return $m->{$getter}();
+            } catch (\Throwable) {
+                // Continúa con acceso por atributo (snapshots de auditoría).
+            }
         }
 
-        return $m->{$getter}();
+        // Snapshots auditoria_* no tienen getters: getNit -> nit, getRazsoc -> razsoc.
+        if (str_starts_with($getter, 'get') && strlen($getter) > 3) {
+            $field = lcfirst(substr($getter, 3));
+
+            return $m->{$field} ?? null;
+        }
+
+        return null;
     }
 
     private function lookup(array $catalogo, mixed $valor): mixed
