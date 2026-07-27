@@ -14,7 +14,6 @@ use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
-use App\Models\Mercurio10;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 use App\Models\Subsi54;
@@ -446,9 +445,6 @@ class FacultativoController extends ApplicationController
             $id = $request->input('id');
             $m36 = Mercurio36::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($m36) {
-                if ($m36->getEstado() != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
-                }
                 Mercurio36::where('id', $id)->delete();
             }
             $salida = [

@@ -10,7 +10,6 @@ use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
-use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio37;
@@ -622,18 +621,11 @@ class TrabajadorController extends ApplicationController
             $documento = $this->user['documento'];
             $coddoc = $this->user['coddoc'];
 
-            $m31 = Mercurio31::where('id', $id)
+            Mercurio37::where('numero', $id)->delete();
+            Mercurio31::where('id', $id)
                 ->where('documento', $documento)
                 ->where('coddoc', $coddoc)
-                ->first();
-            if ($m31) {
-                if ($m31->estado != 'T') {
-                    Mercurio10::where('numero', $id)->delete();
-                }
-            }
-
-            Mercurio37::where('numero', $id)->delete();
-            Mercurio31::where('id', $id)->delete();
+                ->delete();
 
             $response = [
                 'success' => true,

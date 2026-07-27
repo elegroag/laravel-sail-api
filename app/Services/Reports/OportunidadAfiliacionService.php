@@ -148,6 +148,7 @@ class OportunidadAfiliacionService
 
     /**
      * Solicitudes padre indexadas por tipopc|numero.
+     * Si no existe en la tabla viva, usa el snapshot más reciente en auditoria_*.
      *
      * @param  Collection<int, Mercurio10>  $eventosP
      * @param  array<int, array<string, mixed>>  $tipos
@@ -176,6 +177,35 @@ class OportunidadAfiliacionService
             foreach ($solicitudes as $solicitud) {
                 $key = $this->pairKey((string) $tipopc, (int) $solicitud->id);
                 $index[$key] = $solicitud;
+            }
+
+            $faltantes = array_values(array_diff($ids, $solicitudes->pluck('id')->map(fn ($id) => (int) $id)->all()));
+            if ($faltantes === []) {
+                continue;
+            }
+
+            $auditModel = $config['audit_model']
+                ?? (config('reportes.solicitud_auditoria')[(int) $tipopc]['audit_model'] ?? null);
+
+            if ($auditModel === null || ! class_exists($auditModel)) {
+                continue;
+            }
+
+            $auditRows = $auditModel::query()
+                ->whereIn('id', $faltantes)
+                ->orderByDesc('deleted_at')
+                ->orderByDesc('audit_id')
+                ->get();
+
+            $seen = [];
+            foreach ($auditRows as $row) {
+                $id = (int) $row->id;
+                if (isset($seen[$id])) {
+                    continue;
+                }
+                $seen[$id] = true;
+                $key = $this->pairKey((string) $tipopc, $id);
+                $index[$key] = $row;
             }
         }
 

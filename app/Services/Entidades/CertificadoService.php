@@ -173,7 +173,6 @@ class CertificadoService
         $id = $trabajador->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $trabajador;
     }
@@ -197,7 +196,6 @@ class CertificadoService
         $id = $trabajador->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $trabajador;
     }

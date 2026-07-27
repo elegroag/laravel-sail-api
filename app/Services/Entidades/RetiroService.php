@@ -10,15 +10,10 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
-use App\Models\Mercurio31;
-use App\Models\Mercurio32;
-use App\Models\Mercurio34;
 use App\Models\Mercurio35;
 use App\Models\Mercurio37;
-use App\Models\Mercurio45;
-use App\Models\Mercurio47;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
 use Illuminate\Support\Facades\DB;
 
 class RetiroService
@@ -90,10 +85,10 @@ class RetiroService
      */
     public function buscarEmpresaSubsidio($nit)
     {
-        $empresaService = new EmpresaService();
+        $empresaService = new EmpresaService;
+
         return $empresaService->buscarEmpresaSubsidio($nit);
     }
-
 
     public function dataArchivosRequeridos($solicitud)
     {
@@ -141,6 +136,7 @@ class RetiroService
 
         $mercurio01 = Mercurio01::first();
         $archivos_descargar = [];
+
         return [
             'disponibles' => $archivos_descargar,
             'archivos' => $archivos,
@@ -181,7 +177,6 @@ class RetiroService
         $id = $trabajador->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $trabajador;
     }
@@ -277,7 +272,7 @@ class RetiroService
      */
     public function buscarTrabajadorSubsidio($cedtra)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -315,7 +310,7 @@ class RetiroService
 
     public function paramsApi()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -356,7 +351,7 @@ class RetiroService
 
     public function findApiTrabajadoresByNit($nit)
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -374,7 +369,6 @@ class RetiroService
         return ($out->success == true) ? $out->data : false;
     }
 
-
     public function consultaTipopc(Srequest $request): array|bool
     {
         $tipo_consulta = $request->getParam('tipo_consulta');
@@ -386,7 +380,7 @@ class RetiroService
         switch ($tipo_consulta) {
             case 'auditoria':
             case 'all':
-                $response["datos"] = Mercurio35::query()
+                $response['datos'] = Mercurio35::query()
                     ->join('mercurio10', function ($join) use ($tipopc) {
                         $join->on('mercurio35.id', '=', 'mercurio10.numero')
                             ->where('mercurio10.tipopc', '=', $tipopc);
@@ -397,36 +391,45 @@ class RetiroService
                         'mercurio10.fecsis as fecest',
                     ])
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
                 break;
             case 'alluser':
-                $response["datos"] = Mercurio35::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio35::whereRaw("usuario='{$usuario}' and estado='P'")->get();
                 break;
             case 'count':
-                $res = Mercurio35::where("mercurio35.usuario", $usuario)
+                $res = Mercurio35::where('mercurio35.usuario', $usuario)
                     ->when($condi_extra, function ($q) use ($condi_extra) {
-                        if (is_array($condi_extra)) $q->where($condi_extra);
-                        if (is_string($condi_extra) && strlen($condi_extra) > 0) $q->whereRaw($condi_extra);
+                        if (is_array($condi_extra)) {
+                            $q->where($condi_extra);
+                        }
+                        if (is_string($condi_extra) && strlen($condi_extra) > 0) {
+                            $q->whereRaw($condi_extra);
+                        }
                     })
                     ->get();
 
-                $response["count"] = $res->count();
-                $response["all"] = $res;
+                $response['count'] = $res->count();
+                $response['all'] = $res;
                 break;
             case 'one':
-                $response["datos"] = Mercurio35::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio35::whereRaw("id='$numero' and estado='P'")->first();
                 break;
             case 'info':
-                $mercurio = Mercurio35::where("id", $numero)->first();
-                $response["consulta"] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
+                $mercurio = Mercurio35::where('id', $numero)->first();
+                $response['consulta'] = $this->buscarTrabajadorSubsidio($mercurio->getCedtra());
                 break;
             default:
                 $response = false;
                 break;
         }
+
         return $response;
     }
 }

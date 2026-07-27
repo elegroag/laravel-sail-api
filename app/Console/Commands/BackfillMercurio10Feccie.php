@@ -17,7 +17,7 @@ class BackfillMercurio10Feccie extends Command
                             {--chunk=500 : Cantidad de pares tipopc/numero por lote}
                             {--tipopc= : Procesar solo un tipopc}';
 
-    protected $description = 'Recalcula feccie en Mercurio10: fecsis del siguiente item, o fecapr si la solicitud está aprobada';
+    protected $description = 'Recalcula feccie en Mercurio10: fecsis del siguiente, fecapr si A, o fecsis propio si cerrada=S';
 
     public function handle(): int
     {
@@ -100,8 +100,13 @@ class BackfillMercurio10Feccie extends Command
 
                     if ($i < $count - 1) {
                         $nuevo = $this->normalizarFecha($lista[$i + 1]->fecsis ?? null);
-                    } else {
+                    } elseif ($fecapr !== null) {
                         $nuevo = $fecapr;
+                    } elseif (strtoupper((string) ($evento->cerrada ?? 'N')) === 'S') {
+                        // Cerrado sin siguiente ni fecapr: usar fecsis del propio evento.
+                        $nuevo = $this->normalizarFecha($evento->fecsis ?? null);
+                    } else {
+                        $nuevo = null;
                     }
 
                     if ($actual === $nuevo) {
@@ -252,7 +257,7 @@ class BackfillMercurio10Feccie extends Command
         }
 
         $query = DB::table('mercurio10')
-            ->select(['tipopc', 'numero', 'item', 'fecsis', 'feccie'])
+            ->select(['tipopc', 'numero', 'item', 'fecsis', 'feccie', 'cerrada'])
             ->where(function ($q) use ($byTipopc) {
                 foreach ($byTipopc as $tipopc => $numeros) {
                     $q->orWhere(function ($q2) use ($tipopc, $numeros) {

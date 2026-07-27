@@ -11,7 +11,6 @@ use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
-use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio28;
@@ -325,9 +324,6 @@ class ActualizaEmpresaController extends ApplicationController
             $id = $request->input('id');
             $solicitud = Mercurio47::where('id', $id)->first();
             if ($solicitud) {
-                if ($solicitud->getEstado() != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
-                }
                 Mercurio33::where('actualizacion', $id)->delete();
                 Mercurio47::where('id', $id)->delete();
             }

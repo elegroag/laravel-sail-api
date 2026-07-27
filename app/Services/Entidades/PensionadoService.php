@@ -232,7 +232,6 @@ class PensionadoService
         $id = $pensionado->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $pensionado;
     }
@@ -256,7 +255,6 @@ class PensionadoService
         $id = $pensionado->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $pensionado;
     }

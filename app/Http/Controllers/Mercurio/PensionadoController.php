@@ -11,7 +11,6 @@ use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
-use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 use App\Models\Mercurio38;
 use App\Models\Subsi54;
@@ -436,9 +435,6 @@ class PensionadoController extends ApplicationController
 
             $m41 = Mercurio38::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($m41) {
-                if ($m41->getEstado() != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
-                }
                 Mercurio38::where('id', $id)->delete();
             }
             $salida = [
@@ -657,9 +653,6 @@ class PensionadoController extends ApplicationController
             $id = $request->input('id');
             $solicitud = Mercurio38::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($solicitud) {
-                if ($solicitud->estado != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
-                }
             }
             Mercurio38::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->delete();
             $generales->finishTrans();

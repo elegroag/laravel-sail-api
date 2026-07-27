@@ -294,7 +294,7 @@ class EmpresaService
         $empresa = $this->findById($id);
         if ($empresa != false) {
             $empresa->fill($data);
-            $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
+            $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
             $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
             $empresa->tipo = $this->tipo;
             $empresa->coddoc = $this->user['coddoc'];
@@ -320,7 +320,7 @@ class EmpresaService
     {
         $empresa = new Mercurio30;
         $empresa->fill($data);
-        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
+        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = session('tipo');
         $empresa->coddoc = $this->user['coddoc'];
@@ -331,7 +331,6 @@ class EmpresaService
         $empresa->log = '0';
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
         Tranoms::where('request', $empresa->id)->delete();
 
         return $empresa;
@@ -344,7 +343,7 @@ class EmpresaService
     {
         $empresa = new Mercurio30($data);
         $empresa->regenerateUuid();
-        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
+        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = $this->tipo;
         $empresa->coddoc = $this->user['coddoc'];
@@ -362,7 +361,6 @@ class EmpresaService
         $empresa->save();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $empresa->id)->delete();
         Tranoms::where('request', $empresa->id)->delete();
 
         return $empresa;

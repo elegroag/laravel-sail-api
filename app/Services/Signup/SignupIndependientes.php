@@ -2,7 +2,6 @@
 
 namespace App\Services\Signup;
 
-use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 
@@ -136,10 +135,6 @@ class SignupIndependientes implements SignupInterface
         $id = $solicitud->id;
 
         Mercurio37::where('tipopc', $this->tipopc)
-            ->where('numero', $id)
-            ->delete();
-
-        Mercurio10::where('tipopc', $this->tipopc)
             ->where('numero', $id)
             ->delete();
 

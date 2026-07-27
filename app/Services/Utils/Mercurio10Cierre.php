@@ -26,12 +26,23 @@ class Mercurio10Cierre
             return;
         }
 
-        if ($evento->cerrada === 'S') {
+        $hoy = self::fechaCierreHoy();
+        $yaCerrada = $evento->cerrada === 'S';
+        $sinFeccie = $evento->feccie === null
+            || $evento->feccie === '0000-00-00';
+
+        if ($yaCerrada && ! $sinFeccie) {
             return;
         }
 
-        $evento->setCerrada('S');
-        $evento->setFeccie(self::fechaCierreHoy());
+        if (! $yaCerrada) {
+            $evento->setCerrada('S');
+        }
+
+        if ($sinFeccie) {
+            $evento->setFeccie($hoy);
+        }
+
         $evento->save();
     }
 
@@ -46,6 +57,17 @@ class Mercurio10Cierre
             })
             ->update([
                 'cerrada' => 'S',
+                'feccie' => self::fechaCierreHoy(),
+            ]);
+
+        // Completa feccie en P ya cerrados sin fecha.
+        Mercurio10::query()
+            ->where('tipopc', $tipopc)
+            ->where('numero', $numero)
+            ->where('estado', 'P')
+            ->where('cerrada', 'S')
+            ->whereNull('feccie')
+            ->update([
                 'feccie' => self::fechaCierreHoy(),
             ]);
     }

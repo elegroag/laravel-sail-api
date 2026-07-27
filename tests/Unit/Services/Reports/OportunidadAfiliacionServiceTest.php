@@ -2,10 +2,17 @@
 
 namespace Tests\Unit\Services\Reports;
 
+use App\Models\AuditoriaMercurio31;
+use App\Models\AuditoriaMercurio41;
+use App\Models\AuditoriaMercurio45;
+use App\Models\AuditoriaMercurio47;
 use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
+use App\Models\Mercurio41;
+use App\Models\Mercurio45;
+use App\Models\Mercurio47;
 use App\Services\Reports\OportunidadAfiliacionService;
 use App\Support\AfiliacionNormalizer;
 use App\Support\DiasHabilesCalculator;
@@ -111,6 +118,23 @@ class OportunidadAfiliacionServiceTest extends TestCase
         $this->assertArrayHasKey(11, $tipos);
         $this->assertArrayNotHasKey('has_sat_fecapr', $tipos[1]);
         $this->assertSame(3, config('reportes.oportunidad_umbral_dias'));
+        $this->assertSame(AuditoriaMercurio31::class, $tipos[1]['audit_model']);
+
+        $auditoria = config('reportes.solicitud_auditoria');
+        $this->assertSame(AuditoriaMercurio41::class, $auditoria[13]['audit_model']);
+        $this->assertSame(AuditoriaMercurio45::class, $auditoria[8]['audit_model']);
+        $this->assertSame(AuditoriaMercurio47::class, $auditoria[5]['audit_model']);
+        $this->assertSame(Mercurio41::class, $auditoria[13]['model']);
+        $this->assertSame(Mercurio45::class, $auditoria[8]['model']);
+        $this->assertSame(Mercurio47::class, $auditoria[5]['model']);
+    }
+
+    public function test_modelos_auditoria_solicitudes_incluyen_41_45_47(): void
+    {
+        $this->assertSame('auditoria_mercurio41', (new AuditoriaMercurio41)->getTable());
+        $this->assertSame('auditoria_mercurio45', (new AuditoriaMercurio45)->getTable());
+        $this->assertSame('auditoria_mercurio47', (new AuditoriaMercurio47)->getTable());
+        $this->assertSame('audit_id', (new AuditoriaMercurio41)->getKeyName());
     }
 
     public function test_dias_habiles_usa_fecha_actual_cuando_no_hay_cierre(): void

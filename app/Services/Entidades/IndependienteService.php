@@ -326,7 +326,6 @@ class IndependienteService
         $id = $independiente->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $independiente;
     }
@@ -353,7 +352,6 @@ class IndependienteService
         $id = $independiente->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $independiente;
     }

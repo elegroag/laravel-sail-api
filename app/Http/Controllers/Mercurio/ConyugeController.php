@@ -503,9 +503,6 @@ class ConyugeController extends ApplicationController
 
             $m32 = Mercurio32::where('id', $id)->where('documento', $documento)->first();
             if ($m32) {
-                if ($m32->estado != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
-                }
                 Mercurio32::where('id', $id)->where('documento', $documento)->delete();
             }
             $salida = [

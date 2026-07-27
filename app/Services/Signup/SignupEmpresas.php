@@ -2,7 +2,6 @@
 
 namespace App\Services\Signup;
 
-use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio37;
 use App\Models\Tranoms;
@@ -123,8 +122,6 @@ class SignupEmpresas implements SignupInterface
         $solicitud->save();
 
         Mercurio37::where('tipopc', $this->tipopc)
-            ->where('numero', $solicitud->id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)
             ->where('numero', $solicitud->id)->delete();
         Tranoms::where('request', $solicitud->id)
             ->delete();

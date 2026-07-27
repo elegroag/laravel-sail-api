@@ -81,8 +81,8 @@ RUN chmod +x /usr/local/bin/start-container
 
 RUN mkdir -p /tmp/php_temp && chmod 777 /tmp/php_temp
 
-RUN chown -R sail:sail /var/www/html/node_modules /var/www/html/public/build /home/sail
-RUN chown -R sail:sail /var/www/html/.pnpm-store
+RUN mkdir -p /var/www/html/node_modules /var/www/html/public/build /var/www/html/.pnpm-store \
+    && chown -R sail:sail /var/www/html/node_modules /var/www/html/public/build /var/www/html/.pnpm-store /home/sail
 
 EXPOSE 80/tcp
 EXPOSE 5173/tcp

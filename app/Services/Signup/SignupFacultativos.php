@@ -2,7 +2,6 @@
 
 namespace App\Services\Signup;
 
-use App\Models\Mercurio10;
 use App\Models\Mercurio36;
 use App\Models\Mercurio37;
 
@@ -132,7 +131,6 @@ class SignupFacultativos implements SignupInterface
         $solicitud->save();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $solicitud->id)->delete();
         $this->solicitud = $solicitud;
     }
 

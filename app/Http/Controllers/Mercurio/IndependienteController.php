@@ -13,7 +13,6 @@ use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio07;
-use App\Models\Mercurio10;
 use App\Models\Mercurio37;
 use App\Models\Mercurio41;
 use App\Models\Subsi54;
@@ -722,18 +721,6 @@ class IndependienteController extends ApplicationController
             $coddoc = $this->user['coddoc'];
             $id = $request->input('id');
 
-            $m41 = Mercurio41::where('id', $id)
-                ->where('documento', $documento)
-                ->where('coddoc', $coddoc)
-                ->first();
-
-            if ($m41) {
-                if ($m41->getEstado() != 'T') {
-                    Mercurio10::where('numero', $id)
-                        ->where('tipopc', $this->tipopc)
-                        ->delete();
-                }
-            }
             Mercurio41::where('id', $id)
                 ->where('documento', $documento)
                 ->where('coddoc', $coddoc)

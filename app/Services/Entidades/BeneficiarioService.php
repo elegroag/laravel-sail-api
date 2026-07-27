@@ -231,7 +231,6 @@ class BeneficiarioService
         $id = $beneficiario->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $beneficiario;
     }
@@ -273,7 +272,6 @@ class BeneficiarioService
 
         $id = $beneficiario->getId();
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $beneficiario;
     }

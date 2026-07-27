@@ -11,7 +11,6 @@ use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
-use App\Models\Mercurio10;
 use App\Models\Mercurio30;
 use App\Models\Mercurio37;
 use App\Models\Subsi54;
@@ -496,11 +495,6 @@ class EmpresaController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            if ($m30) {
-                if ($m30->getEstado() != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
-                }
-            }
             Mercurio30::where('id', $id)
                 ->where('documento', $documento)
                 ->where('coddoc', $coddoc)

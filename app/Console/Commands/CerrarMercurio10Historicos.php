@@ -66,6 +66,10 @@ class CerrarMercurio10Historicos extends Command
             $this->cerrarPendientesAsociados($estados, $dryRun, $hoy, $conFeccie);
         }
 
+        if ($conFeccie) {
+            $this->completarFeccieEnCerrados($dryRun);
+        }
+
         $this->info($dryRun ? 'Dry-run finalizado.' : 'Proceso finalizado.');
 
         return self::SUCCESS;
@@ -134,5 +138,33 @@ class CerrarMercurio10Historicos extends Command
         ", $bindings);
 
         $this->info("Actualizados (P): {$updatedP}");
+    }
+
+    /**
+     * Completa feccie en filas ya cerradas sin fecha (usa fecsis del propio evento).
+     */
+    private function completarFeccieEnCerrados(bool $dryRun): void
+    {
+        $query = Mercurio10::query()
+            ->where('cerrada', 'S')
+            ->whereNull('feccie')
+            ->whereNotNull('fecsis');
+
+        $count = (clone $query)->count();
+        $this->info("Cerrados sin feccie a completar (con fecsis): {$count}");
+
+        if ($dryRun || $count === 0) {
+            return;
+        }
+
+        $updated = DB::update('
+            UPDATE mercurio10
+            SET feccie = fecsis
+            WHERE cerrada = \'S\'
+              AND feccie IS NULL
+              AND fecsis IS NOT NULL
+        ');
+
+        $this->info("Completados feccie desde fecsis: {$updated}");
     }
 }

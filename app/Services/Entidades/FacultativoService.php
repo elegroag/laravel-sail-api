@@ -235,7 +235,6 @@ class FacultativoService
         $id = $facultativo->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $facultativo;
     }
@@ -259,7 +258,6 @@ class FacultativoService
         $id = $facultativo->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $facultativo;
     }

@@ -268,7 +268,6 @@ class ConyugeService
         $id = $conyuge->getId();
 
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $conyuge;
     }
@@ -290,7 +289,6 @@ class ConyugeService
 
         $id = $conyuge->getId();
         Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
-        Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->delete();
 
         return $conyuge;
     }

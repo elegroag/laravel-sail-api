@@ -335,9 +335,6 @@ class BeneficiarioController extends ApplicationController
 
             $m34 = Mercurio34::where('id', $id)->where('documento', $documento)->first();
             if ($m34) {
-                if ($m34->getEstado() != 'T') {
-                    Mercurio10::where('numero', $id)->where('tipopc', $this->tipopc)->delete();
-                }
                 Mercurio34::where('id', $id)->where('documento', $documento)->delete();
             }
             $salida = [
