@@ -35,6 +35,8 @@ class Mercurio10Factory extends Factory
                 .'-'.str_pad((string) $item, 2, '0', STR_PAD_LEFT)
             : null;
 
+        $cerrada = $this->faker->randomElement(['S', 'N']);
+
         return [
             'tipopc' => $tipopc,
             'numero' => $numero,
@@ -45,7 +47,8 @@ class Mercurio10Factory extends Factory
             'fecsis' => $fecsis,
             'campos_corregir' => $camposCorregir,
             'ruuid' => $ruuid,
-            'cerrada' => $this->faker->randomElement(['S', 'N']),
+            'cerrada' => $cerrada,
+            'feccie' => $cerrada === 'S' ? $this->faker->date('Y-m-d') : null,
         ];
     }
 

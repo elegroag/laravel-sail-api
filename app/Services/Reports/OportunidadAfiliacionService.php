@@ -44,12 +44,12 @@ class OportunidadAfiliacionService
             return [];
         }
 
-        $cierresIndex = $this->buildCierresIndex($eventosP);
         $solicitudesIndex = $this->buildSolicitudesIndex($eventosP, $tipos);
         $usuariosIndex = $this->buildUsuariosIndex($solicitudesIndex);
         $titularesIndex = $this->buildTitularesIndex();
         $tipdocIndex = $this->buildTipdocIndex();
         $dataset = [];
+        $hoy = Carbon::today()->format('Y-m-d');
 
         foreach ($eventosP as $evento) {
             $tipopc = (int) $evento->tipopc;
@@ -73,21 +73,18 @@ class OportunidadAfiliacionService
             $record = $this->enrichIdentificacion($record, $tipdocIndex);
 
             $fechaInicio = $this->formatFecha($evento->fecsis);
-            $cierre = $this->resolveCierreEvento($evento, $cierresIndex);
-            $fechaCierre = $cierre ? $this->formatFecha($cierre->fecsis) : null;
-            $fechaAprobacion = ($cierre && strtoupper((string) $cierre->estado) === 'A')
-                ? $fechaCierre
-                : null;
+            $fechaCierre = $this->formatFecha($evento->feccie);
+            $fechaFinEfectiva = $fechaCierre ?? $hoy;
 
             $usuario = trim((string) ($solicitud->usuario ?? ''));
             $record['ruuid'] = $evento->ruuid ?: '';
             $record['item'] = $evento->item;
             $record['fecsol'] = $fechaInicio;
-            $record['fecapr'] = $fechaAprobacion;
+            $record['fecapr'] = $fechaCierre;
             $record['fecha_cierre'] = $fechaCierre;
             $record['dias_habiles'] = DiasHabilesCalculator::between($fechaInicio, $fechaCierre);
             $record['estado_oportunidad'] = $this->resolverEstadoOportunidad(
-                $fechaCierre,
+                $fechaFinEfectiva,
                 $record['dias_habiles'],
                 $umbral
             );
@@ -147,46 +144,6 @@ class OportunidadAfiliacionService
         }
 
         return $resumen;
-    }
-
-    /**
-     * Índice de cierres A/X por tipopc|numero, ordenados por item ascendente.
-     *
-     * @param  Collection<int, Mercurio10>  $eventosP
-     * @return array<string, Collection<int, Mercurio10>>
-     */
-    private function buildCierresIndex(Collection $eventosP): array
-    {
-        $pairs = $eventosP
-            ->map(fn (Mercurio10 $e) => [
-                'tipopc' => (string) $e->tipopc,
-                'numero' => (int) $e->numero,
-            ])
-            ->unique(fn (array $p) => $p['tipopc'].'|'.$p['numero'])
-            ->values();
-
-        if ($pairs->isEmpty()) {
-            return [];
-        }
-
-        $tipopcs = $pairs->pluck('tipopc')->unique()->values()->all();
-        $numeros = $pairs->pluck('numero')->unique()->values()->all();
-
-        $cierres = Mercurio10::query()
-            ->whereIn('estado', ['A', 'X'])
-            ->whereIn('tipopc', $tipopcs)
-            ->whereIn('numero', $numeros)
-            ->orderBy('item')
-            ->get();
-
-        $index = [];
-        foreach ($cierres as $cierre) {
-            $key = $this->pairKey((string) $cierre->tipopc, (int) $cierre->numero);
-            $index[$key] ??= collect();
-            $index[$key]->push($cierre);
-        }
-
-        return $index;
     }
 
     /**
@@ -251,24 +208,6 @@ class OportunidadAfiliacionService
                 (string) $asesor->usuario => trim((string) $asesor->nombre),
             ])
             ->all();
-    }
-
-    /**
-     * Siguiente evento de cierre A/X de la misma solicitud con item mayor al P.
-     *
-     * @param  array<string, Collection<int, Mercurio10>>  $cierresIndex
-     */
-    private function resolveCierreEvento(Mercurio10 $eventoP, array $cierresIndex): ?Mercurio10
-    {
-        $key = $this->pairKey((string) $eventoP->tipopc, (int) $eventoP->numero);
-        $cierres = $cierresIndex[$key] ?? null;
-        if ($cierres === null || $cierres->isEmpty()) {
-            return null;
-        }
-
-        $itemP = (int) $eventoP->item;
-
-        return $cierres->first(fn (Mercurio10 $c) => (int) $c->item > $itemP);
     }
 
     private function pairKey(string $tipopc, int $numero): string
@@ -375,13 +314,14 @@ class OportunidadAfiliacionService
         return $record;
     }
 
-    private function resolverEstadoOportunidad(?string $fecapr, ?int $diasHabiles, int $umbral): string
+    private function resolverEstadoOportunidad(?string $fechaFinEfectiva, ?int $diasHabiles, int $umbral): string
     {
         if ($diasHabiles === null) {
             return 'EN_TRAMITE';
         }
 
-        if ($fecapr === null || $fecapr === '' || $fecapr === '0000-00-00') {
+        // fechaFinEfectiva siempre viene informada (feccie o hoy) para alinear con días calculados.
+        if ($fechaFinEfectiva === null || $fechaFinEfectiva === '' || $fechaFinEfectiva === '0000-00-00') {
             return $diasHabiles > $umbral ? 'VENCIDO' : 'EN_TRAMITE';
         }
 

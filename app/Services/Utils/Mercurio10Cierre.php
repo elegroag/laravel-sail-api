@@ -3,6 +3,7 @@
 namespace App\Services\Utils;
 
 use App\Models\Mercurio10;
+use Carbon\Carbon;
 
 class Mercurio10Cierre
 {
@@ -12,6 +13,11 @@ class Mercurio10Cierre
      * @var array<int, string>
      */
     public const ESTADOS_CIERRE = ['A', 'X', 'D'];
+
+    public static function fechaCierreHoy(): string
+    {
+        return Carbon::now()->toDateString();
+    }
 
     public static function marcarRespuesta(Mercurio10 $evento): void
     {
@@ -25,6 +31,7 @@ class Mercurio10Cierre
         }
 
         $evento->setCerrada('S');
+        $evento->setFeccie(self::fechaCierreHoy());
         $evento->save();
     }
 
@@ -37,7 +44,10 @@ class Mercurio10Cierre
             ->where(function ($q) {
                 $q->where('cerrada', 'N')->orWhereNull('cerrada');
             })
-            ->update(['cerrada' => 'S']);
+            ->update([
+                'cerrada' => 'S',
+                'feccie' => self::fechaCierreHoy(),
+            ]);
     }
 
     public static function aplicarCierreRespuesta(Mercurio10 $evento): void

@@ -27,6 +27,8 @@ class CerrarMercurio10Historicos extends Command
 
         $dryRun = (bool) $this->option('dry-run');
         $estados = $this->resolverEstados();
+        $hoy = Mercurio10Cierre::fechaCierreHoy();
+        $conFeccie = Schema::hasColumn('mercurio10', 'feccie');
 
         if ($estados === []) {
             $this->error('Debes indicar al menos un estado en --estados');
@@ -52,12 +54,16 @@ class CerrarMercurio10Historicos extends Command
         $this->info("Respuestas abiertas a cerrar: {$countRespuestas}");
 
         if (! $dryRun && $countRespuestas > 0) {
-            $updated = $queryRespuestas->update(['cerrada' => 'S']);
+            $payload = ['cerrada' => 'S'];
+            if ($conFeccie) {
+                $payload['feccie'] = $hoy;
+            }
+            $updated = $queryRespuestas->update($payload);
             $this->info("Actualizados (respuestas): {$updated}");
         }
 
         if ($this->option('cerrar-pendientes')) {
-            $this->cerrarPendientesAsociados($estados, $dryRun);
+            $this->cerrarPendientesAsociados($estados, $dryRun, $hoy, $conFeccie);
         }
 
         $this->info($dryRun ? 'Dry-run finalizado.' : 'Proceso finalizado.');
@@ -87,7 +93,7 @@ class CerrarMercurio10Historicos extends Command
     /**
      * @param  array<int, string>  $estados
      */
-    private function cerrarPendientesAsociados(array $estados, bool $dryRun): void
+    private function cerrarPendientesAsociados(array $estados, bool $dryRun, string $hoy, bool $conFeccie): void
     {
         $placeholders = implode(',', array_fill(0, count($estados), '?'));
 
@@ -112,6 +118,9 @@ class CerrarMercurio10Historicos extends Command
             return;
         }
 
+        $setFeccie = $conFeccie ? ', p.feccie = ?' : '';
+        $bindings = $conFeccie ? array_merge([$hoy], $estados) : $estados;
+
         $updatedP = DB::update("
             UPDATE mercurio10 p
             INNER JOIN (
@@ -119,10 +128,10 @@ class CerrarMercurio10Historicos extends Command
                 FROM mercurio10
                 WHERE estado IN ({$placeholders})
             ) r ON r.tipopc = p.tipopc AND r.numero = p.numero
-            SET p.cerrada = 'S'
+            SET p.cerrada = 'S'{$setFeccie}
             WHERE p.estado = 'P'
               AND (p.cerrada IS NULL OR p.cerrada = '' OR p.cerrada = 'N')
-        ", $estados);
+        ", $bindings);
 
         $this->info("Actualizados (P): {$updatedP}");
     }

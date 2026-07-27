@@ -33,6 +33,7 @@ class Mercurio10 extends ModelBase
         'campos_corregir',
         'ruuid',
         'cerrada',
+        'feccie',
     ];
 
     protected function rules()
@@ -80,6 +81,16 @@ class Mercurio10 extends ModelBase
     public function getCerrada(): ?string
     {
         return $this->cerrada;
+    }
+
+    public function setFeccie(?string $feccie): void
+    {
+        $this->feccie = $feccie;
+    }
+
+    public function getFeccie(): ?string
+    {
+        return $this->feccie;
     }
 
     /**

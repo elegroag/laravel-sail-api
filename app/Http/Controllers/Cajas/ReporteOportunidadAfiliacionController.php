@@ -90,7 +90,7 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
             'Estado',
             'Estado radicado',
             'Fecha envio a caja',
-            'Fecha de aprobacion',
+            'Fecha de cierre',
             'Dias habiles tramite',
         ];
 
@@ -120,7 +120,7 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
                 $row['estado'],
                 $row['estado_radicado'] ?? '',
                 $row['fecsol'],
-                $row['fecapr'] ?? '',
+                $row['fecha_cierre'] ?? $row['fecapr'] ?? '',
                 $row['dias_habiles'],
             ];
 

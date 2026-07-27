@@ -142,8 +142,7 @@ class OportunidadAfiliacionServiceTest extends TestCase
             [
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
-                'evento_p' => $this->evento(1, 100, 1, 'P', '2026-06-01', 'TRA-2026-00100-01'),
-                'evento_cierre' => $this->evento(1, 100, 2, 'A', '2026-06-10'),
+                'evento_p' => $this->evento(1, 100, 1, 'P', '2026-06-01', 'TRA-2026-00100-01', '2026-06-10'),
             ],
         ]);
 
@@ -152,6 +151,7 @@ class OportunidadAfiliacionServiceTest extends TestCase
 
         $this->assertSame('TRA-2026-00100-01', $registro['ruuid']);
         $this->assertSame('2026-06-01', $registro['fecsol']);
+        $this->assertSame('2026-06-10', $registro['fecha_cierre']);
         $this->assertSame('2026-06-10', $registro['fecapr']);
         $this->assertSame(7, $registro['dias_habiles']);
         $this->assertSame('VENCIDO', $registro['estado_oportunidad']);
@@ -177,8 +177,7 @@ class OportunidadAfiliacionServiceTest extends TestCase
             [
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
-                'evento_p' => $this->evento(1, 101, 1, 'P', '2026-06-01', 'TRA-2026-00101-01'),
-                'evento_cierre' => $this->evento(1, 101, 2, 'A', '2026-06-02'),
+                'evento_p' => $this->evento(1, 101, 1, 'P', '2026-06-01', 'TRA-2026-00101-01', '2026-06-02'),
             ],
         ]);
 
@@ -211,7 +210,6 @@ class OportunidadAfiliacionServiceTest extends TestCase
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
                 'evento_p' => $this->evento(1, 210, 1, 'P', '2026-06-15', 'TRA-2026-00210-01'),
-                'evento_cierre' => null,
             ],
         ]);
 
@@ -244,14 +242,12 @@ class OportunidadAfiliacionServiceTest extends TestCase
             [
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
-                'evento_p' => $this->evento(1, 300, 1, 'P', '2026-06-01', 'TRA-2026-00300-01'),
-                'evento_cierre' => $this->evento(1, 300, 2, 'A', '2026-06-02'),
+                'evento_p' => $this->evento(1, 300, 1, 'P', '2026-06-01', 'TRA-2026-00300-01', '2026-06-02'),
             ],
             [
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
-                'evento_p' => $this->evento(1, 300, 3, 'P', '2026-06-10', 'TRA-2026-00300-03'),
-                'evento_cierre' => $this->evento(1, 300, 4, 'A', '2026-06-15'),
+                'evento_p' => $this->evento(1, 300, 3, 'P', '2026-06-10', 'TRA-2026-00300-03', '2026-06-15'),
             ],
         ]);
 
@@ -278,14 +274,13 @@ class OportunidadAfiliacionServiceTest extends TestCase
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
                 'evento_p' => $this->evento(1, 400, 1, 'P', '2026-06-01', 'TRA-2026-00400-01'),
-                'evento_cierre' => null,
             ],
         ]);
 
         $this->assertCount(0, $dataset);
     }
 
-    public function test_cierre_por_rechazo_x_no_muestra_fecha_aprobacion(): void
+    public function test_fecha_cierre_usa_feccie_del_evento_p(): void
     {
         Carbon::setTestNow('2026-06-29');
 
@@ -301,14 +296,13 @@ class OportunidadAfiliacionServiceTest extends TestCase
             [
                 'solicitud' => $solicitud,
                 'tipopc' => 2,
-                'evento_p' => $this->evento(2, 50, 1, 'P', '2026-06-01', 'EMP-2026-00050-01'),
-                'evento_cierre' => $this->evento(2, 50, 2, 'X', '2026-06-12'),
+                'evento_p' => $this->evento(2, 50, 1, 'P', '2026-06-01', 'EMP-2026-00050-01', '2026-06-12'),
             ],
         ]);
 
         $this->assertCount(1, $dataset);
         $this->assertSame('2026-06-12', $dataset[0]['fecha_cierre']);
-        $this->assertNull($dataset[0]['fecapr'], 'rechazo X no debe llenar fecha de aprobacion');
+        $this->assertSame('2026-06-12', $dataset[0]['fecapr']);
         $this->assertSame(9, $dataset[0]['dias_habiles']);
         $this->assertSame('VENCIDO', $dataset[0]['estado_oportunidad']);
 
@@ -330,7 +324,6 @@ class OportunidadAfiliacionServiceTest extends TestCase
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
                 'evento_p' => $this->evento(1, 88, 1, 'P', '2026-06-01', null),
-                'evento_cierre' => null,
             ],
         ]);
 
@@ -340,10 +333,10 @@ class OportunidadAfiliacionServiceTest extends TestCase
     }
 
     #[DataProvider('casosDiasHabilesProvider')]
-    public function test_calculo_dias_habiles_entre_evento_p_y_cierre(string $fecsisP, string $fecsisCierre, int $esperado): void
+    public function test_calculo_dias_habiles_entre_evento_p_y_cierre(string $fecsisP, string $feccie, int $esperado): void
     {
         $solicitud = Mercurio31::factory()->make([
-            'id' => 500 + abs(crc32($fecsisP.$fecsisCierre)) % 1000,
+            'id' => 500 + abs(crc32($fecsisP.$feccie)) % 1000,
             'nit' => '900000001',
             'razsoc' => 'Calculo SA',
             'cedtra' => '1010101010',
@@ -357,12 +350,11 @@ class OportunidadAfiliacionServiceTest extends TestCase
             [
                 'solicitud' => $solicitud,
                 'tipopc' => 1,
-                'evento_p' => $this->evento(1, $id, 1, 'P', $fecsisP, "TRA-2026-{$id}-01"),
-                'evento_cierre' => $this->evento(1, $id, 2, 'A', $fecsisCierre),
+                'evento_p' => $this->evento(1, $id, 1, 'P', $fecsisP, "TRA-2026-{$id}-01", $feccie),
             ],
         ]);
 
-        $this->assertSame($esperado, $dataset[0]['dias_habiles'], "{$fecsisP} -> {$fecsisCierre}");
+        $this->assertSame($esperado, $dataset[0]['dias_habiles'], "{$fecsisP} -> {$feccie}");
     }
 
     public static function casosDiasHabilesProvider(): array
@@ -387,38 +379,39 @@ class OportunidadAfiliacionServiceTest extends TestCase
             [
                 'solicitud' => $s1,
                 'tipopc' => 1,
-                'evento_p' => $this->evento(1, 1, 1, 'P', '2026-06-01', 'TRA-2026-00001-01'),
-                'evento_cierre' => $this->evento(1, 1, 2, 'A', '2026-06-02'),
+                'evento_p' => $this->evento(1, 1, 1, 'P', '2026-06-01', 'TRA-2026-00001-01', '2026-06-02'),
             ],
             [
                 'solicitud' => $s2,
                 'tipopc' => 1,
-                'evento_p' => $this->evento(1, 2, 1, 'P', '2026-06-01', 'TRA-2026-00002-01'),
-                'evento_cierre' => $this->evento(1, 2, 2, 'A', '2026-06-15'),
+                'evento_p' => $this->evento(1, 2, 1, 'P', '2026-06-01', 'TRA-2026-00002-01', '2026-06-15'),
             ],
             [
                 'solicitud' => $s3,
                 'tipopc' => 1,
                 'evento_p' => $this->evento(1, 3, 1, 'P', '2026-06-22', 'TRA-2026-00003-01'),
-                'evento_cierre' => null,
             ],
         ]);
 
         $this->assertCount(3, $dataset);
 
         $estados = array_count_values(array_column($dataset, 'estado_oportunidad'));
-        $this->assertSame(1, $estados['EN_TERMINO'] ?? 0);
+        // sin feccie: días hasta hoy (22→23 = 1) → EN_TERMINO
+        $this->assertSame(2, $estados['EN_TERMINO'] ?? 0);
         $this->assertSame(1, $estados['VENCIDO'] ?? 0);
-        $this->assertSame(1, $estados['EN_TRAMITE'] ?? 0);
 
         Carbon::setTestNow();
     }
 
-    /**
-     * @param  array<string, mixed>  $attrs
-     */
-    private function evento(int $tipopc, int $numero, int $item, string $estado, string $fecsis, ?string $ruuid = null): Mercurio10
-    {
+    private function evento(
+        int $tipopc,
+        int $numero,
+        int $item,
+        string $estado,
+        string $fecsis,
+        ?string $ruuid = null,
+        ?string $feccie = null
+    ): Mercurio10 {
         $evento = new Mercurio10;
         $evento->forceFill([
             'tipopc' => (string) $tipopc,
@@ -426,6 +419,7 @@ class OportunidadAfiliacionServiceTest extends TestCase
             'item' => $item,
             'estado' => $estado,
             'fecsis' => $fecsis,
+            'feccie' => $feccie,
             'nota' => 'test',
             'ruuid' => $ruuid,
         ]);
@@ -436,14 +430,14 @@ class OportunidadAfiliacionServiceTest extends TestCase
     /**
      * Simula buildDataset por eventos Mercurio10 sin tocar la BD.
      *
-     * @param  array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10, evento_cierre: ?Mercurio10}>  $casos
+     * @param  array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10}>  $casos
      * @return array<int, array<string, mixed>>
      */
     private function ejecutarServicioConEventos(array $casos): array
     {
         $serviceMock = new class($casos) extends OportunidadAfiliacionService
         {
-            /** @var array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10, evento_cierre: ?Mercurio10}> */
+            /** @var array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10}> */
             private array $casos;
 
             public function __construct(array $casos)
@@ -458,6 +452,7 @@ class OportunidadAfiliacionServiceTest extends TestCase
                 $resolver->setAccessible(true);
 
                 $umbral = (int) config('reportes.oportunidad_umbral_dias', 3);
+                $hoy = Carbon::today()->format('Y-m-d');
                 $dataset = [];
 
                 foreach ($this->casos as $caso) {
@@ -470,7 +465,6 @@ class OportunidadAfiliacionServiceTest extends TestCase
                     $tipopc = (int) $caso['tipopc'];
                     $config = config("reportes.oportunidad_tipos.{$tipopc}");
                     $eventoP = $caso['evento_p'];
-                    $cierre = $caso['evento_cierre'];
 
                     $record = AfiliacionNormalizer::normalize($solicitud, $tipopc, $config, []);
 
@@ -487,22 +481,21 @@ class OportunidadAfiliacionServiceTest extends TestCase
                     $record['tipo_identificacion'] = trim($tipo.' '.$numero);
 
                     $fechaInicio = Carbon::parse($eventoP->fecsis)->format('Y-m-d');
-                    $fechaCierre = $cierre
-                        ? Carbon::parse($cierre->fecsis)->format('Y-m-d')
-                        : null;
-                    $fechaAprobacion = ($cierre && strtoupper((string) $cierre->estado) === 'A')
-                        ? $fechaCierre
-                        : null;
+                    $fechaCierre = null;
+                    if ($eventoP->feccie !== null && $eventoP->feccie !== '' && $eventoP->feccie !== '0000-00-00') {
+                        $fechaCierre = Carbon::parse($eventoP->feccie)->format('Y-m-d');
+                    }
+                    $fechaFinEfectiva = $fechaCierre ?? $hoy;
 
                     $record['ruuid'] = $eventoP->ruuid ?: '';
                     $record['item'] = $eventoP->item;
                     $record['fecsol'] = $fechaInicio;
-                    $record['fecapr'] = $fechaAprobacion;
+                    $record['fecapr'] = $fechaCierre;
                     $record['fecha_cierre'] = $fechaCierre;
                     $record['dias_habiles'] = DiasHabilesCalculator::between($fechaInicio, $fechaCierre);
                     $record['estado_oportunidad'] = $resolver->invoke(
                         $this,
-                        $fechaCierre,
+                        $fechaFinEfectiva,
                         $record['dias_habiles'],
                         $umbral
                     );

@@ -189,6 +189,7 @@ php artisan mercurio10:backfill-ruuid --tipopc=1
 
 **Dry-run actual:** ~128 243 a actualizar; 3 621 sin solicitud; 142 solicitud sin `ruuid`; 2 tipopc no mapeado.
 
-```
-
+```bash
+php artisan mercurio10:backfill-feccie --dry-run
+php artisan mercurio10:backfill-feccie
 ```
