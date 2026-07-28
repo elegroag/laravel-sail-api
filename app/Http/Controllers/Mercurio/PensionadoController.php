@@ -286,7 +286,7 @@ class PensionadoController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -451,7 +451,7 @@ class PensionadoController extends ApplicationController
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
 
         return $this->renderFile($fichero);
     }
@@ -620,7 +620,7 @@ class PensionadoController extends ApplicationController
             $pensionadoService = new PensionadoService;
 
             $sindepe = Mercurio38::whereRaw(
-                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                "id =? AND documento=? AND coddoc=?",
                 [$id, $documento, $coddoc]
             )
                 ->first();

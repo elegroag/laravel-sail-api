@@ -337,7 +337,7 @@ class IndependienteController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -450,7 +450,7 @@ class IndependienteController extends ApplicationController
             $salida = [
                 'success' => true,
                 'name' => $file,
-                'url' => 'independinte/downloadFile/'.$file,
+                'url' => 'independinte/downloadFile/' . $file,
             ];
         } catch (\Throwable $e) {
             return $this->handleException($e, request());
@@ -478,7 +478,7 @@ class IndependienteController extends ApplicationController
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
 
         return $this->renderFile($fichero);
     }
@@ -677,7 +677,7 @@ class IndependienteController extends ApplicationController
             $service = new IndependienteService;
 
             $sindepe = Mercurio41::whereRaw(
-                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                "id =? AND documento=? AND coddoc=?",
                 [$id, $documento, $coddoc]
             )
                 ->first();
@@ -701,7 +701,7 @@ class IndependienteController extends ApplicationController
     public function cartaSolicitud($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
 
         return $this->renderFile($fichero);
     }
@@ -709,7 +709,7 @@ class IndependienteController extends ApplicationController
     public function tratamientoDatos($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
 
         return $this->renderFile($fichero);
     }
@@ -750,7 +750,7 @@ class IndependienteController extends ApplicationController
                     'tipo' => 'I',
                     'coddoc' => $solicitud->tipdoc,
                     'documento' => $solicitud->cedtra,
-                    'usuario' => $solicitud->priape.' '.$solicitud->segape.' '.$solicitud->prinom.' '.$solicitud->segnom,
+                    'usuario' => $solicitud->priape . ' ' . $solicitud->segape . ' ' . $solicitud->prinom . ' ' . $solicitud->segnom,
                 ]
             );
 

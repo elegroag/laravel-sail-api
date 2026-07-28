@@ -152,7 +152,7 @@ class TrabajadorController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -337,7 +337,7 @@ class TrabajadorController extends ApplicationController
                         continue;
                     }
                     if (isset($codciu[$data['codzon']])) {
-                        $codsuc["{$data['codsuc']}"] = $data['detalle'].' - DE '.$codciu[$data['codzon']];
+                        $codsuc["{$data['codsuc']}"] = $data['detalle'] . ' - DE ' . $codciu[$data['codzon']];
                     } else {
                         $codsuc["{$data['codsuc']}"] = $data['detalle'];
                     }
@@ -590,7 +590,7 @@ class TrabajadorController extends ApplicationController
 
             $traService = new TrabajadorService;
             $mtrabajador = Mercurio31::whereRaw(
-                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                "id =? AND documento=? AND coddoc=?",
                 [$id, $documento, $coddoc]
             )
                 ->first();

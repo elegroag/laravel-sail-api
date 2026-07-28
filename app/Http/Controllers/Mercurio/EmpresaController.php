@@ -165,7 +165,7 @@ class EmpresaController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -365,7 +365,7 @@ class EmpresaController extends ApplicationController
     public function downloadFile($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = public_path('temp/'.$archivo);
+        $fichero = public_path('temp/' . $archivo);
         if (! file_exists($fichero)) {
             throw new DebugException('Archivo no disponible', 404);
         }
@@ -379,7 +379,7 @@ class EmpresaController extends ApplicationController
     public function downloadDocs($archivo = '')
     {
         $this->setResponse('view');
-        $fichero = public_path('docs/formulario_mercurio/'.$archivo);
+        $fichero = public_path('docs/formulario_mercurio/' . $archivo);
         if (! file_exists($fichero)) {
             throw new DebugException('Documento no disponible', 404);
         }
@@ -459,7 +459,6 @@ class EmpresaController extends ApplicationController
             $mempresa = Mercurio30::where('id', $id)
                 ->where('documento', $documento)
                 ->where('coddoc', $coddoc)
-                ->whereNotIn('estado', ['I', 'X'])
                 ->first();
 
             if ($mempresa == false) {

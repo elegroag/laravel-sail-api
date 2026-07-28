@@ -259,7 +259,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' - '.$ciudades[$sucursal['codzon']];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' - ' . $ciudades[$sucursal['codzon']];
                         }
                     }
                 }
@@ -391,7 +391,7 @@ class ActualizaEmpresaController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -516,7 +516,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' '.$sucursal['codzon'];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' ' . $sucursal['codzon'];
                         }
                     }
                 }
@@ -591,7 +591,7 @@ class ActualizaEmpresaController extends ApplicationController
             $sindepe = Mercurio47::where('id', $id)
                 ->where('documento', $this->user['documento'])
                 ->where('coddoc', $this->user['coddoc'])
-                ->whereNotIn('estado', ['I', 'X'])
+                ->where('tipact', 'E')
                 ->first();
 
             if (! $sindepe) {

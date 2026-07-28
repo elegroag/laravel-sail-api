@@ -150,7 +150,7 @@ class ActualizaTrabajadorController extends ApplicationController
                         continue;
                     }
                     if (isset($data['codzon'], $codciu[$data['codzon']])) {
-                        $codsuc["{$codsucKey}"] = ($data['detalle'] ?? '').' - DE '.$codciu[$data['codzon']];
+                        $codsuc["{$codsucKey}"] = ($data['detalle'] ?? '') . ' - DE ' . $codciu[$data['codzon']];
                     } else {
                         $codsuc["{$codsucKey}"] = $data['detalle'] ?? (string) $codsucKey;
                     }
@@ -558,7 +558,7 @@ class ActualizaTrabajadorController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -725,17 +725,17 @@ class ActualizaTrabajadorController extends ApplicationController
         $pdf->AddPage();
         $pdf->SetTextColor(0);
         $pdf->SetFont('Arial', '', 9);
-        $pdf->Image(base_path().'public/docs/formulario_mercurio/fomulario_actualizacion_trabajador_parte_1.jpeg', 0, 0, '216', '280');
+        $pdf->Image(base_path() . 'public/docs/formulario_mercurio/fomulario_actualizacion_trabajador_parte_1.jpeg', 0, 0, '216', '280');
         $tipos_documentos = $this->getTiposDocumentos();
 
         $pdf->setY(57);
         $pdf->setX(20);
-        $pdf->Cell(180, 5, $campos->prinom.' '.$campos->segnom.' '.$campos->priape.' '.$campos->segape, 0, 0, 'L');
+        $pdf->Cell(180, 5, $campos->prinom . ' ' . $campos->segnom . ' ' . $campos->priape . ' ' . $campos->segape, 0, 0, 'L');
 
         $pdf->SetFont('Arial', '', 8);
         $pdf->setY(53);
         $pdf->setX(150);
-        $pdf->Cell(53, 6, '('.@$tipos_documentos["{$trabajador['coddoc']}"].') '.$documento, 0, 0, 'L');
+        $pdf->Cell(53, 6, '(' . @$tipos_documentos["{$trabajador['coddoc']}"] . ') ' . $documento, 0, 0, 'L');
 
         $pdf->setY(62);
         $pdf->setX(150);

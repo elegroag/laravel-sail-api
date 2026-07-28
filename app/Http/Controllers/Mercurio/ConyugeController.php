@@ -116,7 +116,7 @@ class ConyugeController extends ApplicationController
             $coddoc = $request->input('coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
+            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -216,7 +216,7 @@ class ConyugeController extends ApplicationController
     {
         $this->setResponse('view');
         $archivo = 'declaracion_juramentada_nueva.pdf';
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         header('Content-Description: File Transfer');
         header("Content-Type: application/{$ext}");
@@ -224,7 +224,7 @@ class ConyugeController extends ApplicationController
         header('Cache-Control: must-revalidate');
         header('Expires: 0');
         header('Pragma: public');
-        header('Content-Length: '.filesize($fichero));
+        header('Content-Length: ' . filesize($fichero));
         ob_clean();
         readfile($fichero);
         exit;
@@ -232,7 +232,7 @@ class ConyugeController extends ApplicationController
 
     public function downloadDocumentos($archivo = '')
     {
-        $fichero = 'public/docs/formulario_mercurio/'.$archivo;
+        $fichero = 'public/docs/formulario_mercurio/' . $archivo;
         $ext = substr(strrchr($archivo, '.'), 1);
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
@@ -241,7 +241,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -253,7 +253,7 @@ class ConyugeController extends ApplicationController
 
     public function downloadReporte($archivo = '')
     {
-        $fichero = 'public/temp/'.$archivo;
+        $fichero = 'public/temp/' . $archivo;
         if (file_exists($fichero)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/csv');
@@ -261,7 +261,7 @@ class ConyugeController extends ApplicationController
             header('Cache-Control: must-revalidate');
             header('Expires: 0');
             header('Pragma: public');
-            header('Content-Length: '.filesize($fichero));
+            header('Content-Length: ' . filesize($fichero));
             ob_clean();
             readfile($fichero);
             exit;
@@ -771,7 +771,7 @@ class ConyugeController extends ApplicationController
             $conService = new ConyugeService;
 
             $sindepe = Mercurio32::whereRaw(
-                "id =? AND documento=? AND coddoc=? AND estado NOT IN('I','X')",
+                "id =? AND documento=? AND coddoc=?",
                 [$id, $documento, $coddoc]
             )
                 ->first();
@@ -829,7 +829,7 @@ class ConyugeController extends ApplicationController
             $response = [
                 'success' => true,
                 'name' => $file,
-                'url' => 'conyuge/download_reporte/'.$file,
+                'url' => 'conyuge/download_reporte/' . $file,
             ];
 
             return response()->json($response);
