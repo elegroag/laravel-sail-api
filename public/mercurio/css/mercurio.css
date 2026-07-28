@@ -79,10 +79,56 @@ button.btn-link-file:active {
     padding: 0.8rem 1rem;
 }
 
+/* Salir: contraste alto sobre card-header bg-green-blue (#84e1be) */
+#render_subeader .solicitud-subheader-nav__item--exit {
+    margin-left: auto;
+}
+
+#render_subeader .solicitud-subheader-nav__link--exit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1.1rem;
+    border-radius: 10px;
+    border: 1px solid #fff;
+    background: #fff;
+    color: #f5365c !important;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    box-shadow: 0 2px 6px rgba(50, 50, 93, 0.18);
+}
+
+#render_subeader .solicitud-subheader-nav__link--exit i {
+    color: inherit;
+}
+
+#render_subeader .solicitud-subheader-nav__link--exit:hover,
+#render_subeader .solicitud-subheader-nav__link--exit:focus {
+    background: #f5365c;
+    border-color: #f5365c;
+    color: #fff !important;
+    box-shadow: 0 3px 8px rgba(245, 54, 92, 0.35);
+}
+
+#render_subeader .solicitud-subheader-nav__link--exit:active {
+    background: #d9254a;
+    border-color: #d9254a;
+    color: #fff !important;
+}
+
 @media (max-width: 767.98px) {
     #render_subeader .solicitud-subheader-nav .nav-item {
         padding-right: 0;
         width: 100%;
+    }
+
+    #render_subeader .solicitud-subheader-nav__item--exit {
+        margin-left: 0;
+        order: 99;
+        padding-top: 0.35rem;
+        margin-top: 0.25rem;
+        border-top: 1px solid #e9ecef;
     }
 
     #render_subeader .solicitud-subheader-nav .nav-link {
@@ -1585,7 +1631,131 @@ label.is-invalid {
     line-height: 1.35;
 }
 
+/* Ficha Principal Registro: UI global para todas las solicitudes */
+.ficha-principal > .card-body {
+    padding: 1.25rem 1.5rem 1.25rem;
+    background: #f7fafc;
+}
+
+.ficha-principal > .card-body > form.validation_form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.ficha-principal fieldset {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.85rem 1.15rem 1rem;
+    margin: 0 0 1rem;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(50, 50, 93, 0.04);
+}
+
+.ficha-principal legend {
+    float: none;
+    width: auto;
+    max-width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0 0.25rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #32325d;
+    border: 0;
+}
+
+.ficha-principal .row.mb-2 {
+    margin-bottom: 0 !important;
+}
+
+.ficha-principal .form-group {
+    margin-top: 0.45rem;
+    margin-bottom: 0.75rem;
+}
+
+.ficha-principal label.control-label {
+    display: block;
+    position: static;
+    left: auto;
+    margin: 0 0 0.35rem;
+    padding: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #525f7f;
+    text-shadow: none;
+}
+
+.ficha-principal label.control-label small {
+    font-weight: 500;
+    color: #8898aa;
+}
+
+.ficha-principal div.form-control,
+.ficha-principal input.form-control,
+.ficha-principal select.form-control,
+.ficha-principal textarea.form-control {
+    border-radius: 8px;
+    border-color: #e9ecef;
+    font-size: 0.875rem;
+}
+
+.ficha-principal .form-control:focus {
+    border-color: #11cdef;
+    box-shadow: 0 0 0 0.15rem rgba(17, 205, 239, 0.2);
+}
+
+.ficha-principal .choices__inner {
+    border-radius: 8px;
+    border-color: #e9ecef;
+    min-height: calc(2.1rem + 2px);
+}
+
+.ficha-principal .flatpickr-input {
+    border-radius: 8px;
+}
+
+.ficha-principal > .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: #fff;
+    border-top: 1px solid #e9ecef;
+}
+
+.ficha-principal > .card-footer > .col-12 {
+    width: 100%;
+    padding: 0;
+}
+
+.ficha-principal #guardar_ficha {
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 0.65rem 1.35rem;
+    box-shadow: 0 2px 6px rgba(94, 114, 228, 0.25);
+}
+
+.ficha-principal #guardar_ficha i {
+    margin-right: 0.35rem;
+}
+
+.ficha-principal > .card-footer p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #8898aa;
+    font-weight: 600;
+}
+
 @media (max-width: 991.98px) {
+    .ficha-principal > .card-body,
+    .ficha-principal > .card-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
     .doc-adjuntos-layout {
         grid-template-columns: 1fr;
     }

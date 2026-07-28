@@ -77,14 +77,6 @@ export class FormView extends Backbone.View {
             model: this.model,
             collection: [
                 {
-                    id: 'closeForm',
-                    hidden: false,
-                    label: 'Salir',
-                    icon: 'fa fa-times text-warning',
-                    active: false,
-                    tab: '',
-                },
-                {
                     id: 'seguimiento-tab',
                     hidden: this.model.get('id') && this.model.get('estado') !== 'T' ? false : true,
                     label: 'Seguimiento',
@@ -115,6 +107,15 @@ export class FormView extends Backbone.View {
                     icon: 'fa fas fa-upload text-success',
                     active: false,
                     tab: 'enviar_radicado',
+                },
+                {
+                    id: 'closeForm',
+                    hidden: false,
+                    label: 'Salir',
+                    icon: 'fa fa-sign-out-alt',
+                    active: false,
+                    tab: '',
+                    variant: 'exit',
                 },
             ],
         });

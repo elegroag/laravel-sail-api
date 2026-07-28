@@ -1,5 +1,5 @@
 <div class="tab-content" id="pills-tabContent">
-    <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
+    <div class="tab-pane fade show active ficha-principal" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
         <div class="card-body">
             <form id="formRequest" class="validation_form" autocomplete="off" novalidate>
                 @csrf

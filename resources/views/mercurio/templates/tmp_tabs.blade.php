@@ -5,7 +5,7 @@
             <div class="tab-pane fade" id="seguimiento" role="tabpanel" aria-labelledby="seguimiento-tab">
                 ...
             </div>
-            <div class="tab-pane fade show active" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
+            <div class="tab-pane fade show active ficha-principal" id="datos_solicitud" role="tabpanel" aria-labelledby="datos_solicitud-tab">
                 ...
             </div>
             <div class="tab-pane fade" id="documentos_adjuntos" role="tabpanel" aria-labelledby="documentos_adjuntos-tab">
