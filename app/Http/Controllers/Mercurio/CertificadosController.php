@@ -7,10 +7,10 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Mercurio10;
 use App\Models\Mercurio45;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
-use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -34,7 +34,7 @@ class CertificadosController extends ApplicationController
     public function index()
     {
         try {
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'Certificados',
@@ -96,9 +96,9 @@ class CertificadosController extends ApplicationController
 
             if (
                 Mercurio45::where('codben', $codben)
-                ->where('codcer', $codcer)
-                ->where('estado', '!=', 'X')
-                ->count() > 0
+                    ->where('codcer', $codcer)
+                    ->where('estado', '!=', 'X')
+                    ->count() > 0
             ) {
                 $response = [
                     'success' => false,
@@ -128,7 +128,7 @@ class CertificadosController extends ApplicationController
 
             if ($usuario == '') {
                 throw new DebugException(
-                    'No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud.' .
+                    'No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud.'.
                         ' Comuniquese con la atencion al cliente',
                     501
                 );
@@ -139,17 +139,18 @@ class CertificadosController extends ApplicationController
             $mercurio45->setCoddoc($coddoc);
             $mercurio45->setDocumento($documento);
 
-            if (isset($_FILES['archivo_' . $codben]['name']) && $_FILES['archivo_' . $codben]['name'] != '') {
-                $extension = explode('.', $_FILES['archivo_' . $codben]['name']);
-                $name = $this->tipopc . '_' . $mercurio45->getId() . '.' . end($extension);
-                $_FILES['archivo_' . $codben]['name'] = $name;
+            if (isset($_FILES['archivo_'.$codben]['name']) && $_FILES['archivo_'.$codben]['name'] != '') {
+                $extension = explode('.', $_FILES['archivo_'.$codben]['name']);
+                $name = $this->tipopc.'_'.$mercurio45->getId().'.'.end($extension);
+                $_FILES['archivo_'.$codben]['name'] = $name;
 
                 $uploadFile = new UploadFile;
-                $estado = $uploadFile->upload('archivo_' . $codben, 'certificados');
+                $estado = $uploadFile->upload('archivo_'.$codben, 'certificados');
 
                 if ($estado) {
                     $mercurio45->setArchivo($name);
                     $mercurio45->save();
+                    $mercurio45->assignRuuidIfMissing();
 
                     $item = Mercurio10::where('tipopc', $this->tipopc)
                         ->where('numero', $mercurio45->getId())
@@ -162,6 +163,9 @@ class CertificadosController extends ApplicationController
                     $mercurio10->setEstado('P');
                     $mercurio10->setNota('Envio a la Caja para verificación');
                     $mercurio10->setFecsis($today->format('Y-m-d'));
+                    if ($mercurio45->ruuid) {
+                        $mercurio10->setRuuid($mercurio45->ruuid.'-'.str_pad((string) $item, 2, '0', STR_PAD_LEFT));
+                    }
                     $mercurio10->save();
 
                     $message = 'Se adjunto con exito el archivo';
@@ -180,6 +184,7 @@ class CertificadosController extends ApplicationController
             $this->db->commit();
         } catch (\Throwable $e) {
             $this->db->rollBack();
+
             return $this->handleException($e, $request);
         }
 

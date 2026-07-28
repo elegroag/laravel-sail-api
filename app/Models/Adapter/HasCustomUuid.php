@@ -31,6 +31,7 @@ trait HasCustomUuid
 
     /**
      * Asigna ruuid solo si está vacío (p. ej. al enviar a caja). Idempotente en reenvíos.
+     * Persiste únicamente la columna ruuid para no guardar atributos temporales (item, repleg, etc.).
      *
      * @return $this
      */
@@ -43,7 +44,12 @@ trait HasCustomUuid
         }
 
         $this->regenerateUuid();
-        $this->save();
+
+        static::query()->whereKey($this->getKey())->update([
+            $uuidColumn => $this->{$uuidColumn},
+        ]);
+
+        $this->syncOriginalAttribute($uuidColumn);
 
         return $this;
     }
@@ -99,6 +105,7 @@ trait HasCustomUuid
             'Mercurio39' => 'MAD', // madres comunitarias
             'Mercurio40' => 'DOM', // servicio domestico
             'Mercurio41' => 'IND', // independiente
+            'Mercurio45' => 'CER', // certificado
             'Mercurio47' => 'ACT', // actualziacion de datos
             default => 'XNA', // Valor por defecto, ajustar si es necesario
         };

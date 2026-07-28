@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class Mercurio45 extends ModelBase
 {
+    use HasCustomUuid;
+
     protected $table = 'mercurio45';
 
     public $timestamps = false;
@@ -32,6 +35,7 @@ class Mercurio45 extends ModelBase
         'coddoc',
         'documento',
         'fecsol',
+        'ruuid',
     ];
 
     public function rulesValiation()
@@ -59,6 +63,7 @@ class Mercurio45 extends ModelBase
             'nombre' => 'nullable|max:100',
             'nomcer' => 'nullable|max:100',
             'archivo' => 'nullable|max:255',
+            'ruuid' => 'nullable|string|max:20',
         ];
     }
 
@@ -428,5 +433,15 @@ class Mercurio45 extends ModelBase
     public function getDocumento()
     {
         return $this->documento;
+    }
+
+    public function setRuuid(?string $ruuid): void
+    {
+        $this->ruuid = $ruuid;
+    }
+
+    public function getRuuid(): ?string
+    {
+        return $this->ruuid;
     }
 }
