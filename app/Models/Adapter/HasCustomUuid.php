@@ -3,7 +3,6 @@
 namespace App\Models\Adapter;
 
 use App\Models\Radicado;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 trait HasCustomUuid
@@ -15,14 +14,6 @@ trait HasCustomUuid
     {
         // El nombre de columna predeterminado es 'ruuid'
         return property_exists($this, 'uuidColumn') ? $this->uuidColumn : 'ruuid';
-    }
-
-    /**
-     * Relación con el registro de radicados (ruuid = radicados.radicado).
-     */
-    public function radicadoRegistro(): BelongsTo
-    {
-        return $this->belongsTo(Radicado::class, $this->getCustomUuidColumn(), 'radicado');
     }
 
     /**
