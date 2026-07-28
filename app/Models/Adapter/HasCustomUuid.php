@@ -30,6 +30,25 @@ trait HasCustomUuid
     }
 
     /**
+     * Asigna ruuid solo si está vacío (p. ej. al enviar a caja). Idempotente en reenvíos.
+     *
+     * @return $this
+     */
+    public function assignRuuidIfMissing(): static
+    {
+        $uuidColumn = $this->getCustomUuidColumn();
+
+        if (filled($this->{$uuidColumn})) {
+            return $this;
+        }
+
+        $this->regenerateUuid();
+        $this->save();
+
+        return $this;
+    }
+
+    /**
      * Genera un radicado y crea el registro en la tabla radicado con control de concurrencia.
      */
     protected static function generateRadicadoForModel(mixed $model): string

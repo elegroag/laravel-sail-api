@@ -376,6 +376,7 @@ class DatosTrabajadorService
         $solicitud->nit = $solicitante->getDocumento();
         $solicitud->email = $solicitante->getEmail();
 
+        $solicitud->assignRuuidIfMissing();
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 

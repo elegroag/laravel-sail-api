@@ -11,11 +11,10 @@ use App\Models\Mercurio12;
 use App\Models\Mercurio13;
 use App\Models\Mercurio37;
 use App\Models\Mercurio39;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\AsignarFuncionario;
-use App\Services\Utils\Comman;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
-use App\Services\Api\ApiSubsidio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -88,7 +87,7 @@ class ComunitariaController extends ApplicationController
     public function index()
     {
         try {
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'PoblacionAfilia',
@@ -404,7 +403,7 @@ class ComunitariaController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->first();
 
-            unlink($mercurio01->getPath() . $mercurio37->getArchivo());
+            unlink($mercurio01->getPath().$mercurio37->getArchivo());
 
             Mercurio37::where('tipopc', $this->tipopc)
                 ->where('numero', $numero)
@@ -440,10 +439,10 @@ class ComunitariaController extends ApplicationController
             $time = strtotime('now');
 
             $msj = 'No se cargo el archivo';
-            if (isset($_FILES['archivo_' . $coddoc]['name']) && $_FILES['archivo_' . $coddoc]['name'] != '') {
-                $extension = explode('.', $_FILES['archivo_' . $coddoc]['name']);
-                $name = $this->tipopc . '_' . $id . "_{$coddoc}_{$time}." . end($extension);
-                $_FILES['archivo_' . $coddoc]['name'] = $name;
+            if (isset($_FILES['archivo_'.$coddoc]['name']) && $_FILES['archivo_'.$coddoc]['name'] != '') {
+                $extension = explode('.', $_FILES['archivo_'.$coddoc]['name']);
+                $name = $this->tipopc.'_'.$id."_{$coddoc}_{$time}.".end($extension);
+                $_FILES['archivo_'.$coddoc]['name'] = $name;
                 // $estado = $this->uploadFile("archivo_" . $coddoc, $mercurio01->getPath());
                 /* if ($estado != false) {
                     $mercurio37->setArchivo($name);
@@ -489,6 +488,9 @@ class ComunitariaController extends ApplicationController
                 ];
             } else {
                 Mercurio39::where('id', $id)->update(['estado' => 'P']);
+                $solicitud = Mercurio39::where('id', $id)->first();
+                $solicitud->assignRuuidIfMissing();
+
                 $item = Mercurio10::where('tipopc', $this->tipopc)
                     ->where('numero', $id)
                     ->max('item') + 1;
@@ -501,6 +503,9 @@ class ComunitariaController extends ApplicationController
                 $mercurio10->setEstado('P');
                 $mercurio10->setNota('Envio a la Caja para Verificacion');
                 $mercurio10->setFecsis($today->format('Y-m-d'));
+                if ($solicitud->ruuid) {
+                    $mercurio10->setRuuid($solicitud->ruuid.'-'.str_pad((string) $item, 2, '0', STR_PAD_LEFT));
+                }
                 $mercurio10->save();
 
                 // parent::finishTrans();

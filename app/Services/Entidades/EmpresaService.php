@@ -415,6 +415,7 @@ class EmpresaService
             ->max('item') + 1;
 
         $solicitud->item = $ai;
+        $solicitud->assignRuuidIfMissing();
         $senderValidationCaja->send($this->tipopc, $solicitud);
 
         $solicitud = $this->findById($id);

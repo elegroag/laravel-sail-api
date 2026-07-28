@@ -432,6 +432,7 @@ class IndependienteService
         $mercurio41->nit = $solicitante->getDocumento();
         $mercurio41->email = $solicitante->getEmail();
 
+        $mercurio41->assignRuuidIfMissing();
         $senderValidationCaja->send($this->tipopc, $mercurio41);
 
         $mercurio41 = $this->findById($id);

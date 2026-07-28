@@ -318,6 +318,7 @@ class FacultativoService
         $solicitud->razsoc = $solicitante->getNombre();
         $solicitud->nit = $solicitante->getDocumento();
         $solicitud->email = $solicitante->getEmail();
+        $solicitud->assignRuuidIfMissing();
         $senderValidationCaja->send($this->tipopc, $solicitud);
     }
 
