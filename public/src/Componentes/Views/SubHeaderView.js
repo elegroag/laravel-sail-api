@@ -43,7 +43,7 @@ class SubHeaderView extends Backbone.View {
 				this.trigger('show:documentos');
 				break;
 			case 'enviar_radicado':
-				this.trigger('show:enviar');
+				// Solo muestra el panel; el envío lo dispara #btEnviarRadicado
 				break;
 			default:
 				break;

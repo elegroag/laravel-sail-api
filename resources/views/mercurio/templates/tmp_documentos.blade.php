@@ -1,29 +1,17 @@
-<div class="row">
-    <div class="col-8">
-        <fieldset class="mt-0 pt-0">
-            <legend>Adjuntar los documentos</legend>
-            <div class="row col-auto">
-                <table class='table table-bordered  align-content-between mb-2' id='addArchivoRequeridos'>
-                    <thead>
-                        <tr>
-                            <td>Adjuntos</td>
-                            <td colspan='2'>Opciones</td>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-        </fieldset>
-    </div>
+<div class="doc-adjuntos-layout">
+    <section class="doc-adjuntos-main">
+        <header class="doc-adjuntos-main__header">
+            <h3 class="doc-adjuntos-main__title">Adjuntar los documentos</h3>
+            <p class="doc-adjuntos-main__subtitle mb-0">Selecciona o arrastra cada PDF; la carga es automática.</p>
+        </header>
+        <div id="addArchivoRequeridosMount"></div>
+    </section>
 
-    <div class="col-4">
-        <fieldset class="mt-0 pt-0">
-            <legend>Nota</legend>
-            <div class="row col-auto">
-                <p class="p-1 text-gray">El adjunto que posee firma digital no se puede cambiar o borrar.
-                    Para modificar la información del mismo, puede editar la "Ficha Principal De Registro". El sistema realiza la tarea de borrar el documento existente y crear uno nuevo con la respectiva firma.</p>
-                    <img src="{{ asset('img/Mercurio/firma_digital.png') }}" class="img-responsive" style="width:200px" />
-                    <p class="p-1 text-danger fw-bold mt-2">A partir de ahora, solo se admiten documentos en formato PDF. No se aceptan imágenes (JPG, PNG, etc.).</p>
-            </div>
-        </fieldset>
-    </div>
+    <aside class="doc-adjuntos-aside">
+        <h3 class="doc-adjuntos-aside__title">Nota</h3>
+        <p class="doc-adjuntos-aside__text">El adjunto con firma digital se genera automáticamente: no se puede cambiar o borrar desde aquí.
+            Para modificarlo, edite la "Ficha Principal De Registro". El sistema borra el documento existente y crea uno nuevo con la firma.</p>
+        <img src="{{ asset('img/Mercurio/firma_digital.png') }}" class="doc-adjuntos-aside__img" alt="Firma digital" />
+        <p class="doc-adjuntos-aside__alert mb-0">Solo PDF. Al seleccionar o soltar el archivo se carga de inmediato.</p>
+    </aside>
 </div>

@@ -14,6 +14,7 @@ class LoadDocumentsView extends Backbone.View {
         super(options);
         this.documentosCollection = new DocumentoCollection();
         this.documentosView = null;
+        this._uploading = new Set();
     }
 
     get className() {
@@ -29,9 +30,12 @@ class LoadDocumentsView extends Backbone.View {
             'click [toggle-event="borrar"]': 'borrarArchivo',
             'click [toggle-event="download"]': 'descargaArchivo',
             'click [toggle-event="prodoc"]': 'processDocument',
-            'click [toggle-event="salvar"]': 'guardarArchivo',
             'click [toggle-event="show"]': 'verArchivo',
-            'change input[toggle-event="change"]': 'showNameFile',
+            'change input[toggle-event="change"]': 'onFileSelected',
+            'dragenter .doc-dropzone': 'onDragEnter',
+            'dragover .doc-dropzone': 'onDragOver',
+            'dragleave .doc-dropzone': 'onDragLeave',
+            'drop .doc-dropzone': 'onDrop',
         };
     }
 
@@ -57,8 +61,124 @@ class LoadDocumentsView extends Backbone.View {
         this.documentosView = new DocumentsCollectionView({
             collection: this.documentosCollection,
         });
-        this.$el.find('#addArchivoRequeridos').append(this.documentosView.render().el);
+        this.$el.find('#addArchivoRequeridosMount').html(this.documentosView.render().el);
         return this;
+    }
+
+    onDragEnter(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.currentTarget).addClass('doc-dropzone--active');
+    }
+
+    onDragOver(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.currentTarget).addClass('doc-dropzone--active');
+    }
+
+    onDragLeave(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const zone = $(event.currentTarget);
+        if (!zone[0].contains(event.relatedTarget)) {
+            zone.removeClass('doc-dropzone--active');
+        }
+    }
+
+    onDrop(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const zone = $(event.currentTarget);
+        zone.removeClass('doc-dropzone--active');
+
+        const coddoc = zone.attr('data-coddoc');
+        if (this._uploading.has(String(coddoc))) {
+            return;
+        }
+
+        const files = event.originalEvent?.dataTransfer?.files;
+        if (!files || files.length === 0) {
+            return;
+        }
+
+        const input = this.$el.find('#archivo_' + coddoc).get(0);
+        if (!input) {
+            return;
+        }
+
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        input.files = dt.files;
+        $(input).trigger('change');
+    }
+
+    onFileSelected(event) {
+        const target = $(event.currentTarget);
+        const coddoc = target.attr('data-coddoc');
+        const input = document.getElementById(target.attr('id'));
+        const files = input?.files;
+
+        if (!files || files.length === 0) {
+            return;
+        }
+
+        const archivo = files[0];
+        if (archivo.type !== 'application/pdf') {
+            $App.trigger('alert:error', {
+                message: 'Solo se permiten documentos en formato PDF. No se aceptan imágenes.',
+            });
+            target.val('');
+            return;
+        }
+
+        this.$el.find('.toogle-show-name[data-code="' + coddoc + '"]').html(archivo.name);
+        this.uploadArchivo(coddoc, input);
+    }
+
+    uploadArchivo(coddoc, input) {
+        const key = String(coddoc);
+        if (this._uploading.has(key)) {
+            return;
+        }
+
+        const id = parseInt(this.model.get('id'), 10);
+        if (!id) {
+            $App.trigger('alert:error', { message: 'Guarde primero la solicitud antes de adjuntar documentos.' });
+            $(input).val('');
+            return;
+        }
+
+        this._uploading.add(key);
+        this.setUploadingUi(coddoc, true);
+
+        this.trigger('file:save', {
+            target: input,
+            id,
+            coddoc,
+            callback: (response) => {
+                this._uploading.delete(key);
+                this.setUploadingUi(coddoc, false);
+
+                if (response) {
+                    $App.trigger('alert:success', { message: response['msj'] || 'Documento cargado correctamente.' });
+                    this.trigger('file:reload');
+                } else {
+                    $(input).val('');
+                    this.$el
+                        .find('.toogle-show-name[data-code="' + coddoc + '"]')
+                        .html('Solo PDF. Se carga automáticamente al elegir el archivo.');
+                }
+            },
+        });
+    }
+
+    setUploadingUi(coddoc, isUploading) {
+        const zone = this.$el.find('.doc-dropzone[data-coddoc="' + coddoc + '"]');
+        zone.toggleClass('doc-dropzone--busy', isUploading);
+        zone.find('.doc-dropzone__content').toggleClass('d-none', isUploading);
+        zone.find('[data-loading="' + coddoc + '"]').toggleClass('d-none', !isUploading);
+        zone.find('input[type="file"]').prop('disabled', isUploading);
     }
 
     borrarArchivo(event) {
@@ -123,40 +243,6 @@ class LoadDocumentsView extends Backbone.View {
         });
     }
 
-    guardarArchivo(e) {
-        e.preventDefault();
-        let _target = this.$el.find(e.currentTarget);
-        const coddoc = _target.attr('data-coddoc');
-        const id = parseInt(_target.attr('data-id'));
-        const target = document.querySelector('#archivo_' + coddoc);
-
-        this.trigger('file:save', {
-            target,
-            id,
-            coddoc,
-            callback: (response) => {
-                $App.trigger('alert:success', { message: response['msj'] });
-                this.trigger('file:reload');
-            },
-        });
-    }
-
-    showNameFile(event) {
-        let target = $(event.currentTarget);
-        let coddoc = target.attr('data-coddoc');
-        let files = document.getElementById(target.attr('id')).files;
-        if (files.length == 0) return;
-        let archivo = files[0];
-
-        if (archivo.type !== 'application/pdf') {
-            $App.trigger('alert:error', { message: 'Solo se permiten documentos en formato PDF. No se aceptan imágenes.' });
-            target.val('');
-            return;
-        }
-
-        this.$el.find('.toogle-show-name[data-code="' + coddoc + '"]').html(archivo.name);
-    }
-
     verArchivo(event) {
         event.preventDefault();
         const target = $(event.currentTarget);
@@ -183,7 +269,7 @@ class LoadDocumentsView extends Backbone.View {
                         if (msj) {
                             $App.trigger('alert:error', { message: msj });
                         }
-                    }
+                    },
                 });
             },
             error: () => {

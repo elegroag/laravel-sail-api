@@ -21,6 +21,7 @@ class DocumentoModel extends Backbone.Model {
 			detalle: void 0,
 			diponible: void 0,
 			corrige: false,
+			nota: null,
 		};
 	}
 }
