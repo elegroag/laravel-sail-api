@@ -49,13 +49,26 @@ class CertificadosController extends ApplicationController
 
             if ($out['success']) {
                 $beneficiarios = $out['data'];
-                $certificadosPresentados = [];
+                $certificadosPresentados = Mercurio45::query()
+                    ->where('documento', $this->user['documento'])
+                    ->where('estado', 'P')
+                    ->orderByDesc('fecha')
+                    ->orderByDesc('id')
+                    ->get();
+
                 foreach ($beneficiarios as $ai => $beneficiario) {
-                    $has = Mercurio45::where('codben', $beneficiario['codben'])->where('estado', 'P')->count();
-                    if ($has) {
-                        $certificadosPresentados = $has;
+                    $pendientes = Mercurio45::query()
+                        ->where('codben', $beneficiario['codben'])
+                        ->where('documento', $this->user['documento'])
+                        ->where('estado', 'P')
+                        ->get();
+
+                    if ($pendientes->isNotEmpty()) {
                         $beneficiarios[$ai]['certificadoPendiente'] = true;
-                        $beneficiarios[$ai]['certificados'] = $has;
+                        $beneficiarios[$ai]['certificados'] = $pendientes;
+                    } else {
+                        $beneficiarios[$ai]['certificadoPendiente'] = false;
+                        $beneficiarios[$ai]['certificados'] = collect();
                     }
                 }
             }
@@ -138,10 +151,15 @@ class CertificadosController extends ApplicationController
             $mercurio45->setTipo($tipo);
             $mercurio45->setCoddoc($coddoc);
             $mercurio45->setDocumento($documento);
+            $mercurio45->save();
 
             if (isset($_FILES['archivo_'.$codben]['name']) && $_FILES['archivo_'.$codben]['name'] != '') {
-                $extension = explode('.', $_FILES['archivo_'.$codben]['name']);
-                $name = $this->tipopc.'_'.$mercurio45->getId().'.'.end($extension);
+                $extension = strtolower((string) pathinfo($_FILES['archivo_'.$codben]['name'], PATHINFO_EXTENSION));
+                if ($extension !== 'pdf') {
+                    throw new DebugException('Solo se admiten archivos PDF', 501);
+                }
+
+                $name = $this->tipopc.'_'.$mercurio45->getId().'.'.$extension;
                 $_FILES['archivo_'.$codben]['name'] = $name;
 
                 $uploadFile = new UploadFile;
@@ -189,5 +207,74 @@ class CertificadosController extends ApplicationController
         }
 
         return response()->json($response);
+    }
+
+    public function borrar(Request $request)
+    {
+        $this->db->begin();
+        try {
+            $id = (int) $request->input('id');
+            $documento = $this->user['documento'] ?? null;
+
+            if (! $id || ! $documento) {
+                throw new DebugException('Solicitud no válida', 400);
+            }
+
+            $mercurio45 = Mercurio45::query()
+                ->where('id', $id)
+                ->where('documento', $documento)
+                ->first();
+
+            if (! $mercurio45) {
+                throw new DebugException('No se encontró la solicitud de certificado', 404);
+            }
+
+            if (! in_array($mercurio45->getEstado(), ['P', 'D', 'T'], true)) {
+                throw new DebugException('Solo se pueden eliminar solicitudes pendientes, temporales o devueltas', 403);
+            }
+
+            $archivo = $mercurio45->getArchivo();
+
+            // El trigger de mercurio45 se encarga del archivado al eliminar
+            Mercurio45::where('id', $id)
+                ->where('documento', $documento)
+                ->delete();
+
+            $this->eliminarArchivoCertificado($archivo);
+
+            $this->db->commit();
+
+            return response()->json([
+                'success' => true,
+                'msj' => 'La solicitud de certificado fue eliminada correctamente',
+            ]);
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+
+            return $this->handleException($e, $request);
+        }
+    }
+
+    private function eliminarArchivoCertificado(?string $archivo): void
+    {
+        if (! $archivo) {
+            return;
+        }
+
+        $candidatos = [
+            storage_path('app/temp/certificados/'.$archivo),
+            storage_path('temp/certificados/'.$archivo),
+            public_path('temp/'.$archivo),
+            public_path('temp/certificados/'.$archivo),
+        ];
+
+        foreach ($candidatos as $path) {
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
+
+        UploadFile::delete('temp/certificados/'.$archivo);
+        UploadFile::delete('temp/'.$archivo);
     }
 }

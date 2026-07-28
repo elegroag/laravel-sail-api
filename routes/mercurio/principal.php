@@ -40,3 +40,6 @@ Route::get('/mercurio/certificados/index', [CertificadosController::class, 'inde
 
 Route::post('/mercurio/certificados/guardar', [CertificadosController::class, 'guardar'])
     ->middleware(['mercurio.auth']);
+
+Route::post('/mercurio/certificados/borrar', [CertificadosController::class, 'borrar'])
+    ->middleware(['mercurio.auth']);

@@ -1631,6 +1631,279 @@ label.is-invalid {
     line-height: 1.35;
 }
 
+/* Presentar certificados */
+.certificados-page__body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    background: #f7fafc;
+}
+
+.certificados-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(220px, 0.9fr);
+    gap: 1.25rem 1.5rem;
+    align-items: start;
+}
+
+.certificados-main__header,
+.certificados-presentados__header {
+    margin-bottom: 1rem;
+}
+
+.certificados-main__title,
+.certificados-aside__title,
+.certificados-presentados__title {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #32325d;
+}
+
+.certificados-main__subtitle,
+.certificados-presentados__subtitle {
+    font-size: 0.82rem;
+    color: #8898aa;
+}
+
+.certificados-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1.1rem 1.15rem;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(50, 50, 93, 0.04);
+}
+
+.certificados-form__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 1rem;
+}
+
+.certificados-form .control-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #525f7f;
+}
+
+.certificados-form .form-control {
+    border-radius: 8px;
+    border-color: #e9ecef;
+    font-size: 0.875rem;
+}
+
+.certificados-form .doc-dropzone {
+    min-height: 120px;
+}
+
+.certificados-file-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    background: #fff5f5;
+    border: 1px solid rgba(245, 54, 92, 0.2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #525f7f;
+}
+
+.certificados-file-meta span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.certificados-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.certificados-actions__btn {
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 0.65rem 1.25rem;
+}
+
+.certificados-actions__hint {
+    font-size: 0.78rem;
+    color: #8898aa;
+}
+
+.certificados-aside {
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(50, 50, 93, 0.04);
+}
+
+.certificados-aside__text {
+    margin: 0 0 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: #525f7f;
+}
+
+.certificados-ben-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin: 0 0 0.85rem;
+}
+
+.certificados-ben-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 0.75rem;
+    padding: 0.7rem 0.8rem;
+    background: #f7fafc;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+}
+
+.certificados-ben-item--pending {
+    opacity: 0.85;
+}
+
+.certificados-ben-item__name {
+    grid-column: 1;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #32325d;
+}
+
+.certificados-ben-item__meta {
+    grid-column: 1;
+    font-size: 0.75rem;
+    color: #8898aa;
+}
+
+.certificados-ben-item__badge {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(17, 205, 239, 0.12);
+    color: #11cdef;
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.certificados-ben-item--pending .certificados-ben-item__badge {
+    background: rgba(251, 99, 64, 0.12);
+    color: #fb6340;
+}
+
+.certificados-aside__alert {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #f5365c;
+}
+
+.certificados-empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    color: #525f7f;
+    font-size: 0.9rem;
+}
+
+.certificados-empty i {
+    color: #11cdef;
+    margin-top: 0.15rem;
+}
+
+.certificados-presentados {
+    margin-top: 1.5rem;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(50, 50, 93, 0.04);
+}
+
+.certificados-table thead th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #8898aa;
+    border-top: 0;
+    border-bottom-width: 1px;
+}
+
+.certificados-table td {
+    font-size: 0.85rem;
+    vertical-align: middle;
+    color: #525f7f;
+}
+
+.certificados-status {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(136, 152, 170, 0.14);
+    color: #8898aa;
+}
+
+.certificados-status--p {
+    background: rgba(251, 99, 64, 0.12);
+    color: #fb6340;
+}
+
+.certificados-status--a {
+    background: rgba(45, 206, 137, 0.14);
+    color: #2dce89;
+}
+
+.certificados-status--x,
+.certificados-status--d {
+    background: rgba(245, 54, 92, 0.12);
+    color: #f5365c;
+}
+
+.certificados-btn-archivar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 8px;
+    border: 1px solid rgba(245, 54, 92, 0.35);
+    background: #fff;
+    color: #f5365c;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+}
+
+.certificados-btn-archivar:hover,
+.certificados-btn-archivar:focus {
+    background: #f5365c;
+    border-color: #f5365c;
+    color: #fff;
+}
+
+.certificados-btn-archivar:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
 /* Ficha Principal Registro: UI global para todas las solicitudes */
 .ficha-principal > .card-body {
     padding: 1.25rem 1.5rem 1.25rem;
@@ -1754,6 +2027,18 @@ label.is-invalid {
     .ficha-principal > .card-footer {
         padding-left: 1rem;
         padding-right: 1rem;
+    }
+
+    .certificados-page__body {
+        padding: 1rem;
+    }
+
+    .certificados-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .certificados-form__row {
+        grid-template-columns: 1fr;
     }
 
     .doc-adjuntos-layout {

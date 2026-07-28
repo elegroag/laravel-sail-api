@@ -123,23 +123,36 @@ class ActualizaTrabajadorController extends ApplicationController
             $procesadorComando->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
-                    'metodo' => "buscar_sucursales_en_empresa/{$nit}",
-                    'params' => '',
+                    'metodo' => 'buscar_sucursales_en_empresa',
+                    'params' => [
+                        'nit' => $nit,
+                    ],
                 ]
             );
             $rqs = $procesadorComando->toArray();
 
             $codsuc = [];
-            $sucursales = $rqs['data'];
-            if ($sucursales) {
+            $sucursales = $rqs['data'] ?? [];
+            if (($rqs['success'] ?? false) && is_array($sucursales)) {
+                if (isset($sucursales['sucursales']) && is_array($sucursales['sucursales'])) {
+                    $sucursales = $sucursales['sucursales'];
+                }
+
                 foreach ($sucursales as $data) {
-                    if ($data['estado'] == 'I') {
+                    if (! is_array($data)) {
                         continue;
                     }
-                    if (isset($codciu[$data['codzon']])) {
-                        $codsuc["{$data['codsuc']}"] = $data['detalle'].' - DE '.$codciu[$data['codzon']];
+                    if (($data['estado'] ?? null) === 'I') {
+                        continue;
+                    }
+                    $codsucKey = $data['codsuc'] ?? null;
+                    if ($codsucKey === null) {
+                        continue;
+                    }
+                    if (isset($data['codzon'], $codciu[$data['codzon']])) {
+                        $codsuc["{$codsucKey}"] = ($data['detalle'] ?? '').' - DE '.$codciu[$data['codzon']];
                     } else {
-                        $codsuc["{$data['codsuc']}"] = $data['detalle'];
+                        $codsuc["{$codsucKey}"] = $data['detalle'] ?? (string) $codsucKey;
                     }
                 }
             }
