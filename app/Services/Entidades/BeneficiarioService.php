@@ -263,7 +263,6 @@ class BeneficiarioService
         $data['log'] = 0;
         $data['estado'] = 'T';
         $beneficiario = new Mercurio34($data);
-        $beneficiario->regenerateUuid();
         $validator = $beneficiario->isValid();
         if ($validator->fails()) {
             throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());

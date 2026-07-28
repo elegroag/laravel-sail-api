@@ -247,7 +247,6 @@ class FacultativoService
         $data['estado'] = 'T';
         $data['log'] = 0;
         $facultativo = new Mercurio36($data);
-        $facultativo->regenerateUuid();
 
         $validator = $facultativo->isValid();
         if ($validator->fails()) {

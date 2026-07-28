@@ -342,7 +342,6 @@ class EmpresaService
     public function createByFormData(array $data): Mercurio30
     {
         $empresa = new Mercurio30($data);
-        $empresa->regenerateUuid();
         $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = $this->tipo;

@@ -280,7 +280,6 @@ class ConyugeService
         $data['log'] = 0;
         $data['estado'] = 'T';
         $conyuge = new Mercurio32($data);
-        $conyuge->regenerateUuid();
         $validator = $conyuge->isValid();
         if ($validator->fails()) {
             throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());

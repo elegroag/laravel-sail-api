@@ -193,3 +193,17 @@ php artisan mercurio10:backfill-ruuid --tipopc=1
 php artisan mercurio10:backfill-feccie --dry-run
 php artisan mercurio10:backfill-feccie
 ```
+
+Detecta ruuid huérfanos en mercurio30/31/32/34/36/38/39/41/47, normaliza el prefijo `#` (solicitudes/`mercurio10` → canónico sin `#`, alineado con `radicados`), inserta faltantes (parse `TIPO-VIGENCIA-NUMERO`) y reporta no parseables / conflictos. Exit ≠ 0 si hay casos no reparables.
+
+UUID legados u otros no parseables: `--regenerate-unparseable` (genera radicado nuevo por fila).
+
+```bash
+php artisan radicados:backfill-from-solicitudes --dry-run
+php artisan radicados:backfill-from-solicitudes --dry-run --regenerate-unparseable
+php artisan radicados:backfill-from-solicitudes --regenerate-unparseable
+php artisan radicados:backfill-from-solicitudes
+
+php artisan migrate --path=database/migrations/2026_07_28_130000_make_radicados_radicado_unique_not_null.php
+php artisan migrate --path=database/migrations/2026_07_28_130100_add_fk_solicitud_ruuid_to_radicados.php
+```

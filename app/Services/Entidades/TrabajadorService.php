@@ -299,7 +299,6 @@ class TrabajadorService
         $data['log'] = 0;
         $data['estado'] = 'T';
         $trabajador = new Mercurio31($data);
-        $trabajador->regenerateUuid();
         $validator = $trabajador->isValid();
         if ($validator->fails()) {
             throw new DebugException('No cumple con los datos necesarios proceso de validación de datos.', 501, $validator->errors());

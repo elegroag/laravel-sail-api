@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\Adapter\DbBase;
-use App\Models\Adapter\ModelBase;
 use App\Models\Adapter\HasCustomUuid;
+use App\Models\Adapter\ModelBase;
 
 class Mercurio47 extends ModelBase
 {
@@ -32,7 +32,7 @@ class Mercurio47 extends ModelBase
         'usuario',
         'ruuid',
         'fecapr',
-        'codest'
+        'codest',
     ];
 
     public function setUsuario($usuario)
@@ -187,6 +187,7 @@ class Mercurio47 extends ModelBase
         if (! empty($estado)) {
             $this->estado = $estado;
         }
+
         return solicitud_estado_detalle($this->estado);
     }
 
@@ -200,6 +201,7 @@ class Mercurio47 extends ModelBase
         if (! empty($tipact)) {
             $this->tipact = $tipact;
         }
+
         return solicitud_tipo_actualizacion_detalle($this->tipact);
     }
 
@@ -229,7 +231,6 @@ class Mercurio47 extends ModelBase
 
     public function getRuuid()
     {
-        $this->regenerateUuid();
         return $this->ruuid;
     }
 }

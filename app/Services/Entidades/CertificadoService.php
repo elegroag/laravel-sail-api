@@ -185,7 +185,6 @@ class CertificadoService
         $data['log'] = 0;
         $data['estado'] = 'T';
         $trabajador = new Mercurio45($data);
-        $trabajador->regenerateUuid();
 
         $validator = $trabajador->isValid();
         if ($validator->fails()) {

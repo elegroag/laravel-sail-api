@@ -3,26 +3,11 @@
 namespace App\Models\Adapter;
 
 use App\Models\Radicado;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 trait HasCustomUuid
 {
-    /**
-     * Boot the trait.
-     */
-    protected static function bootHasCustomUuid(): void
-    {
-        static::creating(function (mixed $model) {
-            $uuidColumn = $model->getCustomUuidColumn();
-
-            // Verifica si la columna 'ruuid' (o la definida) no está establecida
-            if (empty($model->{$uuidColumn})) {
-                // Genera un radicado basado en el tipo del modelo y consecutivo único
-                $model->{$uuidColumn} = static::generateRadicadoForModel($model);
-            }
-        });
-    }
-
     /**
      * Obtiene el nombre de la columna UUID. Por defecto, 'ruuid'.
      */
@@ -33,13 +18,23 @@ trait HasCustomUuid
     }
 
     /**
-     * Genera un nuevo uuid y lo asigna al modelo.
-     * * @return $this
+     * Relación con el registro de radicados (ruuid = radicados.radicado).
+     */
+    public function radicadoRegistro(): BelongsTo
+    {
+        return $this->belongsTo(Radicado::class, $this->getCustomUuidColumn(), 'radicado');
+    }
+
+    /**
+     * Genera un nuevo radicado y lo asigna al modelo (proceso posterior a la creación).
+     *
+     * @return $this
      */
     public function regenerateUuid()
     {
         $uuidColumn = $this->getCustomUuidColumn();
         $this->{$uuidColumn} = static::generateRadicadoForModel($this);
+
         return $this;
     }
 
@@ -62,7 +57,7 @@ trait HasCustomUuid
             $siguiente = ($ultimo?->numero ?? 0) + 1; // consecutivo único entero
 
             // Construye el texto de radicado. Ajustar formato si se requiere diferente.
-            $radicadoTexto = $tipo . '-' . $vigencia . '-' . str_pad($siguiente, 5, '0', STR_PAD_LEFT);
+            $radicadoTexto = $tipo.'-'.$vigencia.'-'.str_pad($siguiente, 5, '0', STR_PAD_LEFT);
 
             // Crea el registro asociado en la tabla radicado
             Radicado::create([
@@ -71,6 +66,7 @@ trait HasCustomUuid
                 'numero' => $siguiente,
                 'radicado' => $radicadoTexto,
             ]);
+
             return $radicadoTexto;
         });
     }
@@ -81,6 +77,7 @@ trait HasCustomUuid
     protected static function mapModelToTipo(mixed $model): string
     {
         $name = class_basename($model);
+
         return match ($name) {
             'Mercurio30' => 'EMP', // empresa
             'Mercurio31' => 'TRA', // trabajador

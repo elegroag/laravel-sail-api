@@ -88,7 +88,7 @@ class Mercurio38 extends ModelBase
             'usuario' => 'required|integer|min:0',
             'numcue' => 'nullable|min:0',
             // uuid
-            'ruuid' => 'required|min:10',
+            'ruuid' => 'nullable|string|max:20',
             // date — required
             'fecnac' => 'required|date',
             'fecing' => 'nullable|date',

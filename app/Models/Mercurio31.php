@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Validator;
 use App\Models\Adapter\HasCustomUuid;
 use App\Models\Adapter\ModelBase;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class Mercurio31 extends ModelBase
 {
@@ -98,98 +98,98 @@ class Mercurio31 extends ModelBase
     {
         return [
             // integer
-            "log"             => "required|integer|min:0",
-            "salario"         => "required|integer|min:0",
-            "horas"           => "required|integer|min:0",
-            "usuario"         => "required|integer|min:0",
+            'log' => 'required|integer|min:0',
+            'salario' => 'required|integer|min:0',
+            'horas' => 'required|integer|min:0',
+            'usuario' => 'required|integer|min:0',
             // unsignedBigInteger
-            "numcue"          => "nullable|min:0",
+            'numcue' => 'nullable|min:0',
             // uuid
-            "ruuid"           => "required|min:10",
+            'ruuid' => 'nullable|string|max:20',
             // date — required
-            "fecnac"          => "required|date",
-            "fecing"          => "required|date",
+            'fecnac' => 'required|date',
+            'fecing' => 'required|date',
             // date — nullable
-            "fecest"          => "nullable|date",
-            "fecsol"          => "date",
-            "fecapr"          => "nullable|date",
-            "fecafi"          => "nullable|date",
+            'fecest' => 'nullable|date',
+            'fecsol' => 'date',
+            'fecapr' => 'nullable|date',
+            'fecafi' => 'nullable|date',
             // char(N) — required
-            "nit"             => "required|max:15",
-            "cedtra"          => "required|max:15",
-            "tipdoc"          => "required|max:2",
-            "priape"          => "required|max:20",
-            "prinom"          => "required|max:20",
-            "ciunac"          => "required|max:5",
-            "sexo"            => "required|max:1",
-            "cabhog"          => "required|max:1",
-            "rural"           => "required|max:1",
-            "tipcon"          => "required|max:1",
-            "vivienda"        => "required|max:4",
-            "tipafi"          => "required|max:2",
-            "estado"          => "required|max:1",
-            "tipo"            => "required|max:2",
-            "coddoc"          => "required|max:2",
-            "documento"       => "required|max:15",
+            'nit' => 'required|max:15',
+            'cedtra' => 'required|max:15',
+            'tipdoc' => 'required|max:2',
+            'priape' => 'required|max:20',
+            'prinom' => 'required|max:20',
+            'ciunac' => 'required|max:5',
+            'sexo' => 'required|max:1',
+            'cabhog' => 'required|max:1',
+            'rural' => 'required|max:1',
+            'tipcon' => 'required|max:1',
+            'vivienda' => 'required|max:4',
+            'tipafi' => 'required|max:2',
+            'estado' => 'required|max:1',
+            'tipo' => 'required|max:2',
+            'coddoc' => 'required|max:2',
+            'documento' => 'required|max:15',
             // char(N) — nullable
-            "orisex"          => "max:1",
-            "segape"          => "max:20",
-            "segnom"          => "max:20",
-            "codciu"          => "max:5",
-            "codzon"          => "max:9",
-            "telefono"        => "max:13",
-            "celular"         => "max:20",
-            "fax"             => "max:13",
-            "tipsal"          => "max:1",
-            "captra"          => "max:1",
-            "tipdis"          => "max:2",
-            "nivedu"          => "max:3",
-            "trasin"          => "max:1",
-            "cargo"           => "max:9",
-            "autoriza"        => "max:1",
-            "codest"          => "max:2",
-            "facvul"          => "max:2",
-            "peretn"          => "max:2",
-            "ruralt"          => "max:1",
-            "comision"        => "max:1",
-            "tipjor"          => "max:1",
-            "codsuc"          => "max:3",
-            "tippag"          => "max:1",
-            "codban"          => "max:4",
-            "tipcue"          => "max:1",
-            "resguardo_id"    => "max:5",
-            "pub_indigena_id" => "max:3",
-            "ciulab"          => "max:6",
-            "estciv"          => "max:2",
+            'orisex' => 'max:1',
+            'segape' => 'max:20',
+            'segnom' => 'max:20',
+            'codciu' => 'max:5',
+            'codzon' => 'max:9',
+            'telefono' => 'max:13',
+            'celular' => 'max:20',
+            'fax' => 'max:13',
+            'tipsal' => 'max:1',
+            'captra' => 'max:1',
+            'tipdis' => 'max:2',
+            'nivedu' => 'max:3',
+            'trasin' => 'max:1',
+            'cargo' => 'max:9',
+            'autoriza' => 'max:1',
+            'codest' => 'max:2',
+            'facvul' => 'max:2',
+            'peretn' => 'max:2',
+            'ruralt' => 'max:1',
+            'comision' => 'max:1',
+            'tipjor' => 'max:1',
+            'codsuc' => 'max:3',
+            'tippag' => 'max:1',
+            'codban' => 'max:4',
+            'tipcue' => 'max:1',
+            'resguardo_id' => 'max:5',
+            'pub_indigena_id' => 'max:3',
+            'ciulab' => 'max:6',
+            'estciv' => 'max:2',
             // string — required
-            "razsoc"          => "required|max:100",
+            'razsoc' => 'required|max:100',
             // string — nullable
-            "direccion"       => "max:120",
-            "barrio"          => "max:48",
-            "email"           => "email|max:100",
-            "motivo"          => "max:500",
-            "profesion"       => "max:45",
-            "dirlab"          => "max:150",
-            "otra_empresa"    => "max:100",
-            "sat_numtra"      => "max:100",
+            'direccion' => 'max:120',
+            'barrio' => 'max:48',
+            'email' => 'email|max:100',
+            'motivo' => 'max:500',
+            'profesion' => 'max:45',
+            'dirlab' => 'max:150',
+            'otra_empresa' => 'max:100',
+            'sat_numtra' => 'max:100',
             // char(N) — nullable extra
-            "sat_cedtra"      => "max:18",
+            'sat_cedtra' => 'max:18',
         ];
     }
 
     public function isValid(?array $rules = null)
     {
-        $rules = (!$rules) ? $this->rulesValiation() : $rules;
+        $rules = (! $rules) ? $this->rulesValiation() : $rules;
+
         return Validator::make($this->attributes, $rules, [
             'required' => 'El :attribute campo es requirido.',
-            'same'     => 'El :attribute and :other must match.',
-            'size'     => 'El :attribute must be exactly :size.',
-            'between'  => 'El :attribute valor :input no esta entre :min - :max.',
-            'in'       => 'El :attribute must be one of the following types: :values',
+            'same' => 'El :attribute and :other must match.',
+            'size' => 'El :attribute must be exactly :size.',
+            'between' => 'El :attribute valor :input no esta entre :min - :max.',
+            'in' => 'El :attribute must be one of the following types: :values',
             'email.required' => 'Se requiere la dirección de email!',
         ]);
     }
-
 
     public function setFecafi(string $fecafi)
     {
@@ -1184,6 +1184,7 @@ class Mercurio31 extends ModelBase
         if ($estado != '') {
             $this->estado = $estado;
         }
+
         return solicitud_estado_detalle($this->estado);
     }
 
@@ -1294,12 +1295,12 @@ class Mercurio31 extends ModelBase
 
     public function getNombre()
     {
-        return $this->priape . ' ' . $this->prinom;
+        return $this->priape.' '.$this->prinom;
     }
 
     public function getNombreCompleto()
     {
-        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
     }
 
     public function get_all()
@@ -1321,6 +1322,7 @@ class Mercurio31 extends ModelBase
     public function CamposDisponibleDetalle(string $campo)
     {
         $data = $this->CamposDisponibles();
+
         return $data["{$campo}"];
     }
 

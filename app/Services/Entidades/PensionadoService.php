@@ -244,7 +244,6 @@ class PensionadoService
         $data['estado'] = 'T';
         $data['log'] = 0;
         $pensionado = new Mercurio38($data);
-        $pensionado->regenerateUuid();
 
         $validator = $pensionado->isValid();
         if ($validator->fails()) {

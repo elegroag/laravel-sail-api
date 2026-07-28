@@ -338,7 +338,6 @@ class IndependienteService
         $data['log'] = 0;
         $data['estado'] = 'T';
         $independiente = new Mercurio41($data);
-        $independiente->regenerateUuid();
         $independiente->setCoddoc($this->user['coddoc']);
         $independiente->setDocumento($this->user['documento']);
         $independiente->setUsuario((new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']));
