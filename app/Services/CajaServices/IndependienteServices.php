@@ -68,13 +68,15 @@ class IndependienteServices
                 }
 
                 $id = $entity->getId();
+                $fecsol = $entity->getFecsol();
+                $fecsolStr = $fecsol instanceof Carbon ? $fecsol->format('Y-m-d') : (string) $fecsol;
                 $this->table->add_row(
                     "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>",
                     " <i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span> ",
                     $entity->getCedtra(),
                     $entity->getPrinom().' '.$entity->getSegnom().' '.$entity->getPriape().' '.$entity->getSegape(),
                     $entity->getEstadoDetalle(),
-                    $entity->getFecsol()
+                    $fecsolStr
                 );
             }
         } else {

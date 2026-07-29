@@ -509,16 +509,25 @@ class ReporteSolicitudes
 
     /**
      * Devuelve la fecha de aprobacion de una solicitud en formato `Y-m-d`.
-     * Si `fecapr` esta vacia, recurre a `fecest` (fecha del ultimo cambio de estado).
+     * Solo aplica si el estado es A; en otro caso no puede haber fecha de aprobacion.
+     * Si `fecapr` esta vacia y esta aprobada, recurre a `fecest`.
      */
     private function fechaAprobacion(object $model): ?string
     {
-        $fecapr = method_exists($model, 'getFecapr') ? $model->getFecapr() : null;
+        $estado = method_exists($model, 'getEstado')
+            ? strtoupper(trim((string) $model->getEstado()))
+            : strtoupper(trim((string) ($model->estado ?? '')));
+
+        if ($estado !== 'A') {
+            return null;
+        }
+
+        $fecapr = method_exists($model, 'getFecapr') ? $model->getFecapr() : ($model->fecapr ?? null);
         if ($this->formatFecha($fecapr) !== null) {
             return $this->formatFecha($fecapr);
         }
 
-        $fecest = method_exists($model, 'getFecest') ? $model->getFecest() : null;
+        $fecest = method_exists($model, 'getFecest') ? $model->getFecest() : ($model->fecest ?? null);
 
         return $this->formatFecha($fecest);
     }

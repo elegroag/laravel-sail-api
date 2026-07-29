@@ -760,23 +760,18 @@ class Mercurio41 extends ModelBase
         ];
     }
 
-    public function getEstadoDetalle()
+    public function getEstadoArray()
     {
-        $return = '';
-        if ($this->estado == 'T') {
-            $return = 'TEMPORAL';
-        }
-        if ($this->estado == 'D') {
-            $return = 'DEVUELTO';
-        }
-        if ($this->estado == 'A') {
-            $return = 'APROBADO';
-        }
-        if ($this->estado == 'X') {
-            $return = 'RECHAZADO';
+        return solicitud_estados_array();
+    }
+
+    public function getEstadoDetalle($estado = '')
+    {
+        if ($estado != '') {
+            $this->estado = $estado;
         }
 
-        return $return;
+        return solicitud_estado_detalle($this->estado);
     }
 
     public function CamposDisponibleDetalle($campo)
@@ -793,7 +788,7 @@ class Mercurio41 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 
     public function getComprobantePath()
