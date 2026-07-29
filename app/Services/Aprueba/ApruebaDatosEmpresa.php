@@ -41,7 +41,7 @@ class ApruebaDatosEmpresa
      */
     public function procesar($postData)
     {
-        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+        $validacionesControl = ValidacionControlChecklist::preparar($postData, ValidacionControlChecklist::VARIANT_EMPRESA);
 
         $mercurio47 = Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->first();
 

@@ -67,22 +67,27 @@ class FormInfoView extends Backbone.View {
 	}
 
 	buildValidacionesControl() {
-		const keys = ['guias', 'adres', 'ruaf', 'cobertura_salud', 'no_afiliado_otro_trabajador'];
 		const flags = {};
-		_.each(keys, (key) => {
-			const $input = this.$el.find(`.check-validacion-control[data-key="${key}"]`);
-			flags[key] = $input.length && $input.is(':checked') ? 'S' : 'N';
+		this.$el.find('.check-validacion-control[data-key]').each((_index, el) => {
+			const key = el.getAttribute('data-key');
+			if (!key) {
+				return;
+			}
+			flags[key] = el.checked ? 'S' : 'N';
 		});
 		return flags;
 	}
 
 	assertValidacionesControl(flags = null) {
 		const data = flags || this.buildValidacionesControl();
-		const incompletos = _.filter(_.keys(data), (key) => data[key] !== 'S');
+		const keys = _.keys(data);
+		if (keys.length === 0) {
+			return true;
+		}
+		const incompletos = _.filter(keys, (key) => data[key] !== 'S');
 		if (incompletos.length > 0) {
 			$App.trigger('alert:error', {
-				message:
-					'Debe marcar todas las validaciones de control (GUIAS, ADRES, RUAF, cobertura en salud y no afiliado por otro trabajador) para continuar.',
+				message: 'Debe marcar todas las validaciones de control para continuar.',
 			});
 			return false;
 		}

@@ -155,7 +155,7 @@
 				<input type="date" name="fecapr" id="fecapr" placeholder="Fecha de aprobación" class="form-control">
 			</div>
 		</div>
-		@include('cajas.templates.tmp_checklist_validacion_control')
+		@include('cajas.templates.tmp_checklist_validacion_control_empresa')
 
 		<div class='col-12' group-for='nota_aprobar'>
 			<div class='form-group'>

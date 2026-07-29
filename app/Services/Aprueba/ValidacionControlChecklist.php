@@ -6,6 +6,10 @@ use App\Exceptions\DebugException;
 
 class ValidacionControlChecklist
 {
+    public const VARIANT_DEFAULT = 'default';
+
+    public const VARIANT_EMPRESA = 'empresa';
+
     public const KEYS = [
         'guias',
         'adres',
@@ -14,19 +18,25 @@ class ValidacionControlChecklist
         'no_afiliado_otro_trabajador',
     ];
 
-    public const LABELS = [
-        'guias' => 'GUIAS',
-        'adres' => 'ADRES',
-        'ruaf' => 'RUAF',
-        'cobertura_salud' => 'Cobertura en salud / pensionado',
-        'no_afiliado_otro_trabajador' => 'No afiliado a esta Caja por otro trabajador',
+    public const KEYS_EMPRESA = [
+        'camara_comercio',
+        'paz_y_salvo',
+        'aportes_empresa',
     ];
+
+    /**
+     * @return list<string>
+     */
+    public static function keysFor(string $variant = self::VARIANT_DEFAULT): array
+    {
+        return $variant === self::VARIANT_EMPRESA ? self::KEYS_EMPRESA : self::KEYS;
+    }
 
     /**
      * @param  array<string, mixed>|string|null  $input
      * @return array<string, string>
      */
-    public static function parse(array|string|null $input): array
+    public static function parse(array|string|null $input, string $variant = self::VARIANT_DEFAULT): array
     {
         if (is_string($input)) {
             $decoded = json_decode($input, true);
@@ -38,7 +48,7 @@ class ValidacionControlChecklist
         }
 
         $flags = [];
-        foreach (self::KEYS as $key) {
+        foreach (self::keysFor($variant) as $key) {
             $value = strtoupper((string) ($input[$key] ?? 'N'));
             $flags[$key] = $value === 'S' ? 'S' : 'N';
         }
@@ -49,14 +59,15 @@ class ValidacionControlChecklist
     /**
      * @param  array<string, string>  $flags
      */
-    public static function assertCompleto(array $flags): void
+    public static function assertCompleto(array $flags, string $variant = self::VARIANT_DEFAULT): void
     {
-        foreach (self::KEYS as $key) {
+        foreach (self::keysFor($variant) as $key) {
             if (($flags[$key] ?? 'N') !== 'S') {
-                throw new DebugException(
-                    'Debe marcar todas las validaciones de control (GUIAS, ADRES, RUAF, cobertura en salud y no afiliado por otro trabajador) para continuar.',
-                    422
-                );
+                $mensaje = $variant === self::VARIANT_EMPRESA
+                    ? 'Debe marcar todas las validaciones de control (Cámara de Comercio, paz y salvo y aportes de la empresa) para continuar.'
+                    : 'Debe marcar todas las validaciones de control (GUIAS, ADRES, RUAF, cobertura en salud y no afiliado por otro trabajador) para continuar.';
+
+                throw new DebugException($mensaje, 422);
             }
         }
     }
@@ -73,38 +84,20 @@ class ValidacionControlChecklist
     }
 
     /**
-     * Parsea, valida, anexa texto a nota_aprobar y limpia el campo del postData
-     * para no contaminar entidades. Retorna el bloque a fusionar en params API.
+     * Parsea, valida y limpia validaciones_control del postData para no contaminar
+     * entidades ni nota_aprobar/observacion. Retorna el bloque a fusionar en params API.
      *
      * @param  array<string, mixed>  $postData
      * @return array{validaciones_control: array<string, string>}
      */
-    public static function preparar(array &$postData): array
+    public static function preparar(array &$postData, string $variant = self::VARIANT_DEFAULT): array
     {
-        $flags = self::parse($postData['validaciones_control'] ?? null);
-        self::assertCompleto($flags);
-
-        $nota = trim((string) ($postData['nota_aprobar'] ?? ''));
-        $auditoria = self::textoAuditoria($flags);
-        $postData['nota_aprobar'] = $nota === '' ? $auditoria : $nota."\n".$auditoria;
+        $flags = self::parse($postData['validaciones_control'] ?? null, $variant);
+        self::assertCompleto($flags, $variant);
 
         unset($postData['validaciones_control']);
 
         return self::payload($flags);
-    }
-
-    /**
-     * @param  array<string, string>  $flags
-     */
-    public static function textoAuditoria(array $flags): string
-    {
-        $partes = [];
-        foreach (self::KEYS as $key) {
-            $estado = ($flags[$key] ?? 'N') === 'S' ? 'S' : 'N';
-            $partes[] = self::LABELS[$key].': '.$estado;
-        }
-
-        return 'Validaciones de control: '.implode('; ', $partes);
     }
 
     /**

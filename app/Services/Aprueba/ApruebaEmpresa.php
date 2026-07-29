@@ -45,7 +45,7 @@ class ApruebaEmpresa
      */
     public function procesar($postData)
     {
-        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+        $validacionesControl = ValidacionControlChecklist::preparar($postData, ValidacionControlChecklist::VARIANT_EMPRESA);
 
         $mercurio30 = Mercurio30::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
