@@ -19,7 +19,7 @@ class BackfillMercurio10Ruuid extends Command
                             {--chunk=500 : Cantidad de pares tipopc/numero por lote}
                             {--tipopc= : Procesar solo un tipopc}';
 
-    protected $description = 'Asigna ruuid vacío en Mercurio10 (P) desde la solicitud + item (2 dígitos)';
+    protected $description = 'Asigna ruuid vacío en Mercurio10 (P) desde la solicitud (viva o auditoria_*) + item (2 dígitos)';
 
     public function handle(): int
     {
@@ -209,29 +209,15 @@ class BackfillMercurio10Ruuid extends Command
                 continue;
             }
 
-            $table = (new $modelClass)->getTable();
-            if (! Schema::hasColumn($table, 'ruuid')) {
-                foreach ($numeros as $numero) {
-                    $result[$tipopc.'|'.$numero] = ['status' => 'empty'];
-                }
-
-                continue;
-            }
-
             $numeros = array_values(array_unique($numeros));
-            $rows = $modelClass::query()
-                ->whereIn('id', $numeros)
-                ->get(['id', 'ruuid']);
+            $found = $this->cargarRuuidsDesdeTabla($modelClass, $numeros);
 
-            $found = [];
-            foreach ($rows as $row) {
-                $found[(int) $row->id] = trim((string) ($row->ruuid ?? ''));
-            }
-
+            $faltantes = [];
             foreach ($numeros as $numero) {
                 $key = $tipopc.'|'.$numero;
+
                 if (! array_key_exists($numero, $found)) {
-                    $result[$key] = ['status' => 'missing'];
+                    $faltantes[] = $numero;
 
                     continue;
                 }
@@ -244,9 +230,89 @@ class BackfillMercurio10Ruuid extends Command
 
                 $result[$key] = ['status' => 'ok', 'base' => $found[$numero]];
             }
+
+            if ($faltantes === []) {
+                continue;
+            }
+
+            $auditFound = $this->cargarRuuidsDesdeAuditoria($tipopc, $faltantes);
+
+            foreach ($faltantes as $numero) {
+                $key = $tipopc.'|'.$numero;
+
+                if (! array_key_exists($numero, $auditFound)) {
+                    $result[$key] = ['status' => 'missing'];
+
+                    continue;
+                }
+
+                if ($auditFound[$numero] === '') {
+                    $result[$key] = ['status' => 'empty'];
+
+                    continue;
+                }
+
+                $result[$key] = ['status' => 'ok', 'base' => $auditFound[$numero]];
+            }
         }
 
         return $result;
+    }
+
+    /**
+     * @param  class-string  $modelClass
+     * @param  list<int>  $ids
+     * @return array<int, string> id => ruuid (puede ser '')
+     */
+    private function cargarRuuidsDesdeTabla(string $modelClass, array $ids): array
+    {
+        $table = (new $modelClass)->getTable();
+        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'ruuid')) {
+            return [];
+        }
+
+        $found = [];
+        foreach ($modelClass::query()->whereIn('id', $ids)->get(['id', 'ruuid']) as $row) {
+            $found[(int) $row->id] = trim((string) ($row->ruuid ?? ''));
+        }
+
+        return $found;
+    }
+
+    /**
+     * Snapshot más reciente en auditoria_* para ids faltantes en la tabla viva.
+     *
+     * @param  list<int>  $ids
+     * @return array<int, string> id => ruuid (puede ser '')
+     */
+    private function cargarRuuidsDesdeAuditoria(string $tipopc, array $ids): array
+    {
+        $auditModel = config('reportes.solicitud_auditoria')[(int) $tipopc]['audit_model'] ?? null;
+        if ($auditModel === null || ! class_exists($auditModel)) {
+            return [];
+        }
+
+        $table = (new $auditModel)->getTable();
+        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'ruuid')) {
+            return [];
+        }
+
+        $rows = $auditModel::query()
+            ->whereIn('id', $ids)
+            ->orderByDesc('deleted_at')
+            ->orderByDesc('audit_id')
+            ->get(['id', 'ruuid']);
+
+        $found = [];
+        foreach ($rows as $row) {
+            $id = (int) $row->id;
+            if (array_key_exists($id, $found)) {
+                continue;
+            }
+            $found[$id] = trim((string) ($row->ruuid ?? ''));
+        }
+
+        return $found;
     }
 
     private function contarEventosVacios(string $tipopc, int $numero): int

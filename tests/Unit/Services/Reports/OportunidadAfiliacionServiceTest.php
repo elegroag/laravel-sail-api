@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Reports;
 
+use App\Models\AuditoriaMercurio30;
 use App\Models\AuditoriaMercurio31;
 use App\Models\AuditoriaMercurio41;
 use App\Models\AuditoriaMercurio45;
@@ -15,6 +16,7 @@ use App\Models\Mercurio45;
 use App\Models\Mercurio47;
 use App\Services\Reports\OportunidadAfiliacionService;
 use App\Support\AfiliacionNormalizer;
+use App\Support\AuditoriaSolicitudResolver;
 use App\Support\DiasHabilesCalculator;
 use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -319,6 +321,48 @@ class OportunidadAfiliacionServiceTest extends TestCase
         $this->assertCount(0, $dataset);
     }
 
+    public function test_evento_p_sin_solicitud_ni_auditoria_se_omite(): void
+    {
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => null,
+                'tipopc' => 2,
+                'evento_p' => $this->evento(2, 999, 1, 'P', '2026-06-01', 'EMP-HUERFANO-999-01', '2026-06-05'),
+            ],
+        ]);
+
+        $this->assertCount(0, $dataset);
+    }
+
+    public function test_solicitud_desde_auditoria_muestra_estado_archivada(): void
+    {
+        $solicitud = new AuditoriaMercurio30;
+        $solicitud->forceFill([
+            'id' => 501,
+            'nit' => '900000501',
+            'razsoc' => 'Empresa Archivada SA',
+            'estado' => 'A',
+            'tipdoc' => '3',
+            'prinom' => 'Juan',
+            'priape' => 'Perez',
+        ]);
+
+        $this->assertTrue(AuditoriaSolicitudResolver::isArchivado($solicitud));
+
+        $dataset = $this->ejecutarServicioConEventos([
+            [
+                'solicitud' => $solicitud,
+                'tipopc' => 2,
+                'evento_p' => $this->evento(2, 501, 1, 'P', '2026-06-01', 'EMP-AUD-501-01', '2026-06-03'),
+            ],
+        ]);
+
+        $this->assertCount(1, $dataset);
+        $this->assertSame('Archivada', $dataset[0]['estado']);
+        $this->assertSame('EMP-AUD-501-01', $dataset[0]['ruuid']);
+        $this->assertSame('900000501', $dataset[0]['nit']);
+    }
+
     public function test_fecha_cierre_usa_feccie_del_evento_p(): void
     {
         Carbon::setTestNow('2026-06-29');
@@ -469,14 +513,14 @@ class OportunidadAfiliacionServiceTest extends TestCase
     /**
      * Simula buildDataset por eventos Mercurio10 sin tocar la BD.
      *
-     * @param  array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10}>  $casos
+     * @param  array<int, array{solicitud: ?object, tipopc: int, evento_p: Mercurio10}>  $casos
      * @return array<int, array<string, mixed>>
      */
     private function ejecutarServicioConEventos(array $casos): array
     {
         $serviceMock = new class($casos) extends OportunidadAfiliacionService
         {
-            /** @var array<int, array{solicitud: object, tipopc: int, evento_p: Mercurio10}> */
+            /** @var array<int, array{solicitud: ?object, tipopc: int, evento_p: Mercurio10}> */
             private array $casos;
 
             public function __construct(array $casos)
@@ -496,6 +540,10 @@ class OportunidadAfiliacionServiceTest extends TestCase
 
                 foreach ($this->casos as $caso) {
                     $solicitud = $caso['solicitud'];
+                    if ($solicitud === null) {
+                        continue;
+                    }
+
                     $estadoSolicitud = strtoupper(trim((string) ($solicitud->estado ?? '')));
                     if ($estadoSolicitud === 'I') {
                         continue;
@@ -504,6 +552,13 @@ class OportunidadAfiliacionServiceTest extends TestCase
                     $tipopc = (int) $caso['tipopc'];
                     $config = config("reportes.oportunidad_tipos.{$tipopc}");
                     $eventoP = $caso['evento_p'];
+
+                    $fechaInicio = Carbon::parse($eventoP->fecsis)->format('Y-m-d');
+                    $fechaCierre = null;
+                    if ($eventoP->feccie !== null && $eventoP->feccie !== '' && $eventoP->feccie !== '0000-00-00') {
+                        $fechaCierre = Carbon::parse($eventoP->feccie)->format('Y-m-d');
+                    }
+                    $fechaFinEfectiva = $fechaCierre ?? $hoy;
 
                     $record = AfiliacionNormalizer::normalize($solicitud, $tipopc, $config, []);
 
@@ -519,13 +574,6 @@ class OportunidadAfiliacionServiceTest extends TestCase
                     $record['numero_identificacion'] = $numero;
                     $record['tipo_identificacion'] = trim($tipo.' '.$numero);
 
-                    $fechaInicio = Carbon::parse($eventoP->fecsis)->format('Y-m-d');
-                    $fechaCierre = null;
-                    if ($eventoP->feccie !== null && $eventoP->feccie !== '' && $eventoP->feccie !== '0000-00-00') {
-                        $fechaCierre = Carbon::parse($eventoP->feccie)->format('Y-m-d');
-                    }
-                    $fechaFinEfectiva = $fechaCierre ?? $hoy;
-
                     $record['ruuid'] = $eventoP->ruuid ?: '';
                     $record['item'] = $eventoP->item;
                     $record['fecsol'] = $fechaInicio;
@@ -538,6 +586,14 @@ class OportunidadAfiliacionServiceTest extends TestCase
                         $record['dias_habiles'],
                         $umbral
                     );
+
+                    $record['estado'] = AuditoriaSolicitudResolver::isArchivado($solicitud)
+                        ? 'Archivada'
+                        : (string) ($record['estado'] ?? '');
+                    $estadoSolicitud = strtoupper((string) ($record['estado_codigo'] ?? $solicitud->estado ?? ''));
+                    $radicadoCerrado = strtoupper((string) ($eventoP->cerrada ?? 'N')) === 'S'
+                        || $estadoSolicitud === 'A';
+                    $record['estado_radicado'] = $radicadoCerrado ? 'Cerrado' : 'Enviado';
 
                     $dataset[] = $record;
                 }

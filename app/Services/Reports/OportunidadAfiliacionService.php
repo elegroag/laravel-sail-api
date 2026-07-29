@@ -7,6 +7,7 @@ use App\Models\Mercurio10;
 use App\Models\Mercurio31;
 use App\Services\LegacyDatabaseService;
 use App\Support\AfiliacionNormalizer;
+use App\Support\AuditoriaSolicitudResolver;
 use App\Support\DiasHabilesCalculator;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -69,14 +70,19 @@ class OportunidadAfiliacionService
                 continue;
             }
 
-            $record = AfiliacionNormalizer::normalize($solicitud, $tipopc, $config, $titularesIndex);
-            $record = $this->enrichIdentificacion($record, $tipdocIndex);
-
             $fechaInicio = $this->formatFecha($evento->fecsis);
             $fechaCierre = $this->formatFecha($evento->feccie);
             $fechaFinEfectiva = $fechaCierre ?? $hoy;
 
+            $record = AfiliacionNormalizer::normalize($solicitud, $tipopc, $config, $titularesIndex);
+            $record = $this->enrichIdentificacion($record, $tipdocIndex);
+
             $usuario = trim((string) ($solicitud->usuario ?? ''));
+            $record['usuario'] = $usuario;
+            $record['nombre_usuario'] = $usuario !== ''
+                ? (string) ($usuariosIndex[$usuario] ?? '')
+                : '';
+
             $record['ruuid'] = $evento->ruuid ?: '';
             $record['item'] = $evento->item;
             $record['fecsol'] = $fechaInicio;
@@ -88,16 +94,16 @@ class OportunidadAfiliacionService
                 $record['dias_habiles'],
                 $umbral
             );
+
             // Estado = solicitud (no el evento Mercurio10 P).
-            $record['estado'] = (string) ($record['estado'] ?? '');
+            // Snapshots en auditoria_* se etiquetan como Archivada (no "Borrada").
+            $record['estado'] = AuditoriaSolicitudResolver::isArchivado($solicitud)
+                ? 'Archivada'
+                : (string) ($record['estado'] ?? '');
             $estadoSolicitud = strtoupper((string) ($record['estado_codigo'] ?? $solicitud->estado ?? ''));
             $radicadoCerrado = strtoupper((string) ($evento->cerrada ?? 'N')) === 'S'
                 || $estadoSolicitud === 'A';
             $record['estado_radicado'] = $radicadoCerrado ? 'Cerrado' : 'Enviado';
-            $record['usuario'] = $usuario;
-            $record['nombre_usuario'] = $usuario !== ''
-                ? (string) ($usuariosIndex[$usuario] ?? '')
-                : '';
 
             $dataset[] = $record;
         }

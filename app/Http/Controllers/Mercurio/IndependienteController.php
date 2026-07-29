@@ -50,11 +50,11 @@ class IndependienteController extends ApplicationController
 
     protected $tipopc = '13';
 
-    protected $db;
+    protected ?DbBase $db;
 
-    protected $user;
+    protected ?array $user;
 
-    protected $tipo;
+    protected ?string $tipo;
 
     public function __construct()
     {

@@ -58,7 +58,7 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
     }
 
     /**
-     * Cónyuges y beneficiarios no tienen NIT / razón social aportante.
+     * Cónyuges, beneficiarios e independientes no tienen NIT / razón social aportante.
      *
      * @param  array<string, mixed>  $filtros
      */
@@ -76,8 +76,8 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
 
         $tipafis = array_values(array_unique(array_map('intval', $tipafis)));
 
-        // Solo un tipo y es cónyuge (3) o beneficiario (4).
-        return ! (count($tipafis) === 1 && in_array($tipafis[0], [3, 4], true));
+        // Solo un tipo y es cónyuge (3), beneficiario (4) o independiente (13).
+        return ! (count($tipafis) === 1 && in_array($tipafis[0], [3, 4, 13], true));
     }
 
     /**

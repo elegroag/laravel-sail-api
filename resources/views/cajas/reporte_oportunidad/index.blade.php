@@ -139,9 +139,10 @@
                         <i class="fas fa-info-circle" aria-hidden="true"></i>
                         <div>
                             Se calculan los <strong>días hábiles</strong> entre el <strong>envío a caja</strong> (evento P)
-                            y la <strong>aprobación o rechazo</strong> (evento A/X) de la misma solicitud.
+                            y el <strong>cierre</strong> del mismo radicado (feccie del evento, o hoy si sigue abierto).
                             Umbral configurado: <strong>{{ $umbralDias }} días hábiles</strong>.
-                            Cada fila corresponde a un envío; las solicitudes inactivas no se incluyen.
+                            Cada fila corresponde a un envío en Mercurio10 con solicitud viva o archivada en auditoría.
+                            Se omiten solicitudes inactivas y eventos sin solicitud ni snapshot en auditoría.
                         </div>
                     </div>
 

@@ -191,6 +191,54 @@ class ReporteOportunidadAfiliacionTest extends TestCase
         $this->assertSame('Asesor Beneficiario', $rows[1][10]);
     }
 
+    public function test_exportar_independiente_omite_nit_y_razon_social(): void
+    {
+        $this->mock(OportunidadAfiliacionService::class, function ($mock): void {
+            $mock->shouldReceive('buildDataset')
+                ->once()
+                ->andReturn([[
+                    'tipopc' => 13,
+                    'label' => 'INDEPENDIENTE',
+                    'id' => 77,
+                    'ruuid' => 'ruuid-independiente-77',
+                    'fecsol' => '2026-05-01',
+                    'fecapr' => '2026-05-03',
+                    'fecha_cierre' => '2026-05-03',
+                    'estado' => 'Aprobado',
+                    'estado_radicado' => 'Cerrado',
+                    'tipo_documento' => 'CC',
+                    'numero_identificacion' => '1122334455',
+                    'nombre' => 'Laura Rios',
+                    'nit' => '',
+                    'razsoc' => '',
+                    'dias_habiles' => 2,
+                    'usuario' => '404',
+                    'nombre_usuario' => 'Asesor Independiente',
+                ]]);
+        });
+
+        $response = $this->post(route('cajas.reporte-oportunidad.exportar'), [
+            'fecini' => '2026-05-01',
+            'fecfin' => '2026-05-31',
+            'tipafis' => [13],
+        ]);
+
+        $response->assertOk();
+
+        $sheet = $this->readSpreadsheetFromResponse($response->streamedContent());
+        $rows = $sheet->toArray();
+
+        $this->assertNotContains('NIT aportante', $rows[0]);
+        $this->assertNotContains('Razon social aportante', $rows[0]);
+        $this->assertSame('Tipo identificacion', $rows[0][6]);
+        $this->assertSame('Cerrado', $rows[1][2]);
+        $this->assertSame('CC', $rows[1][6]);
+        $this->assertSame('1122334455', $rows[1][7]);
+        $this->assertSame('Laura Rios', $rows[1][8]);
+        $this->assertSame('404', $rows[1][9]);
+        $this->assertSame('Asesor Independiente', $rows[1][10]);
+    }
+
     public function test_filtro_por_tipo_solo_trabajador(): void
     {
         $this->mock(OportunidadAfiliacionService::class, function ($mock): void {
