@@ -9,6 +9,12 @@ $msexo = ($trabajador->sexo != 'N') ? $_sexos[$trabajador->sexo] : '';
 		<div class="row justify-content-around">
             <div class="col-md-4 col-lg-3">
 				<div class="form-group">
+					<label class="form-label text-muted small mb-1">RUUID</label>
+					<div class="form-control bg-light">{{ $trabajador->ruuid ?? '' }}</div>
+				</div>
+			</div>
+            <div class="col-md-4 col-lg-3">
+				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Nit</label>
 					<div class="form-control bg-light">{{ $trabajador->nit }}</div>
 				</div>

@@ -6,6 +6,12 @@
 		<div class="row g-3">
 			<div class="col-md-6 col-lg-4">
 				<div class="form-group">
+					<label class="form-label text-muted small mb-1">RUUID</label>
+					<div class="form-control bg-light">{{ $mercurio45->ruuid ?? '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-6 col-lg-4">
+				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Cedula de trabajador</label>
 					<div class="form-control bg-light">{{$mercurio45->getCedtra()}}</div>
 				</div>

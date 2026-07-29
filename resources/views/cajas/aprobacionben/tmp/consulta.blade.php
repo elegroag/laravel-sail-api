@@ -6,6 +6,12 @@
 		<div class="row justify-content-around">
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
+					<label class="form-label text-muted small mb-1">RUUID</label>
+					<div class="form-control bg-light">{{ $beneficiario->ruuid ?? '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Documento del Beneficiario</label>
 					<div class="form-control bg-light">{{ $beneficiario->getNumdoc() }}</div>
 				</div>

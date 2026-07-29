@@ -6,6 +6,12 @@
         <div class="row g-3">
             <div class="col-md-6 col-lg-3">
                 <div class="form-group">
+                    <label for="ruuid" class="form-label text-muted small mb-1">RUUID</label>
+                    <div class="form-control bg-light">{{ $datostra['ruuid'] ?? '' }}</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="form-group">
                     <label for="prinom" class="form-label text-muted small mb-1">Primer nombre</label>
                     <div class="form-control bg-light">{{ $datostra['prinom'] }}</div>
                 </div>

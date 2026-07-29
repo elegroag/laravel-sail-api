@@ -6,6 +6,12 @@
 		<div class="row justify-content-around">
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
+					<label class="form-label text-muted small mb-1">RUUID</label>
+					<div class="form-control bg-light">{{ $mercurio30->ruuid ?? '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
 					<label class="form-label text-muted small mb-1">NIT</label>
 					<div class="form-control bg-light">{{ $mercurio30->nit }}</div>
 				</div>

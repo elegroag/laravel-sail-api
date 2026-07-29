@@ -9,6 +9,12 @@ $codocu = str_pad($conyuge->codocu, 2, '0', STR_PAD_LEFT);
 		<div class="row justify-content-around">
 			<div class="col-md-4 col-lg-3">
 				<div class="form-group">
+					<label class="form-label text-muted small mb-1">RUUID</label>
+					<div class="form-control bg-light">{{ $conyuge->ruuid ?? '' }}</div>
+				</div>
+			</div>
+			<div class="col-md-4 col-lg-3">
+				<div class="form-group">
 					<label class="form-label text-muted small mb-1">Cédula</label>
 					<div class="form-control bg-light">{{ $conyuge->cedcon }}</div>
 				</div>

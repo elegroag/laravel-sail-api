@@ -606,7 +606,7 @@ class ApruebaUpEmpresaController extends ApplicationController
             $paramsIndependiente = new ParamsEmpresa;
             $paramsIndependiente->setDatosCaptura($datos_captura);
 
-            $htmlEmpresa = view('cajas/actualizardatos/tmp/consulta', [
+            $htmlEmpresa = view('cajas/actualizaemp/tmp/consulta', [
                 'mercurio47' => $mercurio47,
                 'dataItems' => $dataItems,
                 'mercurio01' => Mercurio01::first(),
