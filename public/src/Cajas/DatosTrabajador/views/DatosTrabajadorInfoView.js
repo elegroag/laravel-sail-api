@@ -89,6 +89,9 @@ export default class DatosTrabajadorInfoView extends FormInfoView {
 
 		_target.attr('disabled', true);
 		const entity = this.serializeModel(this.model);
+        if (!entity) {
+            return false;
+        }
 
 		$App.trigger('syncro', {
 			url: 'validarMultiafiliacion',

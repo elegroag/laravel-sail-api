@@ -7,8 +7,8 @@ use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
@@ -39,9 +39,11 @@ class ApruebaDatosTrabajador
      */
     public function procesar($postData)
     {
-        $mercurio47 = Mercurio47::where("id", $this->solicitud->getId())->first();
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
 
-        $ps = new ApiSubsidio();
+        $mercurio47 = Mercurio47::where('id', $this->solicitud->getId())->first();
+
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -56,11 +58,11 @@ class ApruebaDatosTrabajador
             throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
         }
         if (! $out['success']) {
-            throw new DebugException('Error, ' . $out['msj'], 1);
+            throw new DebugException('Error, '.$out['msj'], 1);
         }
         $trabajador = $out['data'];
 
-        $mercurio33 = Mercurio33::where("actualizacion", $this->solicitud->getId())->get();
+        $mercurio33 = Mercurio33::where('actualizacion', $this->solicitud->getId())->get();
         $dataItems = [];
         foreach ($mercurio33 as $row) {
             $dataItems[$row->getCampo()] = $row->getValor();
@@ -77,7 +79,7 @@ class ApruebaDatosTrabajador
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -85,7 +87,7 @@ class ApruebaDatosTrabajador
                 'params' => [
                     'cedtra' => $mercurio47->getDocumento(),
                     'coddoc' => $mercurio47->getCoddoc(),
-                    'post' => $postData,
+                    'post' => array_merge($postData, $validacionesControl),
                 ],
             ]
         );
@@ -105,9 +107,9 @@ class ApruebaDatosTrabajador
         $registroSeguimiento = new RegistroSeguimiento;
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
 
-        Mercurio47::where("id", $this->solicitud->getId())->update([
-            "estado" => 'A',
-            "fecest" => $this->today,
+        Mercurio47::where('id', $this->solicitud->getId())->update([
+            'estado' => 'A',
+            'fecest' => $this->today,
         ]);
 
         return true;
@@ -160,15 +162,16 @@ class ApruebaDatosTrabajador
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = Mercurio47::where("id", $idSolicitud)->first();
+        $this->solicitud = Mercurio47::where('id', $idSolicitud)->first();
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::where("documento", $this->solicitud->getDocumento())
-            ->where("coddoc", $this->solicitud->getCoddoc())
-            ->where("tipo", $this->solicitud->getTipo())
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->getDocumento())
+            ->where('coddoc', $this->solicitud->getCoddoc())
+            ->where('tipo', $this->solicitud->getTipo())
             ->first();
 
         return $this->solicitante;

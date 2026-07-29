@@ -1,7 +1,10 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { usePage } from '@inertiajs/react';
 import ComfacaLogo from '@/components/ComfacaLogo';
+
+const AGENTI_SCRIPT_ID = 'agenti-lite-comfaca-script';
+const AGENTI_SCRIPT_SRC = 'https://comfaca.agenti.com.co/agenti_lite_comfaca/js/scripts.js';
 
 const navLinks = [
     { title: 'Nosotros', href: '/web/about' },
@@ -10,9 +13,39 @@ const navLinks = [
     { title: 'Contáctenos', href: '/web/contact' },
 ];
 
+function shouldLoadAgenti(url: string): boolean {
+    const path = url.split('?')[0] ?? url;
+    return (
+        path === '/web/products' ||
+        path === '/web/about' ||
+        path === '/web/documentation' ||
+        path === '/web/contact' ||
+        path === '/web/login' ||
+        path === '/web/register' ||
+        path.startsWith('/web/register/')
+    );
+}
+
 export default function PublicHeader() {
     const page = usePage();
     const isLoginPage = page.url === '/web/login';
+
+    useEffect(() => {
+        if (!shouldLoadAgenti(page.url)) {
+            return;
+        }
+
+        if (document.getElementById(AGENTI_SCRIPT_ID)) {
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.id = AGENTI_SCRIPT_ID;
+        script.src = AGENTI_SCRIPT_SRC;
+        script.type = 'text/javascript';
+        script.async = true;
+        document.body.appendChild(script);
+    }, [page.url]);
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">

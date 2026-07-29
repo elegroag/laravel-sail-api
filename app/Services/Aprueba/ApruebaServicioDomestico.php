@@ -29,7 +29,7 @@ class ApruebaServicioDomestico
 
     public function __construct()
     {
-        $this->procesadorComando = new ApiSubsidio();
+        $this->procesadorComando = new ApiSubsidio;
         $this->today = Carbon::now();
         $this->dominio = config('app.dominio', 'http://localhost:8000');
     }
@@ -42,6 +42,8 @@ class ApruebaServicioDomestico
      */
     public function procesar($postData)
     {
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
@@ -80,7 +82,7 @@ class ApruebaServicioDomestico
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_madre_comunitaria',
-                'params' => $params,
+                'params' => array_merge($params, $validacionesControl),
             ]
         );
 

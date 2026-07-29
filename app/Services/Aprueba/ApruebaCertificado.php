@@ -6,8 +6,8 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio45;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
@@ -32,10 +32,12 @@ class ApruebaCertificado
 
     public function procesar($postData)
     {
-        $certificado = Mercurio45::where('id', $this->solicitud->getId())->first();
-        $params = array_merge($certificado->getArray(), $_POST);
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
 
-        $ps = new ApiSubsidio();
+        $certificado = Mercurio45::where('id', $this->solicitud->getId())->first();
+        $params = array_merge($certificado->getArray(), $postData, $validacionesControl);
+
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'Certificados',

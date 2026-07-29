@@ -41,10 +41,12 @@ class ApruebaBeneficiario
      */
     public function procesar($postData)
     {
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
         $benefi = Mercurio34::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         $trabajador_sisu = false;
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -65,22 +67,26 @@ class ApruebaBeneficiario
             throw new DebugException('El trabajador aun no está activo en el sistema principal de subsidio.', 505);
         }
 
-        if (is_null($benefi->cedcon) == false && $benefi->cedcon != '') {
-            $apiRest = new ApiSubsidio();
+        if (
+            is_null($benefi->cedcon) == false &&
+            $benefi->cedcon != '' &&
+            $benefi->cedcon != 0
+        ) {
+            $apiRest = new ApiSubsidio;
             $apiRest->send(
                 [
                     'servicio' => 'ComfacaAfilia',
                     'metodo' => 'conyuge',
                     'params' => [
                         'cedcon' => $benefi->cedcon,
-                    ]
+                    ],
                 ]
             );
 
             $datos_conyuge = $apiRest->toArray();
             if ($benefi->cedcon != null) {
                 if (! isset($datos_conyuge['data']['estado'])) {
-                    throw new DebugException('El conyuge del trabajador aún no esta afiliado.', 500);
+                    throw new DebugException("El conyuge del trabajador aún no esta afiliado {$benefi->cedcon}.", 500);
                 }
             }
         }
@@ -122,12 +128,12 @@ class ApruebaBeneficiario
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_beneficiario',
-                'params' => $entity->getData()
+                'params' => array_merge($entity->getData(), $validacionesControl),
             ]
         );
 
@@ -205,22 +211,27 @@ class ApruebaBeneficiario
     public function findSolicitud($idSolicitud)
     {
         $this->solicitud = Mercurio34::where('id', $idSolicitud)->first();
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::where("documento", $this->solicitud->documento)
-            ->where("coddoc", $this->solicitud->coddoc)
-            ->where("tipo", $this->solicitud->tipo)
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->documento)
+            ->where('coddoc', $this->solicitud->coddoc)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
+
         return $this->solicitante;
     }
 
     /**
      * deshacerAprobacion function
+     *
      * @changed [2023-12-19]
+     *
      * @author elegroag <elegroag@ibero.edu.co>
+     *
      * @param  int  $id
      * @param  string  $action
      * @param  string  $nota
@@ -235,7 +246,7 @@ class ApruebaBeneficiario
 
         $mercurio34 = $this->findSolicitud($id);
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -255,7 +266,7 @@ class ApruebaBeneficiario
 
         $trabajadorSisu = $out['data'];
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'DeshacerAfiliaciones',

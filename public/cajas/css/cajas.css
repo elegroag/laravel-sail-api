@@ -361,3 +361,34 @@ legend {
 	top: -12px;
 	left: 20px;
 }
+
+/* Checklist validaciones de control (aprobación) */
+.validacion-control-checklist__card {
+	padding: 1rem 1.1rem;
+	margin-bottom: 0.5rem;
+	background: #f7fafc;
+	border: 1px solid #e9ecef;
+	border-radius: 12px;
+}
+
+.validacion-control-checklist__title {
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: #32325d;
+}
+
+.validacion-control-checklist__hint {
+	font-size: 0.8rem;
+	color: #8898aa;
+	margin: 0;
+}
+
+.validacion-control-checklist__list .checklist-item {
+	padding: 0.35rem 0;
+}
+
+.validacion-control-checklist__list .form-check-label {
+	font-size: 0.875rem;
+	color: #525f7f;
+	font-weight: 600;
+}

@@ -121,7 +121,9 @@ use App\Services\Tag;
         </div>
     </div>
     <div class='row'>
-        <div class='col-md-8'>
+        		@include('cajas.templates.tmp_checklist_validacion_control')
+
+<div class='col-md-8'>
             <div class='form-group'>
                 <label for='nota_aprobar' class='form-control-label'>Nota</label>
                 <textarea class='form-control summer_content' id='nota_aprobar' name='nota_aprobar' rows='3'></textarea>

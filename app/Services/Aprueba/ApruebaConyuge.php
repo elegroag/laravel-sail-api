@@ -6,10 +6,10 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio32;
+use App\Services\Api\ApiSubsidio;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Entities\ConyugeEntity;
 use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -41,7 +41,9 @@ class ApruebaConyuge
      */
     public function procesar($postData)
     {
-        $conyuge = Mercurio32::where("id", $this->solicitud->id)->first();
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
+        $conyuge = Mercurio32::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
 
         $params = array_merge($this->solicitud->toArray(), $postData);
@@ -60,7 +62,7 @@ class ApruebaConyuge
         }
 
         $trabajador_sisu = false;
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -95,12 +97,12 @@ class ApruebaConyuge
             );
         }
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_conyuge',
-                'params' => $entity->getData()
+                'params' => array_merge($entity->getData(), $validacionesControl),
             ]
         );
 
@@ -141,7 +143,7 @@ class ApruebaConyuge
      */
     public function enviarMail($actapr = '', $feccap = '')
     {
-        $nombre = $this->solicitud->prinom . ' ' . $this->solicitud->segnom . ' ' . $this->solicitud->priape . ' ' . $this->solicitud->segape;
+        $nombre = $this->solicitud->prinom.' '.$this->solicitud->segnom.' '.$this->solicitud->priape.' '.$this->solicitud->segape;
         $data = [];
         $data['razsoc'] = $this->solicitante->nombre;
         $data['email'] = $this->solicitante->email;
@@ -175,17 +177,18 @@ class ApruebaConyuge
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = Mercurio32::where("id", $idSolicitud)->first();
+        $this->solicitud = Mercurio32::where('id', $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::where("documento", $this->solicitud->documento)
-            ->where("coddoc", $this->solicitud->coddoc)
-            ->where("tipo", $this->solicitud->tipo)
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->documento)
+            ->where('coddoc', $this->solicitud->coddoc)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
+
         return $this->solicitante;
     }
 
@@ -210,7 +213,7 @@ class ApruebaConyuge
 
         $mercurio32 = $this->findSolicitud($id);
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -231,7 +234,7 @@ class ApruebaConyuge
 
         $dataSisu = $out['data'];
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'DeshacerAfiliaciones',

@@ -22,6 +22,7 @@ use App\Services\FormulariosAdjuntos\IndependienteAdjuntoService;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\SenderValidationCaja;
+use Carbon\Carbon;
 
 class IndependienteService
 {
@@ -415,6 +416,7 @@ class IndependienteService
         Mercurio41::where('id', $id)->update([
             'usuario' => $usuario,
             'estado' => 'P',
+            'fecsol' => Carbon::now()->format('Y-m-d'),
         ]);
 
         $ai = Mercurio10::where('tipopc', $this->tipopc)

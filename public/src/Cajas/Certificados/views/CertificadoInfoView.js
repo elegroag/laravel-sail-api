@@ -85,6 +85,9 @@ export default class CertificadoInfoView extends FormInfoView {
 
         _target.attr('disabled', true);
         const entity = this.serializeModel(this.model);
+        if (!entity) {
+            return false;
+        }
 
         this.trigger('load:aprobar', {
             data: entity.toJSON(),

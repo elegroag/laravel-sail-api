@@ -6,12 +6,12 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio30;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entities\EmpresaEntity;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\SucursalEntity;
 use App\Services\SatApi\SatServices;
 use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -45,6 +45,8 @@ class ApruebaEmpresa
      */
     public function procesar($postData)
     {
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
         $mercurio30 = Mercurio30::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
@@ -68,16 +70,16 @@ class ApruebaEmpresa
 
         if ($tipper == 'N') {
             $fullname = normalize_spaces(
-                $mercurio30->prinom . ' ' .
-                    $mercurio30->segnom . ' ' .
-                    $mercurio30->priape . ' ' .
+                $mercurio30->prinom.' '.
+                    $mercurio30->segnom.' '.
+                    $mercurio30->priape.' '.
                     $mercurio30->segape
             );
         } else {
             $fullname = normalize_spaces(
-                $mercurio30->priaperepleg . ' ' .
-                    $mercurio30->segaperepleg . ' ' .
-                    $mercurio30->prinomrepleg . ' ' .
+                $mercurio30->priaperepleg.' '.
+                    $mercurio30->segaperepleg.' '.
+                    $mercurio30->prinomrepleg.' '.
                     $mercurio30->segnomrepleg
             );
         }
@@ -96,7 +98,7 @@ class ApruebaEmpresa
         $params['calsuc'] = $mercurio30->calemp;
         $params['nomcon'] = substr($fullname, 0, 70);
         $params['detalle'] = $mercurio30->razsoc;
-        $params['nomemp'] = $mercurio30->razsoc . ' - EMPRESA APORTANTE';
+        $params['nomemp'] = $mercurio30->razsoc.' - EMPRESA APORTANTE';
         $params['fecapr'] = $postData['fecapr'];
         $params['observacion'] = $postData['nota_aprobar'];
         $params['totapo'] = '0';
@@ -170,7 +172,7 @@ class ApruebaEmpresa
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -178,8 +180,9 @@ class ApruebaEmpresa
                 'params' => array_merge(
                     $empresa->getData(),
                     $sucursal->getData(),
-                    $listas->getData()
-                )
+                    $listas->getData(),
+                    $validacionesControl
+                ),
             ]
         );
         if ($ps->isJson() == false) {
@@ -297,7 +300,8 @@ class ApruebaEmpresa
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = Mercurio30::where("id", $idSolicitud)->first();
+        $this->solicitud = Mercurio30::where('id', $idSolicitud)->first();
+
         return $this->solicitud;
     }
 
@@ -306,6 +310,7 @@ class ApruebaEmpresa
         $this->solicitante = Mercurio07::whereRaw(
             "documento='{$this->solicitud->documento}' and coddoc='{$this->solicitud->coddoc}' and tipo='{$this->solicitud->tipo}'"
         )->first();
+
         return $this->solicitante;
     }
 }

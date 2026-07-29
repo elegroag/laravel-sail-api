@@ -6,12 +6,12 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio41;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entities\IndependienteEntity;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -45,15 +45,17 @@ class ApruebaIndependiente
      */
     public function procesar($postData)
     {
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
         $mercurio41 = Mercurio41::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
          */
-        $repleg = normalize_spaces($this->solicitud->priape . ' '
-            . $this->solicitud->segape . ' '
-            . $this->solicitud->prinom . ' '
-            . $this->solicitud->segnom);
+        $repleg = normalize_spaces($this->solicitud->priape.' '
+            .$this->solicitud->segape.' '
+            .$this->solicitud->prinom.' '
+            .$this->solicitud->segnom);
 
         $tipper = 'N';
         $params = array_merge($this->solicitud->toArray(), $postData);
@@ -79,9 +81,9 @@ class ApruebaIndependiente
             $detalle_nomemp = 'APORTANTE INDEPENDIENTE 0.6%';
         }
 
-        $fullname = normalize_spaces($this->solicitud->prinom . ' ' .
-            $this->solicitud->segnom . ' ' .
-            $this->solicitud->priape . ' ' .
+        $fullname = normalize_spaces($this->solicitud->prinom.' '.
+            $this->solicitud->segnom.' '.
+            $this->solicitud->priape.' '.
             $this->solicitud->segape);
 
         $params['nit'] = $this->solicitud->cedtra;
@@ -121,7 +123,7 @@ class ApruebaIndependiente
         $params['telr'] = $this->solicitud->telefono;
         $params['mailr'] = $this->solicitud->email;
         $params['calsuc'] = $this->solicitud->calemp;
-        $params['detalle'] = $repleg . ' / ' . $detalle_nomemp;
+        $params['detalle'] = $repleg.' / '.$detalle_nomemp;
         $params['fecapr'] = $postData['fecapr'];
         $params['observacion'] = $postData['nota_aprobar'];
         $params['totapo'] = '0';
@@ -170,7 +172,7 @@ class ApruebaIndependiente
 
         $params['codcaj'] = '13';
         $params['codase'] = '09';
-        $params['tipemp'] = 'P'; //privada
+        $params['tipemp'] = 'P'; // privada
         $params['cedrep'] = $this->solicitud->cedtra;
         $params['nomemp'] = $repleg;
 
@@ -241,7 +243,7 @@ class ApruebaIndependiente
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -250,7 +252,8 @@ class ApruebaIndependiente
                     $entity->getData(),
                     $sucursal->getData(),
                     $listas->getData(),
-                    $trabajador->getData()
+                    $trabajador->getData(),
+                    $validacionesControl
                 ),
             ]
         );
@@ -275,9 +278,9 @@ class ApruebaIndependiente
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = Mercurio07::where("coddoc", $this->solicitud->tipdoc)
-            ->where("documento", $this->solicitud->cedtra)
-            ->where("tipo", $this->solicitud->tipo)
+        $empresa = Mercurio07::where('coddoc', $this->solicitud->tipdoc)
+            ->where('documento', $this->solicitud->cedtra)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
 
         $fecreg = $this->solicitante->fecreg;
@@ -362,6 +365,7 @@ class ApruebaIndependiente
             $this->solicitante->email,
             $html,
         );
+
         return true;
     }
 
@@ -377,20 +381,21 @@ class ApruebaIndependiente
      */
     public function findSolicitud($id)
     {
-        $this->solicitud = Mercurio41::where("id", $id)->first();
+        $this->solicitud = Mercurio41::where('id', $id)->first();
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
         $this->solicitante = Mercurio07::where(
-            "documento",
+            'documento',
             $this->solicitud->documento
         )->where(
-            "coddoc",
+            'coddoc',
             $this->solicitud->coddoc
         )->where(
-            "tipo",
+            'tipo',
             $this->solicitud->tipo
         )->first();
 

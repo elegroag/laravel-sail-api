@@ -6,10 +6,10 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio31;
+use App\Services\Api\ApiSubsidio;
 use App\Services\CajaServices\TrabajadorServices;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -42,7 +42,9 @@ class ApruebaTrabajador
      */
     public function procesar($postData)
     {
-        $mercurio31 = Mercurio31::where("id", $this->solicitud->id)->first();
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
+        $mercurio31 = Mercurio31::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
@@ -113,12 +115,12 @@ class ApruebaTrabajador
             );
         }
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_trabajador',
-                'params' => $entity->getData()
+                'params' => array_merge($entity->getData(), $validacionesControl),
             ]
         );
 
@@ -159,7 +161,7 @@ class ApruebaTrabajador
      */
     public function enviarMail($actapr, $feccap)
     {
-        $nombre = $this->solicitud->prinom . ' ' . $this->solicitud->segnom . ' ' . $this->solicitud->priape . ' ' . $this->solicitud->segape;
+        $nombre = $this->solicitud->prinom.' '.$this->solicitud->segnom.' '.$this->solicitud->priape.' '.$this->solicitud->segape;
         $data = [];
         $data['razsoc'] = $this->solicitante->nombre;
         $data['email'] = $this->solicitante->email;
@@ -193,7 +195,7 @@ class ApruebaTrabajador
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = Mercurio31::where("id", $idSolicitud)->first();
+        $this->solicitud = Mercurio31::where('id', $idSolicitud)->first();
 
         return $this->solicitud;
     }
@@ -201,11 +203,11 @@ class ApruebaTrabajador
     public function findSolicitante()
     {
         $this->solicitante = Mercurio07::where(
-            "documento",
+            'documento',
             $this->solicitud->documento
         )
-            ->where("coddoc", $this->solicitud->coddoc)
-            ->where("tipo", $this->solicitud->tipo)
+            ->where('coddoc', $this->solicitud->coddoc)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
 
         return $this->solicitante;
@@ -232,7 +234,7 @@ class ApruebaTrabajador
 
         $mercurio31 = $this->findSolicitud($id);
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -251,7 +253,7 @@ class ApruebaTrabajador
 
         $trabajadorSisu = $out['data'];
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'DeshacerAfiliaciones',

@@ -8,8 +8,8 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio30;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
-use App\Services\Srequest;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Srequest;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
@@ -41,9 +41,11 @@ class ApruebaDatosEmpresa
      */
     public function procesar($postData)
     {
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
         $mercurio47 = Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->first();
 
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaEmpresas',
@@ -59,7 +61,7 @@ class ApruebaDatosEmpresa
             throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
         }
         if (! $out['success']) {
-            throw new DebugException('Error, ' . $out['msj'], 1);
+            throw new DebugException('Error, '.$out['msj'], 1);
         }
         $empresa = $out['data'];
 
@@ -72,14 +74,14 @@ class ApruebaDatosEmpresa
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'actualiza_empresa',
                 'params' => [
                     'nit' => $mercurio47->getDocumento(),
-                    'post' => array_merge($empresa, $dataItems, $postData),
+                    'post' => array_merge($empresa, $dataItems, $postData, $validacionesControl),
                 ],
             ]
         );
@@ -101,8 +103,8 @@ class ApruebaDatosEmpresa
 
         $fechaEstado = $this->today->format('Y-m-d');
         Mercurio47::whereRaw("id='{$this->solicitud->getId()}'")->update([
-            "estado" => 'A',
-            "fecest" => $fechaEstado,
+            'estado' => 'A',
+            'fecest' => $fechaEstado,
         ]);
 
         return true;
@@ -161,8 +163,8 @@ class ApruebaDatosEmpresa
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::whereRaw("documento='{$this->solicitud->getDocumento()}' and " .
-            "coddoc='{$this->solicitud->getCoddoc()}' and " .
+        $this->solicitante = Mercurio07::whereRaw("documento='{$this->solicitud->getDocumento()}' and ".
+            "coddoc='{$this->solicitud->getCoddoc()}' and ".
             "tipo='{$this->solicitud->getTipo()}'")->first();
 
         return $this->solicitante;

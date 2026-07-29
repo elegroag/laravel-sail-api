@@ -73,6 +73,8 @@
 			</div>
 		</div>
 
+		@include('cajas.templates.tmp_checklist_validacion_control')
+
 		<div class='col-12' group-for='nota_aprobar'>
 			<div class='form-group'>
 				<label for='nota_aprobar' class='form-label'>Nota</label>

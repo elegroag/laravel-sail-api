@@ -56,7 +56,82 @@ class FormInfoView extends Backbone.View {
 	serializeModel(entity) {
 		const dataArray = this.form.serializeArray();
 		_.each(dataArray, (item) => entity.set(item.name, item.value));
+		const flags = this.buildValidacionesControl();
+		if (!this.assertValidacionesControl(flags)) {
+			return false;
+		}
+		const json = JSON.stringify(flags);
+		this.$el.find('#validaciones_control').val(json);
+		entity.set('validaciones_control', json);
 		return entity;
+	}
+
+	buildValidacionesControl() {
+		const keys = ['guias', 'adres', 'ruaf', 'cobertura_salud', 'no_afiliado_otro_trabajador'];
+		const flags = {};
+		_.each(keys, (key) => {
+			const $input = this.$el.find(`.check-validacion-control[data-key="${key}"]`);
+			flags[key] = $input.length && $input.is(':checked') ? 'S' : 'N';
+		});
+		return flags;
+	}
+
+	assertValidacionesControl(flags = null) {
+		const data = flags || this.buildValidacionesControl();
+		const incompletos = _.filter(_.keys(data), (key) => data[key] !== 'S');
+		if (incompletos.length > 0) {
+			$App.trigger('alert:error', {
+				message:
+					'Debe marcar todas las validaciones de control (GUIAS, ADRES, RUAF, cobertura en salud y no afiliado por otro trabajador) para continuar.',
+			});
+			return false;
+		}
+		return true;
+	}
+
+	__aprobar(_target, entity) {
+		const flags = this.buildValidacionesControl();
+		if (!this.assertValidacionesControl(flags)) {
+			_target.removeAttr('disabled');
+			return false;
+		}
+		const json = JSON.stringify(flags);
+		this.$el.find('#validaciones_control').val(json);
+		entity.set('validaciones_control', json);
+
+		this.trigger('load:aprobar', {
+			data: entity.toJSON(),
+			callback: (response) => {
+				_target.removeAttr('disabled');
+				if (response.success) {
+					$App.trigger('confirma', {
+						message: response.msj,
+						callback: (status) => {
+							if (status) {
+								this.remove();
+								$App.router.navigate('list', { trigger: true, replace: true });
+							}
+						},
+					});
+				} else {
+					if (response.info && response.info.errors) {
+						$.each(response.info.errors, (key, item) => {
+							if (_.isArray(item) == true) {
+								$.each(item, (key2, item2) => {
+									$App.trigger('noty:error', item2);
+								});
+							} else {
+								$App.trigger('noty:error', item);
+							}
+						});
+					}
+
+					$App.trigger('alert:warning', {
+						message: response.msj,
+					});
+				}
+			},
+		});
 	}
 
 	actualizaForm() {
@@ -315,42 +390,6 @@ class FormInfoView extends Backbone.View {
 	__editarRequest(data) {
 		this.remove();
 		$App.router.navigate('edit/' + data.id, { trigger: true });
-	}
-
-	__aprobar(_target, entity) {
-		this.trigger('load:aprobar', {
-			data: entity.toJSON(),
-			callback: (response) => {
-				_target.removeAttr('disabled');
-				if (response.success) {
-					$App.trigger('confirma', {
-						message: response.msj,
-						callback: (status) => {
-							if (status) {
-								this.remove();
-								$App.router.navigate('list', { trigger: true, replace: true });
-							}
-						},
-					});
-				} else {
-					if (response.info && response.info.errors) {
-						$.each(response.info.errors, (key, item) => {
-							if (_.isArray(item) == true) {
-								$.each(item, (key2, item2) => {
-									$App.trigger('noty:error', item2);
-								});
-							} else {
-								$App.trigger('noty:error', item);
-							}
-						});
-					}
-
-					$App.trigger('alert:warning', {
-						message: response.msj,
-					});
-				}
-			},
-		});
 	}
 
 	verArchivo(e) {

@@ -6,12 +6,12 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio38;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\PensionadoEntity;
 use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -45,14 +45,16 @@ class ApruebaPensionado
      */
     public function procesar($postData)
     {
-        $mercurio38 = Mercurio38::where("id", $this->solicitud->id)->first();
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
+        $mercurio38 = Mercurio38::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
         /**
          * buscar registro de la empresa
          */
-        $fullname = normalize_spaces($this->solicitud->prinom . ' ' .
-            $this->solicitud->segnom . ' ' .
-            $this->solicitud->priape . ' ' .
+        $fullname = normalize_spaces($this->solicitud->prinom.' '.
+            $this->solicitud->segnom.' '.
+            $this->solicitud->priape.' '.
             $this->solicitud->segape);
 
         $tipper = 'N';
@@ -79,22 +81,22 @@ class ApruebaPensionado
 
         if ($params['codind'] == '07') {
             $tipcot = 10;
-            $calsuc = 'P'; //pensioando del 2%
+            $calsuc = 'P'; // pensioando del 2%
             $nomemp = 'PENSIONADO DEL 2%';
         }
         if ($params['codind'] == '47') {
             $tipcot = 66;
-            $calsuc = 'O'; //pensionado fidelidad
+            $calsuc = 'O'; // pensionado fidelidad
             $nomemp = 'PENSIONADO FIDELIDAD';
         }
         if ($params['codind'] == '48') {
             $tipcot = 67;
-            $calsuc = 'X'; //pensionado del 0%
+            $calsuc = 'X'; // pensionado del 0%
             $nomemp = 'PENSIONADO DEL 0%';
         }
         if ($params['codind'] == '49') {
             $tipcot = 64;
-            $calsuc = 'A'; //pensionado del 0.6%
+            $calsuc = 'A'; // pensionado del 0.6%
             $nomemp = 'PENSIONADO DEL 0.6%';
         }
 
@@ -107,10 +109,10 @@ class ApruebaPensionado
         $params['celpri'] = $this->solicitud->celular;
         $params['emailpri'] = $this->solicitud->email;
 
-        $repleg = normalize_spaces($this->solicitud->priape . ' '
-            . $this->solicitud->segape . ' '
-            . $this->solicitud->prinom . ' '
-            . $this->solicitud->segnom);
+        $repleg = normalize_spaces($this->solicitud->priape.' '
+            .$this->solicitud->segape.' '
+            .$this->solicitud->prinom.' '
+            .$this->solicitud->segnom);
 
         $params['repleg'] = $repleg;
         $params['razsoc'] = $repleg;
@@ -157,9 +159,9 @@ class ApruebaPensionado
         $params['codact'] = '0020';
         $params['codcaj'] = '13';
         $params['codase'] = '09';
-        $params['tipemp'] = 'N'; //no aplica
+        $params['tipemp'] = 'N'; // no aplica
         $params['cedrep'] = $this->solicitud->cedtra;
-        $params['nomemp'] = $repleg . ' - ' . $nomemp;
+        $params['nomemp'] = $repleg.' - '.$nomemp;
 
         $params['giro'] = 'N';
         $params['giro2'] = 'N';
@@ -247,7 +249,7 @@ class ApruebaPensionado
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -256,7 +258,8 @@ class ApruebaPensionado
                     $entity->getData(),
                     $sucursal->getData(),
                     $listas->getData(),
-                    $trabajador->getData()
+                    $trabajador->getData(),
+                    $validacionesControl
                 ),
             ]
         );
@@ -281,9 +284,9 @@ class ApruebaPensionado
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = Mercurio07::where("coddoc", $this->solicitud->tipdoc)
-            ->where("documento", $this->solicitud->cedtra)
-            ->where("tipo", $this->solicitud->tipo)
+        $empresa = Mercurio07::where('coddoc', $this->solicitud->tipdoc)
+            ->where('documento', $this->solicitud->cedtra)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
 
         $feccla = $this->solicitante->feccla;
@@ -387,16 +390,16 @@ class ApruebaPensionado
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = Mercurio38::where("id", $idSolicitud)->first();
+        $this->solicitud = Mercurio38::where('id', $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::where("documento", $this->solicitud->documento)
-            ->where("coddoc", $this->solicitud->coddoc)
-            ->where("tipo", $this->solicitud->tipo)
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->documento)
+            ->where('coddoc', $this->solicitud->coddoc)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
 
         return $this->solicitante;

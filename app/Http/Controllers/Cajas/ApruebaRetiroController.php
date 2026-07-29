@@ -8,6 +8,7 @@ use App\Models\Adapter\DbBase;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio35;
+use App\Services\Aprueba\ValidacionControlChecklist;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\SenderEmail;
@@ -170,8 +171,15 @@ class ApruebaRetiroController extends ApplicationController
     {
         try {
             $id = $request->input('id');
-            $nota = $request->input('nota');
+            $nota = $request->input('nota') ?? $request->input('nota_aprobar');
             $fecest = $request->input('fecest');
+
+            $postData = $request->all();
+            if (! isset($postData['nota_aprobar']) && $nota) {
+                $postData['nota_aprobar'] = $nota;
+            }
+            $validacionesControl = ValidacionControlChecklist::preparar($postData);
+            $nota = $postData['nota_aprobar'];
 
             $response = $this->db->begin();
             $today = new \DateTime;
@@ -203,6 +211,7 @@ class ApruebaRetiroController extends ApplicationController
             $params['cedtra'] = $mercurio35->getCedtra();
             $params['codest'] = $mercurio35->getCodest();
             $params['fecest'] = $mercurio35->getFecest();
+            $params = array_merge($params, $validacionesControl);
 
             $consultasOldServices = new GeneralService;
             $result = $consultasOldServices->webService('retiroTrabajador', $params);

@@ -95,6 +95,9 @@ export default class EmpresaInfoView extends FormInfoView {
 		}
 
 		const entity = this.serializeModel(this.model);
+        if (!entity) {
+            return false;
+        }
 		entity.set('feccap', entity.get('fecafi'));
 
 		if (!entity.isValid()) {

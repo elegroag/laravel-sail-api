@@ -6,12 +6,12 @@ use App\Exceptions\DebugException;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio36;
+use App\Services\Api\ApiSubsidio;
 use App\Services\Entities\IndependienteEntity;
 use App\Services\Entities\ListasEntity;
 use App\Services\Entities\SucursalEntity;
 use App\Services\Entities\TrabajadorEntity;
 use App\Services\Srequest;
-use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\CrearUsuario;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -46,7 +46,9 @@ class ApruebaFacultativo
      */
     public function procesar($postData)
     {
-        $mercurio36 = Mercurio36::where("id", $this->solicitud->id)->first();
+        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+
+        $mercurio36 = Mercurio36::where('id', $this->solicitud->id)->first();
         $hoy = $this->today->format('Y-m-d');
 
         /**
@@ -62,15 +64,15 @@ class ApruebaFacultativo
             throw new Exception('Error, el tipo documento para facultativos no puede ser tipo NIT.', 501);
         }
 
-        $repleg = normalize_spaces($this->solicitud->priape . ' '
-            . $this->solicitud->segape . ' '
-            . $this->solicitud->prinom . ' '
-            . $this->solicitud->segnom);
+        $repleg = normalize_spaces($this->solicitud->priape.' '
+            .$this->solicitud->segape.' '
+            .$this->solicitud->prinom.' '
+            .$this->solicitud->segnom);
 
-        $fullname = normalize_spaces($this->solicitud->prinom . ' '
-            . $this->solicitud->segnom . ' '
-            . $this->solicitud->priape . ' '
-            . $this->solicitud->segape);
+        $fullname = normalize_spaces($this->solicitud->prinom.' '
+            .$this->solicitud->segnom.' '
+            .$this->solicitud->priape.' '
+            .$this->solicitud->segape);
 
         $tipcot = 63;
 
@@ -130,9 +132,9 @@ class ApruebaFacultativo
 
         $params['codcaj'] = '13';
         $params['codase'] = '09';
-        $params['tipemp'] = 'N'; //no aplica
+        $params['tipemp'] = 'N'; // no aplica
         $params['cedrep'] = $this->solicitud->cedtra;
-        $params['nomemp'] = $repleg . ' - FACULTATIVO';
+        $params['nomemp'] = $repleg.' - FACULTATIVO';
 
         $params['giro'] = 'N';
         $params['giro2'] = 'N';
@@ -217,7 +219,7 @@ class ApruebaFacultativo
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
-        $ps = new ApiSubsidio();
+        $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -226,8 +228,9 @@ class ApruebaFacultativo
                     $entity->getData(),
                     $sucursal->getData(),
                     $listas->getData(),
-                    $trabajador->getData()
-                )
+                    $trabajador->getData(),
+                    $validacionesControl
+                ),
             ]
         );
 
@@ -251,9 +254,9 @@ class ApruebaFacultativo
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = Mercurio07::where("coddoc", $this->solicitud->tipdoc)
-            ->where("documento", $this->solicitud->cedtra)
-            ->where("tipo", $this->solicitud->tipo)
+        $empresa = Mercurio07::where('coddoc', $this->solicitud->tipdoc)
+            ->where('documento', $this->solicitud->cedtra)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
 
         $feccla = $this->solicitante->feccla;
@@ -343,15 +346,16 @@ class ApruebaFacultativo
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = Mercurio36::where("id", $idSolicitud)->first();
+        $this->solicitud = Mercurio36::where('id', $idSolicitud)->first();
+
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::where("documento", $this->solicitud->cedtra)
-            ->where("coddoc", $this->solicitud->tipdoc)
-            ->where("tipo", $this->solicitud->tipo)
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->cedtra)
+            ->where('coddoc', $this->solicitud->tipdoc)
+            ->where('tipo', $this->solicitud->tipo)
             ->first();
 
         return $this->solicitante;
