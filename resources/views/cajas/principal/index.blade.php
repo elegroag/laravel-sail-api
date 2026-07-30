@@ -1,11 +1,11 @@
 @extends('layouts.cajas')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('mercurio/css/principal.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('mercurio/css/principal.css') }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('cajas/build/Inicio.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/Inicio.js') }}"></script>
 @endpush
 
 @section('content')

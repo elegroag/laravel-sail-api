@@ -9,5 +9,5 @@
     @include('cajas/aprobaciondom/tmp/tmp_aprobar')
 </script>
 
-<script src="{{ asset('cajas/build/ServicioDomesticos.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/ServicioDomesticos.js') }}"></script>
 @endpush

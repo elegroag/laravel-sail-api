@@ -1,7 +1,7 @@
 @extends('layouts.bone')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('mercurio/css/principal.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('mercurio/css/principal.css') }}">
 @endpush
 
 @section('content')
@@ -26,7 +26,7 @@
 <script type="text/template" id='tmp_galeria_carousel'>
     @include('mercurio/principal/tmp/tmp_galeria_carousel')
 </script>
-<script src="{{ asset('mercurio/build/Principal.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/Principal.js') }}"></script>
 
 {{-- Mensaje informativo en la sección "Consultas" cuando el usuario está inactivo.
      Lee el flag `consultas_habilitadas` devuelto por /principal/servicios; si es false,

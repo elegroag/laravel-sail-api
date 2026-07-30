@@ -142,7 +142,7 @@
 		</div>
 	</div>
 </script>
-<script src="{{ asset('mercurio/build/MoraPresunta.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/MoraPresunta.js') }}"></script>
 @endpush
 
 @section('content')

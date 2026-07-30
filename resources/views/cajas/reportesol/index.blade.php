@@ -233,5 +233,5 @@
     <script>
         window.ServerController = 'reportesol';
     </script>
-    <script src="{{ asset('cajas/build/ReporteSolicitudes.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/ReporteSolicitudes.js') }}"></script>
 @endpush

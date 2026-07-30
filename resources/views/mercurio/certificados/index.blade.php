@@ -232,5 +232,5 @@
         window.CertificadosBeneficiarios = @json($beneficiariosUi);
     </script>
     <script src="{{ asset('core/upload.js') }}"></script>
-    <script src="{{ asset('mercurio/build/Certificados.js') }}"></script>
+    <script src="{{ versioned_asset('mercurio/build/Certificados.js') }}"></script>
 @endpush

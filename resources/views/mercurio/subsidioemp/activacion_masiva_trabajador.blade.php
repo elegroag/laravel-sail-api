@@ -41,5 +41,5 @@
 <div id='consulta' class='table-responsive'>
 </div>
 
-<script src="{{ asset('Mercurio/consultasempresa/consultasempresa.build.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/ConsultasEmpresa.js') }}"></script>
 @endsection

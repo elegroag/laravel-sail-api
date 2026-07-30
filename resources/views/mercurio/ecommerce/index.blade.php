@@ -215,5 +215,5 @@
         guardarVenta: "{{ route('servicios.guardar-venta') }}",
     };
 </script>
-<script src="{{ asset('mercurio/build/Ecommerce.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/Ecommerce.js') }}"></script>
 @endpush

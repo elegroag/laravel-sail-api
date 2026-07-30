@@ -118,5 +118,5 @@
         <div class="col-md-5" id='show_listas'></div>
     </script>
 
-    <script src="{{ asset('cajas/build/Independientes.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Independientes.js') }}"></script>
 @endpush

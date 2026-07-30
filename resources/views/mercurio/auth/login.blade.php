@@ -4,7 +4,7 @@
 @section('application', 'mercurio')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('mercurio/css/login.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('mercurio/css/login.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
 
 <script type="text/template" id='tmp_recovery'>
@@ -39,6 +39,6 @@
 
 <div id='boneLayout'></div>
 
-<script src="{{ asset('mercurio/build/Login.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/Login.js') }}"></script>
 
 @endsection

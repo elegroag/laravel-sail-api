@@ -3,11 +3,11 @@
 @section('application', 'cajas')
 
 @push('scripts')
-<script src="{{ asset('cajas/build/Login.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/Login.js') }}"></script>
 @endpush
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('cajas/css/login.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('cajas/css/login.css') }}" />
 @endpush
 
 @section('content')

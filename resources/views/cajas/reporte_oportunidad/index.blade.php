@@ -229,5 +229,5 @@
             exportar: @json(route('cajas.reporte-oportunidad.exportar')),
         };
     </script>
-    <script src="{{ asset('cajas/build/OportunidadAfiliacion.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/OportunidadAfiliacion.js') }}"></script>
 @endpush

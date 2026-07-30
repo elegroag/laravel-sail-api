@@ -9,5 +9,5 @@
     @include('cajas/actualizatra/tmp/tmp_aprobar')
 </script>
 
-<script src="{{ asset('cajas/build/DatosTrabajador.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/DatosTrabajador.js') }}"></script>
 @endpush

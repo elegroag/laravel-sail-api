@@ -26,7 +26,7 @@
         "btnShowModal" => 'btCaptureModal',
         "idModal" => 'captureModal'])
 
-    <script src="{{ asset('cajas/build/Consulta.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Consulta.js') }}"></script>
 @endpush
 
 @section('content')

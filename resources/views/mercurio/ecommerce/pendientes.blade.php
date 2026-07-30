@@ -134,5 +134,5 @@
         desestimarPrecompra: "{{ route('servicios.desestimar-precompra') }}",
     };
 </script>
-<script src="{{ asset('mercurio/build/ComprasPendientes.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/ComprasPendientes.js') }}"></script>
 @endpush

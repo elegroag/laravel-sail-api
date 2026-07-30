@@ -5,5 +5,5 @@
         @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
     </script>
 
-    <script src="{{ asset('cajas/build/ApruebaRetiro.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/ApruebaRetiro.js') }}"></script>
 @endpush

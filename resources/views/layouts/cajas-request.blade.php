@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/summernote/summernote-bs5.css') }}" />
-    <link rel="stylesheet" href="{{ asset('mercurio/css/mercurio.css') }}" />
-    <link rel="stylesheet" href="{{ asset('cajas/css/consulta.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('mercurio/css/mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('cajas/css/consulta.css') }}" />
 @endpush
 
 @push('scripts')

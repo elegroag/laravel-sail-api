@@ -140,7 +140,7 @@
         </form>
     </script>
 
-    <script src="{{ asset('cajas/build/TipoAcceso.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/TipoAcceso.js') }}"></script>
 @endpush
 
 @section('content')

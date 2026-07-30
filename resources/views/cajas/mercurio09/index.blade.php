@@ -93,5 +93,5 @@
         window.ServerController = 'mercurio09';
     </script>
 
-    <script src="{{ asset('cajas/build/TipoOpciones.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/TipoOpciones.js') }}"></script>
 @endpush

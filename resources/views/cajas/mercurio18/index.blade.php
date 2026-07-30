@@ -45,5 +45,5 @@ echo Tag::filtro($campo_filtro);
   </div>
 </div>
 
-<script src="{{ asset('Cajas/global.js') }}"></script>
-<script src="{{ asset('Cajas/mercurio18.js') }}"></script>
+<script src="{{ versioned_asset('cajas/global.js') }}"></script>
+<script src="{{ versioned_asset('cajas/mercurio18.js') }}"></script>

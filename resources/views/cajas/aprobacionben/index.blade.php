@@ -18,5 +18,5 @@
     <script id='tmp_pendiente_mail' type="text/template">
     </script>
 
-    <script src="{{ asset('cajas/build/Beneficiarios.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Beneficiarios.js') }}"></script>
 @endpush

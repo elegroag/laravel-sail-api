@@ -36,5 +36,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('mercurio/CambioClave.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/CambioClave.js') }}"></script>
 @endpush

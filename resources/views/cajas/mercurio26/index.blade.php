@@ -3,7 +3,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
-    <link rel="stylesheet" href="{{ asset('cajas/css/galeria-admin.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('cajas/css/galeria-admin.css') }}" />
 @endpush
 
 @section('content')
@@ -118,5 +118,5 @@
         window.ServerController = 'mercurio26';
     </script>
 
-    <script src="{{ asset('cajas/build/Galeria.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Galeria.js') }}"></script>
 @endpush

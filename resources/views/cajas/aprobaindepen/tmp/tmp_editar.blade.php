@@ -336,4 +336,4 @@
 <script>
     const _ID = {{$idModel}};
 </script>
-<script src="{{ asset('cajas/build/IndependienteEdita.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/IndependienteEdita.js') }}"></script>

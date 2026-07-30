@@ -13,5 +13,5 @@
 <script id='tmp_conyuge' type='text/template'>
 </script>
 
-<script src="{{ asset('cajas/build/Conyuges.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/Conyuges.js') }}"></script>
 @endpush

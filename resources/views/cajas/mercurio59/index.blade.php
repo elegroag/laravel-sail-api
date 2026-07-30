@@ -111,5 +111,5 @@
         window.ServerController = 'mercurio59';
     </script>
 
-    <script src="{{ asset('cajas/build/Mercurio59.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Mercurio59.js') }}"></script>
 @endpush

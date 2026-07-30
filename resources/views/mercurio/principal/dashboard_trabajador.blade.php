@@ -5,7 +5,7 @@
 @push('scripts')
     <script src="{{ asset('assets/chart/Chart.min.js') }}"></script>
     <script src="{{ asset('assets/chart/Chart.extension.js') }}"></script>
-    <script src="{{ asset('mercurio/build/DashBoard.js') }}"></script>
+    <script src="{{ versioned_asset('mercurio/build/DashBoard.js') }}"></script>
 @endpush
 
 @section('content')

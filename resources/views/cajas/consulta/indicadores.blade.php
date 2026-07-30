@@ -55,7 +55,7 @@
         "btnShowModal" => 'btCaptureModal',
         "idModal" => 'captureModal'])
 
-    <script src="{{ asset('cajas/build/Indicadores.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Indicadores.js') }}"></script>
 @endpush
 
 

@@ -75,5 +75,5 @@
         window.ServerController = 'reportes';
     </script>
 
-    <script src="{{ asset('cajas/build/Reportes.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Reportes.js') }}"></script>
 @endpush

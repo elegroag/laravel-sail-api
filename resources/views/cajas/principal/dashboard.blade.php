@@ -1,7 +1,7 @@
 @extends('layouts.cajas')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('mercurio/css/principal.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('mercurio/css/principal.css') }}">
 @endpush
 
 @push('scripts')
@@ -11,7 +11,7 @@
 
 <script src="{{ asset('assets/chart/Chart.min.js') }}"></script>
 <script src="{{ asset('assets/chart/Chart.extension.js') }}"></script>
-<script src="{{ asset('cajas/build/DashBoard.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/DashBoard.js') }}"></script>
 @endpush
 
 @section('content')

@@ -2,7 +2,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
-<link rel="stylesheet" href="{{ asset('mercurio/build/Mercurio31.css') }}" />
+<link rel="stylesheet" href="{{ versioned_asset('mercurio/build/Mercurio31.css') }}" />
 @endpush
 
 @section('content')
@@ -62,5 +62,5 @@
     window.BREADCRUMB_TITLE = "{{ $title }}";
 </script>
 
-<script src="{{ asset('mercurio/build/Mercurio31.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/Mercurio31.js') }}"></script>
 @endpush

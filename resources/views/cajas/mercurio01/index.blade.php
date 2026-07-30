@@ -75,7 +75,7 @@
         "btnShowModal" => 'btCaptureModal',
         "idModal" => 'captureModal'])
 
-    <script src="{{ asset('cajas/build/Basicas.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Basicas.js') }}"></script>
 @endpush
 
 @section('content')

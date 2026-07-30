@@ -75,6 +75,20 @@ if (! function_exists('get_app_url')) {
     }
 }
 
+if (! function_exists('versioned_asset')) {
+    /**
+     * URL de asset con query de versión basada en filemtime (cache busting).
+     */
+    function versioned_asset(string $path): string
+    {
+        $relative = ltrim($path, '/');
+        $full = public_path($relative);
+        $version = is_file($full) ? (string) filemtime($full) : (string) time();
+
+        return asset($relative) . '?v=' . $version;
+    }
+}
+
 require_once __DIR__ . '/format.php';
 require_once __DIR__ . '/flash.php';
 require_once __DIR__ . '/files.php';

@@ -369,5 +369,5 @@
         window.ServerController = 'subsidio';
     </script>
 
-    <script src="{{ asset('mercurio/build/ConsultaNucleo.js') }}"></script>
+    <script src="{{ versioned_asset('mercurio/build/ConsultaNucleo.js') }}"></script>
 @endpush

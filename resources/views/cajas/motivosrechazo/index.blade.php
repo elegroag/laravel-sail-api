@@ -50,5 +50,5 @@
         window.ServerController = 'motivosrechazo';
     </script>
 
-    <script src="{{ asset('cajas/build/MotivoRechazo.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/MotivoRechazo.js') }}"></script>
 @endpush

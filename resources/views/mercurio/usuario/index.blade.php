@@ -183,5 +183,5 @@
     window.ServerController = 'usuario';
 </script>
 
-<script src="{{ asset('mercurio/build/Usuario.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/Usuario.js') }}"></script>
 @endpush

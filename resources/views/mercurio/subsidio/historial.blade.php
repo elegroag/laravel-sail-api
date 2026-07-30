@@ -280,5 +280,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('mercurio/build/ConsultasTrabajador.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/ConsultasTrabajador.js') }}"></script>
 @endpush

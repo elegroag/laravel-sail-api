@@ -315,4 +315,4 @@
     const _ID = {{ $idModel }};
 </script>
 
-<script src="{{asset('cajas/build/PensionadoEditar.js')}}"></script>
+<script src="{{versioned_asset('cajas/build/PensionadoEditar.js')}}"></script>

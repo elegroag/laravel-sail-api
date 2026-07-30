@@ -113,7 +113,7 @@
             }
         });
     </script>
-    <script src="{{ asset('mercurio/build/Firma.js') }}"></script>
+    <script src="{{ versioned_asset('mercurio/build/Firma.js') }}"></script>
 @endpush
 
 @push('styles')

@@ -291,4 +291,4 @@
     const _ID = {{ $idModel }};
 </script>
 
-<script src="{{ asset('Cajas/build/MadreComunitariaEditar.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/MadreComunitariaEditar.js') }}"></script>

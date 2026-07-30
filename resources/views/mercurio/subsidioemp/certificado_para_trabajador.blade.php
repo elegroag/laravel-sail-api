@@ -1,7 +1,7 @@
 @extends('layouts.bone')
 
 @push('scripts')
-<script src="{{ asset('mercurio/build/GeneradorCertificado.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/GeneradorCertificado.js') }}"></script>
 @endpush
 
 @section('title', 'Certificado para Trabajador')

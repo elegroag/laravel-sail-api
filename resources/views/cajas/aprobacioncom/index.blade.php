@@ -10,5 +10,5 @@
         @include('cajas/aprobacioncom/tmp/tmp_aprobar')
     </script>
 
-    <script src="{{ asset('cajas/build/MadresComunitarias.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/MadresComunitarias.js') }}"></script>
 @endpush

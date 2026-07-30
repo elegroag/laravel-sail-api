@@ -407,5 +407,5 @@
             consultar: @json(route('cajas.reporte-solicitudes-empresa.consultar')),
         };
     </script>
-    <script src="{{ asset('cajas/build/ReporteSolicitudesEmpresa.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/ReporteSolicitudesEmpresa.js') }}"></script>
 @endpush

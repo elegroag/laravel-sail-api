@@ -272,5 +272,5 @@
 @push('scripts')
     <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('mercurio/Comunitaria.js') }}"></script>
+    <script src="{{ versioned_asset('mercurio/Comunitaria.js') }}"></script>
 @endpush

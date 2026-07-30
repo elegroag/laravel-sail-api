@@ -289,4 +289,4 @@ use App\Services\Tag;
     const _ID = {{ $idModel }};
 </script>
 
-<script src="{{ asset('Cajas/build/ServicioDomesticoEditar.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/ServicioDomesticoEditar.js') }}"></script>

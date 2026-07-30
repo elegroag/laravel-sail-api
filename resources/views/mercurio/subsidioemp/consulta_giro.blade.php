@@ -34,7 +34,7 @@
 		const _TITULO = "{{ $title ?? 'Consulta de Giros Empresa' }}";
 		window.ServerController = 'subsidioemp';
 	</script>
-	<script src="{{ asset('mercurio/build/ConsultasEmpresa.js') }}"></script>
+	<script src="{{ versioned_asset('mercurio/build/ConsultasEmpresa.js') }}"></script>
 @endpush
 
 @section('content')

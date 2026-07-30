@@ -24,5 +24,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('mercurio/CambioEmail.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/CambioEmail.js') }}"></script>
 @endpush

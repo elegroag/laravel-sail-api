@@ -22,7 +22,7 @@
         "btnShowModal" => 'btCaptureModal',
         "idModal" => 'captureModal'])
 
-    <script src="{{ asset('cajas/build/AdmProductos.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/AdmProductos.js') }}"></script>
 @endpush
 
 @section('content')

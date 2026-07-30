@@ -210,7 +210,7 @@
         const _TITULO = "{{ $title }}";
         window.ServerController = 'subsidio';
     </script>
-    <script src="{{ asset('mercurio/build/ConsultasTrabajador.js') }}"></script>
+    <script src="{{ versioned_asset('mercurio/build/ConsultasTrabajador.js') }}"></script>
 @endpush
 
 @section('content')

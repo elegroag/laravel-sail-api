@@ -9,5 +9,5 @@
     @include('cajas/aprobacioncer/tmp/tmp_aprobar')
 </script>
 
-<script src="{{ asset('cajas/build/Certificados.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/Certificados.js') }}"></script>
 @endpush

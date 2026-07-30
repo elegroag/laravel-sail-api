@@ -108,7 +108,7 @@
         </div>
     </script>
 
-    <script src="{{ asset('cajas/build/Reasigna.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Reasigna.js') }}"></script>
 @endpush
 
 @section('content')

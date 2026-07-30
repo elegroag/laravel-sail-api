@@ -132,7 +132,7 @@
     "btnShowModal" => 'btCaptureModal',
     "idModal" => 'captureModal'])
 
-<script src="{{ asset('cajas/build/DatosCaja.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/DatosCaja.js') }}"></script>
 @endpush
 
 @section('content')

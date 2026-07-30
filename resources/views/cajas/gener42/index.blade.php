@@ -78,5 +78,5 @@
         window.ServerController = 'gener42';
     </script>
 
-    <script src="{{ asset('cajas/build/Permisos.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Permisos.js') }}"></script>
 @endpush

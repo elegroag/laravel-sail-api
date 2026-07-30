@@ -133,7 +133,7 @@
         window.ServerController = 'admproductos';
     </script>
 
-    <script src="{{ asset('cajas/build/ProductoAplicados.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/ProductoAplicados.js') }}"></script>
 @endpush
 
 @section('content')

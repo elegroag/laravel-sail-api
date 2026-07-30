@@ -10,5 +10,5 @@
     @include('cajas/actualizaemp/tmp/tmp_aprobar')
 </script>
 
-<script src="{{ asset('cajas/build/DatosEmpresa.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/DatosEmpresa.js') }}"></script>
 @endpush

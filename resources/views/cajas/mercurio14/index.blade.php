@@ -99,5 +99,5 @@
         window.ServerController = 'mercurio14';
     </script>
 
-    <script src="{{ asset('cajas/build/DocureqEmpresas.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/DocureqEmpresas.js') }}"></script>
 @endpush

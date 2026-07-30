@@ -143,5 +143,5 @@
         </div>
     </script>
 
-    <script src="{{ asset('cajas/build/Trabajadores.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Trabajadores.js') }}"></script>
 @endpush

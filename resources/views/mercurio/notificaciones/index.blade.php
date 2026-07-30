@@ -331,5 +331,5 @@
     window.ServerController = 'notificaciones';
 </script>
 
-<script src="{{ asset('mercurio/build/Notificaciones.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/Notificaciones.js') }}"></script>
 @endpush

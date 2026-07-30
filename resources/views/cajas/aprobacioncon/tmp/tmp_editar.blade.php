@@ -291,4 +291,4 @@ $id = $mercurio32->getId();
 	const _SOLIICTUD = @json($mercurio32->getArray());
 </script>
 
-<script src="{{ asset('Cajas/build/aprobacionconEditar.js') }}"></script>
+<script src="{{ versioned_asset('cajas/build/aprobacionconEditar.js') }}"></script>

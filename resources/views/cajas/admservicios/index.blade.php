@@ -42,5 +42,5 @@
         window.ServerController = 'admservicios';
     </script>
 
-    <script src="{{ asset('cajas/build/Admservicios.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Admservicios.js') }}"></script>
 @endpush

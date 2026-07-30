@@ -41,7 +41,7 @@
 	@include('mercurio/subsidio/tmp/tmp_beneficiario')
 </script>
 
-<script src="{{ asset('mercurio/build/TrabajadoresEmpresa.js') }}"></script>
+<script src="{{ versioned_asset('mercurio/build/TrabajadoresEmpresa.js') }}"></script>
 @endpush
 
 @section('content')

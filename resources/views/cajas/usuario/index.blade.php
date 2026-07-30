@@ -47,7 +47,7 @@
         </div>
     </script>
 
-    <script src="{{ asset('cajas/build/Usuario.js') }}"></script>
+    <script src="{{ versioned_asset('cajas/build/Usuario.js') }}"></script>
 @endpush
 
 @section('content')
