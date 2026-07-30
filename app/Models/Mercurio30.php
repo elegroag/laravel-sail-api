@@ -114,7 +114,7 @@ class Mercurio30 extends ModelBase
             'tipsoc' => 'nullable|max:3',
             'estado' => 'required|max:1',
             'codest' => 'nullable|max:2',
-            'motivo' => 'nullable|max:500',
+            'motivo' => 'nullable|max:800',
             'dirpri' => 'nullable|max:120',
             'ciupri' => 'nullable|max:5',
             'telpri' => 'nullable|max:13',

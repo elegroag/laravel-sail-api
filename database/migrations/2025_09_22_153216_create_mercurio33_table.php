@@ -28,7 +28,7 @@ return new class extends Migration
             $table->char('valor', 100);
             $table->integer('usuario');
             $table->char('estado', 1);
-            $table->char('motivo', 100)->nullable();
+            $table->string('motivo', 800)->nullable();
             $table->date('fecest')->nullable();
             $table->char('codest', 2)->nullable();
             $table->integer('actualizacion')->default(0); // int(15) DEFAULT '0'

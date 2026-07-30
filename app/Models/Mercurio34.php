@@ -802,6 +802,7 @@ class Mercurio34 extends ModelBase
             'fecest' => 'nullable|date',
             'fecsol' => 'date',
             'fecapr' => 'nullable|date',
+            'motivo' => 'max:800',
             // uuid
             'ruuid' => 'nullable|string|max:20',
         ];

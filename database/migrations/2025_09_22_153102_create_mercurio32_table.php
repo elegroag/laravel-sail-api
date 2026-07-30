@@ -50,7 +50,7 @@ return new class extends Migration
             $table->integer('usuario');
             $table->char('estado', 1);
             $table->char('codest', 2)->nullable();
-            $table->string('motivo', 500)->nullable();
+            $table->string('motivo', 800)->nullable();
             $table->date('fecest')->nullable();
             $table->char('tipo', 2);
             $table->char('coddoc', 2);

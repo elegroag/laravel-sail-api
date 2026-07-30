@@ -58,7 +58,7 @@ class Mercurio45 extends ModelBase
             'documento' => 'required|max:15',
             // char(N) — nullable
             'codest' => 'nullable|max:2',
-            'motivo' => 'nullable|max:500',
+            'motivo' => 'nullable|max:800',
             // string — nullable
             'nombre' => 'nullable|max:100',
             'nomcer' => 'nullable|max:100',

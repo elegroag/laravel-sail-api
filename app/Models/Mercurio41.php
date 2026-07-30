@@ -126,7 +126,7 @@ class Mercurio41 extends ModelBase
             'nivedu' => 'nullable|max:3',
             'autoriza' => 'nullable|max:1',
             'codest' => 'nullable|max:2',
-            'motivo' => 'nullable|max:500',
+            'motivo' => 'nullable|max:800',
             'codact' => 'nullable|max:4',
             'coddocrepleg' => 'nullable|max:2',
             'peretn' => 'nullable|max:2',

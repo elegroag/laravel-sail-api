@@ -981,7 +981,7 @@ class Mercurio32 extends ModelBase
             'fecapr' => 'nullable|date',
             // string
             'barrio' => 'max:45',
-            'motivo' => 'max:500',
+            'motivo' => 'max:800',
             // char(N) — required
             'cedtra' => 'required|max:15',
             'priape' => 'required|max:20',

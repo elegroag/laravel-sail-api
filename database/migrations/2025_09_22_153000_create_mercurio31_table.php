@@ -60,7 +60,7 @@ return new class extends Migration
             $table->integer('usuario');
             $table->char('estado', 1);
             $table->char('codest', 2)->nullable();
-            $table->string('motivo', 500)->nullable();
+            $table->string('motivo', 800)->nullable();
             $table->date('fecest')->nullable();
             $table->char('tipo', 2);
             $table->char('coddoc', 2);
@@ -77,7 +77,7 @@ return new class extends Migration
             $table->unsignedBigInteger('numcue')->default(0);
             $table->string('otra_empresa', 100)->nullable();
             $table->char('ciulab', 6)->nullable();
-            
+
             $table->char('resguardo_id', 5)->nullable();
             $table->char('pub_indigena_id', 3)->nullable();
             $table->char('codban', 4)->nullable();

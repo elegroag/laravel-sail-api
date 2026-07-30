@@ -120,7 +120,7 @@ class Mercurio36 extends ModelBase
             'nivedu' => 'nullable|max:3',
             'autoriza' => 'nullable|max:1',
             'codest' => 'nullable|max:2',
-            'motivo' => 'nullable|max:500',
+            'motivo' => 'nullable|max:800',
             'codact' => 'nullable|max:4',
             'facvul' => 'nullable|max:2',
             'peretn' => 'nullable|max:2',
@@ -1202,6 +1202,6 @@ class Mercurio36 extends ModelBase
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 }

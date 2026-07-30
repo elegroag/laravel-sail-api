@@ -52,7 +52,7 @@ return new class extends Migration
             $table->char('vivienda', 1)->nullable();
             $table->char('tipafi', 2)->nullable();
             $table->char('autoriza', 1)->nullable();
-            $table->string('motivo', 300)->nullable();
+            $table->string('motivo', 800)->nullable();
             $table->char('codact', 6);
             $table->char('ciulab', 6)->nullable();
 

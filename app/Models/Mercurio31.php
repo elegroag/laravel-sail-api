@@ -167,7 +167,7 @@ class Mercurio31 extends ModelBase
             'direccion' => 'max:120',
             'barrio' => 'max:48',
             'email' => 'email|max:100',
-            'motivo' => 'max:500',
+            'motivo' => 'max:800',
             'profesion' => 'max:45',
             'dirlab' => 'max:150',
             'otra_empresa' => 'max:100',
@@ -1295,12 +1295,12 @@ class Mercurio31 extends ModelBase
 
     public function getNombre()
     {
-        return $this->priape.' '.$this->prinom;
+        return $this->priape . ' ' . $this->prinom;
     }
 
     public function getNombreCompleto()
     {
-        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
+        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
     }
 
     public function get_all()
