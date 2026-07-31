@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Cajas\ConsultaDocumentoSolicitudController;
 use App\Http\Controllers\Cajas\InformeSolicitudController;
+use App\Http\Controllers\Cajas\ReporteComprasServiciosController;
 use App\Http\Controllers\Cajas\ReporteOportunidadAfiliacionController;
 use App\Http\Controllers\Cajas\ReportesolController;
 use App\Http\Controllers\Cajas\ReporteSolicitudesEmpresaController;
@@ -41,6 +42,14 @@ Route::middleware(['cajas.auth'])->group(function () {
 
         Route::post('/consultar', [ConsultaDocumentoSolicitudController::class, 'consultar'])
             ->name('cajas.consulta-documento-solicitud.consultar');
+    });
+
+    Route::prefix('/cajas/reporte-compras-servicios')->group(function () {
+        Route::get('/index', [ReporteComprasServiciosController::class, 'index'])
+            ->name('cajas.reporte-compras-servicios.index');
+
+        Route::post('/consultar', [ReporteComprasServiciosController::class, 'consultar'])
+            ->name('cajas.reporte-compras-servicios.consultar');
     });
 
     Route::get('/cajas/reportesol/index', [ReportesolController::class, 'index'])
