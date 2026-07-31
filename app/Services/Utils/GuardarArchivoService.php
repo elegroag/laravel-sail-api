@@ -12,21 +12,18 @@ use App\Models\Mercurio37;
 
 class GuardarArchivoService
 {
-    private $tipopc;
+    private string $tipopc;
 
-    private $coddoc;
+    private string $coddoc;
 
-    private $id;
+    private string $id;
 
-    private $db;
-
-    public function __construct($argv)
+    public function __construct(?array $argv = null)
     {
         // tipopc se usa en modelos que lo validan como string, por lo que se castea explícitamente
         $this->tipopc = (string) $argv['tipopc'];
         $this->coddoc = $argv['coddoc'];
         $this->id = $argv['id'];
-        $this->db = DbBase::rawConnect();
     }
 
     public function main()

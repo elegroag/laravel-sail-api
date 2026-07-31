@@ -45,7 +45,18 @@
         </p>
     @endif
 
-    @if (($solicitud['estado'] ?? '') !== 'A')
+    @if (($solicitud['estado'] ?? '') === 'A')
+        <div class="solicitud-card__actions solicitud-card__actions--resultado" role="group" aria-label="Acciones de solicitud">
+            <button type="button"
+                    class="btn btn-success btn-sm solicitud-card__btn-resultado"
+                    data-toggle="event-detalle"
+                    data-cid="{{ $solicitud['id'] }}"
+                    title="Ver resultado del proceso">
+                <i class="fas fa-file-alt" aria-hidden="true"></i>
+                <span>Ver resultado</span>
+            </button>
+        </div>
+    @else
         <div class="solicitud-card__actions btn-group" role="group" aria-label="Acciones de solicitud">
             @switch($solicitud['estado'])
                 @case('T')

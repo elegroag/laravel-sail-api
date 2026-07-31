@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Cajas\ConsultaDocumentoSolicitudController;
 use App\Http\Controllers\Cajas\InformeSolicitudController;
 use App\Http\Controllers\Cajas\ReporteOportunidadAfiliacionController;
 use App\Http\Controllers\Cajas\ReportesolController;
@@ -32,6 +33,14 @@ Route::middleware(['cajas.auth'])->group(function () {
 
         Route::post('/consultar', [ReporteSolicitudesEmpresaController::class, 'consultar'])
             ->name('cajas.reporte-solicitudes-empresa.consultar');
+    });
+
+    Route::prefix('/cajas/consulta-documento-solicitud')->group(function () {
+        Route::get('/index', [ConsultaDocumentoSolicitudController::class, 'index'])
+            ->name('cajas.consulta-documento-solicitud.index');
+
+        Route::post('/consultar', [ConsultaDocumentoSolicitudController::class, 'consultar'])
+            ->name('cajas.consulta-documento-solicitud.consultar');
     });
 
     Route::get('/cajas/reportesol/index', [ReportesolController::class, 'index'])

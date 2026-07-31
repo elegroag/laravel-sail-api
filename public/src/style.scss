@@ -432,8 +432,45 @@
         color: #dc3545;
     }
 
+    .btn-success {
+        color: #0f5132;
+    }
+
     .btn-light {
         color: #6c757d;
+    }
+}
+
+.solicitud-card__actions--resultado {
+    .solicitud-card__btn-resultado {
+        align-items: center;
+        background-color: #d1e7dd;
+        border-color: #a3cfbb;
+        color: #0f5132;
+        display: inline-flex;
+        font-weight: 600;
+        gap: 0.4rem;
+        justify-content: center;
+        min-height: 2rem;
+        padding: 0.35rem 0.75rem;
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        width: 100%;
+
+        i {
+            font-size: 0.85rem;
+        }
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background-color: #badbcc;
+            border-color: #75b798;
+            color: #0a3622;
+        }
+
+        &:focus-visible {
+            outline: 2px solid #0f5132;
+            outline-offset: 2px;
+        }
     }
 }
 
