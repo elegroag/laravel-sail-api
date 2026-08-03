@@ -122,8 +122,8 @@ class ApruebaTrabajadorController extends ApplicationController
             // Columnas de Mercurio31
             $columns = [
                 'Cédula' => 'cedtra',
-                'Nombres' => fn ($r) => trim(($r->prinom ?? '').' '.($r->segnom ?? '')),
-                'Apellidos' => fn ($r) => trim(($r->priape ?? '').' '.($r->segape ?? '')),
+                'Nombres' => fn($r) => trim(($r->prinom ?? '') . ' ' . ($r->segnom ?? '')),
+                'Apellidos' => fn($r) => trim(($r->priape ?? '') . ' ' . ($r->segape ?? '')),
                 'Nit Empresa' => 'nit',
                 'Estado' => 'estado',
                 'Fecha Solicitud' => 'fecsol',
@@ -133,7 +133,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $gen = (new ReportGenerator($strategy))
                 ->for(Mercurio31::query())
                 ->columns($columns)
-                ->filename('mercurio31_'.now()->format('Ymd_His').'.'.$ext)
+                ->filename('mercurio31_' . now()->format('Ymd_His') . '.' . $ext)
                 ->filter(function ($q) use ($filtro) {
                     if (is_string($filtro) && trim($filtro) !== '') {
                         $q->whereRaw($filtro);
@@ -328,7 +328,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $_codsuc = [];
             if ($sucursales['success']) {
                 foreach ($sucursales['data'] as $data) {
-                    $_codsuc["{$data['codsuc']}"] = $data['codsuc'].' '.$data['detalle'];
+                    $_codsuc["{$data['codsuc']}"] = $data['codsuc'] . ' ' . $data['detalle'];
                 }
             }
 
@@ -389,7 +389,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (Exception $err) {
             $response = [
                 'success' => false,
-                'msj' => $err->getMessage().' '.$err->getLine(),
+                'msj' => $err->getMessage() . ' ' . $err->getLine(),
             ];
         }
 
@@ -481,7 +481,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (Exception $err) {
             $salida = [
                 'success' => false,
-                'msj' => $err->getMessage().' - '.basename($err->getFile()).' - '.$err->getLine(),
+                'msj' => $err->getMessage() . ' - ' . basename($err->getFile()) . ' - ' . $err->getLine(),
                 'code' => $err->getCode(),
             ];
         }
@@ -655,6 +655,7 @@ class ApruebaTrabajadorController extends ApplicationController
 
         $_codciu = ParamsTrabajador::getCiudades();
         $_ciunac = $_codciu;
+        $_codzon = [];
         foreach (ParamsTrabajador::getZonas() as $ai => $valor) {
             if ($ai < 19001 && $ai >= 18001) {
                 $_codzon[$ai] = $valor;
@@ -733,8 +734,8 @@ class ApruebaTrabajadorController extends ApplicationController
     {
         $this->setResponse('ajax');
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $cedtra = $request->input('cedtra', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $cedtra = $request->input('cedtra');
             $mercurio31 = Mercurio31::where('id', $id)->where('cedtra', $cedtra)->first();
             if (! $mercurio31) {
                 throw new DebugException('El trabajador no está disponible para notificar por email', 501);
@@ -812,11 +813,8 @@ class ApruebaTrabajadorController extends ApplicationController
     /**
      * buscar_sisu function
      * Datos de la empresa en sisuweb, si ya está registrada. pruebas 98588506
-     *
-     * @param [type] $nit
-     * @return void
      */
-    public function buscarSisu(Request $request)
+    public function buscarSisu(Request $request): JsonResponse
     {
         try {
             $this->setResponse('ajax');
@@ -852,7 +850,7 @@ class ApruebaTrabajadorController extends ApplicationController
                         'solicitud' => $mercurio31->getArray(),
                         'trayectorias' => $out['data']['trayectoria'] ?? [],
                         'salarios' => $out['data']['salarios'] ?? [],
-                        'title' => 'Trabajador SisuWeb '.$mercurio31->getCedtra(),
+                        'title' => 'Trabajador SisuWeb ' . $mercurio31->getCedtra(),
                     ],
                 ],
             );
@@ -881,7 +879,7 @@ class ApruebaTrabajadorController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = config('app.url').'Cajas/aprobaciontra/info_trabajador/'.$mercurio->getNit().'/'.$mercurio->getCedtra().'/'.$mercurio->getId();
+            $url = config('app.url') . 'Cajas/aprobaciontra/info_trabajador/' . $mercurio->getNit() . '/' . $mercurio->getCedtra() . '/' . $mercurio->getId();
             $sat = 'NORMAL';
             $trabajadores[] = [
                 'estado' => $mercurio->getEstadoDetalle(),
@@ -945,7 +943,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$e->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $e->getMessage(),
             ]);
         }
 
@@ -1040,7 +1038,7 @@ class ApruebaTrabajadorController extends ApplicationController
             $this->setParamToView('hide_header', true);
             $this->setParamToView('idModel', $id);
             $this->setParamToView('cedtra', $mercurio31->getCedtra());
-            $this->setParamToView('title', 'Trabajador Aprobada '.$mercurio31->getCedtra());
+            $this->setParamToView('title', 'Trabajador Aprobada ' . $mercurio31->getCedtra());
         } catch (DebugException $err) {
             set_flashdata('error', [
                 'msj' => $err->getMessage(),
@@ -1055,11 +1053,8 @@ class ApruebaTrabajadorController extends ApplicationController
     /**
      * deshacerAprobado function
      * metodo para deshacer una afilación, dado que se presente algun error por parte de los analistas encargados
-     *
-     * @param [type] $id
-     * @return void
      */
-    public function deshacer(Request $request)
+    public function deshacer(Request $request): JsonResponse
     {
         $this->setResponse('ajax');
         $trabajadorServices = new TrabajadorServices;
@@ -1159,7 +1154,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'Error no se pudo realizar el movimiento, '.$err->getMessage(),
+                'msj' => 'Error no se pudo realizar el movimiento, ' . $err->getMessage(),
                 'comando' => $comando,
                 'file' => $err->getFile(),
                 'line' => $err->getLine(),
@@ -1174,11 +1169,8 @@ class ApruebaTrabajadorController extends ApplicationController
 
     /**
      * aportes function
-     *
-     * @param [type] $id
-     * @return void
      */
-    public function aportes($id)
+    public function aportes(int $id): JsonResponse
     {
         $this->setResponse('ajax');
         try {
@@ -1209,7 +1201,7 @@ class ApruebaTrabajadorController extends ApplicationController
         } catch (DebugException $err) {
             $salida = [
                 'success' => false,
-                'msj' => 'No se pudo realizar el movimiento '."\n".$err->getMessage()."\n ".$err->getLine(),
+                'msj' => 'No se pudo realizar el movimiento ' . "\n" . $err->getMessage() . "\n " . $err->getLine(),
             ];
         }
 

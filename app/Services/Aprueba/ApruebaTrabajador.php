@@ -18,15 +18,15 @@ use Exception;
 
 class ApruebaTrabajador
 {
-    private $today;
+    private Carbon $today;
 
-    private $tipopc = '1';
+    private string $tipopc = '1';
 
-    private $solicitante;
+    private ?Mercurio07 $solicitante = null;
 
-    private $solicitud;
+    private ?Mercurio31 $solicitud = null;
 
-    private $dominio;
+    private string $dominio;
 
     public function __construct()
     {
@@ -115,12 +115,13 @@ class ApruebaTrabajador
             );
         }
 
+        $params = array_merge($entity->getData(), $validacionesControl);
         $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'afilia_trabajador',
-                'params' => array_merge($entity->getData(), $validacionesControl),
+                'params' => $params,
             ]
         );
 
@@ -154,14 +155,13 @@ class ApruebaTrabajador
     /**
      * enviarMail function
      *
-     * @param [type] $Mercurio31
-     * @param [type] $actapr
-     * @param [type] $feccap
+     * @param string $actapr
+     * @param string $feccap
      * @return bool
      */
     public function enviarMail($actapr, $feccap)
     {
-        $nombre = $this->solicitud->prinom.' '.$this->solicitud->segnom.' '.$this->solicitud->priape.' '.$this->solicitud->segape;
+        $nombre = $this->solicitud->prinom . ' ' . $this->solicitud->segnom . ' ' . $this->solicitud->priape . ' ' . $this->solicitud->segape;
         $data = [];
         $data['razsoc'] = $this->solicitante->nombre;
         $data['email'] = $this->solicitante->email;
@@ -193,14 +193,14 @@ class ApruebaTrabajador
         return true;
     }
 
-    public function findSolicitud($idSolicitud)
+    public function findSolicitud(int $idSolicitud): ?Mercurio31
     {
         $this->solicitud = Mercurio31::where('id', $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
-    public function findSolicitante()
+    public function findSolicitante(): ?Mercurio07
     {
         $this->solicitante = Mercurio07::where(
             'documento',
