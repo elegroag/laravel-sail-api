@@ -50,20 +50,7 @@ export default function ResetPassword({Coddoc}: ResetPasswordProps) {
 
     return (
         <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <div
-                id="welcome"
-                className="lg:w-1/2 from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 relative flex flex-col justify-center overflow-hidden bg-gradient-to-br"
-            >
-                {/* Left Panel - Welcome Section */}
-                <AuthWelcome
-                    title="RECUPERAR"
-                    tagline="Comfaca En Línea"
-                    description="Ingresa tu información para recibir las instrucciones de recuperación de clave en tu correo electrónico."
-                    backHref={route('login')}
-                    backText="¿Ya tienes cuenta? Inicia sesión"
-                />
-            </div>
-            {/* Right Panel - Forgot Password Form */}
+            {/* Left Panel - Forgot Password Form */}
             <div className="lg:w-1/2 p-12 relative flex flex-col justify-center">
                 <AuthBackgroundShapes />
                 <div className="max-w-md mx-auto w-full">
@@ -100,6 +87,19 @@ export default function ResetPassword({Coddoc}: ResetPasswordProps) {
                         />
                     )}
                 </div>
+            </div>
+            {/* Right Panel - Welcome Section */}
+            <div
+                id="welcome"
+                className="lg:w-1/2 from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 relative flex flex-col justify-center overflow-hidden bg-gradient-to-br"
+            >
+                <AuthWelcome
+                    title="RECUPERAR"
+                    tagline="Comfaca En Línea"
+                    description="Ingresa tu información para recibir las instrucciones de recuperación de clave en tu correo electrónico."
+                    backHref={route('login')}
+                    backText="¿Ya tienes cuenta? Inicia sesión"
+                />
             </div>
             {/* Loading animado durante el envío de recuperación */}
             <LoadingAnimated show={formState.isSubmitting} />

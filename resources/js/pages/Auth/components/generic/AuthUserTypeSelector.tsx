@@ -21,7 +21,6 @@ type AuthUserTypeSelectorProps<T extends string = string> = {
 
 export default function AuthUserTypeSelector<T extends string = string>({
   title,
-  subtitle,
   logoSrc,
   logoAlt,
   userTypes,
@@ -35,11 +34,8 @@ export default function AuthUserTypeSelector<T extends string = string>({
         </div>
       ) : null}
 
-      <h2 className="text-2xl font-semibold text-gray-800 mb-2 text-center">{title}</h2>
-      {subtitle ? (
-        <p className="text-lg text-gray-600 mb-8 text-center">{subtitle}</p>
-      ) : null}
-
+      <h2 className="text-2xl font-regular text-gray-800 text-center p-4 m-3">{title}</h2>
+      
       <div className="grid grid-cols-3 gap-3 mb-6">
         {userTypes.map((userType) => (
           <button

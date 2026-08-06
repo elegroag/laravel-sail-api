@@ -15,7 +15,6 @@ export interface UserTypeOption {
 
 interface Props {
   title: string
-  subtitle: string
   logoSrc: string
   logoAlt: string
   userTypes: UserTypeOption[]
@@ -27,7 +26,6 @@ interface Props {
 
 const AuthUserTypeStep: React.FC<Props> = ({
   title,
-  subtitle,
   logoSrc,
   logoAlt,
   userTypes,
@@ -40,7 +38,6 @@ const AuthUserTypeStep: React.FC<Props> = ({
     <>
       <AuthUserTypeSelector
         title={title}
-        subtitle={subtitle}
         logoSrc={logoSrc}
         logoAlt={logoAlt}
         userTypes={userTypes}

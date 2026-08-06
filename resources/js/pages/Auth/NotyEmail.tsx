@@ -37,33 +37,7 @@ export default function NotyEmail({ errors }: any) {
       title="Solicitud de cambio de correo"
       description="Usa este formulario para solicitar el cambio de correo electrónico asociado a tu cuenta de Comfaca En Línea."
     >
-      {/* Panel izquierdo - Bienvenida */}
-      <div
-        id="welcome"
-        className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden"
-      >
-        <AuthWelcome
-          title="CAMBIO DE CORREO"
-          tagline="Comfaca En Línea"
-          description={
-            <>
-              <p>
-                Diligencia el siguiente formulario para solicitar el cambio del
-                correo electrónico registrado en tu cuenta. Esta solicitud será
-                revisada por nuestro equipo antes de aplicar el cambio.
-              </p>
-              <p>
-                Por seguridad, es importante que la información ingresada sea
-                veraz y esté actualizada.
-              </p>
-            </>
-          }
-          backHref={route("login")}
-          backText="Volver al inicio de sesión"
-        />
-      </div>
-
-      {/* Panel derecho - Formulario de solicitud */}
+      {/* Panel izquierdo - Formulario de solicitud */}
       <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">
         <AuthBackgroundShapes />
 
@@ -229,6 +203,32 @@ export default function NotyEmail({ errors }: any) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Panel derecho - Bienvenida */}
+      <div
+        id="welcome"
+        className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden"
+      >
+        <AuthWelcome
+          title="CAMBIO DE CORREO"
+          tagline="Comfaca En Línea"
+          description={
+            <>
+              <p>
+                Diligencia el siguiente formulario para solicitar el cambio del
+                correo electrónico registrado en tu cuenta. Esta solicitud será
+                revisada por nuestro equipo antes de aplicar el cambio.
+              </p>
+              <p>
+                Por seguridad, es importante que la información ingresada sea
+                veraz y esté actualizada.
+              </p>
+            </>
+          }
+          backHref={route("login")}
+          backText="Volver al inicio de sesión"
+        />
       </div>
 
       {/* Loading animado durante el envío de la notificación */}

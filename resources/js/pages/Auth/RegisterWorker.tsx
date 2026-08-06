@@ -37,26 +37,8 @@ export default function RegisterWorker(props: LoginProps) {
         description="Crea tu cuenta para acceder a todos los servicios y beneficios que Comfaca tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia."
       >
         <div
-          id="welcome"
-          className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden"
-        >
-          <AuthWelcome
-            title="REGISTRO"
-            tagline="Únete a Comfaca En Línea"
-            description={
-              <p>
-                Cree su cuenta y acceda a COMFACA de forma segura y eficiente para la gestión de sus trámites y
-                servicios.
-              </p>
-            }
-            backHref={route("register")}
-            backText="Volver a selección de tipo de usuario"
-          />
-        </div>
-
-        <div
           id="register"
-          className="p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px] transition-all duration-500 ease-in-out lg:w-full"
+          className="p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px] transition-all duration-500 ease-in-out lg:w-1/2"
         >
           <AuthBackgroundShapes />
           <div className="max-w-xl mx-auto w-full">
@@ -119,6 +101,24 @@ export default function RegisterWorker(props: LoginProps) {
               addressRef={domRef.addressRef}
             />
           </div>
+        </div>
+
+        <div
+          id="welcome"
+          className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden"
+        >
+          <AuthWelcome
+            title="REGISTRO"
+            tagline="Únete a Comfaca En Línea"
+            description={
+              <p>
+                Cree su cuenta y acceda a COMFACA de forma segura y eficiente para la gestión de sus trámites y
+                servicios.
+              </p>
+            }
+            backHref={route("register")}
+            backText="Volver a selección de tipo de usuario"
+          />
         </div>
       </AuthLayout>
 

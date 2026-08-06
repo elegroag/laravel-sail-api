@@ -17,7 +17,27 @@ export default function FueraServicio({ msj }: FueraServicioProps) {
       title="Plataforma fuera de servicio"
       description="La plataforma Comfaca En Línea se encuentra temporalmente fuera de servicio por labores de mantenimiento."
     >
-      {/* Panel izquierdo - Bienvenida */}
+      {/* Panel izquierdo - Mensaje de fuera de servicio */}
+      <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">
+        <AuthBackgroundShapes />
+
+        <div className="max-w-md mx-auto w-full">
+          <Alert className="border-amber-200 bg-amber-50">
+            <AlertTitle className="font-semibold text-amber-800">
+              Plataforma temporalmente fuera de servicio
+            </AlertTitle>
+            <AlertDescription className="mt-2 text-amber-900 text-sm leading-relaxed">
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: message,
+                }}
+              />
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+
+      {/* Panel derecho - Bienvenida */}
       <div
         id="welcome"
         className="lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 text-white p-12 flex flex-col justify-center relative overflow-hidden"
@@ -46,26 +66,6 @@ export default function FueraServicio({ msj }: FueraServicioProps) {
           backHref={route("login")}
           backText="Volver al inicio de sesión"
         />
-      </div>
-
-      {/* Panel derecho - Mensaje de fuera de servicio */}
-      <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">
-        <AuthBackgroundShapes />
-
-        <div className="max-w-md mx-auto w-full">
-          <Alert className="border-amber-200 bg-amber-50">
-            <AlertTitle className="font-semibold text-amber-800">
-              Plataforma temporalmente fuera de servicio
-            </AlertTitle>
-            <AlertDescription className="mt-2 text-amber-900 text-sm leading-relaxed">
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: message,
-                }}
-              />
-            </AlertDescription>
-          </Alert>
-        </div>
       </div>
     </AuthLayout>
   );
