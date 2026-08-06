@@ -39,7 +39,7 @@ class Menu
         }
         $this->menuItems = '';
         if (config('app.env') === 'local') {
-            $this->path = config('app.dominio') . ':' . config('app.port');
+            $this->path = config('app.dominio').':'.config('app.port');
         } else {
             $this->path = config('app.dominio');
         }
@@ -80,7 +80,7 @@ class Menu
         if ($parentId === null) {
             $query .= ' AND menu_items.parent_id IS NULL';
         } else {
-            $query .= ' AND menu_items.parent_id = ' . intval($parentId);
+            $query .= ' AND menu_items.parent_id = '.intval($parentId);
         }
         $query .= ' ORDER BY menu_tipos.position ASC';
         $sql = $this->db->inQueryAssoc($query);
@@ -90,7 +90,16 @@ class Menu
 
     private function normalizeTitle($title)
     {
-        return str_replace(' ', '_', $title);
+        $normalized = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', (string) $title);
+        if ($normalized === false) {
+            $normalized = (string) $title;
+        }
+
+        $normalized = strtolower($normalized);
+        $normalized = preg_replace('/[^a-z0-9]+/', '_', $normalized) ?? '';
+        $normalized = trim($normalized, '_');
+
+        return $normalized !== '' ? $normalized : 'menu_item';
     }
 
     private function buildMenuItem($menu, $isParent = false)
@@ -105,7 +114,7 @@ class Menu
                 'icon' => $menu['icon'] ?? null,
                 'title' => $menu['title'] ?? '',
                 'is_active' => true,
-                'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
+                'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
             ];
             $this->pageTitle = $menu['title'];
         }
@@ -137,14 +146,14 @@ class Menu
                     'icon' => $menu['icon'] ?? null,
                     'title' => $menu['title'] ?? '',
                     'is_active' => false,
-                    'url' => ($menu['default_url']) ? $this->path . '/' . $menu['default_url'] : '#',
+                    'url' => ($menu['default_url']) ? $this->path.'/'.$menu['default_url'] : '#',
                 ];
                 // Agregar breadcrumb del hijo como activo
                 $this->breadcrumbs[] = [
                     'icon' => $child['icon'] ?? null,
                     'title' => $child['title'] ?? '',
                     'is_active' => true,
-                    'url' => ($child['default_url']) ? $this->path . '/' . $child['default_url'] : '#',
+                    'url' => ($child['default_url']) ? $this->path.'/'.$child['default_url'] : '#',
                 ];
                 $this->pageTitle = $menu['title'];
             }
@@ -154,14 +163,16 @@ class Menu
 
         $activeClass = $isActive ? 'active' : '';
         $showClass = $isActive ? 'show' : '';
+        $ariaExpanded = $isActive ? 'true' : 'false';
+        $collapseId = 'menu_'.$title.'_'.intval($menu['id']);
 
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='#{$title}' data-bs-toggle='collapse' role='button' aria-expanded='false' aria-controls='{$title}'>
+                <a class='nav-link {$activeClass}' href='#{$collapseId}' data-bs-toggle='collapse' role='button' aria-expanded='{$ariaExpanded}' aria-controls='{$collapseId}'>
                     {$icon}
                     {$linkText}
                 </a>
-                <div class='collapse {$showClass}' id='{$title}'>
+                <div class='collapse {$showClass}' id='{$collapseId}'>
                     <ul class='nav nav-sm flex-column'>
                         {$childHtml}
                     </ul>
@@ -172,11 +183,11 @@ class Menu
     private function buildChildMenuItem($child, $isActive)
     {
         $activeClass = $isActive ? 'active' : '';
-        $title = strtolower(str_replace(' ', '_', $child['title']));
+        $title = $this->normalizeTitle($child['title']);
 
         return "
             <li class='nav-item'>
-                <a data-id='{$title}' href='{$this->path}/" . $child['default_url'] . "'
+                <a data-id='{$title}' href='{$this->path}/".$child['default_url']."'
                    class='nav-link {$activeClass}'>
                     {$child['title']}
                 </a>
@@ -189,7 +200,7 @@ class Menu
 
         return "
             <li class='nav-item'>
-                <a class='nav-link {$activeClass}' href='{$this->path}/" . $menu['default_url'] . "'>
+                <a class='nav-link {$activeClass}' href='{$this->path}/".$menu['default_url']."'>
                     {$icon}
                     {$linkText}
                 </a>

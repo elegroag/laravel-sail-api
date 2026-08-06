@@ -2,7 +2,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
 <style>
     .consulta-page-card {
         border-radius: 16px;
@@ -10,8 +9,8 @@
 
     .consulta-summary-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.85rem;
         margin-bottom: 1.25rem;
     }
 
@@ -40,9 +39,10 @@
 
     .consulta-summary-value {
         display: block;
-        font-size: 1.35rem;
+        font-size: 1.25rem;
         line-height: 1.2;
         color: #212529;
+        word-break: break-word;
     }
 
     .consulta-empty-state {
@@ -64,73 +64,110 @@
         color: #adb5bd;
     }
 
-    .consulta-data-table {
-        font-size: 0.84rem;
+    .consulta-list-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .consulta-list-toolbar label {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
         margin-bottom: 0;
-        width: 100% !important;
-        table-layout: fixed;
+        font-size: 0.875rem;
+        color: #64748b;
     }
 
-    .consulta-data-table thead th,
-    .consulta-data-table tbody td {
-        padding: 0.7rem 0.65rem;
-        vertical-align: middle;
-        box-sizing: border-box;
-        word-wrap: break-word;
-        overflow-wrap: anywhere;
+    .consulta-list-toolbar select,
+    .consulta-list-toolbar input[type='search'] {
+        min-height: 38px;
+        border-radius: 8px;
     }
 
-    .consulta-data-table thead th {
-        background: #f1f5f9;
-        color: #334155;
-        font-size: 0.78rem;
+    .consulta-list-toolbar input[type='search'] {
+        width: min(100%, 240px);
+    }
+
+    .consulta-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .consulta-list-item {
+        margin: 0;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    .consulta-list-item[hidden] {
+        display: none !important;
+    }
+
+    .consulta-list-item-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .consulta-list-period {
+        font-size: 1rem;
         font-weight: 700;
+        color: #0f172a;
+        letter-spacing: 0.02em;
+    }
+
+    .consulta-list-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
+    }
+
+    .consulta-list-fields {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+    }
+
+    @media (min-width: 768px) {
+        .consulta-list-fields {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    .consulta-list-field {
+        min-width: 0;
+    }
+
+    .consulta-list-field-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.03em;
-        border-bottom: 0;
-        white-space: nowrap;
+        color: #94a3b8;
+        margin-bottom: 0.15rem;
     }
 
-    .consulta-data-table tbody td {
+    .consulta-list-field-value {
+        display: block;
+        font-size: 0.92rem;
         color: #334155;
-    }
-
-    .consulta-data-table tbody tr:hover {
-        background: #f8fbff;
-    }
-
-    .consulta-data-table th:nth-child(1),
-    .consulta-data-table td:nth-child(1) {
-        width: 12%;
-    }
-
-    .consulta-data-table th:nth-child(2),
-    .consulta-data-table td:nth-child(2) {
-        width: 10%;
-    }
-
-    .consulta-data-table th:nth-child(3),
-    .consulta-data-table td:nth-child(3),
-    .consulta-data-table th:nth-child(4),
-    .consulta-data-table td:nth-child(4) {
-        width: 20%;
-    }
-
-    .consulta-data-table th:nth-child(5),
-    .consulta-data-table td:nth-child(5) {
-        width: 12%;
-    }
-
-    .consulta-data-table th:nth-child(6),
-    .consulta-data-table td:nth-child(6) {
-        width: 10%;
-        text-align: end;
-    }
-
-    .consulta-data-table th:nth-child(7),
-    .consulta-data-table td:nth-child(7) {
-        width: 16%;
-        text-align: end;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
     }
 
     .consulta-badge {
@@ -147,65 +184,63 @@
 
     .consulta-money {
         font-variant-numeric: tabular-nums;
-        font-weight: 600;
+        font-weight: 700;
         color: #198754;
         white-space: nowrap;
+        font-size: 1rem;
     }
 
-    .consulta-name {
-        min-width: 160px;
-    }
-
-    .consulta-dt-toolbar .dataTables_length label,
-    .consulta-dt-toolbar .dataTables_filter label {
+    .consulta-list-footer {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 1rem;
         font-size: 0.875rem;
         color: #64748b;
     }
 
-    .consulta-dt-toolbar .dataTables_filter input {
-        min-width: 220px;
+    .consulta-list-pagination {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
     }
 
-    .consulta-dt-footer {
+    .consulta-list-pagination button {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 0.65rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #334155;
         font-size: 0.875rem;
-        color: #64748b;
     }
 
-    .consulta-dt-footer .pagination {
-        margin-bottom: 0;
-        justify-content: flex-end;
+    .consulta-list-pagination button.is-active,
+    .consulta-list-pagination button:hover {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+    }
+
+    .consulta-list-pagination button:disabled {
+        opacity: 0.45;
+        pointer-events: none;
     }
 
     #consulta {
         max-width: 100%;
         min-width: 0;
     }
-
-    #consulta .table-responsive {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: auto;
-    }
-
-    #consulta .dataTables_wrapper {
-        width: 100%;
-        min-width: 0;
-    }
-
-    #consulta .dataTables_wrapper .consulta-data-table {
-        width: 100% !important;
-        margin: 0 !important;
-    }
 </style>
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
     <script>
         const _TITULO = "{{ $title }}";
         window.ServerController = 'subsidio';
@@ -228,6 +263,13 @@
             currency: 'COP',
             maximumFractionDigits: 0,
         }).format(Number(value || 0));
+    };
+    var escapeAttr = function (value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     };
 %>
 
@@ -254,35 +296,77 @@
             <span>Ajuste el rango de periodos e intente nuevamente.</span>
         </div>
     <% } else { %>
-        <div class="table-responsive">
-            <table id="dataTable" class="table table-hover consulta-data-table align-middle w-100">
-                <thead>
-                    <tr>
-                        <th scope="col">Periodo girado</th>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Nombre responsable</th>
-                        <th scope="col">Nombre beneficiario</th>
-                        <th scope="col">Forma pago</th>
-                        <th scope="col">Número cuotas</th>
-                        <th scope="col">Valor neto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% _.each(cuotas, function(item) { %>
-                        <tr>
-                            <td><%= item.pergir %></td>
-                            <td><span class="consulta-badge"><%= item.tipo_pago %></span></td>
-                            <td class="consulta-name"><%= item.nomres %></td>
-                            <td class="consulta-name"><%= item.nombre %></td>
-                            <td><%= item.tippag %></td>
-                            <td><%= item.numcuo %></td>
-                            <td class="consulta-money"><%= formatMoney(item.valor) %></td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
+        <div class="consulta-list-toolbar">
+            <label>
+                Mostrar
+                <select id="consultaPageLength" class="form-select form-select-sm" style="width: auto;">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                por página
+            </label>
+            <label>
+                Buscar
+                <input
+                    type="search"
+                    id="consultaSearch"
+                    class="form-control form-control-sm"
+                    placeholder="Periodo, nombre, pago..."
+                    autocomplete="off">
+            </label>
         </div>
-        <% } %>
+
+        <ul class="consulta-list" id="consultaList">
+            <% _.each(cuotas, function(item) {
+                var searchText = [
+                    item.pergir,
+                    item.tipo_pago,
+                    item.nomres,
+                    item.nombre,
+                    item.tippag,
+                    item.numcuo,
+                    item.valor
+                ].join(' ').toLowerCase();
+            %>
+                <li class="consulta-list-item" data-search="<%= escapeAttr(searchText) %>">
+                    <div class="consulta-list-item-header">
+                        <div>
+                            <div class="consulta-list-period"><%= item.pergir %></div>
+                            <div class="consulta-list-meta">
+                                <span class="consulta-badge"><%= item.tipo_pago %></span>
+                            </div>
+                        </div>
+                        <div class="consulta-money"><%= formatMoney(item.valor) %></div>
+                    </div>
+                    <div class="consulta-list-fields">
+                        <div class="consulta-list-field">
+                            <span class="consulta-list-field-label">Nombre responsable</span>
+                            <span class="consulta-list-field-value"><%= item.nomres || '—' %></span>
+                        </div>
+                        <div class="consulta-list-field">
+                            <span class="consulta-list-field-label">Nombre beneficiario</span>
+                            <span class="consulta-list-field-value"><%= item.nombre || '—' %></span>
+                        </div>
+                        <div class="consulta-list-field">
+                            <span class="consulta-list-field-label">Forma de pago</span>
+                            <span class="consulta-list-field-value"><%= item.tippag || '—' %></span>
+                        </div>
+                        <div class="consulta-list-field">
+                            <span class="consulta-list-field-label">Número de cuotas</span>
+                            <span class="consulta-list-field-value"><%= item.numcuo || 0 %></span>
+                        </div>
+                    </div>
+                </li>
+            <% }); %>
+        </ul>
+
+        <div class="consulta-list-footer">
+            <div id="consultaListInfo">Mostrando 0 registros</div>
+            <ul class="consulta-list-pagination" id="consultaListPagination"></ul>
+        </div>
+    <% } %>
 </div>
 </script>
 
@@ -310,7 +394,7 @@
         <div class="card-body pt-0">
             <form id="form" class="validation_form mb-4" autocomplete="off" novalidate>
                 <div class="row g-3">
-                    <div class="col-md-3 col-lg-2">
+                    <div class="col-12 col-sm-6 col-md-3 col-lg-2">
                         <div class="form-group mb-0">
                             <label for="perini" class="form-control-label">
                                 <i class="fas fa-calendar-alt text-muted me-1"></i>Periodo inicial
@@ -325,7 +409,7 @@
                                 value="{{ date('Ym', strtotime('-3 month')) }}">
                         </div>
                     </div>
-                    <div class="col-md-3 col-lg-2">
+                    <div class="col-12 col-sm-6 col-md-3 col-lg-2">
                         <div class="form-group mb-0">
                             <label for="perfin" class="form-control-label">
                                 <i class="fas fa-calendar-alt text-muted me-1"></i>Periodo final

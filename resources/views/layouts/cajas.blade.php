@@ -27,6 +27,8 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('C
         '_estado_afiliado' => session()->get('estado_afiliado')
     ])
 
+<div class="sidenav-overlay" aria-hidden="true"></div>
+
 <div class="main-content" id="panel">
     @include('templates.navbar-cajas', [
         'user_name' => capitalize($user['nombre']), 

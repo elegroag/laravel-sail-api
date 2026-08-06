@@ -10,8 +10,28 @@
             <span class="navbar-toggler-icon-bar"></span>
         </button>
 
-        {{-- Título --}}
-        <h1 class="navbar-title mb-0">{{ $pageTitle }}</h1>
+        <div class="navbar-header">
+            <h1 class="navbar-title">{{ $pageTitle }}</h1>
+            <nav aria-label="breadcrumb" class="navbar-breadcrumb d-none d-md-block">
+                <ol class="breadcrumb">
+                    @if(!empty($breadcrumbs) && is_array($breadcrumbs))
+                        @foreach($breadcrumbs as $crumb)
+                            <li class="breadcrumb-item {{ !empty($crumb['is_active']) ? 'active' : '' }}"
+                                @if(!empty($crumb['is_active'])) aria-current="page" @endif>
+                                @if(!empty($crumb['icon']))
+                                    <i class="{{ $crumb['icon'] }} me-1"></i>
+                                @endif
+                                @if(!empty($crumb['is_active']))
+                                    <span>{{ $crumb['title'] ?? '' }}</span>
+                                @else
+                                    <a href="{{ $crumb['url'] ?? '#' }}">{{ $crumb['title'] ?? '' }}</a>
+                                @endif
+                            </li>
+                        @endforeach
+                    @endif
+                </ol>
+            </nav>
+        </div>
 
         {{-- Acciones del Navbar (derecha) --}}
         <ul class="navbar-nav navbar-actions ms-auto align-items-center">
@@ -58,8 +78,9 @@
                         <span>Accesos Rápidos</span>
                     </div>
                     <div class="dropdown-body">
-                        @php 
-                            $action = session('tipo')  == 'T' || session('tipo')  == 'P' ? 'trabajador': 'empresa';
+                        @php
+                            $tipo = session('tipo');
+                            $action = in_array($tipo, ['T', 'I', 'O', 'F', 'P'], true) ? 'trabajador' : 'empresa';
                         @endphp
                         <div class="shortcuts-grid">
                             <a href="{{ route("{$action}.historial") }}" class="shortcut-item">
@@ -89,7 +110,7 @@
             <li class="nav-item dropdown nav-item-user">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="avatar avatar-sm">
-                        <img src="{{ asset('img/Mercurio/profile-a.png') }}" alt="Avatar" />    
+                        <img src="{{ asset('img/Mercurio/profile-a.png') }}" alt="Avatar" />
                     </span>
                     <span class="nav-link-user-name d-none d-lg-inline">
                         {{ htmlspecialchars($user_name) }}

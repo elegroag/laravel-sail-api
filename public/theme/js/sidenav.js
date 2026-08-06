@@ -185,6 +185,13 @@
             }
         });
 
+        // Cerrar drawer al navegar (enlace real, no collapse) en móviles
+        $(document).on('click', '#sidenav-main a.nav-link[href]:not([data-bs-toggle])', function () {
+            if (isMobile() && isSidenavOpen()) {
+                closeSidenav();
+            }
+        });
+
         // Manejar clicks en data-action para compatibilidad
         $(document).on('click', '[data-action]', function (e) {
             var action = $(this).attr('data-action');

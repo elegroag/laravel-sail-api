@@ -28,6 +28,8 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
         '_estado_afiliado' => session()->get('estado_afiliado')
     ])
 
+<div class="sidenav-overlay" aria-hidden="true"></div>
+
 <div class="main-content" id="panel">
 @include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> ($pageTitle)? $pageTitle : $title ]) 
 

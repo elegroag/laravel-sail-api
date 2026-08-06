@@ -43,7 +43,7 @@
     @stack('styles')
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center h-screen g-sidenav-pinned">
+<body class="bg-gray-100 g-sidenav-hidden">
 
     @include('templates.loading')
 

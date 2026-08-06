@@ -2,7 +2,6 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
     <style>
         .consulta-page-card {
             border-radius: 16px;
@@ -10,8 +9,8 @@
 
         .consulta-summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.85rem;
             margin-bottom: 1.25rem;
         }
 
@@ -43,6 +42,7 @@
             font-size: 1.2rem;
             line-height: 1.2;
             color: #212529;
+            word-break: break-word;
         }
 
         .consulta-empty-state {
@@ -64,53 +64,145 @@
             color: #adb5bd;
         }
 
-        .consulta-data-table {
-            font-size: 0.82rem;
-            margin-bottom: 0;
+        .consulta-list-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
-        .consulta-data-table thead th {
-            background: #f1f5f9;
-            color: #334155;
-            font-size: 0.72rem;
+        .consulta-list-toolbar label {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 0;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .consulta-list-toolbar select,
+        .consulta-list-toolbar input[type='search'] {
+            min-height: 38px;
+            border-radius: 8px;
+        }
+
+        .consulta-list-toolbar input[type='search'] {
+            width: min(100%, 240px);
+        }
+
+        .consulta-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .consulta-list-item {
+            margin: 0;
+            padding: 1rem 1.1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+
+        .consulta-list-item[hidden] {
+            display: none !important;
+        }
+
+        .consulta-list-item-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .consulta-list-company {
+            font-size: 0.98rem;
             font-weight: 700;
+            color: #0f172a;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+        }
+
+        .consulta-list-period {
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .consulta-list-fields {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.55rem;
+            margin-bottom: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            .consulta-list-fields {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .consulta-list-field-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.03em;
-            border-bottom: 0;
-            padding: 0.7rem 0.55rem;
-            white-space: nowrap;
-            vertical-align: middle;
+            color: #94a3b8;
+            margin-bottom: 0.15rem;
         }
 
-        .consulta-data-table tbody td {
-            padding: 0.65rem 0.55rem;
-            vertical-align: middle;
+        .consulta-list-field-value {
+            display: block;
+            font-size: 0.92rem;
             color: #334155;
-        }
-
-        .consulta-data-table tbody tr:hover {
-            background: #f8fbff;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
         }
 
         .consulta-money {
             font-variant-numeric: tabular-nums;
-            font-weight: 600;
+            font-weight: 700;
             color: #198754;
             white-space: nowrap;
+            font-size: 1rem;
         }
 
-        .consulta-company {
-            min-width: 180px;
-            max-width: 240px;
-            white-space: normal;
+        .consulta-novedades {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 0.75rem;
+        }
+
+        .consulta-novedades-title {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .consulta-novedades-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
         }
 
         .consulta-flag {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            min-width: 1.6rem;
-            padding: 0.12rem 0.35rem;
+            gap: 0.3rem;
+            padding: 0.2rem 0.5rem;
             border-radius: 999px;
             background: #e7f1ff;
             color: #0d6efd;
@@ -123,49 +215,61 @@
             background: #f1f5f9;
         }
 
-        .consulta-dt-toolbar .dataTables_length label,
-        .consulta-dt-toolbar .dataTables_filter label {
+        .consulta-flag-code {
+            opacity: 0.85;
+        }
+
+        .consulta-list-footer {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-top: 1rem;
             font-size: 0.875rem;
             color: #64748b;
         }
 
-        .consulta-dt-toolbar .dataTables_filter input {
-            min-width: 220px;
+        .consulta-list-pagination {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
         }
 
-        .consulta-dt-footer {
+        .consulta-list-pagination button {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 0.65rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
+            color: #334155;
             font-size: 0.875rem;
-            color: #64748b;
         }
 
-        .consulta-dt-footer .pagination {
-            margin-bottom: 0;
-            justify-content: flex-end;
+        .consulta-list-pagination button.is-active,
+        .consulta-list-pagination button:hover {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+        .consulta-list-pagination button:disabled {
+            opacity: 0.45;
+            pointer-events: none;
         }
 
         #consulta {
             max-width: 100%;
-        }
-
-        #consulta .dt-scroll {
-            max-width: 100%;
-        }
-
-        #consulta .dataTables_wrapper {
-            width: 100%;
             min-width: 0;
         }
     </style>
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('assets/datatables.net/js/dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/datatables.net.bs5/js/dataTables.bootstrap5.min.js') }}"></script>
-
     <script type="text/template" id="templatePlanillas">
     <%
         var formatMoney = function (value) {
@@ -194,6 +298,24 @@
             var text = (value || '').toString().trim();
             return !text || text === '0' || text === '00';
         };
+        var escapeAttr = function (value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        };
+        var novedades = [
+            { key: 'ingtra', code: 'Ing', title: 'Ingreso' },
+            { key: 'novret', code: 'Ret', title: 'Retiro' },
+            { key: 'novvps', code: 'VST', title: 'Variación salarial temporal' },
+            { key: 'novstc', code: 'STC', title: 'Suspensión temporal contrato' },
+            { key: 'novitg', code: 'ITE', title: 'Incapacidad temporal enfermedad' },
+            { key: 'licnom', code: 'LM', title: 'Licencia maternidad' },
+            { key: 'vacnom', code: 'VAC', title: 'Vacaciones' },
+            { key: 'incnom', code: 'ITAT', title: 'Incapacidad temporal accidente de trabajo' },
+            { key: 'novvts', code: 'VSP', title: 'Variación salarial permanente' }
+        ];
     %>
 
     <div class="consulta-results">
@@ -219,48 +341,95 @@
                 <span>Ajuste el rango de periodos e intente nuevamente.</span>
             </div>
         <% } else { %>
-            <table id="dataTable" class="table table-hover consulta-data-table align-middle w-100">
-                    <thead>
-                        <tr>
-                            <th scope="col">Razón social</th>
-                            <th scope="col">Periodo aporte</th>
-                            <th scope="col">Índice aporte</th>
-                            <th scope="col">Salario base</th>
-                            <th scope="col">Días trabajados</th>
-                            <th scope="col">Fecha pago</th>
-                            <th scope="col" title="Ingreso">Ing</th>
-                            <th scope="col" title="Retiro">Ret</th>
-                            <th scope="col" title="Variación salarial temporal">VST</th>
-                            <th scope="col" title="Suspensión temporal contrato">STC</th>
-                            <th scope="col" title="Incapacidad temporal enfermedad">ITE</th>
-                            <th scope="col" title="Licencia maternidad">LM</th>
-                            <th scope="col" title="Vacaciones">VAC</th>
-                            <th scope="col" title="Incapacidad temporal accidente de trabajo">ITAT</th>
-                            <th scope="col" title="Variación salarial permanente">VSP</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% _.each(planilla, function (item) { %>
-                            <tr>
-                                <td class="consulta-company"><%= item.razsoc %></td>
-                                <td><%= item.perapo %></td>
-                                <td><%= item.tarapo %></td>
-                                <td class="consulta-money"><%= formatMoney(item.salbas) %></td>
-                                <td><%= item.diatra %></td>
-                                <td><%= item.fecrec %></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.ingtra) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.ingtra) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.novret) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.novret) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.novvps) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.novvps) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.novstc) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.novstc) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.novitg) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.novitg) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.licnom) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.licnom) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.vacnom) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.vacnom) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.incnom) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.incnom) %></span></td>
-                                <td class="text-center"><span class="consulta-flag <%= flagIsMuted(item.novvts) ? 'consulta-flag-muted' : '' %>"><%= flagText(item.novvts) %></span></td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
+            <div class="consulta-list-toolbar">
+                <label>
+                    Mostrar
+                    <select id="consultaPageLength" class="form-select form-select-sm" style="width: auto;">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    por página
+                </label>
+                <label>
+                    Buscar
+                    <input
+                        type="search"
+                        id="consultaSearch"
+                        class="form-control form-control-sm"
+                        placeholder="Empresa, periodo, salario..."
+                        autocomplete="off">
+                </label>
+            </div>
+
+            <ul class="consulta-list" id="consultaList">
+                <% _.each(planilla, function (item) {
+                    var searchText = [
+                        item.razsoc,
+                        item.perapo,
+                        item.tarapo,
+                        item.salbas,
+                        item.diatra,
+                        item.fecrec,
+                        item.ingtra,
+                        item.novret,
+                        item.novvps,
+                        item.novstc,
+                        item.novitg,
+                        item.licnom,
+                        item.vacnom,
+                        item.incnom,
+                        item.novvts
+                    ].join(' ').toLowerCase();
+                %>
+                    <li class="consulta-list-item" data-search="<%= escapeAttr(searchText) %>">
+                        <div class="consulta-list-item-header">
+                            <div>
+                                <div class="consulta-list-company"><%= item.razsoc || '—' %></div>
+                                <div class="consulta-list-period">Periodo aporte <%= item.perapo || '—' %></div>
+                            </div>
+                            <div class="consulta-money"><%= formatMoney(item.salbas) %></div>
+                        </div>
+
+                        <div class="consulta-list-fields">
+                            <div class="consulta-list-field">
+                                <span class="consulta-list-field-label">Índice aporte</span>
+                                <span class="consulta-list-field-value"><%= item.tarapo || '—' %></span>
+                            </div>
+                            <div class="consulta-list-field">
+                                <span class="consulta-list-field-label">Días trabajados</span>
+                                <span class="consulta-list-field-value"><%= item.diatra || 0 %></span>
+                            </div>
+                            <div class="consulta-list-field">
+                                <span class="consulta-list-field-label">Fecha pago</span>
+                                <span class="consulta-list-field-value"><%= item.fecrec || '—' %></span>
+                            </div>
+                        </div>
+
+                        <div class="consulta-novedades">
+                            <span class="consulta-novedades-title">Novedades</span>
+                            <div class="consulta-novedades-grid">
+                                <% _.each(novedades, function (nov) {
+                                    var muted = flagIsMuted(item[nov.key]);
+                                %>
+                                    <span
+                                        class="consulta-flag <%= muted ? 'consulta-flag-muted' : '' %>"
+                                        title="<%= nov.title %>">
+                                        <span class="consulta-flag-code"><%= nov.code %></span>
+                                        <span><%= flagText(item[nov.key]) %></span>
+                                    </span>
+                                <% }); %>
+                            </div>
+                        </div>
+                    </li>
+                <% }); %>
+            </ul>
+
+            <div class="consulta-list-footer">
+                <div id="consultaListInfo">Mostrando 0 registros</div>
+                <ul class="consulta-list-pagination" id="consultaListPagination"></ul>
+            </div>
         <% } %>
     </div>
     </script>
@@ -298,7 +467,7 @@
         <div class="card-body pt-0">
             <form id="form" class="validation_form mb-4" autocomplete="off" novalidate>
                 <div class="row g-3">
-                    <div class="col-md-3 col-lg-2">
+                    <div class="col-12 col-sm-6 col-md-3 col-lg-2">
                         <div class="form-group mb-0">
                             <label for="perini" class="form-control-label">
                                 <i class="fas fa-calendar-alt text-muted me-1"></i>Periodo inicial
@@ -313,7 +482,7 @@
                                 value="{{ date('Ym', strtotime('-3 month')) }}">
                         </div>
                     </div>
-                    <div class="col-md-3 col-lg-2">
+                    <div class="col-12 col-sm-6 col-md-3 col-lg-2">
                         <div class="form-group mb-0">
                             <label for="perfin" class="form-control-label">
                                 <i class="fas fa-calendar-alt text-muted me-1"></i>Periodo final

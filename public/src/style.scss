@@ -233,15 +233,23 @@
     .solicitudes-toolbar__panel {
         align-items: stretch;
         flex-direction: column;
+        gap: 0.75rem;
     }
 
+    /* En columna, flex-basis 280px se aplica a la ALTURA y abre un hueco enorme */
     .solicitudes-toolbar__search {
+        flex: 0 0 auto;
         max-width: none;
+        min-width: 0;
+        width: 100%;
     }
 
     .solicitudes-toolbar__actions {
         align-items: stretch;
+        flex: 0 0 auto;
+        gap: 0.65rem 0.85rem;
         justify-content: flex-start;
+        width: 100%;
     }
 
     .solicitudes-toolbar__group--pagination {
