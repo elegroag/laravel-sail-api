@@ -5,6 +5,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ApiDocumentationAuth;
 use App\Http\Middleware\ApiAuthMiddleware;
 use App\Http\Middleware\CajasAuthenticated;
+use App\Http\Middleware\EnsureEndUserAvailable;
 use App\Http\Middleware\MercurioAuthenticated;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -44,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
             StartSession::class,
+            EnsureEndUserAvailable::class,
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,

@@ -124,6 +124,27 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Maintenance Mode for End Users (Mercurio)
+    |--------------------------------------------------------------------------
+    |
+    | When "maintenance_endusers" is true, requests to /mercurio/* and /api/*
+    | are answered with a "fuera de servicio" page (HTML for Inertia, JSON
+    | 503 for API consumers). Cajas admins (sessions with "tipfun") and any
+    | other paths (/web/*, /cajas/*) are unaffected.
+    |
+    | "maintenance_endusers_message" overrides the default Spanish message.
+    |
+    */
+
+    'maintenance_endusers' => (bool) env('APP_MAINTENANCE_ENDUSERS', false),
+
+    'maintenance_endusers_message' => env(
+        'MAINTENANCE_ENDUSERS_MESSAGE',
+        'El sistema se encuentra en estado de actualización y mantenimiento.<br/>Con el fin de corregir errores y actualizar a versiones más seguras y óptimas que buscan la satisfacción de sus usuarios.'
+    ),
+
     'dominio' => env('APP_DOMINIO', 'http://localhost'),
 
     'port' => env('APP_PORT', '443'),
