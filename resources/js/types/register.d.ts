@@ -22,7 +22,6 @@ export interface DataCompany extends BaseFormProps, WithNextStep {
     isJuridicaRepresentative: boolean;
     companyNameRef?: React.Ref<HTMLInputElement>;
     companyNitRef?: React.Ref<HTMLInputElement>;
-    addressRef?: React.Ref<HTMLInputElement>;
 }
 
 export interface DataRepresentative extends BaseFormProps, WithNextStep, WithPrevStep {
@@ -42,15 +41,6 @@ export interface DataPersonRegister extends BaseFormProps, WithNextStep {
 }
 
 export interface DataEmpresaRegister extends BaseFormProps, WithNextStep, WithPrevStep {}
-
-export interface DataDelegado extends BaseFormProps, WithNextStep, WithPrevStep {
-    documentTypes: DocumentTypeOption[];
-    cityOptions: DocumentTypeOption[];
-    firstNameRef?: React.Ref<HTMLInputElement>;
-    lastNameRef?: React.Ref<HTMLInputElement>;
-    emailRef?: React.Ref<HTMLInputElement>;
-    phoneRef?: React.Ref<HTMLInputElement>;
-}
 
 export interface DataSession extends BaseFormProps, WithPrevStep {
     isJuridicaRepresentative: boolean;
@@ -90,7 +80,7 @@ export type RegisterValues = {
     companyCategory: string;
     userRole: string;
     position: string;
-    // Datos del representante (solo cuando userRole === 'delegado')
+    // Datos del representante legal
     repName: string;
     repIdentification: string;
     repEmail: string;
@@ -126,7 +116,6 @@ export interface PropsCompanyRegisterForm {
     confirmPasswordRef: React.Ref<HTMLInputElement>;
     companyNameRef: React.Ref<HTMLInputElement>;
     companyNitRef: React.Ref<HTMLInputElement>;
-    addressRef: React.Ref<HTMLInputElement>;
 }
 
 export interface PropsPersonRegisterForm extends PropsCompanyRegisterForm {

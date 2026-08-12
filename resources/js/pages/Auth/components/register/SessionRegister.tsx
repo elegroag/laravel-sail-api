@@ -15,7 +15,7 @@ const SessionRegister: React.FC<DataSession> = ({
     errors,
     onChange,
     onPrevStep,
-    isJuridicaRepresentative,
+    isJuridicaRepresentative: _isJuridicaRepresentative,
     documentTypes,
     cityOptions,
     identificationRef,
@@ -36,8 +36,12 @@ const SessionRegister: React.FC<DataSession> = ({
           <Label htmlFor="documentTypeUser" className="text-sm font-medium text-gray-700">
             Tipo de documento usuario *
           </Label>
-          <Select value={values.documentTypeUser} onValueChange={(v) => onChange("documentTypeUser", v)}>
-            <SelectTrigger className={`in-b-form mt-1 ${errors.documentTypeUser ? "border-red-500" : ""} ${isJuridicaRepresentative ? 'bg-gray-50 text-gray-600' : ''}`}>
+          <Select
+            key={`doc-user-${values.documentTypeUser || 'empty'}`}
+            value={values.documentTypeUser || undefined}
+            onValueChange={(v) => onChange("documentTypeUser", v)}
+          >
+            <SelectTrigger className={`in-b-form mt-1 ${errors.documentTypeUser ? "border-red-500" : ""}`}>
               <SelectValue placeholder="Selecciona" />
             </SelectTrigger>
             <SelectContent>
@@ -74,7 +78,7 @@ const SessionRegister: React.FC<DataSession> = ({
           <Label htmlFor="city" className="text-sm font-medium text-gray-700">
             Ciudad *
           </Label>
-          <Select value={values.city} onValueChange={(v) => onChange("city", v)}>
+          <Select value={values.city || undefined} onValueChange={(v) => onChange("city", v)}>
             <SelectTrigger className={`in-b-form mt-1 ${errors.city ? "border-red-500" : ""}`}>
               <SelectValue placeholder="Selecciona la ciudad" />
             </SelectTrigger>

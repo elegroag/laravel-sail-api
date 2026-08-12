@@ -23,7 +23,7 @@ const initialState: FormState = {
     city: '',
     societyType: '',
     companyCategory: '',
-    userRole: '',
+    userRole: 'representante',
     position: '',
     repName: '',
     repIdentification: '',
@@ -75,7 +75,6 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     const confirmPasswordRef = useRef<HTMLInputElement>(null);
     const companyNameRef = useRef<HTMLInputElement>(null);
     const companyNitRef = useRef<HTMLInputElement>(null);
-    const addressRef = useRef<HTMLInputElement>(null);
 
     const documentTypeOptions = useMemo(() => Object.entries(Coddoc || {}).map(([value, label]) => ({ value, label })), [Coddoc]);
 
@@ -154,23 +153,59 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
         }
     };
 
+    // Prefills de empresa antes de montar el siguiente paso (Select Radix necesita el value en el primer render)
+    const applyCompanyPrefillsForStep = (nextStep: number) => {
+        if (state.selectedUserType !== 'empresa') {
+            return;
+        }
+
+        if (nextStep === 2 && state.companyCategory === 'N') {
+            // Natural: tipo e identificación del representante = datos empresa del paso 1
+            if (state.documentType) {
+                dispatch({ type: 'SET_FIELD', field: 'documentTypeRep', value: state.documentType });
+            }
+            if (state.companyNit) {
+                dispatch({ type: 'SET_FIELD', field: 'repIdentification', value: state.companyNit });
+            }
+        }
+
+        if (nextStep === 3) {
+            if (state.companyCategory === 'N') {
+                if (state.documentTypeRep) {
+                    dispatch({ type: 'SET_FIELD', field: 'documentTypeUser', value: state.documentTypeRep });
+                }
+                if (state.repIdentification) {
+                    dispatch({ type: 'SET_FIELD', field: 'identification', value: state.repIdentification });
+                }
+                return;
+            }
+
+            if (state.companyCategory === 'J') {
+                const nitOpt = documentTypeOptions.find(
+                    (opt) =>
+                        opt.label.toLowerCase().includes('nit') ||
+                        opt.value.toLowerCase() === 'nit' ||
+                        opt.value === '3',
+                );
+                dispatch({ type: 'SET_FIELD', field: 'documentTypeUser', value: nitOpt?.value ?? '3' });
+                if (state.companyNit) {
+                    dispatch({ type: 'SET_FIELD', field: 'identification', value: state.companyNit });
+                }
+            }
+        }
+    };
+
     // Navegación entre pasos usando validación
     const handleNextStep = () => {
         const isCompany = state.selectedUserType === 'empresa';
         const isWorker = state.selectedUserType === 'trabajador';
-        const isNatural = state.companyCategory === 'N';
 
-        // Para persona natural, saltar del paso 1 directamente al paso 3
-        if (isCompany && isNatural && step === 1) {
-            if (validateStep()) {
-                setStep(3);
-            }
-            return;
-        }
-
-        const maxSteps = isCompany ? (state.userRole === 'delegado' ? 5 : 4) : isWorker ? 3 : 2;
+        // Empresa: 1 datos empresa -> 2 representante -> 3 sesión
+        const maxSteps = isCompany ? 3 : isWorker ? 3 : 2;
         if (validateStep()) {
-            setStep((prev) => Math.min(prev + 1, maxSteps));
+            const nextStep = Math.min(step + 1, maxSteps);
+            applyCompanyPrefillsForStep(nextStep);
+            setStep(nextStep);
         }
     };
 
@@ -250,26 +285,22 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
 
         // Resolver datos base del usuario según tipo (empresa vs persona)
         if (isCompany) {
-            // Para empresa: si es delegado, los datos del usuario vienen en firstName/lastName/email/phone/city
-            // Si es representante, los datos vienen en repName/repEmail/repPhone y city
-            if (state.userRole === 'delegado') {
-                payload.nombre = `${state.firstName} ${state.lastName}`.trim();
-                payload.email = state.email;
-                payload.telefono = validatePhoneLength(state.phone, 'celular');
-                payload.codciu = Number(state.city);
+            // Empresa: el responsable es siempre el representante legal
+            payload.nombre = (state.repName || '').trim();
+            payload.email = state.repEmail;
+            payload.telefono = validatePhoneLength(state.repPhone, 'celular');
+            payload.codciu = Number(state.city);
 
-                payload.first_name = state.firstName;
-                payload.last_name = state.lastName;
-            } else {
-                payload.nombre = (state.repName || '').trim();
-                payload.email = state.repEmail;
-                payload.telefono = validatePhoneLength(state.repPhone, 'celular');
-                payload.codciu = Number(state.city);
+            const { first, last } = splitNombre(state.repName);
+            payload.first_name = first;
+            payload.last_name = last;
 
-                const { first, last } = splitNombre(state.repName);
-                payload.first_name = first;
-                payload.last_name = last;
-            }
+            payload.is_delegado = false;
+            payload.rep_nombre = state.repName || undefined;
+            payload.rep_documento = state.repIdentification || undefined;
+            payload.rep_email = state.repEmail || undefined;
+            payload.rep_telefono = validatePhoneLength(state.repPhone, 'celular del representante') || undefined;
+            payload.rep_coddoc = state.documentTypeRep || undefined;
         } else {
             // Para particulares/trabajador/independiente/etc.
             payload.nombre = `${state.firstName} ${state.lastName}`.trim();
@@ -279,20 +310,6 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
 
             payload.first_name = state.firstName;
             payload.last_name = state.lastName;
-        }
-
-        // Delegado/Representante (empresa)
-        if (isCompany) {
-            payload.is_delegado = state.userRole === 'delegado';
-            payload.cargo = state.userRole === 'delegado' ? state.position : undefined;
-            // En ambos casos (delegado o representante) debemos enviar los datos del representante.
-            // - Si el responsable es delegado: rep_* corresponde al representante legal.
-            // - Si el responsable es representante: rep_* corresponde al mismo representante (responsable de la cuenta).
-            payload.rep_nombre = state.repName || undefined;
-            payload.rep_documento = state.repIdentification || undefined;
-            payload.rep_email = state.repEmail || undefined;
-            payload.rep_telefono = validatePhoneLength(state.repPhone, 'celular del representante') || undefined;
-            payload.rep_coddoc = state.documentTypeRep || undefined;
         }
 
         // Trabajador: también enviar cargo si fue diligenciado
@@ -451,7 +468,6 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
             confirmPasswordRef,
             companyNameRef,
             companyNitRef,
-            addressRef,
         },
         events: {
             handleBack,

@@ -185,6 +185,12 @@ class PensionadoServices
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $mercurio38,
+            $nota,
+            'Solicitud de afiliación de pensionado devolución'
+        );
+
         return true;
     }
 

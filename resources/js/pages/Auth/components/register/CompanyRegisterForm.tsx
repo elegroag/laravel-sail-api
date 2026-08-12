@@ -4,10 +4,8 @@ import type {
   PropsCompanyRegisterForm,
 } from "@/types/register.d"
 import HeaderRegister from "./HeaderRegister"
-import AccountResponsibleSelect from "./AccountResponsibleSelect"
 import { 
   DataCompanyRegister, 
-  DataDelegadoRegister, 
   DataRepresentanteRegister, 
   SessionRegister 
 } from "./index"
@@ -28,18 +26,12 @@ export default function CompanyRegisterForm({
   step = 1,
   onNextStep,
   onPrevStep,
-  firstNameRef,
-  lastNameRef,
-  emailRef,
-  phoneRef,
   identificationRef,
   passwordRef,
   confirmPasswordRef,
   companyNameRef,
   companyNitRef,
-  addressRef,
 }: PropsCompanyRegisterForm){
-  // Pista visual de contraseña: requisitos básicos
   const pwd = values.password || ""
   const pwdReqs = {
     length: pwd.length >= 10,
@@ -70,21 +62,16 @@ export default function CompanyRegisterForm({
     setShowConfirm(true)
   }
 
-  // --- Reglas de documento según categoría de empresa ---
   // Persona Natural (N): todos menos NIT y NUIP
   // Persona Jurídica (J): solo NIT y forzar selección
   const isNatural = values.companyCategory === 'N'
   const isJuridica = values.companyCategory === 'J'
-  const isDelegate = values.userRole === 'delegado'
-  const isJuridicaRepresentative = isJuridica && !isDelegate
-  const isJuridicaDelegate = isJuridica && isDelegate
 
   const isNitOption = (opt: DocumentTypeOption) =>
-    opt.label.toLowerCase().includes('nit') || opt.value.toLowerCase() === 'nit'
+    opt.label.toLowerCase().includes('nit') ||
+    opt.value.toLowerCase() === 'nit' ||
+    opt.value === '3'
 
-  // El representante legal no puede identificarse con NIT (empresas) ni NUIP
-  // (asignado a menores de edad en primera infancia); solo aplica para personas
-  // naturales adultas y extranjeras con documento válido.
   const isNuipOption = (opt: DocumentTypeOption) =>
     opt.label.toLowerCase().includes('nuip') || opt.value.toLowerCase() === 'nu'
 
@@ -97,9 +84,6 @@ export default function CompanyRegisterForm({
     [documentTypes],
   )
 
-  // Para persona natural la empresa NO se identifica con NIT ni con NUIP
-  // (NIT = personas jurídicas; NUIP = menores de edad). Para persona jurídica
-  // el NIT sigue siendo obligatorio y se fuerza desde el useEffect.
   const companyDocumentTypes = React.useMemo(() => {
     if (isJuridica) {
       const nit = (documentTypes || []).find(isNitOption)
@@ -108,38 +92,34 @@ export default function CompanyRegisterForm({
     return (documentTypes || []).filter((opt) => !isNitOption(opt) && !isNuipOption(opt))
   }, [documentTypes, isJuridica])
 
-  // Forzar selección cuando es Jurídica y limpiar cuando Natural tenga NIT o NUIP
   useEffect(() => {
-    if (isJuridicaRepresentative) {
-      // Forzar NIT
+    // Siempre representante legal: no hay flujo de delegado
+    if (values.userRole !== 'representante') {
+      onChange('userRole', 'representante')
+    }
+
+    if (isJuridica) {
       const nit = (documentTypes || []).find(isNitOption)
       if (nit && values.documentType !== nit.value) {
         onChange('documentType', nit.value)
       }
-    } else if (isNatural || isJuridicaDelegate) {
-      // Limpiar si quedó NIT o NUIP seleccionado (no aplican para persona natural)
+    } else if (isNatural) {
       const currentDoc = (documentTypes || []).find(
         (o) => o.value === values.documentType,
       )
       if (currentDoc && (isNitOption(currentDoc) || isNuipOption(currentDoc))) {
         onChange('documentType', '')
       }
-      // Si es persona natural, no puede haber delegado: forzar representante
-      if (isNatural && values.userRole !== 'representante') {
-        onChange('userRole', 'representante')
-      }
     }
 
-    // Limpiar NIT o NUIP si quedó seleccionado en el tipo de documento del representante
     const repCurrent = (documentTypes || []).find(
       (o) => o.value === values.documentTypeRep,
     )
     if (repCurrent && isRepresentativeForbidden(repCurrent)) {
       onChange('documentTypeRep', '')
     }
-    // Solo dependencias necesarias para evitar bucles
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.companyCategory, values.userRole])
+  }, [values.companyCategory])
 
   return (
     <>
@@ -150,7 +130,6 @@ export default function CompanyRegisterForm({
       />
 
       <form onSubmit={onSubmit} className="space-y-3">
-        {/* Paso 1: Datos empresa */}
         {step === 1 && (
           <DataCompanyRegister
             values={values}
@@ -160,28 +139,13 @@ export default function CompanyRegisterForm({
             errors={errors}
             onChange={onChange}
             onNextStep={onNextStep}
-            isJuridicaRepresentative={isJuridicaRepresentative}
+            isJuridicaRepresentative={isJuridica}
             companyNameRef={companyNameRef}
             companyNitRef={companyNitRef}
-            addressRef={addressRef}
           />
         )}
 
-        {/* Paso 2: Selección responsable de la cuenta */}
-        {step === 2 && isJuridica && (
-            <AccountResponsibleSelect
-              value={values.userRole}
-              onChange={onChange}
-              error={errors.userRole}
-              isJuridica={isJuridica}
-              onNextStep={onNextStep}
-              onPrevStep={onPrevStep}
-              userRole={values.userRole}
-            />
-        )}
-
-        {/* Paso 3: Datos representante */}
-        {step === 3 && (
+        {step === 2 && (
            <DataRepresentanteRegister
             values={values}
             errors={errors}
@@ -192,31 +156,13 @@ export default function CompanyRegisterForm({
           />
         )}
 
-        {/* Paso 4 (solo delegado): Datos del delegado */}
-        {step === 4 && values.userRole === 'delegado' && (
-          <DataDelegadoRegister
-            values={values}
-            errors={errors}
-            onChange={onChange}
-            onNextStep={onNextStep}
-            onPrevStep={onPrevStep}
-            documentTypes={documentTypes}
-            cityOptions={cityOptions}
-            firstNameRef={firstNameRef}
-            lastNameRef={lastNameRef}
-            emailRef={emailRef}
-            phoneRef={phoneRef}
-          />
-        )}
-
-        {/* Paso sesión: paso 4 (no delegado) o paso 5 (delegado) */}
-        {((values.userRole !== 'delegado' && step === 4) || (values.userRole === 'delegado' && step === 5)) && (
+        {step === 3 && (
           <SessionRegister
             values={values}
             errors={errors}
             onChange={onChange}
             onPrevStep={onPrevStep}
-            isJuridicaRepresentative={isJuridicaRepresentative}
+            isJuridicaRepresentative={isJuridica}
             documentTypes={documentTypes}
             cityOptions={cityOptions}
             identificationRef={identificationRef}

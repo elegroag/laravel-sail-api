@@ -25,7 +25,11 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 <div class="sidenav-overlay" aria-hidden="true"></div>
 
 <div class="main-content" id="panel">
-@include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> $pageTitle])
+@include('templates.navbar', [
+    'user_name' => capitalize($user['nombre']),
+    'breadcrumbs' => $breadcrumbs,
+    'pageTitle' => $pageTitle ?: ($title ?? ''),
+])
     @yield('content')
 @include('templates.footer')
 </div>

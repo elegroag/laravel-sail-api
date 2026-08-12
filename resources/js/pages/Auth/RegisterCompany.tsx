@@ -41,7 +41,7 @@ export default function RegisterCompany(props: LoginProps) {
           className="p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px] transition-all duration-500 ease-in-out lg:w-1/2"
         >
           <AuthBackgroundShapes />
-          <div className="max-w-xl mx-auto w-full">
+          <div className="relative z-10 max-w-xl mx-auto w-full">
             <CompanyRegisterForm
               userTypeLabel={userTypes.find((ut) => ut.id === "empresa")?.label || ""}
               values={{
@@ -95,7 +95,6 @@ export default function RegisterCompany(props: LoginProps) {
               confirmPasswordRef={domRef.confirmPasswordRef}
               companyNameRef={domRef.companyNameRef}
               companyNitRef={domRef.companyNitRef}
-              addressRef={domRef.addressRef}
             />
           </div>
         </div>

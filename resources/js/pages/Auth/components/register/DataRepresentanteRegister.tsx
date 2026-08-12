@@ -22,7 +22,8 @@ const DataRepresentanteRegister: React.FC<DataRepresentative> = ({
             Tipo de documento representante *
           </Label>
           <Select
-            value={values.documentTypeRep}
+            key={`doc-rep-${values.documentTypeRep || 'empty'}`}
+            value={values.documentTypeRep || undefined}
             onValueChange={(v) => onChange("documentTypeRep", v)}
             >
             <SelectTrigger

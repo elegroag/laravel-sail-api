@@ -238,6 +238,12 @@ class UpDatosTrabajadorService
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $entity,
+            $nota,
+            'Solicitud de actualización de datos trabajador devolución'
+        );
+
         return true;
     }
 

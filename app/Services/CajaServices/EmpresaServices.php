@@ -164,6 +164,12 @@ class EmpresaServices
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $entity,
+            $nota,
+            'Solicitud de afiliación de empresa devolución'
+        );
+
         return true;
     }
 

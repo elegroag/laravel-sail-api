@@ -47,7 +47,7 @@ export default function Login({
       <div className="lg:w-1/2 p-6 flex flex-col justify-center relative">
         <AuthBackgroundShapes />
 
-        <div className="max-w-md mx-auto w-full">
+        <div className="relative z-10 max-w-md mx-auto w-full">
           {!selectedUserType ? (
             <AuthUserTypeStep
               title="Iniciar sesión"

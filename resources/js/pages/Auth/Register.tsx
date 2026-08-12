@@ -30,7 +30,7 @@ export default function Register(props: LoginProps){
     <AuthLayout title="REGISTRO COMFACA EN LÍNEA" description="Crea tu cuenta para acceder a todos los servicios y beneficios que Comfaca tiene para ofrecerte. Un proceso simple y seguro para comenzar tu experiencia.">
       <div id="register" className="p-8 flex flex-col justify-center relative overflow-y-auto max-h-[700px] transition-all duration-500 ease-in-out lg:w-1/2">
         <AuthBackgroundShapes />
-        <div className="max-w-xl mx-auto w-full">
+        <div className="relative z-10 max-w-xl mx-auto w-full">
           {!state.selectedUserType ? (
             <AuthUserTypeSelector
               title="Crear cuenta"
@@ -104,7 +104,6 @@ export default function Register(props: LoginProps){
               confirmPasswordRef={domRef.confirmPasswordRef}
               companyNameRef={domRef.companyNameRef}
               companyNitRef={domRef.companyNitRef}
-              addressRef={domRef.addressRef}
             />
           )}
         </div>

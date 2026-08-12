@@ -97,7 +97,7 @@ const DatosPersonalesRegister: React.FC<DataPersonRegister> = ({
       <Label htmlFor="city" className="text-sm font-medium text-gray-700">
         Ciudad
       </Label>
-      <Select value={values.city} onValueChange={(v) => onChange("city", v)}>
+      <Select value={values.city || undefined} onValueChange={(v) => onChange("city", v)}>
         <SelectTrigger className={`in-b-form mt-1 ${errors.city ? "border-red-500" : ""}`}>
           <SelectValue placeholder="Selecciona la ciudad" />
         </SelectTrigger>

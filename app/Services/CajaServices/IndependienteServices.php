@@ -189,6 +189,12 @@ class IndependienteServices
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $mercurio41,
+            $nota,
+            'Solicitud de afiliación de independiente devolución'
+        );
+
         return true;
     }
 

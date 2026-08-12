@@ -53,7 +53,7 @@ export default function ResetPassword({Coddoc}: ResetPasswordProps) {
             {/* Left Panel - Forgot Password Form */}
             <div className="lg:w-1/2 p-12 relative flex flex-col justify-center">
                 <AuthBackgroundShapes />
-                <div className="max-w-md mx-auto w-full">
+                <div className="relative z-10 max-w-md mx-auto w-full">
                     {!selectedUserType ? (
                         <AuthUserTypeSelector
                             title="Recuperar clave"

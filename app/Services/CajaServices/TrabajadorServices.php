@@ -223,6 +223,12 @@ class TrabajadorServices
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $mercurio31,
+            $nota,
+            'Solicitud de afiliación de trabajador devolución'
+        );
+
         return true;
     }
 

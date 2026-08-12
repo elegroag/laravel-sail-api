@@ -27,7 +27,7 @@ interface UseRegisterValidationParams {
 
 // Validación para flujo de empresa
 function validateCompanyStep(step: number, state: FormState, refs: Refs, dispatch: (action: FormAction) => void): boolean {
-    const { firstNameRef, lastNameRef, emailRef, identificationRef, passwordRef, confirmPasswordRef, companyNameRef, companyNitRef } = refs;
+    const { identificationRef, passwordRef, confirmPasswordRef, companyNameRef, companyNitRef } = refs;
     let isValid = true;
 
     // Paso 1: datos de empresa
@@ -58,18 +58,12 @@ function validateCompanyStep(step: number, state: FormState, refs: Refs, dispatc
         return isValid;
     }
 
-    // Paso 2: selección de responsable (solo para jurídica)
-    if (step === 2 && state.companyCategory === 'J') {
-        if (!state.userRole) {
-            dispatch({ type: 'SET_ERROR', field: 'userRole', error: 'Debes indicar si eres representante o delegado' });
+    // Paso 2: datos del representante legal
+    if (step === 2) {
+        if (!state.documentTypeRep) {
+            dispatch({ type: 'SET_ERROR', field: 'documentTypeRep', error: 'El tipo de documento del representante es requerido' });
             isValid = false;
         }
-        console.log('state', state, 'paso', step);
-        return isValid;
-    }
-
-    // Paso 3: datos del representante (o paso 2 para natural)
-    if (step === 3 || (state.companyCategory === 'N' && step === 2)) {
         if (!state.repName?.trim()) {
             dispatch({ type: 'SET_ERROR', field: 'repName', error: 'El nombre del representante es requerido' });
             isValid = false;
@@ -89,78 +83,22 @@ function validateCompanyStep(step: number, state: FormState, refs: Refs, dispatc
             dispatch({ type: 'SET_ERROR', field: 'repPhone', error: 'El celular del representante es requerido' });
             isValid = false;
         }
-        console.log('state', state, 'paso', step, 'isValid', isValid);
         return isValid;
     }
 
-    // Paso 4: datos del delegado (solo si userRole === 'delegado')
-    if (step === 4 && state.userRole === 'delegado') {
-        if (!state.position.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'position', error: 'El cargo u ocupación es requerido' });
-            isValid = false;
-        }
-        if (!state.firstName.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'firstName', error: 'El nombre del delegado es requerido' });
-            firstNameRef.current?.focus();
-            isValid = false;
-        }
-        if (!state.lastName.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'lastName', error: 'El apellido del delegado es requerido' });
-            if (isValid) lastNameRef.current?.focus();
-            isValid = false;
-        }
-        if (!state.email.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'email', error: 'El email del delegado es requerido' });
-            if (isValid) emailRef.current?.focus();
-            isValid = false;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
-            dispatch({ type: 'SET_ERROR', field: 'email', error: 'Email del delegado inválido' });
-            if (isValid) emailRef.current?.focus();
-            isValid = false;
-        }
-        if (!state.city) {
-            dispatch({ type: 'SET_ERROR', field: 'city', error: 'La ciudad es requerida' });
-            isValid = false;
-        }
-        console.log('state', state, 'paso', step);
-        return isValid;
-    }
-
-    // Paso 5: datos del representante (solo cuando hay delegado)
-    if (step === 5 && state.userRole === 'delegado') {
-        if (!state.repName?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'repName', error: 'El nombre del representante es requerido' });
-            isValid = false;
-        }
-        if (!state.repIdentification?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'repIdentification', error: 'La identificación del representante es requerida' });
-            isValid = false;
-        }
-        if (!state.repEmail?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'repEmail', error: 'El email del representante es requerido' });
-            isValid = false;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.repEmail)) {
-            dispatch({ type: 'SET_ERROR', field: 'repEmail', error: 'Email del representante inválido' });
-            isValid = false;
-        }
-        if (!state.repPhone?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'repPhone', error: 'El celular del representante es requerido' });
-            isValid = false;
-        }
-        console.log('state', state, 'paso', step);
-        return isValid;
-    }
-
-    // Paso sesión: paso 4 (sin delegado) o paso 6 (con delegado)
-    const isSessionStep = (state.userRole === 'delegado' && step === 6) || (state.userRole !== 'delegado' && step === 4);
-    if (isSessionStep) {
-        if (!state.documentType) {
-            dispatch({ type: 'SET_ERROR', field: 'documentType', error: 'El tipo de documento es requerido' });
+    // Paso 3: datos de sesión
+    if (step === 3) {
+        if (!state.documentTypeUser) {
+            dispatch({ type: 'SET_ERROR', field: 'documentTypeUser', error: 'El tipo de documento es requerido' });
             isValid = false;
         }
         if (!state.identification.trim()) {
             dispatch({ type: 'SET_ERROR', field: 'identification', error: 'La identificación es requerida' });
             if (isValid) identificationRef.current?.focus();
+            isValid = false;
+        }
+        if (!state.city) {
+            dispatch({ type: 'SET_ERROR', field: 'city', error: 'La ciudad es requerida' });
             isValid = false;
         }
         if (!state.password.trim()) {
@@ -184,7 +122,6 @@ function validateCompanyStep(step: number, state: FormState, refs: Refs, dispatc
             if (isValid) confirmPasswordRef.current?.focus();
             isValid = false;
         }
-        console.log('state', state, 'paso', step);
         return isValid;
     }
 

@@ -200,6 +200,12 @@ class FacultativoServices
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $mercurio36,
+            $nota,
+            'Solicitud de afiliación de facultativo devolución'
+        );
+
         return true;
     }
 

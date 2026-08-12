@@ -222,6 +222,12 @@ class ConyugeServices
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $mercurio32,
+            $nota,
+            'Solicitud de afiliación de cónyuge devolución'
+        );
+
         return true;
     }
 

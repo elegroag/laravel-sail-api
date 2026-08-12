@@ -81,3 +81,5 @@ CLAUDE.md
 .deploy.sh
 deploy.sh
 public/img/galeria
+public/manuales/manual-para-empleadores.pdf
+public/manuales/manual-para-trabajadores.pdf

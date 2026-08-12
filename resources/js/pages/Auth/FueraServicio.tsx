@@ -21,7 +21,7 @@ export default function FueraServicio({ msj }: FueraServicioProps) {
       <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">
         <AuthBackgroundShapes />
 
-        <div className="max-w-md mx-auto w-full">
+        <div className="relative z-10 max-w-md mx-auto w-full">
           <Alert className="border-amber-200 bg-amber-50">
             <AlertTitle className="font-semibold text-amber-800">
               Plataforma temporalmente fuera de servicio

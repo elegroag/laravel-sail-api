@@ -16,6 +16,7 @@ use App\Models\Mercurio33;
 use App\Models\Mercurio47;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaSolicitud;
+use App\Services\CajaServices\DevolucionNotificacion;
 use App\Services\CajaServices\UpDatosEmpresaServices;
 use App\Services\Srequest;
 use App\Services\Tag;
@@ -110,7 +111,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         $help = 'Esta opcion permite manejar los ';
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprobacion Empresa');
-        $mercurio30 = Mercurio30::whereRaw("estado='{$estado}' AND usuario=" . $this->user['usuario'])->orderBy('fecini', 'ASC')->get();
+        $mercurio30 = Mercurio30::whereRaw("estado='{$estado}' AND usuario=".$this->user['usuario'])->orderBy('fecini', 'ASC')->get();
         $empresas = [];
         foreach ($mercurio30 as $ai => $mercurio) {
             $background = '';
@@ -122,7 +123,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = config('app.url') . 'Cajas/aprobacionemp/info_empresa/' . $mercurio->getId();
+            $url = config('app.url').'Cajas/aprobacionemp/info_empresa/'.$mercurio->getId();
             $sat = 'NORMAL';
             if ($mercurio->getDocumentoRepresentanteSat() > 0) {
                 $sat = 'SAT';
@@ -225,15 +226,21 @@ class ApruebaUpEmpresaController extends ApplicationController
             if (! $mercurio10->save()) {
                 $msj = '';
                 foreach ($mercurio10->getMessages() as $key => $message) {
-                    $msj .= $message . '<br/>';
+                    $msj .= $message.'<br/>';
                 }
-                throw new DebugException('Error ' . $msj, 501);
+                throw new DebugException('Error '.$msj, 501);
             }
             Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update([
                 'campos_corregir' => $campos_corregir,
             ]);
 
             Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
+
+            DevolucionNotificacion::notificar(
+                $mercurio47,
+                $nota,
+                'Solicitud de actualización de datos empresa devolución'
+            );
 
             $this->db->commit();
 
@@ -294,9 +301,9 @@ class ApruebaUpEmpresaController extends ApplicationController
             if (! $mercurio10->save()) {
                 $msj = '';
                 foreach ($mercurio10->getMessages() as $key => $mess) {
-                    $msj .= $mess->getMessage() . '<br/>';
+                    $msj .= $mess->getMessage().'<br/>';
                 }
-                throw new DebugException('Error ' . $msj, 501);
+                throw new DebugException('Error '.$msj, 501);
             }
 
             Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
@@ -438,7 +445,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         }
         $_codact = [];
         foreach ($datos_captura['actividades'] as $data) {
-            $_codact["{$data['codact']}"] = $data['codact'] . ' - ' . $data['detalle'];
+            $_codact["{$data['codact']}"] = $data['codact'].' - '.$data['detalle'];
         }
 
         $_coddocrepleg = [];

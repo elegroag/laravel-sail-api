@@ -65,25 +65,17 @@ class WebController extends Controller
                 'id' => 'manual-empresa',
                 'title' => 'Manual para Empleadores',
                 'description' => 'Guía completa para la gestión de empresa, afiliación de trabajadores y novedades.',
-                'file' => '/manuales/manual-empresa.pdf',
-                'size' => '2.4 MB',
-                'disabled' => true,
+                'file' => '/manuales/manual-para-empleadores.pdf',
+                'size' => '2.6 MB',
+                'disabled' => false,
             ],
             [
                 'id' => 'manual-trabajador',
                 'title' => 'Manual para Trabajadores',
                 'description' => 'Información sobre afiliados, consulta de estado y servicios disponibles.',
-                'file' => '/manuales/manual-trabajador.pdf',
-                'size' => '1.8 MB',
-                'disabled' => true,
-            ],
-            [
-                'id' => 'manual-pensionado',
-                'title' => 'Manual para Pensionados',
-                'description' => 'Guía para pensionados afiliados a COMFACA y acceso a servicios.',
-                'file' => '/manuales/manual-pensionado.pdf',
-                'size' => '1.5 MB',
-                'disabled' => true,
+                'file' => '/manuales/manual-para-trabajadores.pdf',
+                'size' => '2.2 MB',
+                'disabled' => false,
             ],
             [
                 'id' => 'guia-rapida',
@@ -104,8 +96,8 @@ class WebController extends Controller
     public function sendContact(Request $request)
     {
         $validated = $request->validate([
-            'name'    => 'required|string|max:255',
-            'email'   => 'required|email|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
             'subject' => 'required|string|max:255',
             'message' => 'required|string|max:2000',
         ]);
@@ -123,13 +115,13 @@ class WebController extends Controller
         $adminId = $this->getAdminUserId();
         if ($adminId) {
             Notificaciones::create([
-                'titulo'  => 'Nuevo mensaje de contacto web',
-                'descri'  => "Nombre: {$validated['name']}\nCorreo: {$validated['email']}\nAsunto: {$validated['subject']}",
-                'user'    => $adminId,
-                'estado'  => 'P',
-                'result'  => null,
-                'dia'     => now()->toDateString(),
-                'hora'    => now()->toTimeString(),
+                'titulo' => 'Nuevo mensaje de contacto web',
+                'descri' => "Nombre: {$validated['name']}\nCorreo: {$validated['email']}\nAsunto: {$validated['subject']}",
+                'user' => $adminId,
+                'estado' => 'P',
+                'result' => null,
+                'dia' => now()->toDateString(),
+                'hora' => now()->toTimeString(),
             ]);
         }
 

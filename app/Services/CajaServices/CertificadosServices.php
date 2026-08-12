@@ -236,6 +236,12 @@ class CertificadosServices
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
+        DevolucionNotificacion::notificar(
+            $mercurio45,
+            $nota,
+            'Solicitud de certificado devolución'
+        );
+
         return true;
     }
 

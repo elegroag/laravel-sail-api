@@ -40,7 +40,7 @@ export interface FormState extends FormBasic {
     userRole: string;
     position: string;
     contributionRate: string;
-    // Datos del representante (solo aplica cuando userRole === 'delegado')
+    // Datos del representante legal
     repName: string;
     repIdentification: string;
     repEmail: string;

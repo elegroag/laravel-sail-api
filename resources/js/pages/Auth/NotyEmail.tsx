@@ -41,7 +41,7 @@ export default function NotyEmail({ errors }: any) {
       <div className="lg:w-1/2 p-12 flex flex-col justify-center relative">
         <AuthBackgroundShapes />
 
-        <div className="max-w-md mx-auto w-full space-y-6">
+        <div className="relative z-10 max-w-md mx-auto w-full space-y-6">
           <form
             onSubmit={handleSubmit}
             className={`space-y-4 ${successMessage ? 'hidden' : ''}`}

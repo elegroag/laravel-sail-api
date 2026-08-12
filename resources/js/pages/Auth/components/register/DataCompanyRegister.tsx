@@ -14,10 +14,9 @@ const DataCompanyRegister: React.FC<DataCompany> = (
     errors,
     onChange,
     onNextStep,
-    isJuridicaRepresentative,
+    isJuridicaRepresentative: _isJuridicaRepresentative,
     companyNameRef,
     companyNitRef,
-    addressRef,
   }
 ) => {
 return (
@@ -27,7 +26,7 @@ return (
           <Label htmlFor="companyCategory" className="text-sm font-medium text-gray-700">
             Tipo persona *
           </Label>
-          <Select value={values.companyCategory} onValueChange={(v) => onChange("companyCategory", v)}>
+          <Select value={values.companyCategory || undefined} onValueChange={(v) => onChange("companyCategory", v)}>
             <SelectTrigger className={`in-b-form mt-1 ${errors.companyCategory ? "border-red-500" : ""}`}>
               <SelectValue placeholder="Selecciona tipo" />
             </SelectTrigger>
@@ -46,12 +45,12 @@ return (
             Tipo de documento empresa *
           </Label>
           <Select
-            value={values.documentType}
+            key={`doc-type-${values.documentType || 'empty'}`}
+            value={values.documentType || undefined}
             onValueChange={(v) => onChange("documentType", v)}
-            disabled={isJuridicaRepresentative}
             >
             <SelectTrigger
-              className={`in-b-form mt-1 ${errors.documentType ? "border-red-500" : ""} ${isJuridicaRepresentative ? 'bg-gray-50 text-gray-600' : ''}`}>
+              className={`in-b-form mt-1 ${errors.documentType ? "border-red-500" : ""}`}>
               <SelectValue placeholder="Selecciona" />
             </SelectTrigger>
             <SelectContent>
@@ -90,16 +89,26 @@ return (
           type="number"
           value={values.companyNit}
           onChange={(e) => onChange("companyNit", e.target.value)}
-          placeholder="NIT de la empresa"
+          placeholder={values.companyCategory === 'N' ? 'Cédula del representante' : 'NIT de la empresa'}
           className={`in-b-form mt-1 ${errors.companyNit ? "border-red-500" : ""}`}
         />
+        {values.companyCategory === 'N' && (
+          <p className="text-xs text-slate-500 mt-1">
+            Para persona natural, este número corresponde a la misma cédula del representante legal.
+          </p>
+        )}
+        {values.companyCategory === 'J' && (
+          <p className="text-xs text-slate-500 mt-1">
+            Para persona jurídica, el NIT no puede ser la misma cédula del representante legal.
+          </p>
+        )}
         {errors.companyNit && <p className="text-red-500 text-xs mt-1">{errors.companyNit}</p>}
       </div>
       <div>
         <Label htmlFor="societyType" className="text-sm font-medium text-gray-700">
           Tipo de sociedad *
         </Label>
-        <Select value={values.societyType} onValueChange={(v) => onChange("societyType", v)}>
+        <Select value={values.societyType || undefined} onValueChange={(v) => onChange("societyType", v)}>
           <SelectTrigger className={`in-b-form mt-1 ${errors.societyType ? "border-red-500" : ""}`}>
             <SelectValue placeholder="Selecciona el tipo de sociedad" />
           </SelectTrigger>
@@ -112,20 +121,6 @@ return (
           </SelectContent>
         </Select>
         {errors.societyType && <p className="text-red-500 text-xs mt-1">{errors.societyType}</p>}
-      </div>
-      <div>
-        <Label htmlFor="address" className="text-sm font-medium text-gray-700">
-          Dirección
-        </Label>
-        <Input
-          id="address"
-          ref={addressRef}
-          type="text"
-          value={values.address}
-          onChange={(e) => onChange("address", e.target.value)}
-          placeholder="Dirección empresa"
-          className="in-b-form mt-1"
-        />
       </div>
       <Button type="button" className="w-full mt-4" onClick={onNextStep}>
         Siguiente: Datos representante
