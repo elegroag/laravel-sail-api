@@ -531,7 +531,7 @@ label.is-invalid {
     .servicios-catalog > .card {
         display: flex;
         flex-direction: column;
-        max-height: calc(100dvh - 5.5rem);
+        max-height: calc(100dvh - 3.5rem);
         overflow: hidden;
     }
 
@@ -910,6 +910,51 @@ label.is-invalid {
     color: var(--bs-danger, #f5365c);
 }
 
+.panel-compra__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.panel-compra__btn-cancelar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #64748b;
+    color: #334155;
+    background: #fff;
+}
+
+.panel-compra__btn-cancelar:hover,
+.panel-compra__btn-cancelar:focus {
+    border-color: #475569;
+    color: #0f172a;
+    background: #f8fafc;
+}
+
+.panel-compra__btn-pagar {
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    .panel-compra__actions {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .panel-compra__btn-cancelar {
+        flex: 0 1 38%;
+        width: auto;
+        min-width: 0;
+    }
+
+    .panel-compra__btn-pagar {
+        flex: 1 1 62%;
+        width: auto;
+        min-width: 0;
+    }
+}
+
 .servicios-cart-fab {
     align-items: center;
     background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
@@ -957,6 +1002,25 @@ label.is-invalid {
         background: transparent;
         border: 0;
         padding: 0;
+    }
+
+    #modal_resumen_compra .panel-compra__actions {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    #modal_resumen_compra .panel-compra__btn-cancelar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    #modal_resumen_compra .panel-compra__btn-pagar {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
     }
 }
 

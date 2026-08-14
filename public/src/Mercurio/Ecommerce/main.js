@@ -39,6 +39,20 @@ const EcommerceModule = (function () {
         $('#' + id).hide();
     }
 
+    function mostrarNoty(type, message, timeout) {
+        if (typeof Noty === 'undefined') {
+            return;
+        }
+
+        new Noty({
+            text: message,
+            layout: 'topRight',
+            theme: 'relax',
+            type: type,
+            timeout: timeout || (type === 'error' ? 10000 : 6000),
+        }).show();
+    }
+
     function sanitizarTexto(texto) {
         if (!texto) return '';
         return texto
@@ -727,9 +741,6 @@ const EcommerceModule = (function () {
         $('.servicio-card').removeClass('servicio-card--selected');
         $('.servicio-card[data-key="' + cardKey + '"]').addClass('servicio-card--selected');
 
-        mostrarPanelCompra();
-        actualizarPanelBeneficiario();
-        actualizarPanelServicio(srv);
         $('#detalle_tarifa').hide();
         $('#error_tarifa').hide();
 
@@ -775,23 +786,35 @@ const EcommerceModule = (function () {
                 $('#txt_tarifa_cupos').val(data.cupos_disponibles || '0');
 
                 var puedeComprar = actualizarCuposMesResumen(cuposMes);
-                $('#detalle_tarifa').fadeIn();
 
                 if (!puedeComprar) {
+                    mostrarNoty(
+                        'warning',
+                        'No cumple con los requisitos minimos para aplicar al servicio.'
+                    );
+                    limpiarSeleccionServicio();
                     mostrarAlertaCuposMesCero();
+                    return;
                 }
 
+                $('#detalle_tarifa').fadeIn();
+                actualizarPanelBeneficiario();
+                actualizarPanelServicio(servicioSeleccionado);
+                mostrarPanelCompra();
+
+                var nombreServicio = (servicioSeleccionado && servicioSeleccionado.nombre)
+                    ? servicioSeleccionado.nombre
+                    : 'el servicio seleccionado';
+                mostrarNoty('success', 'Se agregó "' + nombreServicio + '" al resumen de compra.');
                 actualizarFabCarrito();
             } else {
-                $('#error_tarifa_msg').text(response.message || 'No se pudo validar la tarifa');
-                $('#error_tarifa').fadeIn();
-                actualizarFabCarrito();
+                mostrarNoty('error', 'No cumple con los requisitos minimos para aplicar al servicio.');
+                limpiarSeleccionServicio();
             }
         }).fail(function () {
             ocultarLoader('loader_tarifa');
-            $('#error_tarifa_msg').text('Error de conexion al validar tarifa');
-            $('#error_tarifa').fadeIn();
-            actualizarFabCarrito();
+            mostrarNoty('error', 'Error de conexion al validar tarifa');
+            limpiarSeleccionServicio();
         });
     }
 
@@ -986,10 +1009,17 @@ const EcommerceModule = (function () {
     function bindHandlers() {
         var modalEl = document.getElementById('modal_resumen_compra');
         if (modalEl && typeof bootstrap !== 'undefined') {
-            modalResumenCompra = new bootstrap.Modal(modalEl);
+            modalResumenCompra = new bootstrap.Modal(modalEl, {
+                backdrop: 'static',
+                keyboard: false,
+            });
         }
 
         $('#btn_carrito_movil').on('click', abrirResumenCompraMovil);
+        $('#btn_cancelar_resumen_compra').on('click', function (e) {
+            e.preventDefault();
+            limpiarSeleccionServicio();
+        });
 
         $('#modal_resumen_compra').on('hidden.bs.modal', function () {
             restaurarPanelAlSlot();

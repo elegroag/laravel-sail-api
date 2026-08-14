@@ -153,9 +153,14 @@
                                         <textarea id="txt_nota" class="form-control" rows="2" placeholder="Escriba una nota si lo desea..."></textarea>
                                     </div>
 
-                                    <button type="button" id="btn_procesar_pago" class="btn btn-primary btn-lg w-100 mt-3">
-                                        <i class="fas fa-credit-card"></i> Procesar pago
-                                    </button>
+                                    <div class="panel-compra__actions mt-3">
+                                        <button type="button" id="btn_cancelar_resumen_compra" class="btn panel-compra__btn-cancelar">
+                                            Cancelar
+                                        </button>
+                                        <button type="button" id="btn_procesar_pago" class="btn btn-primary btn-lg panel-compra__btn-pagar">
+                                            <i class="fas fa-credit-card"></i> Procesar pago
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </aside>
@@ -169,11 +174,11 @@
         <i class="fas fa-shopping-cart"></i>
     </button>
 
-    <div class="modal fade" id="modal_resumen_compra" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modal_resumen_compra" tabindex="-1" aria-labelledby="modal_resumen_compra_title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Resumen de compra</h5>
+                    <h5 class="modal-title" id="modal_resumen_compra_title">Resumen de compra</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body" id="modal_resumen_compra_body"></div>
