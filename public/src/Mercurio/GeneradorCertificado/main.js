@@ -5,11 +5,95 @@ const MODAL_DIALOG_ID = 'size_modal_generic';
 const MODAL_CONTENT_ID = 'show_modal_generic';
 const CERTIFICADO_IFRAME_NAME = 'certificado_modal_iframe';
 
+const FORCE_DOWNLOAD_FIELD = 'force_download';
+
 const isMobileDevice = () => {
     return (
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        (window.innerWidth <= 768 && 'ontouchstart' in window)
+        window.innerWidth <= 768 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     );
+};
+
+const setForceDownloadFlag = ($form, enabled) => {
+    let $field = $form.find(`input[name="${FORCE_DOWNLOAD_FIELD}"]`);
+    if (!$field.length) {
+        $field = $(`<input type="hidden" name="${FORCE_DOWNLOAD_FIELD}" />`);
+        $form.append($field);
+    }
+    $field.val(enabled ? '1' : '0');
+};
+
+const parseFilenameFromContentDisposition = (header, fallback = 'certificado.pdf') => {
+    if (!header) {
+        return fallback;
+    }
+
+    const utfMatch = /filename\*=UTF-8''([^;]+)/i.exec(header);
+    if (utfMatch?.[1]) {
+        try {
+            return decodeURIComponent(utfMatch[1]);
+        } catch {
+            // ignore decode errors and try the plain filename
+        }
+    }
+
+    const match = /filename="?([^";]+)"?/i.exec(header);
+    return match?.[1]?.trim() || fallback;
+};
+
+const showDownloadError = (message) => {
+    if (window.App?.trigger) {
+        window.App.trigger('alert:error', { message });
+        return;
+    }
+
+    alert(message);
+};
+
+const downloadCertificadoMobile = async ($form) => {
+    const formEl = $form.get(0);
+    if (!formEl) {
+        return;
+    }
+
+    setForceDownloadFlag($form, true);
+    const formData = new FormData(formEl);
+
+    try {
+        const response = await fetch(formEl.action, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/pdf',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al generar el certificado (${response.status})`);
+        }
+
+        const contentType = response.headers.get('Content-Type') || '';
+        if (contentType.includes('text/html') || contentType.includes('application/json')) {
+            throw new Error('No se pudo generar el certificado. Intenta de nuevo.');
+        }
+
+        const blob = await response.blob();
+        const filename = parseFilenameFromContentDisposition(response.headers.get('Content-Disposition'));
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = filename;
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Error al descargar el certificado';
+        showDownloadError(message);
+    }
 };
 
 const showModal = () => {
@@ -64,16 +148,14 @@ const submitFormToModalIframe = () => {
         return;
     }
 
-    // Si es dispositivo móvil, descargar el certificado directamente
+    // Móvil: descarga forzada vía fetch + blob (sin pestaña vacía)
     if (isMobileDevice()) {
-        const formEl = $form.get(0);
-        if (formEl) {
-            formEl.submit();
-        }
+        downloadCertificadoMobile($form);
         return;
     }
 
-    // Si es desktop, mostrar en modal con iframe
+    // Desktop: preview en modal con iframe
+    setForceDownloadFlag($form, false);
     const prevTarget = $form.attr('target');
     $form.data('prev-target', prevTarget ?? '');
 

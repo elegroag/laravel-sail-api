@@ -448,9 +448,35 @@ class ConsultasTrabajadorController extends ApplicationController
         $cedtra = $this->user['documento'];
         $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
         $certificado->generate();
-        return response()->file($certificado->getFilePath(), [
+
+        return $this->respondCertificado($request, $certificado);
+    }
+
+    private function respondCertificado(Request $request, Certificado $certificado)
+    {
+        $path = $certificado->getFilePath();
+        $name = $certificado->getDownloadName();
+
+        if ($this->shouldForceCertificadoDownload($request)) {
+            return response()->download($path, $name, [
+                'Content-Type' => 'application/pdf',
+            ]);
+        }
+
+        return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $certificado->getDownloadName() . '"',
+            'Content-Disposition' => 'inline; filename="'.$name.'"',
         ]);
+    }
+
+    private function shouldForceCertificadoDownload(Request $request): bool
+    {
+        if ($request->boolean('force_download')) {
+            return true;
+        }
+
+        $userAgent = (string) $request->userAgent();
+
+        return preg_match('/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i', $userAgent) === 1;
     }
 }
