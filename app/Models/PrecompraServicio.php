@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\Ecommerce\EstadoPrecompra;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PrecompraServicio extends Model
 {
@@ -75,5 +76,13 @@ class PrecompraServicio extends Model
     public function transaccionesEpayco(): HasMany
     {
         return $this->hasMany(EpaycoTransaccion::class, 'precompra_id');
+    }
+
+    /**
+     * Último snapshot ePayco (validación o webhook) asociado a la precompra.
+     */
+    public function ultimaTransaccionEpayco(): HasOne
+    {
+        return $this->hasOne(EpaycoTransaccion::class, 'precompra_id')->latestOfMany();
     }
 }

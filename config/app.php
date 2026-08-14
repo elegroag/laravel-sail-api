@@ -151,7 +151,7 @@ return [
 
     'api_mode' => env('API_MODE', 'production'),
 
-    'host_api_user' => env('HOST_API_USER', "2"),
+    'host_api_user' => env('HOST_API_USER', '2'),
     'host_api_password' => env('HOST_API_PASSWORD', null),
 
     'integration' => env('APP_INTEGRATION', null),
@@ -182,6 +182,12 @@ return [
     'epayco' => [
         'mode' => env('EPAYCO_MODE'),
         'public_key' => env('EPAYCO_PUBLIC_KEY'),
-        'private_key' => env('EPAYCO_PRIVATE_KEY')
-    ]
+        'private_key' => env('EPAYCO_PRIVATE_KEY'),
+        // Credenciales del panel ePayco para validar x_signature (webhook confirmation)
+        'customer_id' => env('EPAYCO_CUSTOMER_ID'),
+        'p_key' => env('EPAYCO_P_KEY'),
+        // Verificación TLS al consultar secure.epayco.co (default true).
+        // Solo poner false en entornos dev con CA/proxy problemáticos.
+        'verify_ssl' => filter_var(env('EPAYCO_HTTP_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+    ],
 ];

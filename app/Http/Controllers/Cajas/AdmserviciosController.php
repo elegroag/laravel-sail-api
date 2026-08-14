@@ -124,11 +124,14 @@ class AdmserviciosController extends ApplicationController
                     'Valor',
                     'Estado',
                     'Referencia ePayco',
+                    'Transaction ID',
+                    'Approval code',
                     'Fecha precompra',
                     'Fecha pago',
                     'Motivo desestimacion',
                 ], ';');
                 foreach ($precompras as $precompra) {
+                    $tx = $precompra->ultimaTransaccionEpayco;
                     fputcsv($handle, [
                         $precompra->id,
                         $precompra->documento,
@@ -138,6 +141,8 @@ class AdmserviciosController extends ApplicationController
                         $precompra->valor,
                         $precompra->estado_descripcion,
                         $precompra->ref_payco,
+                        $tx?->transaction_id,
+                        $tx?->approval_code,
                         optional($precompra->fecha_precompra)->format('Y-m-d H:i'),
                         optional($precompra->fecha_pago)->format('Y-m-d H:i'),
                         trim(($precompra->motivo_desestimacion ?? '').' '.($precompra->detalle_desestimacion ?? '')),
@@ -160,7 +165,9 @@ class AdmserviciosController extends ApplicationController
      */
     protected function queryPrecompras(Request $request)
     {
-        $builder = PrecompraServicio::whereRaw("{$this->query}")->orderByDesc('id');
+        $builder = PrecompraServicio::with('ultimaTransaccionEpayco')
+            ->whereRaw("{$this->query}")
+            ->orderByDesc('id');
 
         $estado = $request->input('estado');
         if ($estado != '' && array_key_exists($estado, EstadoPrecompra::DESCRIPCIONES)) {

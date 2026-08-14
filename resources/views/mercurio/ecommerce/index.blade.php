@@ -219,6 +219,7 @@
         abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
         validarPagoEpayco: "{{ route('servicios.validar-pago-epayco') }}",
         guardarVenta: "{{ route('servicios.guardar-venta') }}",
+        epaycoConfirmation: "{{ route('api.epayco.confirmation') }}",
     };
 </script>
 <script src="{{ versioned_asset('mercurio/build/Ecommerce.js') }}"></script>

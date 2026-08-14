@@ -133,6 +133,7 @@
         listarPrecompras: "{{ route('servicios.listar-precompras') }}",
         desestimarPrecompra: "{{ route('servicios.desestimar-precompra') }}",
         abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
+        epaycoConfirmation: "{{ route('api.epayco.confirmation') }}",
     };
 </script>
 <script src="{{ versioned_asset('mercurio/build/ComprasPendientes.js') }}"></script>

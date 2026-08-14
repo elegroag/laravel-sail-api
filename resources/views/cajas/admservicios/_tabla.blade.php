@@ -20,6 +20,8 @@
             <th scope='col'>Valor</th>
             <th scope='col'>Estado</th>
             <th scope='col'>Referencia ePayco</th>
+            <th scope='col'>Transaction ID</th>
+            <th scope='col'>Approval code</th>
             <th scope='col'>Fecha precompra</th>
             <th scope='col'>Fecha pago</th>
             <th scope='col'>Motivo desestimación</th>
@@ -32,6 +34,8 @@
                 if ($precompra->motivo_desestimacion != '') {
                     if ($precompra->motivo_desestimacion === EstadoPrecompra::MOTIVO_ABANDONO_CHECKOUT) {
                         $motivo = 'Abandono del checkout ePayco';
+                    } elseif ($precompra->motivo_desestimacion === EstadoPrecompra::MOTIVO_ABANDONO_INACTIVIDAD) {
+                        $motivo = 'Abandono por inactividad';
                     } else {
                         $motivo = EstadoPrecompra::MOTIVOS_DESESTIMACION[$precompra->motivo_desestimacion] ?? $precompra->motivo_desestimacion;
                     }
@@ -39,6 +43,7 @@
                         $motivo .= ' - ' . $precompra->detalle_desestimacion;
                     }
                 }
+                $tx = $precompra->ultimaTransaccionEpayco;
             @endphp
             <tr>
                 <td>{{ $precompra->id }}</td>
@@ -51,14 +56,16 @@
                         {{ $precompra->estado_descripcion }}
                     </span>
                 </td>
-                <td>{{ $precompra->ref_payco }}</td>
+                <td>{{ $precompra->ref_payco ?: '—' }}</td>
+                <td class="text-nowrap"><code class="small">{{ $tx?->transaction_id ?: '—' }}</code></td>
+                <td class="text-nowrap"><code class="small">{{ $tx?->approval_code ?: '—' }}</code></td>
                 <td>{{ optional($precompra->fecha_precompra)->format('Y-m-d H:i') }}</td>
                 <td>{{ optional($precompra->fecha_pago)->format('Y-m-d H:i') }}</td>
                 <td>{{ $motivo }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="10" class="text-center text-muted py-4">No se encontraron registros con los filtros aplicados.</td>
+                <td colspan="12" class="text-center text-muted py-4">No se encontraron registros con los filtros aplicados.</td>
             </tr>
         @endforelse
     </tbody>

@@ -66,9 +66,20 @@ class ApiEpayco extends ApiAbstract
         $host = $this->mode === 'development' ? $endpoint->host_dev : $endpoint->host_pro;
         $url = $host."/{$endpoint->endpoint_name}/".urlencode($refPayco);
 
-        $response = Http::timeout(30)
-            ->withoutVerifying()
-            ->get($url);
+        try {
+            $http = Http::timeout(30);
+
+            if (! config('app.epayco.verify_ssl', true)) {
+                $http = $http->withoutVerifying();
+            }
+
+            $response = $http->get($url);
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'errors' => 'Error de conexion con ePayco: '.$e->getMessage(),
+            ];
+        }
 
         $status = $response->status();
 

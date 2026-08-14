@@ -1008,6 +1008,7 @@ const EcommerceModule = (function () {
             extra2: $('#hid_codser').val(),
             extra3: $('#hid_numero').val(),
             response: window.location.href,
+            confirmation: routes.epaycoConfirmation || '',
             name_billing: nombre,
             type_doc_billing: 'cc',
             number_doc_billing: documento,
@@ -1039,6 +1040,10 @@ const EcommerceModule = (function () {
                 sessionStorage.setItem('epayco_precompra_id', response.data.id);
                 marcarPagoEnValidacion(false);
                 registrarOnCloseEpayco(epaycoHandler, response.data.id);
+                data.extra4 = String(response.data.id);
+                if (routes.epaycoConfirmation) {
+                    data.confirmation = routes.epaycoConfirmation;
+                }
                 epaycoHandler.open(data);
             } else {
                 Swal.fire({

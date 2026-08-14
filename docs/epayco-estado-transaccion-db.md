@@ -98,7 +98,7 @@ ORDER BY created_at DESC;
 
 | # | Acción                                                         | Estado      |
 | - | -------------------------------------------------------------- | ----------- |
-| 1 | Mostrar `transaction_id` / `approval_code` en Admservicios     | Pendiente   |
-| 2 | Incluir campos en reporte de compras                           | Pendiente   |
-| 3 | Webhook `confirmation` + validar `x_signature`                 | Pendiente   |
-| 4 | Quitar `withoutVerifying()` en la validación TLS               | Pendiente   |
+| 1 | ~~Mostrar `transaction_id` / `approval_code` en Admservicios~~ — hecho (última tx) | Hecho       |
+| 2 | Incluir campos en reporte de compras                           | Pendiente (fuera de alcance B) |
+| 3 | ~~Webhook `confirmation` + validar `x_signature`~~ — [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md) | Hecho       |
+| 4 | ~~Verificación TLS~~ — `EPAYCO_HTTP_VERIFY_SSL` (default true; `false` solo en dev problemático) | Hecho       |

@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\AuthMercurioController;
 use App\Http\Controllers\Api\ApiEndpointController;
+use App\Http\Controllers\Api\AuthMercurioController;
 use App\Http\Controllers\Api\EmpresaController;
+use App\Http\Controllers\Api\EpaycoWebhookController;
 use App\Http\Controllers\Api\NucleoFamiliarController;
 use App\Http\Controllers\Api\TrabajadorController;
 use Illuminate\Http\Request;
@@ -10,6 +11,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('solicitar-token', [AuthMercurioController::class, 'solicitarToken'])->name('api.solicitar-token');
 Route::post('validate-token', [AuthMercurioController::class, 'validateToken'])->name('api.validate-token');
+
+// Webhook ePayco (público; seguridad vía x_signature)
+Route::post('epayco/confirmation', [EpaycoWebhookController::class, 'confirmation'])
+    ->name('api.epayco.confirmation');
 
 Route::middleware(['api.auth'])->group(function () {
     Route::post('authenticate-movile', [AuthMercurioController::class, 'authenticateMovile'])->name('api.authenticate-movile');

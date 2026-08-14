@@ -175,21 +175,19 @@ data.onClose = function() {
 
 **Limitación:** sigue dependiendo de que el usuario tenga la pestaña abierta.
 
-### 5.2 Mediano plazo — webhook `confirmation` (más robusto)
+### 5.2 Webhook `confirmation` (server-side)
 
-1. Crear un endpoint nuevo, p. ej. `POST /api/epayco/webhook` (o
-   `/mercurio/servicios/webhook-epayco`), **fuera** del middleware
-   `mercurio.auth` (ePayco no se autentica con JWT).
-2. Registrar la URL en el panel de ePayco como `confirmation`.
-3. Validar la `x_signature` que envía ePayco.
-4. Actualizar la precompra consultando el endpoint `/reference/{ref_payco}`
-   para confirmar el estado antes de cambiar nada.
-5. Hacer el flujo **idempotente**: si el mismo `ref_payco` notifica dos
-   veces, no romper.
+Implementado. Guía:
+[epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md).
+
+`POST /api/epayco/confirmation` valida `x_signature`, audita en
+`epayco_transacciones` (`origen=webhook`), actualiza la precompra
+(idempotente si ya estaba `PA`) y registra la venta en subsidio si el pago
+es aceptado.
 
 **Beneficio:** confirmación aunque el usuario cierre el navegador.
 
-**Riesgo:** exponer endpoint público → obligatorio validar firma.
+**Riesgo mitigado:** endpoint público protegido con validación de firma.
 
 ### 5.3 Job de limpieza de precompras abandonadas
 
@@ -226,8 +224,9 @@ Requiere que el scheduler del servidor esté activo. Guía operativa:
    este proyecto lo mostraría sin filtro.
 4. **Branding inconsistente** — la modal rompe el look & feel del resto de
    la aplicación.
-5. **Sin firma en respuestas** — si en el futuro se agrega un webhook sin
-   validar `x_signature`, queda expuesto a manipulación.
+5. **Sin firma en respuestas** — mitigado en el webhook `confirmation`
+   (validación de `x_signature`). El flujo `validarReferencia` sigue
+   confiando en la API de ePayco.
 
 ---
 
@@ -235,9 +234,9 @@ Requiere que el scheduler del servidor esté activo. Guía operativa:
 
 | # | Acción                                                                   | Esfuerzo | Valor |
 | - | ------------------------------------------------------------------------ | -------- | ----- |
-| 1 | Agregar `onClose` con SweetAlert informativo                              | Bajo     | Alto  |
+| 1 | ~~Agregar `onClose` con SweetAlert informativo~~ — hecho | — | — |
 | 2 | Whitelist de medios de pago con `methods`                                | Bajo     | Medio |
-| 3 | Crear endpoint de webhook `confirmation` con validación de firma         | Medio    | Alto  |
+| 3 | ~~Webhook `confirmation` + firma~~ — [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md) | — | — |
 | 4 | ~~Job programado que marque precompras abandonadas~~ — hecho (`precompras:marcar-abandonadas`) | — | — |
 | 5 | Customizar textos (`titleButtonPay`, `title`)                            | Bajo     | Bajo  |
-| 6 | Habilitar verificación TLS en `ApiEpayco::validarReferencia()` (sin `withoutVerifying()`) | Bajo | Seguridad |
+| 6 | ~~Verificación TLS en `validarReferencia`~~ — `EPAYCO_HTTP_VERIFY_SSL` (default true) | — | — |
