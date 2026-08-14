@@ -1,11 +1,11 @@
 import { $App } from '@/App';
+import loading from '@/Componentes/Views/Loading';
 
 const MODAL_ID = 'modal_generic';
 const MODAL_DIALOG_ID = 'size_modal_generic';
 const MODAL_CONTENT_ID = 'show_modal_generic';
 const CERTIFICADO_IFRAME_NAME = 'certificado_modal_iframe';
-
-const FORCE_DOWNLOAD_FIELD = 'force_download';
+const SEND_EMAIL_FIELD = 'send_email';
 
 const isMobileDevice = () => {
     return (
@@ -14,86 +14,13 @@ const isMobileDevice = () => {
     );
 };
 
-const setForceDownloadFlag = ($form, enabled) => {
-    let $field = $form.find(`input[name="${FORCE_DOWNLOAD_FIELD}"]`);
+const setSendEmailFlag = ($form, enabled) => {
+    let $field = $form.find(`input[name="${SEND_EMAIL_FIELD}"]`);
     if (!$field.length) {
-        $field = $(`<input type="hidden" name="${FORCE_DOWNLOAD_FIELD}" />`);
+        $field = $(`<input type="hidden" name="${SEND_EMAIL_FIELD}" />`);
         $form.append($field);
     }
     $field.val(enabled ? '1' : '0');
-};
-
-const parseFilenameFromContentDisposition = (header, fallback = 'certificado.pdf') => {
-    if (!header) {
-        return fallback;
-    }
-
-    const utfMatch = /filename\*=UTF-8''([^;]+)/i.exec(header);
-    if (utfMatch?.[1]) {
-        try {
-            return decodeURIComponent(utfMatch[1]);
-        } catch {
-            // ignore decode errors and try the plain filename
-        }
-    }
-
-    const match = /filename="?([^";]+)"?/i.exec(header);
-    return match?.[1]?.trim() || fallback;
-};
-
-const showDownloadError = (message) => {
-    if (window.App?.trigger) {
-        window.App.trigger('alert:error', { message });
-        return;
-    }
-
-    alert(message);
-};
-
-const downloadCertificadoMobile = async ($form) => {
-    const formEl = $form.get(0);
-    if (!formEl) {
-        return;
-    }
-
-    setForceDownloadFlag($form, true);
-    const formData = new FormData(formEl);
-
-    try {
-        const response = await fetch(formEl.action, {
-            method: 'POST',
-            body: formData,
-            credentials: 'same-origin',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                Accept: 'application/pdf',
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error al generar el certificado (${response.status})`);
-        }
-
-        const contentType = response.headers.get('Content-Type') || '';
-        if (contentType.includes('text/html') || contentType.includes('application/json')) {
-            throw new Error('No se pudo generar el certificado. Intenta de nuevo.');
-        }
-
-        const blob = await response.blob();
-        const filename = parseFilenameFromContentDisposition(response.headers.get('Content-Disposition'));
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = objectUrl;
-        link.download = filename;
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-    } catch (error) {
-        const message = error instanceof Error ? error.message : 'Error al descargar el certificado';
-        showDownloadError(message);
-    }
 };
 
 const showModal = () => {
@@ -110,6 +37,54 @@ const showModal = () => {
     if (typeof window.$ !== 'undefined' && typeof window.$(el).modal === 'function') {
         window.$(el).modal('show');
     }
+};
+
+const showError = (message) => {
+    if (window.App?.trigger) {
+        window.App.trigger('alert:error', { message });
+        return;
+    }
+
+    alert(message);
+};
+
+const openEmailSentModal = (emailMasked) => {
+    const $dialog = $(`#${MODAL_DIALOG_ID}`);
+    if ($dialog.length) {
+        $dialog.removeClass().addClass('modal-dialog modal-dialog-centered');
+    }
+
+    const emailText = emailMasked
+        ? `al correo <strong>${emailMasked}</strong>`
+        : 'al correo registrado en su cuenta';
+
+    const html = `
+        <div class="card-header py-3 border-0">
+            <div class="d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">Certificado enviado</h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" data-dismiss="modal"></button>
+            </div>
+        </div>
+        <div class="card-body pt-0 pb-4 px-4">
+            <div class="text-center mb-3">
+                <i class="fas fa-shield-alt fa-2x text-success" aria-hidden="true"></i>
+            </div>
+            <p class="mb-2 text-center">
+                Por seguridad, el certificado se ha enviado ${emailText}.
+            </p>
+            <p class="mb-0 text-center text-muted small">
+                Revise su bandeja de entrada o carpeta de spam.
+            </p>
+            <div class="d-grid mt-4">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-dismiss="modal">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    `;
+
+    $(`#${MODAL_CONTENT_ID}`).html(html);
+    showModal();
 };
 
 const openCertificadoModal = (title) => {
@@ -138,6 +113,50 @@ const openCertificadoModal = (title) => {
     showModal();
 };
 
+const sendCertificadoByEmail = async ($form) => {
+    const formEl = $form.get(0);
+    if (!formEl) {
+        return;
+    }
+
+    setSendEmailFlag($form, true);
+    const formData = new FormData(formEl);
+    const $button = $('#bt_certificado_afiliacion');
+    $button.prop('disabled', true);
+    loading.show();
+
+    try {
+        const response = await fetch(formEl.action, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+            },
+        });
+
+        let payload = null;
+        try {
+            payload = await response.json();
+        } catch {
+            payload = null;
+        }
+
+        if (!response.ok || !payload?.success) {
+            throw new Error(payload?.msj || `No se pudo enviar el certificado (${response.status})`);
+        }
+
+        openEmailSentModal(payload.email_masked);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Error al enviar el certificado por correo';
+        showError(message);
+    } finally {
+        loading.hide();
+        $button.prop('disabled', false);
+    }
+};
+
 const submitFormToModalIframe = () => {
     const $form = $('#form');
     if (!$form.length) {
@@ -148,14 +167,14 @@ const submitFormToModalIframe = () => {
         return;
     }
 
-    // Móvil: descarga forzada vía fetch + blob (sin pestaña vacía)
+    // Móvil: enviar certificado por correo y mostrar confirmación
     if (isMobileDevice()) {
-        downloadCertificadoMobile($form);
+        sendCertificadoByEmail($form);
         return;
     }
 
     // Desktop: preview en modal con iframe
-    setForceDownloadFlag($form, false);
+    setSendEmailFlag($form, false);
     const prevTarget = $form.attr('target');
     $form.data('prev-target', prevTarget ?? '');
 

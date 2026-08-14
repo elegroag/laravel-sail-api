@@ -23,6 +23,7 @@ use App\Services\Api\ApiSubsidio;
 use App\Services\Certificados\CertiEmpleador;
 use App\Services\Certificados\Certificado;
 use App\Services\Certificados\CertiTrabajador;
+use App\Services\Certificados\EnviarCertificadoEmailService;
 use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Logger;
@@ -713,7 +714,7 @@ class ConsultasEmpresaController extends ApplicationController
         $certificado = new Certificado(new CertiEmpleador($nit, 'A'));
         $certificado->generate();
 
-        return $this->respondCertificado($request, $certificado);
+        return $this->respondCertificado($request, $certificado, 'A');
     }
 
     public function certificadoParaTrabajadorView()
@@ -763,7 +764,7 @@ class ConsultasEmpresaController extends ApplicationController
         $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
         $certificado->generate();
 
-        return $this->respondCertificado($request, $certificado);
+        return $this->respondCertificado($request, $certificado, $tipo);
     }
 
     public function ejemploPlanillaActivacionMasiva()
@@ -974,16 +975,39 @@ class ConsultasEmpresaController extends ApplicationController
         return response()->json($salida);
     }
 
-    private function respondCertificado(Request $request, Certificado $certificado)
+    private function respondCertificado(Request $request, Certificado $certificado, ?string $tipoCertificado = null)
     {
+        if ($this->shouldSendCertificadoByEmail($request)) {
+            try {
+                $tipoLabels = [
+                    'A' => 'Certificado Afiliación Principal',
+                    'I' => 'Certificación Con Núcleo',
+                    'T' => 'Certificación de Multiafiliación',
+                    'P' => 'Reporte trabajador en planillas',
+                ];
+
+                $result = (new EnviarCertificadoEmailService)->sendToSolicitante(
+                    $this->user ?? [],
+                    $this->tipo,
+                    $certificado,
+                    $tipoLabels[$tipoCertificado] ?? null
+                );
+
+                return response()->json([
+                    'success' => true,
+                    'msj' => 'El certificado se ha enviado al correo registrado por seguridad.',
+                    'email_masked' => $result['email_masked'],
+                ]);
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => $e->getMessage() ?: 'No se pudo enviar el certificado por correo.',
+                ], 422);
+            }
+        }
+
         $path = $certificado->getFilePath();
         $name = $certificado->getDownloadName();
-
-        if ($this->shouldForceCertificadoDownload($request)) {
-            return response()->download($path, $name, [
-                'Content-Type' => 'application/pdf',
-            ]);
-        }
 
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
@@ -991,9 +1015,9 @@ class ConsultasEmpresaController extends ApplicationController
         ]);
     }
 
-    private function shouldForceCertificadoDownload(Request $request): bool
+    private function shouldSendCertificadoByEmail(Request $request): bool
     {
-        if ($request->boolean('force_download')) {
+        if ($request->boolean('send_email') || $request->boolean('force_download')) {
             return true;
         }
 
