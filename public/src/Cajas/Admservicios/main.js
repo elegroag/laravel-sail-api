@@ -13,9 +13,13 @@ const readFiltro = () => ({
 });
 
 const renderResultado = (response) => {
+    const cantidadActual = $('#cantidad_paginate').val();
     if (response) {
         $('#consulta').html(response.consulta);
         $('#paginate').html(response.paginate);
+        if (cantidadActual) {
+            $('#cantidad_paginate').val(cantidadActual);
+        }
     } else {
         Messages.display('No se pudo cargar la consulta.', 'error');
     }
@@ -57,6 +61,41 @@ const buscar = (elem = undefined) => {
     });
 };
 
+const abrirDetallePrecompra = (id) => {
+    const modalEl = document.getElementById('modal_detalle_precompra');
+    if (!modalEl) {
+        Messages.display('No se encontró el modal de detalle.', 'error');
+        return;
+    }
+
+    const $body = $('#modal_detalle_precompra_body');
+    const $titulo = $('#modal_detalle_precompra_titulo');
+    $titulo.text('Detalle de precompra #' + id);
+    $body.html('<div class="text-center text-muted py-4">Cargando…</div>');
+
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+
+    window.App.trigger('syncro', {
+        url: window.App.url(controller() + '/detalle/' + id),
+        data: {},
+        callback: (response) => {
+            if (response && response.success && response.html) {
+                if (response.titulo) {
+                    $titulo.text(response.titulo);
+                }
+                $body.html(response.html);
+                return;
+            }
+            $body.html(
+                '<div class="alert alert-warning mb-0">' +
+                    (response?.msj || 'No se pudo cargar el detalle.') +
+                '</div>'
+            );
+        },
+    });
+};
+
 $(() => {
     window.App.initialize();
 
@@ -73,6 +112,14 @@ $(() => {
         target.addClass('active');
         $('#chip_estado').val(target.attr('data-estado'));
         aplicarFiltro();
+    });
+
+    // Detalle precompra + transacciones
+    $(document).on('click', "[data-toggle='detalle-precompra']", (e) => {
+        e.preventDefault();
+        const id = $(e.currentTarget).data('id');
+        if (!id) return;
+        abrirDetallePrecompra(id);
     });
 
     // Paginación

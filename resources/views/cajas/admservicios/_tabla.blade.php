@@ -4,7 +4,7 @@
     $badgeEstado = [
         EstadoPrecompra::PENDIENTE => 'bg-warning text-dark',
         EstadoPrecompra::PAGADO => 'bg-success',
-        EstadoPrecompra::DESESTIMADO => 'bg-secondary',
+        EstadoPrecompra::DESESTIMADO => 'badge-estado-desestimado',
         EstadoPrecompra::RECHAZADO => 'bg-danger',
         EstadoPrecompra::ABANDONADA => 'bg-dark',
     ];
@@ -25,6 +25,7 @@
             <th scope='col'>Fecha precompra</th>
             <th scope='col'>Fecha pago</th>
             <th scope='col'>Motivo desestimación</th>
+            <th scope='col' class="text-center">Acciones</th>
         </tr>
     </thead>
     <tbody class='list'>
@@ -62,10 +63,21 @@
                 <td>{{ optional($precompra->fecha_precompra)->format('Y-m-d H:i') }}</td>
                 <td>{{ optional($precompra->fecha_pago)->format('Y-m-d H:i') }}</td>
                 <td>{{ $motivo }}</td>
+                <td class="text-center text-nowrap">
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        data-toggle="detalle-precompra"
+                        data-id="{{ $precompra->id }}"
+                        title="Ver detalle y transacciones"
+                    >
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
             </tr>
         @empty
             <tr>
-                <td colspan="12" class="text-center text-muted py-4">No se encontraron registros con los filtros aplicados.</td>
+                <td colspan="13" class="text-center text-muted py-4">No se encontraron registros con los filtros aplicados.</td>
             </tr>
         @endforelse
     </tbody>

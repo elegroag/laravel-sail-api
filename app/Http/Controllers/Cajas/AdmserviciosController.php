@@ -66,7 +66,10 @@ class AdmserviciosController extends ApplicationController
 
     public function changeCantidadPagina(Request $request)
     {
-        $this->cantidad_pagina = $request->input('numero');
+        $numero = $request->input('numero');
+        if ($numero != '' && is_numeric($numero)) {
+            $this->cantidad_pagina = (int) $numero;
+        }
 
         return $this->buscar($request);
     }
@@ -87,7 +90,7 @@ class AdmserviciosController extends ApplicationController
 
         $html = $this->showTabla($paginate);
         $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
+        $html_paginate = $consultasOldServices->showPaginate($paginate, $this->cantidad_pagina);
 
         $response['consulta'] = $html;
         $response['paginate'] = $html_paginate;
@@ -100,6 +103,36 @@ class AdmserviciosController extends ApplicationController
         return view('cajas.admservicios._tabla', [
             'paginate' => $paginate,
         ])->render();
+    }
+
+    /**
+     * POST /cajas/admservicios/detalle/{id}
+     * HTML del detalle de precompra + historial epayco_transacciones.
+     */
+    public function detalle(int $id)
+    {
+        $precompra = PrecompraServicio::with([
+            'transaccionesEpayco' => function ($q) {
+                $q->orderBy('id');
+            },
+        ])->find($id);
+
+        if (! $precompra) {
+            return $this->renderObject([
+                'success' => false,
+                'msj' => 'La precompra no existe',
+            ]);
+        }
+
+        $html = view('cajas.admservicios._detalle', [
+            'precompra' => $precompra,
+        ])->render();
+
+        return $this->renderObject([
+            'success' => true,
+            'html' => $html,
+            'titulo' => 'Precompra #'.$precompra->id,
+        ]);
     }
 
     public function reporte(Request $request, $format = 'csv')

@@ -151,10 +151,11 @@ class GeneralService
         return $dias;
     }
 
-    public function showPaginate($paginate)
+    public function showPaginate($paginate, $cantidadPaginas = null)
     {
         return view('templates/paginate_traditional', [
             'paginate' => $paginate,
+            'cantidadPaginas' => $cantidadPaginas ?? request()->input('numero', 10),
         ])->render();
     }
 

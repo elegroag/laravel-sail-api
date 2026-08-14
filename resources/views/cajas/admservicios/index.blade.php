@@ -3,6 +3,15 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
+    <style>
+        /* Desestimado (DE): purple pastel oscuro — no depende de bg-secondary del tema */
+        .badge.badge-estado-desestimado {
+            background-color: #7a6b9a !important;
+            color: #f5f0fa !important;
+            border: 1px solid #6a5b88;
+            font-weight: 600;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -29,6 +38,24 @@
                     <div id='consulta' class='table-responsive'></div>
                     <div id='paginate' class='card-footer py-4'></div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal detalle precompra + transacciones ePayco --}}
+<div class="modal fade" id="modal_detalle_precompra" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_detalle_precompra_titulo">Detalle de precompra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modal_detalle_precompra_body">
+                <div class="text-center text-muted py-4">Cargando…</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
