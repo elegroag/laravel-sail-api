@@ -25,9 +25,9 @@
     <link rel="stylesheet" href="{{ asset('assets/sweetalert2/dist/sweetalert2.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/flatpickr/flatpickr.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('theme/css/headroom.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/css/nucleo.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/css/nucleo.svg.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/headroom.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/nucleo.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/nucleo.svg.css') }}" />
 
     <script type="text/javascript" src="{{ asset('assets/jquery/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('assets/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>

@@ -3,9 +3,9 @@
 @section('application', 'cajas')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('theme/css/argon-mercurio.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/css/argon-sidenav.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/css/argon-content.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/argon-mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/argon-sidenav.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/argon-content.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/choices/choices.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/datatables.net.bs5/css/dataTables.bootstrap5.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/summernote/summernote-bs5.css') }}" />

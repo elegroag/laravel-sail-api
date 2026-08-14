@@ -10,9 +10,9 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('C
 @endphp
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('theme/css/argon-mercurio.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/css/argon-sidenav.css') }}" />
-    <link rel="stylesheet" href="{{ asset('theme/css/argon-content.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/argon-mercurio.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/argon-sidenav.css') }}" />
+    <link rel="stylesheet" href="{{ versioned_asset('theme/css/argon-content.css') }}" />
     <link rel="stylesheet" href="{{ versioned_asset('mercurio/css/mercurio.css') }}" />
 @endpush
 

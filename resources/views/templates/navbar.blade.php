@@ -126,10 +126,9 @@
                             <span class="dropdown-user-role">Usuario</span>
                         </div>
                     </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
+                    <li class="dropdown-user-actions">
                         <a class="dropdown-item dropdown-item-logout" href="{{ route('login.salir') }}">
-                            <i class="ni ni-user-run"></i>
+                            <i class="ni ni-user-run" aria-hidden="true"></i>
                             <span>Cerrar sesión</span>
                         </a>
                     </li>
