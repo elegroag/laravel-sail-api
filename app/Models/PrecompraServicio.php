@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\Ecommerce\EstadoPrecompra;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PrecompraServicio extends Model
 {
@@ -61,8 +62,18 @@ class PrecompraServicio extends Model
         return $this->estado === EstadoPrecompra::RECHAZADO;
     }
 
+    public function isAbandonada(): bool
+    {
+        return $this->estado === EstadoPrecompra::ABANDONADA;
+    }
+
     public function getEstadoDescripcionAttribute(): string
     {
         return EstadoPrecompra::descripcion($this->estado);
+    }
+
+    public function transaccionesEpayco(): HasMany
+    {
+        return $this->hasMany(EpaycoTransaccion::class, 'precompra_id');
     }
 }

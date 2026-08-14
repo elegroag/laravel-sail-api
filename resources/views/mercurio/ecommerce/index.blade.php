@@ -216,6 +216,7 @@
         listarServicios: "{{ route('servicios.listar-servicios') }}",
         validarTarifa: "{{ route('servicios.validar-tarifa') }}",
         crearPrecompra: "{{ route('servicios.crear-precompra') }}",
+        abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
         validarPagoEpayco: "{{ route('servicios.validar-pago-epayco') }}",
         guardarVenta: "{{ route('servicios.guardar-venta') }}",
     };

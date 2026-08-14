@@ -359,6 +359,44 @@ const ComprasPendientesModule = (function () {
         sessionStorage.setItem('epayco_codben', precompra.codben || cedtra);
         sessionStorage.setItem('epayco_precompra_id', String(precompra.id));
 
+        epaycoHandler.onCloseModal = function () {
+            setTimeout(function () {
+                if (window.__epaycoPagoEnValidacion) {
+                    return;
+                }
+
+                $.ajax({
+                    url: routes.abandonarPrecompra,
+                    method: 'POST',
+                    dataType: 'JSON',
+                    cache: false,
+                    data: { precompra_id: precompra.id },
+                }).done(function (response) {
+                    if (!response.success || !response.data || !response.data.abandonada) {
+                        return;
+                    }
+
+                    sessionStorage.removeItem('epayco_cedtra');
+                    sessionStorage.removeItem('epayco_codser');
+                    sessionStorage.removeItem('epayco_numero');
+                    sessionStorage.removeItem('epayco_nota');
+                    sessionStorage.removeItem('epayco_codben');
+                    sessionStorage.removeItem('epayco_precompra_id');
+
+                    Swal.fire({
+                        title: 'Pago no completado',
+                        html:
+                            '<p>Cerraste la pasarela sin finalizar el pago.</p>' +
+                            '<p class="mb-0">La compra quedó marcada como <b>abandonada</b> y no se puede retomar.</p>',
+                        icon: 'info',
+                        confirmButtonText: 'Entendido',
+                    }).then(function () {
+                        cargarDatos();
+                    });
+                });
+            }, 2500);
+        };
+
         epaycoHandler.open(data);
     }
 

@@ -21,11 +21,14 @@ class EstadoPrecompra
 
     public const RECHAZADO = 'RE';
 
+    public const ABANDONADA = 'AB';
+
     public const DESCRIPCIONES = [
         self::PENDIENTE => 'Pendiente de pago',
         self::PAGADO => 'Pagado',
         self::DESESTIMADO => 'Desestimado',
         self::RECHAZADO => 'Rechazado',
+        self::ABANDONADA => 'Abandonada',
     ];
 
     /**
@@ -33,6 +36,10 @@ class EstadoPrecompra
      * La clave OTRO habilita un campo de texto libre en el frontend.
      */
     public const MOTIVO_OTRO = 'OTRO';
+
+    public const MOTIVO_ABANDONO_CHECKOUT = 'ABANDONO_CHECKOUT';
+
+    public const MOTIVO_ABANDONO_INACTIVIDAD = 'ABANDONO_INACTIVIDAD';
 
     public const MOTIVOS_DESESTIMACION = [
         'YA_NO_INTERESA' => 'Ya no estoy interesado en el servicio',
@@ -45,6 +52,11 @@ class EstadoPrecompra
     /**
      * El estado DESESTIMADO nunca se asigna automaticamente: queda reservado
      * para cuando el usuario desestima la compra de forma manual con un motivo.
+     *
+     * El estado ABANDONADA se asigna cuando el usuario cierra el checkout de
+     * ePayco sin completar el pago (onClose), o cuando el job de limpieza
+     * marca precompras PE antiguas por inactividad. Queda cerrada y no es retomable.
+     *
      * Mientras el pago no se complete ni sea rechazado por la pasarela,
      * la precompra permanece PENDIENTE para que el usuario pueda retomarla.
      */

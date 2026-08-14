@@ -282,6 +282,57 @@ const EcommerceModule = (function () {
         sessionStorage.removeItem('epayco_precompra_id');
     }
 
+    function marcarPagoEnValidacion(activo) {
+        window.__epaycoPagoEnValidacion = !!activo;
+    }
+
+    function marcarPrecompraAbandonada(precompraId) {
+        if (!precompraId || !routes.abandonarPrecompra) {
+            return;
+        }
+
+        if (window.__epaycoPagoEnValidacion) {
+            return;
+        }
+
+        $.ajax({
+            url: routes.abandonarPrecompra,
+            method: 'POST',
+            dataType: 'JSON',
+            cache: false,
+            data: { precompra_id: precompraId },
+        }).done(function (response) {
+            if (!response.success || !response.data || !response.data.abandonada) {
+                return;
+            }
+
+            limpiarSessionEpayco();
+            limpiarSeleccionServicio();
+
+            Swal.fire({
+                title: 'Pago no completado',
+                html:
+                    '<p>Cerraste la pasarela sin finalizar el pago.</p>' +
+                    '<p class="mb-0">La compra quedó marcada como <b>abandonada</b> y no se puede retomar.</p>',
+                icon: 'info',
+                confirmButtonText: 'Entendido',
+            });
+        });
+    }
+
+    function registrarOnCloseEpayco(epaycoHandler, precompraId) {
+        if (!epaycoHandler || !precompraId) {
+            return;
+        }
+
+        epaycoHandler.onCloseModal = function () {
+            // Esperar a una posible redireccion/validacion post-pago antes de abandonar
+            setTimeout(function () {
+                marcarPrecompraAbandonada(precompraId);
+            }, 2500);
+        };
+    }
+
     function pagoEpaycoAprobado(datos) {
         return datos && parseInt(datos.cod_estado) === 1 && datos.aprobado === true;
     }
@@ -333,11 +384,14 @@ const EcommerceModule = (function () {
         }
 
         if (refPayco) {
+            marcarPagoEnValidacion(true);
+
             if (window.history && window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
 
             if (codEstadoUrl && codEstadoUrl !== 1) {
+                marcarPagoEnValidacion(false);
                 mostrarPagoNoRegistrado(codEstadoUrl, refPayco, motivoUrl);
                 return;
             }
@@ -983,6 +1037,8 @@ const EcommerceModule = (function () {
         }).done(function (response) {
             if (response.success && response.data && response.data.id) {
                 sessionStorage.setItem('epayco_precompra_id', response.data.id);
+                marcarPagoEnValidacion(false);
+                registrarOnCloseEpayco(epaycoHandler, response.data.id);
                 epaycoHandler.open(data);
             } else {
                 Swal.fire({

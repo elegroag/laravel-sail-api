@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mercurio;
 
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Models\EpaycoTransaccion;
 use App\Models\PrecompraServicio;
 use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
@@ -184,7 +185,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar servicios: ' . $e->getMessage(),
+                    'message' => 'Error al cargar servicios: '.$e->getMessage(),
                 ]
             );
         }
@@ -244,7 +245,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar tarifa: ' . $e->getMessage(),
+                    'message' => 'Error al validar tarifa: '.$e->getMessage(),
                 ]
             );
         }
@@ -299,7 +300,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al registrar la precompra: ' . $e->getMessage(),
+                'message' => 'Error al registrar la precompra: '.$e->getMessage(),
             ]);
         }
     }
@@ -351,7 +352,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar pago: ' . $e->getMessage(),
+                    'message' => 'Error al validar pago: '.$e->getMessage(),
                 ]
             );
         }
@@ -443,7 +444,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al guardar la venta: ' . $e->getMessage(),
+                    'message' => 'Error al guardar la venta: '.$e->getMessage(),
                 ]
             );
         }
@@ -498,7 +499,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar compras: ' . $e->getMessage(),
+                    'message' => 'Error al cargar compras: '.$e->getMessage(),
                 ]
             );
         }
@@ -517,7 +518,7 @@ class EcommerceController extends ApplicationController
                 ->where('estado', EstadoPrecompra::PENDIENTE)
                 ->orderByDesc('fecha_precompra')
                 ->get()
-                ->map(fn(PrecompraServicio $precompra) => [
+                ->map(fn (PrecompraServicio $precompra) => [
                     'id' => $precompra->id,
                     'codser' => $precompra->codser,
                     'numero' => $precompra->numero,
@@ -539,7 +540,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar las compras pendientes: ' . $e->getMessage(),
+                'message' => 'Error al cargar las compras pendientes: '.$e->getMessage(),
             ]);
         }
     }
@@ -554,8 +555,8 @@ class EcommerceController extends ApplicationController
         try {
             $data = $request->validate([
                 'precompra_id' => 'required|integer|min:1',
-                'motivo' => 'required|string|in:' . implode(',', array_keys(EstadoPrecompra::MOTIVOS_DESESTIMACION)),
-                'detalle' => 'required_if:motivo,' . EstadoPrecompra::MOTIVO_OTRO . '|nullable|string|max:255',
+                'motivo' => 'required|string|in:'.implode(',', array_keys(EstadoPrecompra::MOTIVOS_DESESTIMACION)),
+                'detalle' => 'required_if:motivo,'.EstadoPrecompra::MOTIVO_OTRO.'|nullable|string|max:255',
             ], [
                 'motivo.required' => 'Debe seleccionar un motivo',
                 'motivo.in' => 'El motivo seleccionado no es válido',
@@ -605,7 +606,99 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al desestimar la compra: ' . $e->getMessage(),
+                'message' => 'Error al desestimar la compra: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * POST /mercurio/servicios/abandonar-precompra
+     * AJAX: Marca como abandonada (AB) una precompra pendiente cuando el usuario
+     * cierra el checkout de ePayco sin completar el pago. No es retomable.
+     */
+    public function abandonarPrecompra(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'precompra_id' => 'required|integer|min:1',
+            ]);
+
+            $documento = self::getActUser('documento');
+
+            $precompra = PrecompraServicio::where('id', $data['precompra_id'])
+                ->where('documento', $documento)
+                ->first();
+
+            if (! $precompra) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La precompra no existe',
+                ]);
+            }
+
+            // Si ya se pago o gestiono, no degradar
+            if ($precompra->isPagado() || $precompra->isDesestimado() || $precompra->isRechazado()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'id' => $precompra->id,
+                        'estado' => $precompra->estado,
+                        'abandonada' => false,
+                    ],
+                    'message' => 'La precompra ya fue gestionada',
+                ]);
+            }
+
+            if ($precompra->isAbandonada()) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'id' => $precompra->id,
+                        'estado' => $precompra->estado,
+                        'abandonada' => true,
+                    ],
+                    'message' => 'La precompra ya estaba abandonada',
+                ]);
+            }
+
+            if (! $precompra->isPendiente()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La precompra no se puede abandonar en su estado actual',
+                ]);
+            }
+
+            $precompra->fill([
+                'estado' => EstadoPrecompra::ABANDONADA,
+                'motivo_desestimacion' => EstadoPrecompra::MOTIVO_ABANDONO_CHECKOUT,
+                'detalle_desestimacion' => 'Cierre del checkout de ePayco sin completar el pago',
+                'fecha_desestimacion' => now(),
+            ]);
+            $precompra->save();
+
+            $this->setLogger("Precompra {$precompra->id} abandonada por cierre de checkout - documento: {$documento}");
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $precompra->id,
+                    'estado' => $precompra->estado,
+                    'abandonada' => true,
+                ],
+                'message' => 'La compra fue marcada como abandonada',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos invalidos',
+                'errors' => $e->errors(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al abandonar la compra: '.$e->getMessage(),
             ]);
         }
     }
@@ -613,9 +706,10 @@ class EcommerceController extends ApplicationController
     /**
      * Actualiza el estado de la precompra segun la respuesta de ePayco.
      * Busca por ref_payco y, si no hay coincidencia, por el id de precompra
-     * enviado desde el frontend (solo si sigue pendiente).
+     * enviado desde el frontend (pendiente o abandonada por carrera con onClose).
+     * Siempre registra un snapshot en epayco_transacciones para auditoria.
      */
-    protected function actualizarPrecompraDesdePago(array $datosPago, int $precompraId = 0): void
+    protected function actualizarPrecompraDesdePago(array $datosPago, int $precompraId = 0, string $origen = 'validacion'): void
     {
         try {
             $refPayco = (string) ($datosPago['ref_payco'] ?? '');
@@ -625,41 +719,66 @@ class EcommerceController extends ApplicationController
                 $precompra = PrecompraServicio::where('ref_payco', $refPayco)->first();
             }
 
-            if (! $precompra && $precompraId > 0) {
-                $precompra = PrecompraServicio::where('id', $precompraId)
-                    ->where('estado', EstadoPrecompra::PENDIENTE)
+            $precompraActualizable = $precompra;
+
+            if (! $precompraActualizable && $precompraId > 0) {
+                $precompraActualizable = PrecompraServicio::where('id', $precompraId)
+                    ->whereIn('estado', [EstadoPrecompra::PENDIENTE, EstadoPrecompra::ABANDONADA])
                     ->first();
             }
 
-            if (! $precompra) {
+            // Asociar auditoria aunque la precompra ya no sea PE/AB
+            if (! $precompra && ! $precompraActualizable && $precompraId > 0) {
+                $precompra = PrecompraServicio::where('id', $precompraId)->first();
+            } elseif (! $precompra) {
+                $precompra = $precompraActualizable;
+            }
+
+            $this->registrarTransaccionEpayco($precompra?->id ?? $precompraActualizable?->id, $datosPago, $origen);
+
+            if (! $precompraActualizable) {
                 return;
             }
 
             // No degradar una precompra que ya quedo pagada
-            if ($precompra->isPagado()) {
+            if ($precompraActualizable->isPagado()) {
                 return;
             }
 
             $codEstado = (int) ($datosPago['cod_estado'] ?? 0);
             $nuevoEstado = EstadoPrecompra::desdeCodigoEpayco($codEstado);
 
-            $precompra->fill([
+            $precompraActualizable->fill([
                 'estado' => $nuevoEstado,
-                'ref_payco' => $refPayco !== '' ? $refPayco : $precompra->ref_payco,
+                'ref_payco' => $refPayco !== '' ? $refPayco : $precompraActualizable->ref_payco,
                 'cod_estado_epayco' => (string) $codEstado,
                 'motivo_epayco' => mb_substr((string) ($datosPago['motivo'] ?: ($datosPago['respuesta'] ?? '')), 0, 255),
             ]);
 
-            if ($nuevoEstado === EstadoPrecompra::PAGADO && ! $precompra->fecha_pago) {
-                $precompra->fecha_pago = now();
+            if ($nuevoEstado === EstadoPrecompra::PAGADO && ! $precompraActualizable->fecha_pago) {
+                $precompraActualizable->fecha_pago = now();
             }
 
-            $precompra->save();
+            $precompraActualizable->save();
 
-            $this->setLogger("Precompra {$precompra->id} actualizada a estado {$nuevoEstado} (ePayco: {$codEstado}, ref: {$refPayco})");
+            $this->setLogger("Precompra {$precompraActualizable->id} actualizada a estado {$nuevoEstado} (ePayco: {$codEstado}, ref: {$refPayco})");
         } catch (\Throwable $e) {
             // La trazabilidad de la precompra no debe romper el flujo de pago
-            $this->setLogger('Error actualizando precompra: ' . $e->getMessage());
+            $this->setLogger('Error actualizando precompra: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Guarda un snapshot de la respuesta ePayco. No debe romper el flujo de pago.
+     *
+     * @param  array<string, mixed>  $datosPago
+     */
+    protected function registrarTransaccionEpayco(?int $precompraId, array $datosPago, string $origen = 'validacion'): void
+    {
+        try {
+            EpaycoTransaccion::registrarDesdeValidacion($precompraId, $datosPago, $origen);
+        } catch (\Throwable $e) {
+            $this->setLogger('Error registrando epayco_transacciones: '.$e->getMessage());
         }
     }
 }

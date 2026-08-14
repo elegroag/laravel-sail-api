@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Http;
 
 class ApiEpayco extends ApiAbstract
 {
-
     public function __construct()
     {
         $this->mode = config('app.epayco.mode', 'development');
@@ -38,7 +37,7 @@ class ApiEpayco extends ApiAbstract
 
         $host = $this->mode == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
 
-        $url = "{$endpoint->endpoint_name}/" . urlencode($metodo);
+        $url = "{$endpoint->endpoint_name}/".urlencode($metodo);
         $this->setCurlCommand($host, $url, $params, $basicAuth);
 
         $api = new APIClient($basicAuth, $host, $url);
@@ -50,7 +49,6 @@ class ApiEpayco extends ApiAbstract
 
         return $this;
     }
-
 
     public function validarReferencia(string $refPayco): array
     {
@@ -66,7 +64,7 @@ class ApiEpayco extends ApiAbstract
         }
 
         $host = $this->mode === 'development' ? $endpoint->host_dev : $endpoint->host_pro;
-        $url = $host . "/{$endpoint->endpoint_name}/" . urlencode($refPayco);
+        $url = $host."/{$endpoint->endpoint_name}/".urlencode($refPayco);
 
         $response = Http::timeout(30)
             ->withoutVerifying()
@@ -101,6 +99,17 @@ class ApiEpayco extends ApiAbstract
                 'motivo' => $tx['x_response_reason_text'] ?? '',
                 'monto' => $tx['x_amount'] ?? '0',
                 'ref_payco' => $tx['x_ref_payco'] ?? $refPayco,
+                'x_id_invoice' => $tx['x_id_invoice'] ?? null,
+                'x_transaction_id' => $tx['x_transaction_id'] ?? null,
+                'x_approval_code' => $tx['x_approval_code'] ?? null,
+                'x_bank_name' => $tx['x_bank_name'] ?? null,
+                'x_franchise' => $tx['x_franchise'] ?? null,
+                'x_card_number' => $tx['x_card_number'] ?? null,
+                'x_quotas' => $tx['x_quotas'] ?? null,
+                'x_currency_code' => $tx['x_currency_code'] ?? null,
+                'x_date' => $tx['x_date'] ?? null,
+                'x_signature' => $tx['x_signature'] ?? null,
+                'payload_raw' => is_array($tx) ? $tx : null,
             ],
         ];
     }
@@ -108,10 +117,10 @@ class ApiEpayco extends ApiAbstract
     public function setCurlCommand(string $hostConnection, string $url, array $params, BasicAuth $basicAuth)
     {
         $token = $basicAuth->authenticate();
-        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
-            " -H 'Content-Type: application/json' " .
-            " -H 'Authorization: Basic {$token}'" .
-            " -d \"" . json_encode($params) . "\" \"";
+        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"".
+            " -H 'Content-Type: application/json' ".
+            " -H 'Authorization: Basic {$token}'".
+            ' -d "'.json_encode($params).'" "';
     }
 
     public function generalErrors()
@@ -127,7 +136,7 @@ class ApiEpayco extends ApiAbstract
             'AL001' => 'URL not send: Validación de campo URL requerido',
             'AL002' => 'URL is required: Validación de campo URL requerido',
             'AL003' => 'The URL structure is wrong: Formato inválido de URL',
-            'AED100' => 'La información ingresada no cumple con los parámetros definidos en términos y condiciones. Diligencie el campo de nuevo.'
+            'AED100' => 'La información ingresada no cumple con los parámetros definidos en términos y condiciones. Diligencie el campo de nuevo.',
         ];
     }
 }

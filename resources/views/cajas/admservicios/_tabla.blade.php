@@ -6,6 +6,7 @@
         EstadoPrecompra::PAGADO => 'bg-success',
         EstadoPrecompra::DESESTIMADO => 'bg-secondary',
         EstadoPrecompra::RECHAZADO => 'bg-danger',
+        EstadoPrecompra::ABANDONADA => 'bg-dark',
     ];
 @endphp
 
@@ -29,7 +30,11 @@
             @php
                 $motivo = '';
                 if ($precompra->motivo_desestimacion != '') {
-                    $motivo = EstadoPrecompra::MOTIVOS_DESESTIMACION[$precompra->motivo_desestimacion] ?? $precompra->motivo_desestimacion;
+                    if ($precompra->motivo_desestimacion === EstadoPrecompra::MOTIVO_ABANDONO_CHECKOUT) {
+                        $motivo = 'Abandono del checkout ePayco';
+                    } else {
+                        $motivo = EstadoPrecompra::MOTIVOS_DESESTIMACION[$precompra->motivo_desestimacion] ?? $precompra->motivo_desestimacion;
+                    }
                     if ($precompra->detalle_desestimacion != '') {
                         $motivo .= ' - ' . $precompra->detalle_desestimacion;
                     }

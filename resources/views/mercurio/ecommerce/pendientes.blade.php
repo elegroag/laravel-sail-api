@@ -132,6 +132,7 @@
         validarTarifa: "{{ route('servicios.validar-tarifa') }}",
         listarPrecompras: "{{ route('servicios.listar-precompras') }}",
         desestimarPrecompra: "{{ route('servicios.desestimar-precompra') }}",
+        abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
     };
 </script>
 <script src="{{ versioned_asset('mercurio/build/ComprasPendientes.js') }}"></script>
