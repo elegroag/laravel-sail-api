@@ -28,6 +28,7 @@ Route::prefix('/web')->group(function () {
     Route::post('/contact/send', [WebController::class, 'sendContact'])->name('web.contact.send');
     Route::get('/products', [WebController::class, 'products'])->name('web.products');
     Route::get('/documentation', [WebController::class, 'documentation'])->name('web.documentation');
+    Route::get('/politica-privacidad-app', [WebController::class, 'politicaPrivacidadApp'])->name('web.politica-privacidad-app');
 });
 // ──────────────────────────────────────────────
 

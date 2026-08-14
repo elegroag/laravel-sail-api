@@ -93,6 +93,11 @@ class WebController extends Controller
         ]);
     }
 
+    public function politicaPrivacidadApp()
+    {
+        return Inertia::render('Web/PoliticaPrivacidadApp');
+    }
+
     public function sendContact(Request $request)
     {
         $validated = $request->validate([

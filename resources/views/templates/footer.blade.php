@@ -9,7 +9,7 @@ $xhost = DB::table('information_schema.SCHEMATA')
     ->first();
 @endphp
 
-<footer class="footer">
+<footer class="footer {{ $footerClass ?? '' }}">
     <div class="row">
         <div class="col pl-5">
             <div class="copyright pt-0">

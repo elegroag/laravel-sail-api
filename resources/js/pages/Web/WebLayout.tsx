@@ -61,9 +61,17 @@ export default function WebLayout({ children }: { children: React.ReactNode }) {
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-6 text-center">
+                    <div className="border-t border-gray-200 pt-6 text-center space-y-2">
                         <p className="text-sm text-gray-500">
                             &copy; {currentYear} COMFACA – Caja de Compensación Familiar del Caquetá. Todos los derechos reservados.
+                        </p>
+                        <p>
+                            <a
+                                href="/web/politica-privacidad-app"
+                                className="text-sm text-gray-500 hover:text-emerald-600 transition-colors underline-offset-2 hover:underline"
+                            >
+                                Política de tratamiento de datos personales
+                            </a>
                         </p>
                     </div>
                 </div>

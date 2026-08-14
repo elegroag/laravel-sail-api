@@ -49,7 +49,7 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 </div>
 
    
-@include('templates.footer')
+@include('templates.footer', ['footerClass' => 'd-none d-md-block'])
 </div>
 
 @include('templates.modal')
