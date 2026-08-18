@@ -9,7 +9,7 @@ use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
-use App\Models\Mercurio07;
+use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
 use App\Models\Mercurio33;
@@ -18,12 +18,10 @@ use App\Services\Api\ApiSubsidio;
 use App\Services\Aprueba\ApruebaDatosTrabajador;
 use App\Services\CajaServices\UpDatosTrabajadorService;
 use App\Services\Srequest;
-use App\Services\Utils\Comman;
+use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\Pagination;
-use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 
 class ApruebaUpTrabajadorController extends ApplicationController
 {
@@ -98,7 +96,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
     public function loadParametrosView()
     {
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -192,7 +190,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
      *
      * @return void
      */
-    public function info(Request $request)
+    public function infor(Request $request)
     {
         try {
             $upServices = new UpDatosTrabajadorService;
@@ -201,8 +199,8 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
-            $mercurio47 = Mercurio47::where("id", $id)->where("tipact", 'T')->first();
-            $mercurio33 = Mercurio33::where("actualizacion", $id)->get();
+            $mercurio47 = Mercurio47::where('id', $id)->where('tipact', 'T')->first();
+            $mercurio33 = Mercurio33::where('actualizacion', $id)->get();
             $dataItems = [];
 
             foreach ($mercurio33 as $row) {
@@ -210,7 +208,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 $dataItems["{$campo}"] = $row->getValor();
             }
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaAfilia',
@@ -222,7 +220,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
             $paramsIndependiente = new ParamsTrabajador;
             $paramsIndependiente->setDatosCaptura($datos_captura);
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -239,7 +237,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 'datostra' => $datostra,
                 'dataItems' => $dataItems,
                 'mercurio01' => Mercurio01::first(),
-                'det_tipo' => Mercurio06::where("tipo", $mercurio47->getTipo())->first()->getDetalle(),
+                'det_tipo' => Mercurio06::where('tipo', $mercurio47->getTipo())->first()->getDetalle(),
                 '_coddoc' => ParamsTrabajador::getTiposDocumentos(),
                 '_codciu' => ParamsTrabajador::getCiudades(),
                 '_codzon' => ParamsTrabajador::getZonas(),
@@ -257,7 +255,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 '_bancos' => ParamsTrabajador::getBancos(),
             ])->render();
 
-            $ps = new ApiSubsidio();
+            $ps = new ApiSubsidio;
             $ps->send(
                 [
                     'servicio' => 'ComfacaEmpresas',
@@ -341,38 +339,61 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
     public function rechazar(Request $request)
     {
+        $this->setResponse('ajax');
+        $this->db->begin();
         try {
             $id = $request->input('id');
             $nota = $request->input('nota');
             $codest = $request->input('codest');
-            $this->db->begin();
             $today = Carbon::now();
-            $mercurio33 = Mercurio33::where("id", $id)->first();
-            $mercurio33->update([
+
+            $mercurio47 = Mercurio47::where('id', $id)->where('tipact', 'T')->first();
+            if (! $mercurio47) {
+                throw new DebugException('No se encontró la solicitud de actualización de datos del trabajador.', 404);
+            }
+            if ($mercurio47->getEstado() == 'X') {
+                throw new DebugException('El registro ya se encuentra rechazado, no se requiere de repetir la acción.', 201);
+            }
+
+            Mercurio47::where('id', $id)->update([
                 'estado' => 'X',
-                'motivo' => $nota,
                 'codest' => $codest,
                 'fecest' => $today->format('Y-m-d H:i:s'),
             ]);
 
-            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio33->getTipo()}' and documento = '{$mercurio33->getDocumento()}'")->first();
-            $asunto = 'Actualizacion de datos';
-            $msj = 'Se rechazo la actualizacion de datos';
-            $senderEmail = new SenderEmail(
-                new Srequest([
-                    'email_emisor' => $mercurio07->getEmail(),
-                    'email_clave' => $mercurio07->getClave(),
-                    'asunto' => $asunto,
-                ])
-            );
-            $senderEmail->send($mercurio07->getEmail(), $msj);
+            $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
+            $mercurio10 = new Mercurio10;
+            $mercurio10->setTipopc($this->tipopc);
+            $mercurio10->setNumero($id);
+            $mercurio10->setItem($item);
+            $mercurio10->setEstado('X');
+            $mercurio10->setNota($nota);
+            $mercurio10->setCodest($codest);
+            $mercurio10->setFecsis($today->format('Y-m-d H:i:s'));
+
+            if (! $mercurio10->save()) {
+                $msj = '';
+                foreach ($mercurio10->getMessages() as $mess) {
+                    $msj .= $mess->getMessage().'<br/>';
+                }
+                throw new DebugException('Error '.$msj, 501);
+            }
+
+            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
             $this->db->commit();
-            $response = 'Movimiento Realizado Con Exito';
-        } catch (DebugException $e) {
+            $salida = [
+                'success' => true,
+                'msj' => 'El proceso se ha completado con éxito',
+            ];
+        } catch (\Throwable $e) {
             $this->db->rollback();
-            $response = 'No se pudo realizar el movimiento';
+            $salida = [
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ];
         }
-        return $this->renderObject($response, false);
+
+        return $this->renderObject($salida, false);
     }
 }

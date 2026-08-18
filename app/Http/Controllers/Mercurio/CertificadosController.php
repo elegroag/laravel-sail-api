@@ -13,6 +13,7 @@ use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CertificadosController extends ApplicationController
 {
@@ -152,23 +153,26 @@ class CertificadosController extends ApplicationController
             $mercurio45->setCoddoc($coddoc);
             $mercurio45->setDocumento($documento);
             $mercurio45->save();
+            $mercurio45->assignRuuidIfMissing();
 
-            if (isset($_FILES['archivo_'.$codben]['name']) && $_FILES['archivo_'.$codben]['name'] != '') {
-                $extension = strtolower((string) pathinfo($_FILES['archivo_'.$codben]['name'], PATHINFO_EXTENSION));
+            $inputName = 'archivo_'.$codben;
+            if (isset($_FILES[$inputName]['name']) && $_FILES[$inputName]['name'] != '') {
+                $extension = strtolower((string) pathinfo($_FILES[$inputName]['name'], PATHINFO_EXTENSION));
                 if ($extension !== 'pdf') {
                     throw new DebugException('Solo se admiten archivos PDF', 501);
                 }
 
-                $name = $this->tipopc.'_'.$mercurio45->getId().'.'.$extension;
-                $_FILES['archivo_'.$codben]['name'] = $name;
+                $ruuid = (string) $mercurio45->getRuuid();
+                if ($ruuid === '') {
+                    throw new DebugException('No se pudo generar el radicado del certificado.', 501);
+                }
 
-                $uploadFile = new UploadFile;
-                $estado = $uploadFile->upload('archivo_'.$codben, 'certificados');
+                $name = $ruuid.'.'.$extension;
+                $estado = UploadFile::upload($inputName, '', $name, 'temp');
 
                 if ($estado) {
                     $mercurio45->setArchivo($name);
                     $mercurio45->save();
-                    $mercurio45->assignRuuidIfMissing();
 
                     $item = Mercurio10::where('tipopc', $this->tipopc)
                         ->where('numero', $mercurio45->getId())
@@ -262,6 +266,7 @@ class CertificadosController extends ApplicationController
         }
 
         $candidatos = [
+            storage_path('temp/'.$archivo),
             storage_path('app/temp/certificados/'.$archivo),
             storage_path('temp/certificados/'.$archivo),
             public_path('temp/'.$archivo),
@@ -274,7 +279,7 @@ class CertificadosController extends ApplicationController
             }
         }
 
-        UploadFile::delete('temp/certificados/'.$archivo);
-        UploadFile::delete('temp/'.$archivo);
+        UploadFile::delete($archivo);
+        Storage::disk('temp')->delete($archivo);
     }
 }
