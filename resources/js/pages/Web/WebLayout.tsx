@@ -70,7 +70,7 @@ export default function WebLayout({ children }: { children: React.ReactNode }) {
                                 href="/web/politica-privacidad-app"
                                 className="text-sm text-gray-500 hover:text-emerald-600 transition-colors underline-offset-2 hover:underline"
                             >
-                                Política de tratamiento de datos personales
+                                Política de uso de la plataforma
                             </a>
                         </p>
                     </div>

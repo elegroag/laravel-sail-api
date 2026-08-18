@@ -123,7 +123,7 @@ class ApruebaCertificadoController extends ApplicationController
         return response()->json($response);
     }
 
-    public function info(Request $request)
+    public function infor(Request $request)
     {
         try {
             $id = $request->input('id');
@@ -131,6 +131,9 @@ class ApruebaCertificadoController extends ApplicationController
                 throw new DebugException('Error no se puede identificar el identificador de la solicitud.', 501);
             }
             $mercurio45 = Mercurio45::where('id', $id)->first();
+            if (! $mercurio45) {
+                throw new DebugException('No se encontró la solicitud de certificado.', 404);
+            }
             $html = view(
                 'cajas/aprobacioncer/tmp/consulta',
                 [
@@ -143,7 +146,9 @@ class ApruebaCertificadoController extends ApplicationController
             $adjuntos = $certificadoServices->adjuntos($mercurio45);
             $seguimiento = $certificadoServices->seguimiento($mercurio45);
 
-            $campos_disponibles = $mercurio45->CamposDisponibles();
+            $campos_disponibles = method_exists($mercurio45, 'CamposDisponibles')
+                ? $mercurio45->CamposDisponibles()
+                : [];
             $response = [
                 'success' => true,
                 'data' => $mercurio45->toArray(),
