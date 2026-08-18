@@ -1,10 +1,7 @@
 <h4>Aprobar</h4>
-<p>Esta opcion es para aprobar la empresa y enviar los datos a Subsidio</p>
+<p>Esta opción es para aprobar la actualización de datos del trabajador y enviar los datos a Subsidio</p>
 <form method="POST" action="" id='formAprobar'>
-
     <div class='row'>
-        		@include('cajas.templates.tmp_checklist_validacion_control')
-
 <div class='col-md-8'>
             <div class='form-group'>
                 <label for='nota_aprobar' class='form-control-label'>Nota</label>
