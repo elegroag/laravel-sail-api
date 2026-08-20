@@ -6,6 +6,7 @@ use App\Exceptions\DebugException;
 use App\Library\APIClient\APIClient;
 use App\Library\APIClient\BasicAuth;
 use App\Models\ApiEndpoint;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class ApiEpayco extends ApiAbstract
@@ -123,6 +124,149 @@ class ApiEpayco extends ApiAbstract
                 'payload_raw' => is_array($tx) ? $tx : null,
             ],
         ];
+    }
+
+    /**
+     * Autentica contra Apify (Basic Auth con PUBLIC_KEY:PRIVATE_KEY) y retorna un
+     * token Bearer para crear sesiones de Smart Checkout v2. El token se cachea
+     * segun su expiracion (JWT corto) para no re-loguear en cada pago.
+     */
+    public function obtenerTokenApify(): ?string
+    {
+        $publicKey = (string) config('app.epayco.public_key');
+        $privateKey = (string) config('app.epayco.private_key');
+
+        if ($publicKey === '' || $privateKey === '') {
+            return null;
+        }
+
+        $cacheKey = 'epayco_apify_token_'.md5($publicKey);
+        $cached = Cache::get($cacheKey);
+        if (is_string($cached) && $cached !== '') {
+            return $cached;
+        }
+
+        $apifyUrl = rtrim((string) config('app.epayco.apify_url', 'https://apify.epayco.co'), '/');
+        $basic = base64_encode($publicKey.':'.$privateKey);
+
+        try {
+            $http = Http::timeout(30)->withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Basic '.$basic,
+            ]);
+
+            if (! config('app.epayco.verify_ssl', true)) {
+                $http = $http->withoutVerifying();
+            }
+
+            $response = $http->post($apifyUrl.'/login');
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if ($response->status() !== 200) {
+            return null;
+        }
+
+        $token = $response->json()['token'] ?? null;
+        if (! is_string($token) || $token === '') {
+            return null;
+        }
+
+        Cache::put($cacheKey, $token, $this->ttlDesdeJwt($token, 300));
+
+        return $token;
+    }
+
+    /**
+     * Crea una sesion de Smart Checkout v2 en Apify y retorna el sessionId.
+     *
+     * @param  array<string, mixed>  $datos  Propiedades de la sesion (name, amount, currency, response, confirmation, extras, billing, ...)
+     * @return array{success: bool, sessionId?: string, errors?: string}
+     */
+    public function crearSesionCheckout(array $datos): array
+    {
+        $token = $this->obtenerTokenApify();
+        if (! $token) {
+            return [
+                'success' => false,
+                'errors' => 'No se pudo autenticar con ePayco (Apify). Verifique EPAYCO_PUBLIC_KEY/EPAYCO_PRIVATE_KEY.',
+            ];
+        }
+
+        $apifyUrl = rtrim((string) config('app.epayco.apify_url', 'https://apify.epayco.co'), '/');
+        $payload = array_merge(['checkout_version' => '2'], $datos);
+
+        try {
+            $http = Http::timeout(30)->withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer '.$token,
+            ]);
+
+            if (! config('app.epayco.verify_ssl', true)) {
+                $http = $http->withoutVerifying();
+            }
+
+            $response = $http->post($apifyUrl.'/payment/session/create', $payload);
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'errors' => 'Error de conexion con ePayco: '.$e->getMessage(),
+            ];
+        }
+
+        if ($response->status() !== 200) {
+            return [
+                'success' => false,
+                'errors' => "ePayco respondio con codigo HTTP: {$response->status()}",
+            ];
+        }
+
+        $data = $response->json();
+        $sessionId = $data['data']['sessionId'] ?? null;
+
+        if (! ($data['success'] ?? false) || ! $sessionId) {
+            return [
+                'success' => false,
+                'errors' => $data['textResponse'] ?? 'No se pudo crear la sesion de checkout',
+            ];
+        }
+
+        return [
+            'success' => true,
+            'sessionId' => (string) $sessionId,
+        ];
+    }
+
+    /**
+     * Calcula el TTL (segundos) de cacheo a partir del claim exp del JWT.
+     */
+    protected function ttlDesdeJwt(string $jwt, int $default = 300): int
+    {
+        $parts = explode('.', $jwt);
+        if (count($parts) < 2) {
+            return $default;
+        }
+
+        $payload = json_decode($this->base64UrlDecode($parts[1]), true);
+        $exp = (int) ($payload['exp'] ?? 0);
+        if ($exp <= 0) {
+            return $default;
+        }
+
+        $ttl = $exp - time() - 30; // margen de seguridad
+
+        return $ttl > 0 ? $ttl : $default;
+    }
+
+    protected function base64UrlDecode(string $data): string
+    {
+        $remainder = strlen($data) % 4;
+        if ($remainder) {
+            $data .= str_repeat('=', 4 - $remainder);
+        }
+
+        return (string) base64_decode(strtr($data, '-_', '+/'));
     }
 
     public function setCurlCommand(string $hostConnection, string $url, array $params, BasicAuth $basicAuth)

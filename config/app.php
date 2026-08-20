@@ -183,8 +183,13 @@ return [
         'mode' => env('EPAYCO_MODE'),
         'public_key' => env('EPAYCO_PUBLIC_KEY'),
         'private_key' => env('EPAYCO_PRIVATE_KEY'),
-        // Credenciales del panel ePayco para validar x_signature (webhook confirmation)
-        'customer_id' => env('EPAYCO_CUSTOMER_ID'),
+        // Version del checkout: 1 = Standard (checkout.js), 2 = Smart Checkout (checkout-v2.js)
+        'checkout_version' => (string) env('EPAYCO_CHECKOUT_VERSION', '1'),
+        // Base de la API Apify (login + creacion de sesion Smart Checkout v2)
+        'apify_url' => env('EPAYCO_APIFY_URL', 'https://apify.epayco.co'),
+        // Credenciales del panel ePayco para validar x_signature (webhook confirmation).
+        // Acepta EPAYCO_CUSTOMER_ID o su alias EPAYCO_P_CUST_ID_CLIENTE.
+        'customer_id' => env('EPAYCO_CUSTOMER_ID', env('EPAYCO_P_CUST_ID_CLIENTE')),
         'p_key' => env('EPAYCO_P_KEY'),
         // Verificación TLS al consultar secure.epayco.co (default true).
         // Solo poner false en entornos dev con CA/proxy problemáticos.

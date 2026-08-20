@@ -15,6 +15,7 @@ Route::middleware(['mercurio.auth'])->group(function () {
         Route::post('/listar-servicios', [EcommerceController::class, 'listarServicios'])->name('servicios.listar-servicios');
         Route::post('/validar-tarifa', [EcommerceController::class, 'validarTarifa'])->name('servicios.validar-tarifa');
         Route::post('/crear-precompra', [EcommerceController::class, 'crearPrecompra'])->name('servicios.crear-precompra');
+        Route::post('/crear-sesion-epayco', [EcommerceController::class, 'crearSesionCheckout'])->name('servicios.crear-sesion-epayco');
         Route::post('/validar-pago-epayco', [EcommerceController::class, 'validarPagoEpayco'])->name('servicios.validar-pago-epayco');
         Route::post('/guardar-venta', [EcommerceController::class, 'guardarVenta'])->name('servicios.guardar-venta');
         Route::post('/mis-compras', [EcommerceController::class, 'misCompras'])->name('servicios.mis-compras');

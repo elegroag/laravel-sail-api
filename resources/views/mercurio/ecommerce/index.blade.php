@@ -2,7 +2,11 @@
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
+@if ($EPAYCO_CHECKOUT_VERSION === '2')
+<script src="https://checkout.epayco.co/checkout-v2.js"></script>
+@else
 <script src="https://checkout.epayco.co/checkout.js"></script>
+@endif
 
 <div class="col-12 col-xl-11 mx-auto mt-3 servicios-catalog">
     <div class="card shadow-sm border-0 servicios-page-card">
@@ -199,24 +203,31 @@
     // vive en public/src/Mercurio/Ecommerce/main.js (compilado a mercurio/build/Ecommerce.js)
     var EPAYCO_PUBLIC_KEY = '{{ $EPAYCO_PUBLIC_KEY }}';
     var EPAYCO_TEST = {{ $EPAYCO_TEST === true ? 'true' : 'false' }};
-    console.log('EPAYCO_TEST', EPAYCO_TEST);
+    var EPAYCO_CHECKOUT_VERSION = '{{ $EPAYCO_CHECKOUT_VERSION }}';
 
+    // En Smart Checkout v2 la sesion se crea en backend; no se configura un handler global con key.
     var epaycoHandler = null;
-
-    try {
-        epaycoHandler = ePayco.checkout.configure({
-            key: EPAYCO_PUBLIC_KEY,
-            test: EPAYCO_TEST
-        });
-    } catch (e) {
-        console.log('Error inicializando ePayco:', e);
+    if (EPAYCO_CHECKOUT_VERSION !== '2') {
+        try {
+            epaycoHandler = ePayco.checkout.configure({
+                key: EPAYCO_PUBLIC_KEY,
+                test: EPAYCO_TEST
+            });
+        } catch (e) {
+            console.log('Error inicializando ePayco:', e);
+        }
     }
+
+    console.log('EPAYCO_PUBLIC_KEY', EPAYCO_PUBLIC_KEY);
+    console.log('EPAYCO_TEST', EPAYCO_TEST);
+    console.log('EPAYCO_CHECKOUT_VERSION', EPAYCO_CHECKOUT_VERSION);
 
     var routes = {
         identificarTrabajador: "{{ route('servicios.identificar-trabajador') }}",
         listarServicios: "{{ route('servicios.listar-servicios') }}",
         validarTarifa: "{{ route('servicios.validar-tarifa') }}",
         crearPrecompra: "{{ route('servicios.crear-precompra') }}",
+        crearSesionEpayco: "{{ route('servicios.crear-sesion-epayco') }}",
         abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
         validarPagoEpayco: "{{ route('servicios.validar-pago-epayco') }}",
         guardarVenta: "{{ route('servicios.guardar-venta') }}",

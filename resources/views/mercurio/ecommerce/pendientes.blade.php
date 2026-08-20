@@ -2,7 +2,11 @@
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
+@if ($EPAYCO_CHECKOUT_VERSION === '2')
+<script src="https://checkout.epayco.co/checkout-v2.js"></script>
+@else
 <script src="https://checkout.epayco.co/checkout.js"></script>
+@endif
 
 <div class="col-12 col-xl-11 mx-auto mt-3 servicios-catalog compras-catalog">
     <div class="card shadow-sm border-0 servicios-page-card">
@@ -112,17 +116,20 @@
     // Valores que provienen de Blade (config y rutas). La logica del modulo
     // vive en public/src/Mercurio/ComprasPendientes/main.js (compilado a mercurio/build/ComprasPendientes.js)
     var EPAYCO_PUBLIC_KEY = '{{ $EPAYCO_PUBLIC_KEY }}';
-    var EPAYCO_TEST = {{ $EPAYCO_TEST ? 'true' : 'false' }};
+    var EPAYCO_TEST = {{ $EPAYCO_TEST === true ? 'true' : 'false' }};
+    var EPAYCO_CHECKOUT_VERSION = '{{ $EPAYCO_CHECKOUT_VERSION }}';
 
+    // En Smart Checkout v2 la sesion se crea en backend; no se configura un handler global con key.
     var epaycoHandler = null;
-
-    try {
-        epaycoHandler = ePayco.checkout.configure({
-            key: EPAYCO_PUBLIC_KEY,
-            test: EPAYCO_TEST
-        });
-    } catch (e) {
-        console.log('Error inicializando ePayco:', e);
+    if (EPAYCO_CHECKOUT_VERSION !== '2') {
+        try {
+            epaycoHandler = ePayco.checkout.configure({
+                key: EPAYCO_PUBLIC_KEY,
+                test: EPAYCO_TEST
+            });
+        } catch (e) {
+            console.log('Error inicializando ePayco:', e);
+        }
     }
 
     var routes = {
@@ -133,6 +140,7 @@
         listarPrecompras: "{{ route('servicios.listar-precompras') }}",
         desestimarPrecompra: "{{ route('servicios.desestimar-precompra') }}",
         abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
+        crearSesionEpayco: "{{ route('servicios.crear-sesion-epayco') }}",
         epaycoConfirmation: "{{ route('api.epayco.confirmation') }}",
     };
 </script>

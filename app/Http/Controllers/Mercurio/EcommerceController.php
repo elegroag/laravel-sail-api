@@ -63,6 +63,7 @@ class EcommerceController extends ApplicationController
             [
                 'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
                 'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? true : false,
+                'EPAYCO_CHECKOUT_VERSION' => (string) config('app.epayco.checkout_version', '1'),
                 'documento' => $documento,
                 'pendientesCount' => PrecompraServicio::where('documento', $documento)
                     ->where('estado', EstadoPrecompra::PENDIENTE)
@@ -80,7 +81,8 @@ class EcommerceController extends ApplicationController
     {
         return view('mercurio/ecommerce/pendientes', [
             'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
-            'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? 'true' : 'false',
+            'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? true : false,
+            'EPAYCO_CHECKOUT_VERSION' => (string) config('app.epayco.checkout_version', '1'),
             'documento' => self::getActUser('documento'),
             'motivosDesestimacion' => EstadoPrecompra::MOTIVOS_DESESTIMACION,
             'title' => 'Compras Pendientes de Pago',
@@ -185,7 +187,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar servicios: ' . $e->getMessage(),
+                    'message' => 'Error al cargar servicios: '.$e->getMessage(),
                 ]
             );
         }
@@ -245,7 +247,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar tarifa: ' . $e->getMessage(),
+                    'message' => 'Error al validar tarifa: '.$e->getMessage(),
                 ]
             );
         }
@@ -300,7 +302,108 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al registrar la precompra: ' . $e->getMessage(),
+                'message' => 'Error al registrar la precompra: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * POST /mercurio/servicios/crear-sesion-epayco
+     * AJAX: Crea (o reutiliza) la precompra y genera una sesion de Smart Checkout v2
+     * en ePayco (Apify). Devuelve el sessionId para inicializar el checkout en el front.
+     */
+    public function crearSesionCheckout(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'cedtra' => 'required|string|max:20',
+                'codser' => 'required|string|max:20',
+                'numero' => 'required|integer|min:1',
+                'codben' => 'nullable|string|max:20',
+                'nota' => 'nullable|string',
+                'valor' => 'required|numeric|min:1',
+                'nombre_servicio' => 'nullable|string|max:150',
+                'nombre' => 'nullable|string|max:150',
+                'email' => 'nullable|string|max:150',
+                'precompra_id' => 'nullable|integer',
+            ]);
+
+            $precompra = null;
+            if (! empty($data['precompra_id'])) {
+                $precompra = PrecompraServicio::where('id', $data['precompra_id'])
+                    ->where('documento', $data['cedtra'])
+                    ->where('estado', EstadoPrecompra::PENDIENTE)
+                    ->first();
+            }
+
+            if (! $precompra) {
+                $precompra = PrecompraServicio::create([
+                    'documento' => $data['cedtra'],
+                    'codser' => $data['codser'],
+                    'numero' => $data['numero'],
+                    'codben' => ! empty($data['codben']) ? $data['codben'] : $data['cedtra'],
+                    'nota' => $data['nota'] ?? '',
+                    'valor' => $data['valor'],
+                    'estado' => EstadoPrecompra::PENDIENTE,
+                    'fecha_precompra' => now(),
+                ]);
+            }
+
+            $nombreServicio = ! empty($data['nombre_servicio']) ? $data['nombre_servicio'] : 'Compra de servicio';
+
+            $sesion = $this->epayco->crearSesionCheckout([
+                'name' => $nombreServicio,
+                'description' => $nombreServicio,
+                'invoice' => 'ORD'.$precompra->id.'-'.time(),
+                'currency' => 'COP',
+                'amount' => (float) $data['valor'],
+                'lang' => 'ES',
+                'country' => 'CO',
+                'response' => route('servicios.index'),
+                'confirmation' => route('api.epayco.confirmation'),
+                'extras' => [
+                    'extra1' => $data['cedtra'],
+                    'extra2' => $data['codser'],
+                    'extra3' => (string) $data['numero'],
+                    'extra4' => (string) $precompra->id,
+                ],
+                'billing' => [
+                    'email' => ! empty($data['email']) ? $data['email'] : 'sin@email.com',
+                    'name' => ! empty($data['nombre']) ? $data['nombre'] : 'Cliente',
+                    'typeDoc' => 'CC',
+                    'numberDoc' => $data['cedtra'],
+                ],
+            ]);
+
+            if (! ($sesion['success'] ?? false)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $sesion['errors'] ?? 'No se pudo crear la sesion de pago',
+                ]);
+            }
+
+            $this->setLogger("Sesion Smart Checkout creada - precompra: {$precompra->id}, sessionId: {$sesion['sessionId']}");
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'sessionId' => $sesion['sessionId'],
+                    'precompra_id' => $precompra->id,
+                ],
+                'message' => 'Sesion de checkout creada',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos invalidos para crear la sesion de pago',
+                'errors' => $e->errors(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear la sesion de pago: '.$e->getMessage(),
             ]);
         }
     }
@@ -352,7 +455,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar pago: ' . $e->getMessage(),
+                    'message' => 'Error al validar pago: '.$e->getMessage(),
                 ]
             );
         }
@@ -444,7 +547,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al guardar la venta: ' . $e->getMessage(),
+                    'message' => 'Error al guardar la venta: '.$e->getMessage(),
                 ]
             );
         }
@@ -499,7 +602,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar compras: ' . $e->getMessage(),
+                    'message' => 'Error al cargar compras: '.$e->getMessage(),
                 ]
             );
         }
@@ -518,7 +621,7 @@ class EcommerceController extends ApplicationController
                 ->where('estado', EstadoPrecompra::PENDIENTE)
                 ->orderByDesc('fecha_precompra')
                 ->get()
-                ->map(fn(PrecompraServicio $precompra) => [
+                ->map(fn (PrecompraServicio $precompra) => [
                     'id' => $precompra->id,
                     'codser' => $precompra->codser,
                     'numero' => $precompra->numero,
@@ -540,7 +643,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar las compras pendientes: ' . $e->getMessage(),
+                'message' => 'Error al cargar las compras pendientes: '.$e->getMessage(),
             ]);
         }
     }
@@ -555,8 +658,8 @@ class EcommerceController extends ApplicationController
         try {
             $data = $request->validate([
                 'precompra_id' => 'required|integer|min:1',
-                'motivo' => 'required|string|in:' . implode(',', array_keys(EstadoPrecompra::MOTIVOS_DESESTIMACION)),
-                'detalle' => 'required_if:motivo,' . EstadoPrecompra::MOTIVO_OTRO . '|nullable|string|max:255',
+                'motivo' => 'required|string|in:'.implode(',', array_keys(EstadoPrecompra::MOTIVOS_DESESTIMACION)),
+                'detalle' => 'required_if:motivo,'.EstadoPrecompra::MOTIVO_OTRO.'|nullable|string|max:255',
             ], [
                 'motivo.required' => 'Debe seleccionar un motivo',
                 'motivo.in' => 'El motivo seleccionado no es válido',
@@ -606,7 +709,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al desestimar la compra: ' . $e->getMessage(),
+                'message' => 'Error al desestimar la compra: '.$e->getMessage(),
             ]);
         }
     }
@@ -698,7 +801,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al abandonar la compra: ' . $e->getMessage(),
+                'message' => 'Error al abandonar la compra: '.$e->getMessage(),
             ]);
         }
     }
@@ -764,7 +867,7 @@ class EcommerceController extends ApplicationController
             $this->setLogger("Precompra {$precompraActualizable->id} actualizada a estado {$nuevoEstado} (ePayco: {$codEstado}, ref: {$refPayco})");
         } catch (\Throwable $e) {
             // La trazabilidad de la precompra no debe romper el flujo de pago
-            $this->setLogger('Error actualizando precompra: ' . $e->getMessage());
+            $this->setLogger('Error actualizando precompra: '.$e->getMessage());
         }
     }
 
@@ -778,7 +881,7 @@ class EcommerceController extends ApplicationController
         try {
             EpaycoTransaccion::registrarDesdeValidacion($precompraId, $datosPago, $origen);
         } catch (\Throwable $e) {
-            $this->setLogger('Error registrando epayco_transacciones: ' . $e->getMessage());
+            $this->setLogger('Error registrando epayco_transacciones: '.$e->getMessage());
         }
     }
 }
