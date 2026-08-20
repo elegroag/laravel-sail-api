@@ -62,7 +62,7 @@ class EcommerceController extends ApplicationController
             'mercurio/ecommerce/index',
             [
                 'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
-                'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? 'true' : 'false',
+                'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? true : false,
                 'documento' => $documento,
                 'pendientesCount' => PrecompraServicio::where('documento', $documento)
                     ->where('estado', EstadoPrecompra::PENDIENTE)
@@ -185,7 +185,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar servicios: '.$e->getMessage(),
+                    'message' => 'Error al cargar servicios: ' . $e->getMessage(),
                 ]
             );
         }
@@ -245,7 +245,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar tarifa: '.$e->getMessage(),
+                    'message' => 'Error al validar tarifa: ' . $e->getMessage(),
                 ]
             );
         }
@@ -300,7 +300,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al registrar la precompra: '.$e->getMessage(),
+                'message' => 'Error al registrar la precompra: ' . $e->getMessage(),
             ]);
         }
     }
@@ -352,7 +352,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al validar pago: '.$e->getMessage(),
+                    'message' => 'Error al validar pago: ' . $e->getMessage(),
                 ]
             );
         }
@@ -444,7 +444,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al guardar la venta: '.$e->getMessage(),
+                    'message' => 'Error al guardar la venta: ' . $e->getMessage(),
                 ]
             );
         }
@@ -499,7 +499,7 @@ class EcommerceController extends ApplicationController
             return response()->json(
                 [
                     'success' => false,
-                    'message' => 'Error al cargar compras: '.$e->getMessage(),
+                    'message' => 'Error al cargar compras: ' . $e->getMessage(),
                 ]
             );
         }
@@ -518,7 +518,7 @@ class EcommerceController extends ApplicationController
                 ->where('estado', EstadoPrecompra::PENDIENTE)
                 ->orderByDesc('fecha_precompra')
                 ->get()
-                ->map(fn (PrecompraServicio $precompra) => [
+                ->map(fn(PrecompraServicio $precompra) => [
                     'id' => $precompra->id,
                     'codser' => $precompra->codser,
                     'numero' => $precompra->numero,
@@ -540,7 +540,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar las compras pendientes: '.$e->getMessage(),
+                'message' => 'Error al cargar las compras pendientes: ' . $e->getMessage(),
             ]);
         }
     }
@@ -555,8 +555,8 @@ class EcommerceController extends ApplicationController
         try {
             $data = $request->validate([
                 'precompra_id' => 'required|integer|min:1',
-                'motivo' => 'required|string|in:'.implode(',', array_keys(EstadoPrecompra::MOTIVOS_DESESTIMACION)),
-                'detalle' => 'required_if:motivo,'.EstadoPrecompra::MOTIVO_OTRO.'|nullable|string|max:255',
+                'motivo' => 'required|string|in:' . implode(',', array_keys(EstadoPrecompra::MOTIVOS_DESESTIMACION)),
+                'detalle' => 'required_if:motivo,' . EstadoPrecompra::MOTIVO_OTRO . '|nullable|string|max:255',
             ], [
                 'motivo.required' => 'Debe seleccionar un motivo',
                 'motivo.in' => 'El motivo seleccionado no es válido',
@@ -606,7 +606,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al desestimar la compra: '.$e->getMessage(),
+                'message' => 'Error al desestimar la compra: ' . $e->getMessage(),
             ]);
         }
     }
@@ -698,7 +698,7 @@ class EcommerceController extends ApplicationController
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al abandonar la compra: '.$e->getMessage(),
+                'message' => 'Error al abandonar la compra: ' . $e->getMessage(),
             ]);
         }
     }
@@ -764,7 +764,7 @@ class EcommerceController extends ApplicationController
             $this->setLogger("Precompra {$precompraActualizable->id} actualizada a estado {$nuevoEstado} (ePayco: {$codEstado}, ref: {$refPayco})");
         } catch (\Throwable $e) {
             // La trazabilidad de la precompra no debe romper el flujo de pago
-            $this->setLogger('Error actualizando precompra: '.$e->getMessage());
+            $this->setLogger('Error actualizando precompra: ' . $e->getMessage());
         }
     }
 
@@ -778,7 +778,7 @@ class EcommerceController extends ApplicationController
         try {
             EpaycoTransaccion::registrarDesdeValidacion($precompraId, $datosPago, $origen);
         } catch (\Throwable $e) {
-            $this->setLogger('Error registrando epayco_transacciones: '.$e->getMessage());
+            $this->setLogger('Error registrando epayco_transacciones: ' . $e->getMessage());
         }
     }
 }

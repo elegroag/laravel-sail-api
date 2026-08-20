@@ -198,7 +198,8 @@
     // Valores que provienen de Blade (config y rutas). La logica del modulo
     // vive en public/src/Mercurio/Ecommerce/main.js (compilado a mercurio/build/Ecommerce.js)
     var EPAYCO_PUBLIC_KEY = '{{ $EPAYCO_PUBLIC_KEY }}';
-    var EPAYCO_TEST = {{ $EPAYCO_TEST ? 'true' : 'false' }};
+    var EPAYCO_TEST = {{ $EPAYCO_TEST === true ? 'true' : 'false' }};
+    console.log('EPAYCO_TEST', EPAYCO_TEST);
 
     var epaycoHandler = null;
 

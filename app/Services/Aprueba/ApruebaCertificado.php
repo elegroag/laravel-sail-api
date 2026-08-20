@@ -41,10 +41,8 @@ class ApruebaCertificado
         $ps->send(
             [
                 'servicio' => 'Certificados',
-                'metodo' => 'presentaCertificado',
-                'params' => [
-                    'post' => $params,
-                ],
+                'metodo' => 'presentar-certificado',
+                'params' => $params
             ]
         );
 
@@ -76,10 +74,6 @@ class ApruebaCertificado
 
     /**
      * enviarMail function
-     *
-     * @param [type] $Mercurio34
-     * @param [type] $actapr
-     * @param [type] $feccap
      * @return bool
      */
     public function enviarMail($actapr)
