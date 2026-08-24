@@ -102,7 +102,7 @@ class ApiEpayco extends ApiAbstract
 
         $tx = $data['data'];
 
-        return [
+        $resultado = [
             'success' => true,
             'data' => [
                 'aprobado' => (int) ($tx['x_cod_transaction_state'] ?? 0) === 1,
@@ -124,6 +124,30 @@ class ApiEpayco extends ApiAbstract
                 'payload_raw' => is_array($tx) ? $tx : null,
             ],
         ];
+
+        if ($this->debeForzarAprobacion()) {
+            $resultado['data']['aprobado'] = true;
+            $resultado['data']['cod_estado'] = 1;
+            $resultado['data']['respuesta'] = 'Aceptada (FORCE_APPROVED)';
+            $resultado['data']['motivo'] = 'Simulado por EPAYCO_FORCE_APPROVED';
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * Bandera temporal de QA: solo aplica fuera de production (APP_ENV y APP_MODE).
+     */
+    protected function debeForzarAprobacion(): bool
+    {
+        if (! config('app.epayco.force_approved', false)) {
+            return false;
+        }
+
+        $env = (string) config('app.env', 'production');
+        $appMode = (string) config('app.app_mode', 'production');
+
+        return $env !== 'production' && $appMode !== 'production';
     }
 
     /**

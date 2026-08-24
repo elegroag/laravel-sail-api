@@ -11,6 +11,7 @@ use App\Services\Ecommerce\EstadoPrecompra;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -476,7 +477,18 @@ class EcommerceController extends ApplicationController
             $codben = $request->input('codben');
             $precompraId = (int) $request->input('precompra_id', 0);
 
+            Log::info('Ecommerce.guardarVenta: inicio', [
+                'cedtra' => $cedtra,
+                'codser' => $codser,
+                'numero' => $numero,
+                'refpago' => $refpago,
+                'codben' => $codben,
+                'precompra_id' => $precompraId,
+            ]);
+
             if (empty(trim((string) $refpago))) {
+                Log::info('Ecommerce.guardarVenta: refpago vacia');
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Referencia de pago no proporcionada',
@@ -485,7 +497,22 @@ class EcommerceController extends ApplicationController
 
             $pago = $this->epayco->validarReferencia($refpago);
 
+            Log::info('Ecommerce.guardarVenta: resultado validarReferencia', [
+                'refpago' => $refpago,
+                'success' => $pago['success'] ?? false,
+                'aprobado' => $pago['data']['aprobado'] ?? null,
+                'cod_estado' => $pago['data']['cod_estado'] ?? null,
+                'respuesta' => $pago['data']['respuesta'] ?? null,
+                'motivo' => $pago['data']['motivo'] ?? null,
+                'errors' => $pago['errors'] ?? null,
+            ]);
+
             if (! ($pago['success'] ?? false)) {
+                Log::info('Ecommerce.guardarVenta: fallo validacion ePayco', [
+                    'refpago' => $refpago,
+                    'errors' => $pago['errors'] ?? null,
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => $pago['errors'] ?? 'No se pudo validar el pago en ePayco',
@@ -500,6 +527,13 @@ class EcommerceController extends ApplicationController
             if (! $pagoAprobado) {
                 $estado = $datosPago['cod_estado'] ?? 'desconocido';
                 $motivo = $datosPago['motivo'] ?? $datosPago['respuesta'] ?? 'Pago no aprobado';
+
+                Log::info('Ecommerce.guardarVenta: pago no aprobado', [
+                    'refpago' => $refpago,
+                    'cod_estado' => $estado,
+                    'motivo' => $motivo,
+                    'precompra_id' => $precompraId,
+                ]);
 
                 return response()->json([
                     'success' => false,
@@ -516,6 +550,8 @@ class EcommerceController extends ApplicationController
                 'codben' => ! empty($codben) ? $codben : $cedtra,
             ];
 
+            Log::info('Ecommerce.guardarVenta: enviando a Subsidio guardar-venta', $params);
+
             $this->api->send([
                 'servicio' => 'Movil',
                 'metodo' => 'guardar-venta',
@@ -523,6 +559,12 @@ class EcommerceController extends ApplicationController
             ]);
 
             $resultado = $this->api->toArray();
+
+            Log::info('Ecommerce.guardarVenta: respuesta Subsidio', [
+                'flag' => $resultado['flag'] ?? null,
+                'message' => $resultado['message'] ?? null,
+                'refpago' => $refpago,
+            ]);
 
             if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al guardar la venta';
@@ -536,6 +578,15 @@ class EcommerceController extends ApplicationController
             $codbenLog = ! empty($codben) ? $codben : $cedtra;
             $this->setLogger("Venta Servicio - cedtra: $cedtra, codben: $codbenLog, codser: $codser, refpago: $refpago");
 
+            Log::info('Ecommerce.guardarVenta: venta guardada exitosamente', [
+                'cedtra' => $cedtra,
+                'codben' => $codbenLog,
+                'codser' => $codser,
+                'numero' => $numero,
+                'refpago' => $refpago,
+                'precompra_id' => $precompraId,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'data' => $resultado['data'] ?? [],
@@ -543,6 +594,11 @@ class EcommerceController extends ApplicationController
             ]);
         } catch (\Throwable $e) {
             $this->setLogger($e->getMessage());
+            Log::info('Ecommerce.guardarVenta: excepcion', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
 
             return response()->json(
                 [

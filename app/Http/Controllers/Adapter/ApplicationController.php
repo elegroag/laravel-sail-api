@@ -180,7 +180,14 @@ class ApplicationController extends Controller
 
     public function setLogger(string $msg)
     {
-        Log::stack(['single', 'slack'])->debug($msg);
+        $channels = ['single'];
+
+        $slackWebhook = (string) config('logging.channels.slack.url', '');
+        if ($slackWebhook !== '') {
+            $channels[] = 'slack';
+        }
+
+        Log::stack($channels)->debug($msg);
     }
 
     protected function getDebug(Throwable $e)
