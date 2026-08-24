@@ -1,8 +1,9 @@
 # Análisis y recomendaciones — mejoras ePayco / precompras (Mercurio)
 
-> **Fecha:** 2026-08-14  
-> **Alcance:** cambios del módulo de pasarela ePayco y precompras de servicios
-> (commit `e64ad053` + trabajo posterior de webhook, TLS, Admservicios).  
+> **Fecha original:** 2026-08-14  
+> **Última revisión:** 2026-08-24  
+> **Alcance:** pasarela ePayco y precompras de servicios (webhook, TLS,
+> Admservicios, modularización JS, `EPAYCO_FORCE_APPROVED`).  
 > **Audiencia:** desarrollo, operaciones y soporte de Cajas/Mercurio.
 
 Documentos relacionados:
@@ -19,14 +20,15 @@ Documentos relacionados:
 
 Se reforzó el ciclo de vida de la compra digital en tres ejes:
 
-1. **Trazabilidad** — historial append-only de respuestas ePayco.
-2. **Resiliencia** — abandono explícito (`onClose` + job) y confirmación
-   server-side (webhook + firma).
-3. **Operación / seguridad** — visibilidad en Admservicios y verificación TLS
-   configurable.
+1. **Trazabilidad** — historial append-only de respuestas ePayco + modal de
+   detalle en Admservicios.
+2. **Resiliencia** — abandono explícito (`onClose` / `onClosed` + job) y
+   confirmación server-side (webhook + firma).
+3. **Operación / seguridad** — TLS configurable, visibilidad operativa y
+   bandera de QA `EPAYCO_FORCE_APPROVED` (solo non-prod).
 
-El flujo deja de depender solo del navegador del usuario: aunque cierre la
-modal, la pestaña o la WebView, el backend puede confirmar el pago y auditarlo.
+El flujo no depende solo del navegador: aunque cierre la modal, la pestaña
+o la WebView, el backend puede confirmar el pago y auditarlo.
 
 ---
 
@@ -38,11 +40,8 @@ modal, la pestaña o la WebView, el backend puede confirmar el pago y auditarlo.
 | ----- | ------- |
 | Migración | `2026_08_14_160000_create_epayco_transacciones_table.php` |
 | Modelo | `EpaycoTransaccion` + `PrecompraServicio::transaccionesEpayco()` |
-| Escritura | Cada `validarReferencia` exitosa → fila nueva (`origen=validacion`) |
+| Escritura | `validarReferencia` → `origen=validacion`; webhook → `origen=webhook` |
 | Payload | Campos clave + `payload_json` crudo |
-
-**Mejora:** se puede reconstruir el pago (monto, banco, franquicia, firma,
-IDs) sin depender solo de `ref_payco` / `motivo_epayco` en la precompra.
 
 ### 2.2 Abandonos de checkout
 
@@ -50,11 +49,8 @@ IDs) sin depender solo de `ref_payco` / `motivo_epayco` en la precompra.
 | ----- | ------- |
 | Estado | `EstadoPrecompra::ABANDONADA` (`AB`) — no retomable |
 | Endpoint | `POST /mercurio/servicios/abandonar-precompra` |
-| Cliente | `onCloseModal` en Ecommerce y ComprasPendientes (+ SweetAlert) |
+| Cliente | `onCloseModal` / `onClosed` en Ecommerce y ComprasPendientes (+ Swal) |
 | Salvaguarda | Flag `__epaycoPagoEnValidacion` + delay 2.5s; `AB`→`PA` si el pago llega tarde |
-
-**Mejora:** deja de haber “pendientes eternos” silenciosos cuando el usuario
-cierra la pasarela con la pestaña abierta.
 
 ### 2.3 Job de limpieza de `PE` huérfanas
 
@@ -66,49 +62,56 @@ cierra la pasarela con la pestaña abierta.
 | Motivo | `ABANDONO_INACTIVIDAD` |
 | Guía | [precompras-job-abandonadas.md](./precompras-job-abandonadas.md) |
 
-**Mejora:** cubre cierre de navegador / WebView / pérdida de red donde
-`onClose` no corre.
-
 ### 2.4 Webhook `confirmation` + firma `x_signature`
 
 | Pieza | Detalle |
 | ----- | ------- |
 | Ruta | `POST /api/epayco/confirmation` (pública) |
-| Validador | `EpaycoSignatureValidator` (fórmula oficial ePayco) |
-| Servicio | `EpaycoConfirmationService` (audita, actualiza precompra, `guardar-venta`) |
+| Validador | `EpaycoSignatureValidator` |
+| Servicio | `EpaycoConfirmationService` |
 | Checkout | Envía `confirmation` + `extra4` (precompra_id) |
-| Env | `EPAYCO_CUSTOMER_ID`, `EPAYCO_P_KEY` |
-| Tests | `EpaycoSignatureValidatorTest` (3 casos) |
+| Env | `EPAYCO_CUSTOMER_ID` / `EPAYCO_P_CUST_ID_CLIENTE`, `EPAYCO_P_KEY` |
 | Guía | [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md) |
-
-**Mejora:** confirmación confiable aunque el cliente no vuelva; anti-fraude
-básico vía firma; idempotencia si la precompra ya estaba `PA`.
 
 ### 2.5 Visibilidad operativa (Admservicios)
 
 | Pieza | Detalle |
 | ----- | ------- |
 | Relación | `ultimaTransaccionEpayco()` (`latestOfMany`) |
-| UI / CSV | Columnas `Transaction ID` y `Approval code` |
+| Tabla / CSV | Columnas `Transaction ID` y `Approval code` |
+| Detalle | `POST /cajas/admservicios/detalle/{id}` — modal con historial completo de `epayco_transacciones` |
 
-**Mejora:** soporte puede conciliar con ePayco sin consultar SQL a mano.
-*(Fuera de alcance: `ReporteComprasServicios`.)*
+*(Fuera de alcance aún: `ReporteComprasServicios`.)*
 
-### 2.6 TLS en `validarReferencia`
+### 2.6 TLS en `ApiEpayco`
 
 | Pieza | Detalle |
 | ----- | ------- |
 | Flag | `EPAYCO_HTTP_VERIFY_SSL` (default **true**) |
-| Escape | `false` solo en dev con CA/proxy roto |
-| Error | Fallos de conexión/SSL se reportan como mensaje controlado |
+| Alcance | `validarReferencia`, Apify login / sesión Smart Checkout |
 
-**Mejora:** endurece la validación del pago contra MITM, sin romper entornos
-problemáticos.
+### 2.7 Checkout modular + versión v1/v2
 
-### 2.7 Documentación
+| Pieza | Detalle |
+| ----- | ------- |
+| JS catálogo | Módulos en `public/src/Mercurio/Ecommerce/` (`pago.js`, `epayco.js`, `venta.js`, …) |
+| JS pendientes | `public/src/Mercurio/ComprasPendientes/` (`pago.js`, `utils.js`, …) |
+| Env | `EPAYCO_CHECKOUT_VERSION` (`1` Standard / `2` Smart + Apify) |
 
-Se consolidó documentación operativa y de arquitectura del flujo ePayco
-(pasarela, modal, estado en BD, webhook, job).
+### 2.8 QA: forzar aprobación (non-prod)
+
+| Pieza | Detalle |
+| ----- | ------- |
+| Flag | `EPAYCO_FORCE_APPROVED` (default **false**) |
+| Efecto | En `ApiEpayco::validarReferencia()`, fuerza `aprobado=true` / `cod_estado=1` |
+| Guardrail | Solo si `APP_ENV` y `APP_MODE` **no** son `production` |
+| Uso | Probar `guardar-venta` sin un pago realmente aceptado en QA/dev |
+| No aplica | Al webhook (sigue exigiendo firma y payload real de ePayco) |
+
+### 2.9 Documentación
+
+Set operativo en `docs/ecommerce/` (pasarela, modal, estado BD, webhook, job,
+este análisis).
 
 ---
 
@@ -119,12 +122,13 @@ Se consolidó documentación operativa y de arquitectura del flujo ePayco
 ```text
 Antes                         Ahora
 ─────                         ─────
-Precompra PE + redirect       Precompra + validación API
+Precompra PE + redirect       Precompra + validación API + webhook
 Sin historial ePayco          epayco_transacciones (append-only)
 Abandono = PE huérfana        AB vía onClose + job TTL
 Confirmación solo cliente     + webhook firmado
-Admin: solo ref_payco         + transaction_id / approval_code
+Admin: solo ref_payco         + IDs en tabla/CSV + modal historial
 TLS desactivado siempre       TLS on por defecto (flag)
+Checkout monolítico main.js   Módulos + Standard/Smart Checkout
 ```
 
 ### 3.2 Fortalezas
@@ -133,30 +137,32 @@ TLS desactivado siempre       TLS on por defecto (flag)
 - Auditoría append-only útil para disputas y soporte.
 - Estados de negocio claros (`PE` / `PA` / `RE` / `DE` / `AB`).
 - Job y webhook reducen dependencia de la WebView/navegador.
-- Documentación alineada con el código.
+- Admservicios puede inspeccionar el historial sin SQL manual.
 
 ### 3.3 Riesgos y huecos residuales
 
 | # | Riesgo | Severidad | Notas |
 | - | ------ | --------- | ----- |
-| R1 | Credenciales de firma no configuradas en prod | Alta | Webhook responde `503` y ePayco reintenta; hay que setear `EPAYCO_CUSTOMER_ID` / `EPAYCO_P_KEY`. |
+| R1 | Credenciales de firma no configuradas en prod | Alta | Webhook responde `503`; setear `EPAYCO_CUSTOMER_ID` / `EPAYCO_P_KEY`. |
 | R2 | Scheduler no activo en el servidor | Media | El job de abandono no corre sin cron/`schedule:work`. |
-| R3 | Migración `epayco_transacciones` no aplicada | Alta | Escrituras de auditoría fallan (se loguean; no deben tumbar el pago). |
-| R4 | Doble `guardar-venta` (cliente + webhook) | Media | Idempotencia local evita re-llamada si ya `PA`; depende de que subsidio tolere reintentos si hay carrera. |
-| R5 | Checkout ePayco en WebView Android | Media | Iframe/`onClose`/storage frágiles; el webhook mitiga, pero hay que probar en dispositivo real. |
-| R6 | `APIClient` (Subsidio u otros) sigue con `withoutVerifying()` | Baja–Media | Deuda TLS fuera de ePayco reference. |
+| R3 | Migración `epayco_transacciones` no aplicada | Alta | Escrituras de auditoría fallan (logueadas; no deben tumbar el pago). |
+| R4 | Doble `guardar-venta` (cliente + webhook) | Baja | Mitigado en ambos lados si la precompra ya estaba `PA` antes de actualizar. Carrera simultánea residual (ambos leen `PE`) depende de idempotencia en Subsidio. |
+| R5 | Checkout ePayco en WebView Android | Media | Probar en dispositivo real; webhook mitiga. |
+| R6 | `APIClient` (Subsidio u otros) sigue con `withoutVerifying()` | Baja–Media | Deuda TLS fuera de `ApiEpayco`. |
 | R7 | Firma no se valida en `validarReferencia` (solo webhook) | Baja | La API de ePayco es el origen de confianza en ese path. |
-| R8 | Reporte de compras Cajas sin `transaction_id` | Baja | Decisión consciente (opción B); CSV de Admservicios sí los trae. |
-| R9 | Whitelist de medios de pago / branding del modal | Baja | Sigue pendiente en la doc de modal-control. |
-| R10 | Bundles JS deben regenerarse al desplegar | Media | Cambios en `src/Mercurio/...` requieren `APP=mercurio npx gulp ...`. |
+| R8 | ~~Reporte de compras Cajas sin `transaction_id`~~ | — | Hecho: columnas Transaction ID / Approval code en `ReporteComprasServicios`. |
+| R9 | Whitelist de medios de pago / branding del modal | Baja | Pendiente; ver [modal-control](./epayco-modal-control.md). |
+| R10 | Bundles JS deben regenerarse al desplegar | Media | Cambios en `src/Mercurio/...` requieren gulp del módulo. |
+| R11 | `EPAYCO_FORCE_APPROVED=true` mal configurado | Media | Guardrail non-prod; nunca activar en production. |
 
 ### 3.4 Dependencias de puesta en marcha (checklist corto)
 
 - [ ] Migración `epayco_transacciones` ejecutada.
-- [ ] `.env`: `EPAYCO_CUSTOMER_ID`, `EPAYCO_P_KEY`, `EPAYCO_HTTP_VERIFY_SSL=true` (prod).
-- [ ] URL pública HTTPS de ` /api/epayco/confirmation` registrada / alcanzable.
+- [ ] `.env`: `EPAYCO_CUSTOMER_ID` (o `EPAYCO_P_CUST_ID_CLIENTE`), `EPAYCO_P_KEY`, `EPAYCO_HTTP_VERIFY_SSL=true` (prod).
+- [ ] `EPAYCO_FORCE_APPROVED=false` en todo entorno productivo.
+- [ ] URL pública HTTPS de `/api/epayco/confirmation` registrada / alcanzable.
 - [ ] Cron de `schedule:run` (job 02:00).
-- [ ] Bundles `Ecommerce.js` / `ComprasPendientes.js` desplegados.
+- [ ] Bundles `Ecommerce` / `ComprasPendientes` / `Admservicios` desplegados.
 - [ ] Prueba sandbox: pago OK, rechazo, cierre modal, cierre app (WebView).
 
 ---
@@ -169,47 +175,49 @@ TLS desactivado siempre       TLS on por defecto (flag)
 | Webhook + firma | Menos ventas “pagadas en ePayco, no en Mercurio” | Seguridad + resiliencia |
 | `onClose` → `AB` | Métricas reales; menos pendientes falsos | UX + datos limpios |
 | Job TTL 7 días | Limpieza automática | Operación |
-| Admservicios: IDs ePayco | Soporte más rápido | Observabilidad |
+| Admservicios: IDs + modal detalle | Soporte más rápido | Observabilidad |
 | TLS con flag | Cumplimiento / hardening | Seguridad |
+| Checkout v1/v2 + módulos JS | Mantenibilidad | Arquitectura frontend |
+| `EPAYCO_FORCE_APPROVED` | QA de `guardar-venta` sin cobro real | Testing (non-prod) |
 
 ---
 
 ## 5. Recomendaciones
 
-### 5.1 Inmediatas (esta semana / al desplegar)
+### 5.1 Inmediatas (despliegue / operación)
 
-1. **Completar variables de firma en cada entorno** y verificar con un POST
-   de prueba firmado ([guía webhook](./epayco-webhook-confirmation.md)).
-2. **Confirmar cron del scheduler** ([guía job](./precompras-job-abandonadas.md)).
-3. **Probar el flujo completo en WebView Flutter Android** (abrir checkout,
-   pagar, cancelar, matar app a mitad): validar que el webhook deje la
-   precompra en `PA` y la venta en subsidio.
-4. **Monitorear logs** las primeras 48 h:
-   - `ePayco confirmation`
-   - `MarcarPrecomprasAbandonadas`
-   - `Error registrando epayco_transacciones`
+1. Completar variables de firma y verificar con POST de prueba
+   ([guía webhook](./epayco-webhook-confirmation.md)).
+2. Confirmar cron del scheduler
+   ([guía job](./precompras-job-abandonadas.md)).
+3. Probar flujo completo en WebView Flutter Android.
+4. Monitorear logs las primeras 48 h: `ePayco confirmation`,
+   `MarcarPrecomprasAbandonadas`, errores de `epayco_transacciones`.
+5. Verificar `EPAYCO_FORCE_APPROVED=false` en prod.
 
-### 5.2 Corto plazo (1–2 sprints)
+### 5.2 Corto plazo (1–2 sprints) — aún pendientes
 
-5. **Prueba de carrera cliente + webhook:** dos `guardar-venta` casi
-   simultáneos; documentar comportamiento de ApiSubsidio y, si hace falta,
-   un flag `venta_registrada` en precompra.
-6. **Extender TLS configurable a `APIClient`** (mismo patrón
-   `*_HTTP_VERIFY_SSL`) o al menos a llamadas críticas de subsidio.
-7. **Incluir `transaction_id` / `approval_code` en `ReporteComprasServicios`**
-   si finanzas lo pide (opción C descartada antes; reabrir si hay demanda).
+5. ~~**Prueba de carrera cliente + webhook / omitir reenvío si ya `PA`**~~ —
+   **hecho en cliente:** `EcommerceController::guardarVenta` captura
+   `yaPagada` antes de actualizar y no llama a Subsidio si ya estaba `PA`
+   (mismo criterio que el webhook). Carrera simultánea residual: depende
+   de idempotencia de Subsidio o de un lock futuro.
+6. **Extender TLS configurable a `APIClient`** (mismo patrón `*_HTTP_VERIFY_SSL`).
+7. ~~**Incluir `transaction_id` / `approval_code` en `ReporteComprasServicios`~~ —
+   **hecho** (columnas en tabla + JSON del consultar; última tx vía
+   `ultimaTransaccionEpayco`).
 8. **Alerta operativa** (email/Slack) cuando el webhook reciba `400` de firma
    o `503` por credenciales faltantes.
 
-### 5.3 Mediano plazo
+### 5.3 Mediano plazo — aún pendientes
 
-9. **Whitelist de medios de pago** (`methods` / `methodsDisable` en checkout).
-10. **Cola asíncrona para `guardar-venta` desde el webhook** si la API de
-    subsidio supera ~2–3 s (ePayco espera respuesta rápida).
-11. **Panel de detalle de precompra** en Admservicios con historial completo
-    de `epayco_transacciones` (no solo la última).
-12. **Tests Feature** del webhook (firma OK/KO, idempotencia `PA`, resolución
-    por `extra4`) con Http::fake / DB de prueba.
+9. **Whitelist de medios de pago** (`methods` / `methodsDisable`).
+10. **Cola asíncrona para `guardar-venta` desde el webhook** si Subsidio
+    supera ~2–3 s.
+11. ~~**Panel de detalle de precompra** en Admservicios~~ — **hecho**
+    (`detalle/{id}` + historial).
+12. **Tests Feature** del webhook (firma OK/KO, idempotencia `PA`,
+    resolución por `extra4`) con Http::fake / DB de prueba.
 
 ### 5.4 No prioritario / consciente
 
@@ -225,23 +233,23 @@ TLS desactivado siempre       TLS on por defecto (flag)
 | -------------- | --------- | ------------------ |
 | Paga y vuelve al sitio | `validar-pago-epayco` + `guardar-venta` | `PA` + venta + filas auditoría |
 | Paga y cierra el navegador | Webhook `confirmation` | `PA` + venta (si no estaba `PA`) |
-| Cierra modal sin pagar | `onCloseModal` → abandonar | `AB` + Swal |
+| Cierra modal sin pagar | `onClose` → abandonar | `AB` + Swal |
 | Cierra app / pierde red sin `onClose` | Job a los 7 días | `PE` → `AB` |
 | Pago llega después de `AB` | Validación / webhook | Puede pasar a `PA` |
-| Disputa con ePayco | Admservicios / SQL `epayco_transacciones` | `transaction_id`, `approval_code`, payload |
+| Disputa con ePayco | Admservicios detalle / SQL | Historial `epayco_transacciones` |
+| QA sin cobro real (non-prod) | `EPAYCO_FORCE_APPROVED=true` | `validarReferencia` simula aprobado |
 
 ---
 
 ## 7. Conclusión
 
-El módulo pasó de un checkout “cliente-céntrico” a un diseño **híbrido
-cliente + servidor** con auditoría, abandono controlado y confirmación
-firmada. Las mejoras ya aplicadas cubren los hallazgos de mayor valor de la
-documentación de diagnóstico.
+El módulo está en un diseño **híbrido cliente + servidor** con auditoría,
+abandono controlado, confirmación firmada y visibilidad en Admservicios.
+Las mejoras de mayor valor del diagnóstico original ya están aplicadas.
 
-El éxito en producción depende menos de más código y más de **configuración
-y pruebas de despliegue**: firma ePayco, scheduler, migración, TLS y un
-recorrido real en WebView Android.
+El éxito en producción depende sobre todo de **configuración y pruebas de
+despliegue**: firma ePayco, scheduler, migración, TLS, `FORCE_APPROVED`
+apagado, y un recorrido real en WebView Android.
 
 ---
 
@@ -255,5 +263,7 @@ recorrido real en WebView Android.
 | Confirmación | `app/Services/Ecommerce/EpaycoConfirmationService.php` |
 | Abandono / sync precompra | `app/Http/Controllers/Mercurio/EcommerceController.php` |
 | Job | `app/Jobs/MarcarPrecomprasAbandonadas.php` |
-| Admin | `app/Http/Controllers/Cajas/AdmserviciosController.php` |
-| Checkout JS | `public/src/Mercurio/Ecommerce/main.js`, `ComprasPendientes/main.js` |
+| Admin listado / CSV | `app/Http/Controllers/Cajas/AdmserviciosController.php` |
+| Admin detalle | `POST /cajas/admservicios/detalle/{id}` + `_detalle.blade.php` |
+| Checkout JS | `public/src/Mercurio/Ecommerce/{pago,epayco,venta}.js` |
+| Pendientes JS | `public/src/Mercurio/ComprasPendientes/pago.js` |

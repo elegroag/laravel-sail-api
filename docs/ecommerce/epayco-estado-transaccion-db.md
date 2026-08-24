@@ -4,19 +4,21 @@ Diagnóstico complementario a
 [pasarela-pago-epayco.md](./pasarela-pago-epayco.md) y
 [epayco-modal-control.md](./epayco-modal-control.md).
 
+> **Última revisión:** 2026-08-24  
 > **Pregunta evaluada:** ¿El estado real que emite ePayco se almacena en
 > base de datos, o solo el mapeo local de `EstadoPrecompra`?
 >
 > **Respuesta corta:** Se almacenan **ambos**. El resumen vive en
 > `precompras_servicios`; el historial completo de respuestas ePayco vive
-> en `epayco_transacciones`.
+> en `epayco_transacciones` (origen `validacion` y `webhook`).
 
 ---
 
 ## 1. Resumen en `precompras_servicios`
 
 Campos rellenados por
-[`EcommerceController::actualizarPrecompraDesdePago()`](../app/Http/Controllers/Mercurio/EcommerceController.php):
+[`EcommerceController::actualizarPrecompraDesdePago()`](../app/Http/Controllers/Mercurio/EcommerceController.php)
+(y el camino equivalente del webhook vía `EpaycoConfirmationService`):
 
 | Columna             | Origen ePayco                           |
 | ------------------- | --------------------------------------- |
@@ -31,12 +33,11 @@ Esto es el **estado operativo** de la compra (último snapshot útil).
 
 ## 2. Auditoría en `epayco_transacciones`
 
-Tabla nueva (migración
+Tabla (migración
 `2026_08_14_160000_create_epayco_transacciones_table.php`).
 
-Cada llamada exitosa a `ApiEpayco::validarReferencia()` (vía
-`validar-pago-epayco` o `guardar-venta`) inserta **una fila** — no
-sobrescribe — con:
+Cada validación exitosa o notificación de webhook inserta **una fila** —
+no sobrescribe — con:
 
 | Columna          | Contenido                                      |
 | ---------------- | ---------------------------------------------- |
@@ -56,21 +57,34 @@ sobrescribe — con:
 | `quotas`         | `x_quotas`                                     |
 | `signature`      | `x_signature`                                  |
 | `fecha_epayco`   | `x_date` (texto original)                      |
-| `origen`         | `validacion` (futuro: `webhook`, `manual`)     |
-| `payload_json`   | Objeto `data` crudo completo de ePayco         |
+| `origen`         | `validacion` · `webhook` (posible futuro: `manual`) |
+| `payload_json`   | Objeto `data` / payload crudo completo         |
 
 Modelo: [`EpaycoTransaccion`](../app/Models/EpaycoTransaccion.php).
-Relación: `PrecompraServicio::transaccionesEpayco()`.
+Relaciones: `PrecompraServicio::transaccionesEpayco()`,
+`ultimaTransaccionEpayco()`.
 
-### 2.1 Flujo de escritura
+### 2.1 Flujos de escritura
+
+**A) Cliente vuelve al sitio (`response`)**
 
 1. Frontend → `validar-pago-epayco` o `guardar-venta`.
 2. `ApiEpayco::validarReferencia()` normaliza campos + adjunta `payload_raw`.
 3. `actualizarPrecompraDesdePago()`:
-   - inserta en `epayco_transacciones` (siempre, incluso si la precompra ya
-     está `PA`);
+   - inserta en `epayco_transacciones` con `origen=validacion`
+     (incluso si la precompra ya está `PA`);
    - actualiza `precompras_servicios` solo si la precompra es actualizable
      (por `ref_payco`, o por id en `PE`/`AB`) y aún no está pagada.
+
+**B) Webhook `confirmation`**
+
+1. ePayco → `POST /api/epayco/confirmation`.
+2. Firma OK → `EpaycoConfirmationService` inserta fila con `origen=webhook`
+   y actualiza / registra venta si corresponde (idempotente si ya `PA`).
+
+> **Nota QA:** `EPAYCO_FORCE_APPROVED` solo altera el resultado de
+> `validarReferencia` (flujo A) en entornos non-prod. No escribe una fila
+> “falsa” por sí solo ni afecta el webhook.
 
 ---
 
@@ -92,13 +106,19 @@ WHERE ref_payco = :ref
 ORDER BY created_at DESC;
 ```
 
+En UI (Cajas):
+
+- Listado / CSV Admservicios: última tx (`transaction_id`, `approval_code`).
+- Modal detalle: `POST /cajas/admservicios/detalle/{id}` — historial completo.
+
 ---
 
 ## 4. Qué falta (fuera de este cambio)
 
-| # | Acción                                                         | Estado      |
-| - | -------------------------------------------------------------- | ----------- |
-| 1 | ~~Mostrar `transaction_id` / `approval_code` en Admservicios~~ — hecho (última tx) | Hecho       |
-| 2 | Incluir campos en reporte de compras                           | Pendiente (fuera de alcance B) |
-| 3 | ~~Webhook `confirmation` + validar `x_signature`~~ — [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md) | Hecho       |
-| 4 | ~~Verificación TLS~~ — `EPAYCO_HTTP_VERIFY_SSL` (default true; `false` solo en dev problemático) | Hecho       |
+| # | Acción | Estado |
+| - | ------ | ------ |
+| 1 | Mostrar `transaction_id` / `approval_code` en Admservicios (tabla/CSV) | Hecho |
+| 2 | Modal detalle con historial completo de transacciones | Hecho |
+| 3 | Incluir campos en `ReporteComprasServicios` | Hecho (Transaction ID + Approval code) |
+| 4 | Webhook `confirmation` + validar `x_signature` | Hecho |
+| 5 | Verificación TLS — `EPAYCO_HTTP_VERIFY_SSL` | Hecho |

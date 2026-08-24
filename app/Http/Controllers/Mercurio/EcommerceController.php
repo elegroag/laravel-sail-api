@@ -522,6 +522,12 @@ class EcommerceController extends ApplicationController
             $datosPago = $pago['data'] ?? [];
             $pagoAprobado = ($datosPago['aprobado'] ?? false) === true && (int) ($datosPago['cod_estado'] ?? 0) === 1;
 
+            // Capturar PA antes de actualizar: si el webhook (u otro request) ya dejó
+            // la precompra pagada, no reenviar guardar-venta a Subsidio.
+            $refPaycoDatos = (string) ($datosPago['ref_payco'] ?? $refpago);
+            $precompraAntes = $this->resolverPrecompraPorRefOId($refPaycoDatos, $precompraId);
+            $yaPagada = $precompraAntes?->isPagado() ?? false;
+
             $this->actualizarPrecompraDesdePago($datosPago, $precompraId);
 
             if (! $pagoAprobado) {
@@ -538,6 +544,22 @@ class EcommerceController extends ApplicationController
                 return response()->json([
                     'success' => false,
                     'message' => "El pago no fue aprobado en ePayco. Estado: {$estado}. {$motivo}",
+                ]);
+            }
+
+            if ($yaPagada) {
+                Log::info('Ecommerce.guardarVenta: precompra ya PA, omitiendo Subsidio', [
+                    'refpago' => $refpago,
+                    'precompra_id' => $precompraAntes?->id ?? $precompraId,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'ya_pagada' => true,
+                        'precompra_id' => $precompraAntes?->id,
+                    ],
+                    'message' => 'Venta ya registrada previamente',
                 ]);
             }
 
@@ -607,6 +629,25 @@ class EcommerceController extends ApplicationController
                 ]
             );
         }
+    }
+
+    /**
+     * Resuelve la precompra por ref_payco o por id (para idempotencia de guardar-venta).
+     */
+    protected function resolverPrecompraPorRefOId(string $refPayco, int $precompraId): ?PrecompraServicio
+    {
+        if ($refPayco !== '') {
+            $byRef = PrecompraServicio::where('ref_payco', $refPayco)->first();
+            if ($byRef) {
+                return $byRef;
+            }
+        }
+
+        if ($precompraId > 0) {
+            return PrecompraServicio::where('id', $precompraId)->first();
+        }
+
+        return null;
     }
 
     /**

@@ -63,6 +63,7 @@ class ReporteComprasServiciosService
         $estado = isset($filtros['estado']) ? trim((string) $filtros['estado']) : '';
 
         $query = PrecompraServicio::query()
+            ->with('ultimaTransaccionEpayco')
             ->whereBetween('fecha_precompra', [
                 $fecini.' 00:00:00',
                 Carbon::parse($fecfin)->endOfDay()->format('Y-m-d H:i:s'),
@@ -120,6 +121,8 @@ class ReporteComprasServiciosService
      */
     private function normalize(PrecompraServicio $item): array
     {
+        $tx = $item->ultimaTransaccionEpayco;
+
         return [
             'id' => $item->id,
             'documento' => $item->documento,
@@ -130,6 +133,8 @@ class ReporteComprasServiciosService
             'estado' => $item->estado,
             'estado_detalle' => EstadoPrecompra::descripcion((string) $item->estado),
             'ref_payco' => $item->ref_payco,
+            'transaction_id' => $tx?->transaction_id,
+            'approval_code' => $tx?->approval_code,
             'motivo_epayco' => $item->motivo_epayco,
             'motivo_desestimacion' => $item->motivo_desestimacion,
             'detalle_desestimacion' => $item->detalle_desestimacion,

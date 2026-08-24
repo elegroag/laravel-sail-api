@@ -359,6 +359,8 @@
                                         <th>Valor</th>
                                         <th>Estado</th>
                                         <th>Ref. ePayco</th>
+                                        <th>Transaction ID</th>
+                                        <th>Approval code</th>
                                         <th>Fecha preventa</th>
                                         <th>Fecha pago</th>
                                     </tr>

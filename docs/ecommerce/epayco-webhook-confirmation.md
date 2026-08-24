@@ -3,11 +3,16 @@
 Guía para poner en marcha el endpoint server-side de confirmación de ePayco
 con validación de `x_signature`.
 
+> **Última revisión:** 2026-08-24  
 > **URL del webhook:** `POST {APP_URL}/api/epayco/confirmation`  
 > **Ruta Laravel:** `api.epayco.confirmation`  
 > **Código:** [`EpaycoWebhookController`](../app/Http/Controllers/Api/EpaycoWebhookController.php),
 > [`EpaycoSignatureValidator`](../app/Services/Ecommerce/EpaycoSignatureValidator.php),
 > [`EpaycoConfirmationService`](../app/Services/Ecommerce/EpaycoConfirmationService.php)
+
+> **Nota:** `EPAYCO_FORCE_APPROVED` **no** aplica a este endpoint. Solo altera
+> `ApiEpayco::validarReferencia()` en entornos non-prod. El webhook exige
+> firma válida y payload real de ePayco.
 
 ---
 
@@ -43,6 +48,7 @@ EPAYCO_P_KEY="tu_p_key"
 | Variable | Origen en panel ePayco | Uso |
 | -------- | ---------------------- | --- |
 | `EPAYCO_CUSTOMER_ID` | `P_CUST_ID_CLIENTE` | Primer segmento de la firma |
+| `EPAYCO_P_CUST_ID_CLIENTE` | (alias) | Mismo valor; `config` acepta ambos |
 | `EPAYCO_P_KEY` | `P_KEY` | Segundo segmento de la firma |
 
 > **Nota:** No confundir con `EPAYCO_PUBLIC_KEY` / `EPAYCO_PRIVATE_KEY`

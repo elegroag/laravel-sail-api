@@ -111,7 +111,7 @@ const renderRows = (rows) => {
 
     if (!rows.length) {
         $tbody.append(
-            '<tr><td colspan="10" class="text-center text-muted py-3">Sin resultados para los filtros indicados.</td></tr>'
+            '<tr><td colspan="12" class="text-center text-muted py-3">Sin resultados para los filtros indicados.</td></tr>'
         );
         return;
     }
@@ -128,6 +128,8 @@ const renderRows = (rows) => {
                 <td>${escapeHtml(row.valor != null ? formatMoney(row.valor) : '—')}</td>
                 <td><span class="rcs-estado rcs-estado--${estadoCode}">${escapeHtml(row.estado_detalle || row.estado)}</span></td>
                 <td>${escapeHtml(row.ref_payco || '—')}</td>
+                <td class="text-nowrap"><code class="small">${escapeHtml(row.transaction_id || '—')}</code></td>
+                <td class="text-nowrap"><code class="small">${escapeHtml(row.approval_code || '—')}</code></td>
                 <td>${escapeHtml(row.fecha_precompra || '—')}</td>
                 <td>${escapeHtml(row.fecha_pago || '—')}</td>
             </tr>

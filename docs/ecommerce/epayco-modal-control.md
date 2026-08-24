@@ -1,24 +1,23 @@
-# Control sobre la modal de ePayco — Diagnóstico
+# Control sobre la modal de ePayco — Estado actual
 
 Documento complementario a [pasarela-pago-epayco.md](./pasarela-pago-epayco.md).
 Evalúa **qué tanto se controla la modal de ePayco** en el flujo del catálogo
 de servicios de Mercurio.
 
-> **Conclusión rápida:** El control es **bajo**. Solo se controla el payload
-> que se le envía a `epaycoHandler.open()`. El aspecto visual, los medios de
-> pago disponibles, los textos, los callbacks y los webhooks **no se
-> configuran** en el código actual.
+> **Última revisión:** 2026-08-24  
+> **Conclusión rápida:** El control del **ciclo de pago** es **alto** (payload,
+> `onClose` / `onClosed`, `confirmation` + firma, abandono `AB`, job TTL).
+> El control del **UI del checkout** (medios, branding, textos) sigue siendo
+> **bajo**: ePayco gobierna apariencia y métodos visibles.
 
 ---
 
 ## 1. Lo que SÍ se controla
 
-Solo dos cosas: la **configuración del handler** y el **payload de la
-transacción**.
-
 ### 1.1 Configuración del handler
 
-[resources/views/mercurio/ecommerce/index.blade.php:206-209](../resources/views/mercurio/ecommerce/index.blade.php#L206-L209)
+[resources/views/mercurio/ecommerce/index.blade.php](../resources/views/mercurio/ecommerce/index.blade.php)
+(y el blade de pendientes):
 
 ```js
 epaycoHandler = ePayco.checkout.configure({
@@ -27,103 +26,98 @@ epaycoHandler = ePayco.checkout.configure({
 });
 ```
 
-Únicamente la llave pública y el flag `test`. Sin opciones adicionales.
+Además:
 
-### 1.2 Payload enviado a `epaycoHandler.open()`
+| Bandera / env | Efecto |
+| ------------- | ------ |
+| `EPAYCO_MODE` → `EPAYCO_TEST` | Modo test del checkout |
+| `EPAYCO_CHECKOUT_VERSION` | `1` = Standard (`checkout.js`); `2` = Smart Checkout (`checkout-v2.js` + sesión Apify) |
 
-[public/src/Mercurio/Ecommerce/main.js:942-961](../public/src/Mercurio/Ecommerce/main.js#L942-L961)
+### 1.2 Payload enviado al abrir el checkout
 
-```js
-var data = {
-    name: servicioNombre,
-    description: servicioNombre,
-    invoice: invoice,                   // 'ORD' + Date.now()
-    currency: 'cop',
-    amount: valor,
-    tax_base: '0',
-    tax: '0',
-    country: 'co',
-    lang: 'es',
-    external: 'false',
-    extra1: documento,                  // cedtra
-    extra2: $('#hid_codser').val(),
-    extra3: $('#hid_numero').val(),
-    response: window.location.href,
-    name_billing: nombre,
-    type_doc_billing: 'cc',
-    number_doc_billing: documento,
-    email_billing: email
-};
-```
+Código: [`public/src/Mercurio/Ecommerce/pago.js`](../public/src/Mercurio/Ecommerce/pago.js)
+(catálogo) y [`ComprasPendientes/pago.js`](../public/src/Mercurio/ComprasPendientes/pago.js)
+(retoma). Lógica compartida de cierre/validación:
+[`Ecommerce/epayco.js`](../public/src/Mercurio/Ecommerce/epayco.js).
 
-Campos enviados:
+Campos relevantes del Standard Checkout (v1):
 
-| Campo                | Función                                                     |
-| -------------------- | ----------------------------------------------------------- |
-| `name`               | Título del producto en el checkout                          |
-| `description`        | Descripción visible                                         |
-| `invoice`            | Identificador de la orden (`ORD{timestamp}`)                |
-| `currency`           | `cop` (peso colombiano)                                     |
-| `amount`             | Monto a pagar                                               |
-| `tax_base` / `tax`   | Impuestos (`0` en este flujo)                               |
-| `country` / `lang`   | Localización (`co` / `es`)                                  |
-| `external`           | `false` → checkout embebido (no redirige a ePayco externo)  |
-| `extra1/2/3`         | Datos auxiliares (cedtra, codser, numero)                   |
-| `response`           | URL de retorno client-side                                  |
-| `name_billing`       | Nombre del pagador                                          |
-| `type_doc_billing`   | Tipo de documento (`cc` = cédula)                           |
-| `number_doc_billing` | Número de documento del pagador                             |
-| `email_billing`      | Email del pagador                                           |
+| Campo | Función |
+| ----- | ------- |
+| `name` / `description` | Producto en el checkout |
+| `invoice` | Orden (`ORD{timestamp}`) |
+| `currency` / `amount` / `tax*` | Monto e impuestos (`0` en este flujo) |
+| `country` / `lang` | `co` / `es` |
+| `external` | `false` → modal embebida |
+| `extra1/2/3` | cedtra, codser, numero |
+| `extra4` | **id de precompra** (resolución en webhook) |
+| `response` | URL de retorno client-side |
+| `confirmation` | URL del webhook `POST /api/epayco/confirmation` |
+| `name_billing` / docs / email | Datos del pagador |
 
----
+En Smart Checkout (v2) la sesión se crea en backend
+(`EcommerceController` + `ApiEpayco`) e incluye `confirmation` / extras
+equivalentes; el frontend abre con `sessionId`.
 
-## 2. Lo que NO se controla
+### 1.3 Callbacks de cierre
 
-| Aspecto                            | Por qué no se controla                                                       |
-| ---------------------------------- | ---------------------------------------------------------------------------- |
-| **Aspecto visual**                 | Colores, logos, fuentes, layout → lo gobierna el CSS interno de ePayco.      |
-| **Botones de pago disponibles**    | No se filtran con `methods` ni `methodsDisable`.                             |
-| **Textos del modal**               | `title`, `titleButtonPay`, etc. → no se setean.                              |
-| **Idioma real del checkout**       | `lang: 'es'` se envía pero el copy final lo sirve ePayco.                    |
-| **Campos opcionales del pagador**  | `address`, `phone_contact`, `city`, `duedays` → no se mandan.                |
-| **Webhook server-side**            | No se configura `confirmation`; solo se usa `response` (client-side).        |
-| **Cierre de la modal**             | Sin `onClose`, sin `onError`, sin polling. Abandonos silenciosos.            |
+| Checkout | Hook | Comportamiento |
+| -------- | ---- | -------------- |
+| v1 | `epaycoHandler.onCloseModal` | Tras delay 2.5 s → `POST abandonar-precompra` si no hay pago en validación |
+| v2 | `checkout.onClosed` (+ `onErrors` log) | Misma lógica de abandono |
 
-### 2.1 Implicación crítica: abandonos silenciosos
+Salvaguarda: `window.__epaycoPagoEnValidacion` evita marcar `AB` mientras se
+valida un pago en curso.
 
-Si el usuario abre la modal de ePayco y la cierra sin completar el pago:
+### 1.4 Confirmación server-side
 
-1. **ePayco no redirige** a `response` (porque no hubo transacción).
-2. `verificarRespuestaEpayco()` no se dispara (no hay `ref_payco` en la URL).
-3. **El backend nunca se entera** del cierre.
-4. La precompra queda en estado `PE` para siempre.
+- Ruta pública: `POST /api/epayco/confirmation`
+- Firma `x_signature` + auditoría `origen=webhook`
+- Guía: [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md)
 
-El único flujo de recuperación hoy es que el usuario entre manualmente a
-`/mercurio/servicios/compras-pendientes` y la desestima con un motivo del
-catálogo. No existe ningún job automático ni notificación que detecte
-precompras abandonadas.
+### 1.5 Limpieza de PE huérfanas
+
+Job diario `precompras:marcar-abandonadas` (TTL 7 días).
+Guía: [precompras-job-abandonadas.md](./precompras-job-abandonadas.md)
 
 ---
 
-## 3. Lo que ePayco SOPORTA y este proyecto NO usa
+## 2. Lo que NO se controla (UI / producto)
 
-| Parámetro / hook    | Para qué sirve                                                | Impacto potencial en este proyecto                          |
-| ------------------- | ------------------------------------------------------------- | ------------------------------------------------------------ |
-| `onOpen`            | Callback al abrir la modal                                    | Deshabilitar botones, mostrar loader, analytics.            |
-| `onClose`           | Callback al cerrar la modal (con o sin pago)                  | **Detectar abandonos** y marcar la precompra como tal.       |
-| `onCreateToken`     | Tokenización previa al cobro                                  | No aplica (se cobra inmediato).                              |
-| `methods`           | Whitelist de medios (`card`, `pse`, `nequi`, `daviplata`, ...) | Restringir a tarjeta + PSE por ejemplo.                      |
-| `methodsDisable`    | Blacklist de medios                                           | Bloquear métodos que no se quieran ofrecer.                  |
-| `confirmation`      | URL server-side para webhook                                  | Confirmar pagos aunque el usuario cierre el navegador.       |
-| `x_signature`       | Firma de la transacción                                       | Validar integridad de la respuesta en el backend.            |
-| `duedays`           | Plazos de cuota                                               | Ofrecer financiación a N cuotas.                            |
-| `ico`               | Impuestos al consumo                                          | Aplicar impuestos reales.                                    |
-| `discount`          | Descuento global                                              | Mostrar precio con descuento.                                |
-| `titleButtonPay`    | Texto del botón de pagar                                      | "Pagar ahora" vs "Confirmar compra".                         |
-| `expiration`        | Fecha de expiración del link de pago (si `external: true`)    | Caducar links no usados.                                     |
-| `ico_tax_base`      | Base de impuesto al consumo                                   | Igual que `tax_base` pero para ICO.                          |
+| Aspecto | Por qué |
+| ------- | ------- |
+| **Aspecto visual** | CSS interno de ePayco |
+| **Botones de pago** | No se usa `methods` / `methodsDisable` |
+| **Textos del modal** | `title`, `titleButtonPay`, etc. no se setean |
+| **Idioma real del copy** | `lang: 'es'` se envía; el copy final lo sirve ePayco |
+| **Campos opcionales del pagador** | `address`, `phone_contact`, `city`, `duedays` no se mandan |
 
-Referencia: documentación oficial de ePayco Standard Checkout.
+### 2.1 Abandonos (ya no son “silenciosos”)
+
+Si el usuario cierra la modal sin pagar **con la pestaña abierta**:
+
+1. Corre `onCloseModal` / `onClosed` → precompra `PE` → `AB`.
+2. SweetAlert informa que no es retomable.
+
+Si cierra el navegador / WebView / pierde red **sin** callback:
+
+1. La precompra puede quedar `PE` hasta el job nocturno (o hasta que el
+   webhook confirme un pago real → puede pasar a `PA` incluso desde `AB`).
+
+---
+
+## 3. Lo que ePayco soporta y aún no usamos
+
+| Parámetro | Para qué | Estado en Mercurio |
+| --------- | -------- | ------------------ |
+| `onOpen` | Loader / analytics al abrir | No usado |
+| `methods` / `methodsDisable` | Curar medios de pago | **Pendiente** |
+| `title` / `titleButtonPay` | Copy del modal | No prioritario |
+| `duedays` / `discount` / `ico*` | Cuotas, descuentos, ICO | No aplica al flujo actual |
+| `expiration` | Caducar links (`external: true`) | No aplica (checkout embebido) |
+
+Hooks ya en uso: `onCloseModal` / `onClosed`, `confirmation`, validación
+`x_signature` en webhook.
 
 ---
 
@@ -134,17 +128,18 @@ Referencia: documentación oficial de ePayco Standard Checkout.
 │ Capa                            │ Control │ Notas                   │
 ├─────────────────────────────────┼─────────┼─────────────────────────┤
 │ Llave pública / modo test       │   ●     │ vía .env → config       │
-│ Datos del producto (monto, etc.)│   ●     │ payload de open()       │
+│ Versión checkout (v1 / v2)      │   ●     │ EPAYCO_CHECKOUT_VERSION │
+│ Datos del producto (monto, etc.)│   ●     │ payload / sesión Apify  │
 │ Datos de facturación            │   ●     │ payload de open()       │
 │ URL de retorno (response)       │   ●     │ window.location.href    │
+│ Webhook (confirmation + extra4) │   ●     │ firma + auditoría       │
+│ Callbacks de cierre             │   ●     │ onCloseModal / onClosed │
+│ Detección de abandonos          │   ●     │ AB inmediato + job TTL  │
 │ Campos opcionales (address, …)  │   ○     │ no enviados             │
 │ Impuestos (tax, ico)            │   ○     │ hardcodeados en 0       │
 │ Medios de pago visibles         │   ○     │ ePayco muestra todos    │
 │ Apariencia / branding           │   ○     │ CSS interno de ePayco   │
 │ Textos del modal                │   ○     │ copy de ePayco          │
-│ Callbacks (onOpen, onClose)     │   ○     │ no se pasan             │
-│ Webhook server-side             │   ○     │ no hay `confirmation`   │
-│ Detección de abandonos          │   ○     │ solo manual             │
 └─────────────────────────────────────────────────────────────────────┘
 
 ● = controlado por el código   ○ = NO controlado
@@ -152,91 +147,26 @@ Referencia: documentación oficial de ePayco Standard Checkout.
 
 ---
 
-## 5. Recomendaciones ordenadas por impacto
+## 5. Riesgos residuales (UI / operación)
 
-### 5.1 Corto plazo — agregar `onClose` (mínimo invasivo)
-
-Pasar un callback `onClose` al `epaycoHandler.open(data)` para detectar
-cuando el usuario cierra la modal sin completar el pago.
-
-```js
-var data = { ... };
-data.onClose = function() {
-    Swal.fire({
-        title: 'Pago no completado',
-        text: 'Tu compra quedó en estado pendiente. Puedes retomarla desde "Compras pendientes".',
-        icon: 'info',
-        confirmButtonText: 'Entendido'
-    });
-};
-```
-
-**Beneficio:** UX inmediata, sin tocar backend.
-
-**Limitación:** sigue dependiendo de que el usuario tenga la pestaña abierta.
-
-### 5.2 Webhook `confirmation` (server-side)
-
-Implementado. Guía:
-[epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md).
-
-`POST /api/epayco/confirmation` valida `x_signature`, audita en
-`epayco_transacciones` (`origen=webhook`), actualiza la precompra
-(idempotente si ya estaba `PA`) y registra la venta en subsidio si el pago
-es aceptado.
-
-**Beneficio:** confirmación aunque el usuario cierre el navegador.
-
-**Riesgo mitigado:** endpoint público protegido con validación de firma.
-
-### 5.3 Job de limpieza de precompras abandonadas
-
-Comando Artisan + schedule diario (02:00):
-
-```bash
-# Simulación
-php artisan precompras:marcar-abandonadas --dias=7 --dry-run
-
-# Ejecución
-php artisan precompras:marcar-abandonadas --dias=7
-```
-
-- Job: [`MarcarPrecomprasAbandonadas`](../app/Jobs/MarcarPrecomprasAbandonadas.php)
-- Comando: `precompras:marcar-abandonadas`
-- Schedule: [`routes/console.php`](../routes/console.php) — diario a las 02:00
-- Criterio: `estado = PE` y `fecha_precompra` anterior a N días (default 7) → `AB`
-- Motivo: `MOTIVO_ABANDONO_INACTIVIDAD`
-
-Requiere que el scheduler del servidor esté activo. Guía operativa:
-[precompras-job-abandonadas.md](./precompras-job-abandonadas.md).
-
-**Beneficio:** limpia PE huérfanas (cierre de pestaña/navegador sin `onClose`).
+1. **Medios de pago no curados** — si ePayco habilita un método no deseado,
+   el checkout lo mostraría sin filtro.
+2. **Branding inconsistente** — la modal rompe el look & feel de Mercurio
+   (limitación del producto ePayco).
+3. **WebView Android** — iframes / storage / `onClose` frágiles; el webhook
+   mitiga, pero conviene probar en dispositivo real.
+4. **Firma solo en webhook** — `validarReferencia` confía en la API de ePayco
+   (origen de confianza en ese path).
 
 ---
 
-## 6. Riesgos actuales
+## 6. Próximos pasos sugeridos
 
-1. **Abandonos invisibles** — sin `onClose` ni `confirmation`, no se sabe
-   cuántos usuarios cierran la modal sin pagar.
-2. **Precompras huérfanas** — pueden acumularse y distorsionar métricas de
-   "compras pendientes".
-3. **Medios de pago no curados** — si ePayco habilita un método no deseado,
-   este proyecto lo mostraría sin filtro.
-4. **Branding inconsistente** — la modal rompe el look & feel del resto de
-   la aplicación.
-5. **Sin firma en respuestas** — mitigado en el webhook `confirmation`
-   (validación de `x_signature`). El flujo `validarReferencia` sigue
-   confiando en la API de ePayco.
-
----
-
-## 7. Próximos pasos sugeridos
-
-| # | Acción                                                                   | Esfuerzo | Valor |
-| - | ------------------------------------------------------------------------ | -------- | ----- |
-| 1 | ~~Agregar `onClose` con SweetAlert informativo~~ — hecho | — | — |
-| 2 | Whitelist de medios de pago con `methods`                                | Bajo     | Medio |
-| 3 | ~~Webhook `confirmation` + firma~~ — [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md) | — | — |
-| 4 | ~~Job programado que marque precompras abandonadas~~ — hecho (`precompras:marcar-abandonadas`) | — | — |
-| 5 | Customizar textos (`titleButtonPay`, `title`)                            | Bajo     | Bajo  |
-| 6 | ~~Verificación TLS en `validarReferencia`~~ — `EPAYCO_HTTP_VERIFY_SSL` (default true) | — | — |
+| # | Acción | Esfuerzo | Valor | Estado |
+| - | ------ | -------- | ----- | ------ |
+| 1 | `onClose` / `onClosed` + SweetAlert + abandono `AB` | — | — | Hecho |
+| 2 | Webhook `confirmation` + firma | — | — | Hecho |
+| 3 | Job `precompras:marcar-abandonadas` | — | — | Hecho |
+| 4 | TLS `EPAYCO_HTTP_VERIFY_SSL` | — | — | Hecho |
+| 5 | Whitelist de medios (`methods` / `methodsDisable`) | Bajo | Medio | **Pendiente** |
+| 6 | Customizar textos (`titleButtonPay`, `title`) | Bajo | Bajo | Opcional |
