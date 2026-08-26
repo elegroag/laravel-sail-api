@@ -1,5 +1,6 @@
 /**
  * Vista movil del panel de compra: panel / FAB / modal de resumen.
+ * También detecta entorno movil/WebView para forzar Smart Checkout v2.
  *
  * Depende de globales del layout: $ (jQuery), Swal (SweetAlert2).
  */
@@ -7,6 +8,26 @@ import store from './store.js';
 
 export function esVistaMovil() {
     return window.matchMedia('(max-width: 991.98px)').matches;
+}
+
+/**
+ * Movil / WebView (Flutter Android, etc.): fuerza Checkout v2 en modo standard.
+ */
+export function esEntornoMovil() {
+    if (window.isFlutterWebView === true || typeof window.FlutterChannel !== 'undefined') {
+        return true;
+    }
+
+    var ua = navigator.userAgent || '';
+    if (/\bwv\b/i.test(ua)) {
+        return true;
+    }
+
+    if (/Android|iPhone|iPad|iPod/i.test(ua) && esVistaMovil()) {
+        return true;
+    }
+
+    return esVistaMovil();
 }
 
 export function moverPanelAlModal() {

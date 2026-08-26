@@ -4,6 +4,8 @@
  * Depende de globales del layout: $ (jQuery) y las banderas
  * window.EPAYCO_CHECKOUT_VERSION / window.EPAYCO_TEST / window.epaycoHandler.
  */
+var CHECKOUT_V2_SRC = 'https://checkout.epayco.co/checkout-v2.js';
+
 export function escapeHtml(texto) {
     if (!texto) return '';
     return String(texto)
@@ -42,10 +44,74 @@ export function obtenerEpaycoHandler() {
     return window.epaycoHandler || null;
 }
 
+export function esVistaMovil() {
+    return window.matchMedia('(max-width: 991.98px)').matches;
+}
+
+export function esEntornoMovil() {
+    if (window.isFlutterWebView === true || typeof window.FlutterChannel !== 'undefined') {
+        return true;
+    }
+
+    var ua = navigator.userAgent || '';
+    if (/\bwv\b/i.test(ua)) {
+        return true;
+    }
+
+    if (/Android|iPhone|iPad|iPod/i.test(ua) && esVistaMovil()) {
+        return true;
+    }
+
+    return esVistaMovil();
+}
+
+/**
+ * Desktop: respeta EPAYCO_CHECKOUT_VERSION.
+ * Movil/WebView: siempre Smart Checkout v2.
+ */
 export function esCheckoutV2() {
-    return String(window.EPAYCO_CHECKOUT_VERSION) === '2';
+    return String(window.EPAYCO_CHECKOUT_VERSION) === '2' || esEntornoMovil();
+}
+
+export function tipoCheckoutV2() {
+    return esEntornoMovil() ? 'standard' : 'onpage';
 }
 
 export function epaycoTestActivo() {
     return window.EPAYCO_TEST === true || String(window.EPAYCO_TEST) === 'true';
+}
+
+export function asegurarSdkCheckoutV2(done) {
+    var finish = typeof done === 'function' ? done : function () {};
+
+    if (String(window.EPAYCO_CHECKOUT_VERSION) === '2' || window.__epaycoCheckoutV2Ready) {
+        window.__epaycoCheckoutV2Ready = true;
+        finish(null);
+        return;
+    }
+
+    var existing = document.querySelector('script[data-epayco-checkout-v2]');
+    if (existing) {
+        existing.addEventListener('load', function () {
+            window.__epaycoCheckoutV2Ready = true;
+            finish(null);
+        });
+        existing.addEventListener('error', function () {
+            finish(new Error('No se pudo cargar ePayco Smart Checkout'));
+        });
+        return;
+    }
+
+    var script = document.createElement('script');
+    script.src = CHECKOUT_V2_SRC;
+    script.async = true;
+    script.setAttribute('data-epayco-checkout-v2', '1');
+    script.onload = function () {
+        window.__epaycoCheckoutV2Ready = true;
+        finish(null);
+    };
+    script.onerror = function () {
+        finish(new Error('No se pudo cargar ePayco Smart Checkout'));
+    };
+    document.head.appendChild(script);
 }

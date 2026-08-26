@@ -6,7 +6,15 @@
  * sessionStorage.
  */
 import store from './store.js';
-import { escapeHtml, sanitizarTexto, obtenerEpaycoHandler, esCheckoutV2, epaycoTestActivo } from './utils.js';
+import {
+    escapeHtml,
+    sanitizarTexto,
+    obtenerEpaycoHandler,
+    esCheckoutV2,
+    epaycoTestActivo,
+    tipoCheckoutV2,
+    asegurarSdkCheckoutV2,
+} from './utils.js';
 import { nombreServicio } from './datos.js';
 import { cargarDatos } from './carga.js';
 
@@ -151,75 +159,103 @@ function abrirCheckout(precompra, valor) {
 
 // Smart Checkout v2: crea la sesion en backend reutilizando la precompra pendiente.
 function abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra) {
-    $.ajax({
-        url: store.routes.crearSesionEpayco,
-        method: 'POST',
-        dataType: 'JSON',
-        cache: false,
-        data: {
-            cedtra: cedtra,
-            codser: precompra.codser,
-            numero: precompra.numero,
-            codben: precompra.codben || cedtra,
-            nota: precompra.nota || '',
-            valor: valor,
-            nombre_servicio: servicioNombre,
-            nombre: nombre,
-            email: email,
-            precompra_id: precompra.id
-        }
-    }).done(function (response) {
-        if (response.success && response.data && response.data.sessionId) {
-            sessionStorage.setItem('epayco_precompra_id', String(response.data.precompra_id));
-            window.__epaycoPagoEnValidacion = false;
-
-            var checkout;
-            try {
-                checkout = ePayco.checkout.configure({
-                    sessionId: response.data.sessionId,
-                    type: 'onpage',
-                    test: epaycoTestActivo()
-                });
-            } catch (e) {
-                console.log('Error inicializando ePayco v2:', e);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo inicializar la pasarela de pago. Recargue la página.',
-                    icon: 'error',
-                    confirmButtonText: 'Entendido'
-                });
-                return;
-            }
-
-            if (typeof checkout.onClosed === 'function') {
-                checkout.onClosed(function () {
-                    setTimeout(function () {
-                        marcarPrecompraAbandonadaV2(precompra.id);
-                    }, 2500);
-                });
-            }
-            if (typeof checkout.onErrors === 'function') {
-                checkout.onErrors(function (errores) {
-                    console.log('ePayco onErrors:', errores);
-                });
-            }
-
-            checkout.open();
-        } else {
+    asegurarSdkCheckoutV2(function (errSdk) {
+        if (errSdk) {
             Swal.fire({
-                title: 'No se pudo iniciar el pago',
-                text: response.message || 'Error al crear la sesión de pago. Intente nuevamente.',
+                title: 'Error',
+                text: errSdk.message || 'No se pudo cargar la pasarela de pago.',
                 icon: 'error',
-                confirmButtonText: 'Entendido'
+                confirmButtonText: 'Entendido',
             });
+            return;
         }
-    }).fail(function () {
-        Swal.fire({
-            title: 'Error de conexión',
-            text: 'No se pudo crear la sesión de pago. Intente nuevamente.',
-            icon: 'error',
-            confirmButtonText: 'Entendido'
-        });
+
+        $.ajax({
+            url: store.routes.crearSesionEpayco,
+            method: 'POST',
+            dataType: 'JSON',
+            cache: false,
+            data: {
+                cedtra: cedtra,
+                codser: precompra.codser,
+                numero: precompra.numero,
+                codben: precompra.codben || cedtra,
+                nota: precompra.nota || '',
+                valor: valor,
+                nombre_servicio: servicioNombre,
+                nombre: nombre,
+                email: email,
+                precompra_id: precompra.id,
+            },
+        })
+            .done(function (response) {
+                if (response.success && response.data && response.data.sessionId) {
+                    sessionStorage.setItem('epayco_precompra_id', String(response.data.precompra_id));
+                    window.__epaycoPagoEnValidacion = false;
+
+                    var tipo = tipoCheckoutV2();
+                    var checkout;
+                    try {
+                        checkout = ePayco.checkout.configure({
+                            sessionId: response.data.sessionId,
+                            type: tipo,
+                            test: epaycoTestActivo(),
+                        });
+                    } catch (e) {
+                        console.log('Error inicializando ePayco v2:', e);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo inicializar la pasarela de pago. Recargue la página.',
+                            icon: 'error',
+                            confirmButtonText: 'Entendido',
+                        });
+                        return;
+                    }
+
+                    if (tipo === 'onpage') {
+                        if (typeof checkout.onClosed === 'function') {
+                            checkout.onClosed(function () {
+                                setTimeout(function () {
+                                    marcarPrecompraAbandonadaV2(precompra.id);
+                                }, 2500);
+                            });
+                        }
+                        if (typeof checkout.onErrors === 'function') {
+                            checkout.onErrors(function (errores) {
+                                console.log('ePayco onErrors:', errores);
+                            });
+                        }
+                        checkout.open();
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Continuar con el pago',
+                        html:
+                            '<p>Será redirigido al entorno seguro de ePayco para completar el pago.</p>' +
+                            '<p class="mb-0 text-muted">Al finalizar volverá a esta aplicación; la confirmación también se procesa en el servidor.</p>',
+                        icon: 'info',
+                        confirmButtonText: 'Continuar',
+                    }).then(function () {
+                        checkout.open();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'No se pudo iniciar el pago',
+                        text: response.message || 'Error al crear la sesión de pago. Intente nuevamente.',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                    });
+                }
+            })
+            .fail(function () {
+                Swal.fire({
+                    title: 'Error de conexión',
+                    text: 'No se pudo crear la sesión de pago. Intente nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                });
+            });
     });
 }
 

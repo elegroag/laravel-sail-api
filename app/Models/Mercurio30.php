@@ -99,7 +99,7 @@ class Mercurio30 extends ModelBase
             // char(N) — required
             'nit' => 'required|max:15',
             'tipdoc' => 'required|max:2',
-            'razsoc' => 'required|max:100',
+            'razsoc' => 'required|max:150',
             'sigla' => 'nullable|max:40',
             'digver' => 'nullable|max:2',
             'calemp' => 'nullable|max:3',

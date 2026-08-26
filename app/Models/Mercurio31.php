@@ -162,7 +162,7 @@ class Mercurio31 extends ModelBase
             'ciulab' => 'max:6',
             'estciv' => 'max:2',
             // string — required
-            'razsoc' => 'required|max:100',
+            'razsoc' => 'required|max:150',
             // string — nullable
             'direccion' => 'max:120',
             'barrio' => 'max:48',
@@ -1295,12 +1295,12 @@ class Mercurio31 extends ModelBase
 
     public function getNombre()
     {
-        return $this->priape . ' ' . $this->prinom;
+        return $this->priape.' '.$this->prinom;
     }
 
     public function getNombreCompleto()
     {
-        return $this->priape . ' ' . $this->segape . ' ' . $this->prinom . ' ' . $this->segnom;
+        return $this->priape.' '.$this->segape.' '.$this->prinom.' '.$this->segnom;
     }
 
     public function get_all()

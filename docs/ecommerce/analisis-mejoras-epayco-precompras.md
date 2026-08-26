@@ -147,7 +147,7 @@ Checkout monolítico main.js   Módulos + Standard/Smart Checkout
 | R2 | Scheduler no activo en el servidor | Media | El job de abandono no corre sin cron/`schedule:work`. |
 | R3 | Migración `epayco_transacciones` no aplicada | Alta | Escrituras de auditoría fallan (logueadas; no deben tumbar el pago). |
 | R4 | Doble `guardar-venta` (cliente + webhook) | Baja | Mitigado en ambos lados si la precompra ya estaba `PA` antes de actualizar. Carrera simultánea residual (ambos leen `PE`) depende de idempotencia en Subsidio. |
-| R5 | Checkout ePayco en WebView Android | Media | Probar en dispositivo real; webhook mitiga. |
+| R5 | Checkout ePayco en WebView Android | Baja | Mitigado: en móvil/WebView se fuerza Smart Checkout v2 con `type: standard` (entorno seguro ePayco). Webhook + retorno `response` siguen confirmando. |
 | R6 | `APIClient` (Subsidio u otros) sigue con `withoutVerifying()` | Baja–Media | Deuda TLS fuera de `ApiEpayco`. |
 | R7 | Firma no se valida en `validarReferencia` (solo webhook) | Baja | La API de ePayco es el origen de confianza en ese path. |
 | R8 | ~~Reporte de compras Cajas sin `transaction_id`~~ | — | Hecho: columnas Transaction ID / Approval code en `ReporteComprasServicios`. |

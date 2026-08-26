@@ -26,8 +26,10 @@ Documentos relacionados:
 La compra de servicios para los usuarios finales (trabajadores, beneficiarios)
 se paga electrónicamente con **ePayco**. Según `EPAYCO_CHECKOUT_VERSION`:
 
-- **`1`** — Standard Checkout (`checkout.js`, modal embebida).
-- **`2`** — Smart Checkout (`checkout-v2.js` + sesión Apify en backend).
+- **`1`** — Standard Checkout (`checkout.js`, modal embebida) en **desktop**.
+- **`2`** — Smart Checkout (`checkout-v2.js` + sesión Apify) en desktop (`onpage`).
+- **Móvil / WebView** — siempre Smart Checkout v2 con `type: standard`
+  (entorno seguro ePayco / redirect), aunque `EPAYCO_CHECKOUT_VERSION=1`.
 
 Además hay un **endpoint de validación de referencia** y un **webhook
 `confirmation`** firmado para confirmar el estado real aunque el cliente no
@@ -778,11 +780,12 @@ El frontend lee `ref_payco` desde varios nombres
 | 6 | `onClose` / `onClosed` + abandono `AB` | Hecho |
 | 7 | Auditoría `epayco_transacciones` | Hecho |
 | 8 | Checkout modular + `EPAYCO_CHECKOUT_VERSION` | Hecho |
-| 9 | `EPAYCO_FORCE_APPROVED` (QA non-prod) | Hecho |
-| 10 | Whitelist de medios (`methods` / `methodsDisable`) | Pendiente |
+| 9 | Móvil/WebView fuerza Checkout v2 `type: standard` | Hecho |
+| 10 | `EPAYCO_FORCE_APPROVED` (QA non-prod) | Hecho |
 | 11 | `transaction_id` / `approval_code` en `ReporteComprasServicios` | Hecho |
-| 12 | TLS configurable en `APIClient` (Subsidio) | Pendiente |
-| 13 | Tests Feature del webhook | Pendiente |
-| 14 | Alertas operativas firma `400` / credenciales `503` | Pendiente |
+| 12 | Whitelist de medios (`methods` / `methodsDisable`) | Pendiente |
+| 13 | TLS configurable en `APIClient` (Subsidio) | Pendiente |
+| 14 | Tests Feature del webhook | Pendiente |
+| 15 | Alertas operativas firma `400` / credenciales `503` | Pendiente |
 
 Detalle de backlog: [analisis-mejoras-epayco-precompras.md](./analisis-mejoras-epayco-precompras.md).

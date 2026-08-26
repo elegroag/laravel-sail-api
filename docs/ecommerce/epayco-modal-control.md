@@ -153,8 +153,9 @@ Hooks ya en uso: `onCloseModal` / `onClosed`, `confirmation`, validación
    el checkout lo mostraría sin filtro.
 2. **Branding inconsistente** — la modal rompe el look & feel de Mercurio
    (limitación del producto ePayco).
-3. **WebView Android** — iframes / storage / `onClose` frágiles; el webhook
-   mitiga, pero conviene probar en dispositivo real.
+3. **WebView Android / móvil** — en móvil se fuerza Smart Checkout v2 con
+   `type: standard` (redirect a entorno seguro ePayco). El webhook mitiga si
+   el usuario no vuelve al `response`.
 4. **Firma solo en webhook** — `validarReferencia` confía en la API de ePayco
    (origen de confianza en ese path).
 
@@ -170,3 +171,4 @@ Hooks ya en uso: `onCloseModal` / `onClosed`, `confirmation`, validación
 | 4 | TLS `EPAYCO_HTTP_VERIFY_SSL` | — | — | Hecho |
 | 5 | Whitelist de medios (`methods` / `methodsDisable`) | Bajo | Medio | **Pendiente** |
 | 6 | Customizar textos (`titleButtonPay`, `title`) | Bajo | Bajo | Opcional |
+| 7 | Móvil/WebView → Checkout v2 `type: standard` | — | — | Hecho |
