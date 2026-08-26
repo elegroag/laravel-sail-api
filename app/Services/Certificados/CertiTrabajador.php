@@ -72,7 +72,7 @@ class CertiTrabajador
      */
     public function getFileName(): string
     {
-        return "certificado_trabajador_{$this->cedtra}_" . date('YmdHis') . '.pdf';
+        return "certificado_trabajador_{$this->cedtra}_".date('YmdHis').'.pdf';
     }
 
     /**
@@ -113,8 +113,12 @@ class CertiTrabajador
         // Convertir Collection a objeto para usar en la plantilla Blade
         $trabajadorObj = $trabajador->isNotEmpty() ? (object) $trabajador->first() : null;
 
+        if ($trabajadorObj === null) {
+            throw new \InvalidArgumentException("No se encontraron datos del trabajador {$this->cedtra}.");
+        }
+
         // Convertir Collection de trayectorias a array de objetos
-        $trayectoriasObj = $trayectorias->map(fn($t) => (object) $t)->toArray();
+        $trayectoriasObj = $trayectorias->map(fn ($t) => (object) $t)->toArray();
 
         $trabajadorObj->ultper = $ultper->isNotEmpty() ? $ultper->first()['ultper'] : '';
         $trabajadorObj->estapo = 'Al día';
@@ -182,15 +186,15 @@ class CertiTrabajador
 
         $legacy->disconnect();
 
-        $beneficiariosObj = $beneficiarios->map(fn($b) => (object) $b)->toArray();
+        $beneficiariosObj = $beneficiarios->map(fn ($b) => (object) $b)->toArray();
         $beneficiariosSinGiro = array_values(array_filter(
             $beneficiariosObj,
-            static fn($b) => ($b->cuota_monetaria ?? 'NO') === 'NO' || ($b->giro ?? 'N') === 'N'
+            static fn ($b) => ($b->cuota_monetaria ?? 'NO') === 'NO' || ($b->giro ?? 'N') === 'N'
         ));
 
         return [
             'trabajador' => $trabajador->isNotEmpty() ? (object) $trabajador->first() : null,
-            'conyuges' => $conyuges->map(fn($c) => (object) $c)->toArray(),
+            'conyuges' => $conyuges->map(fn ($c) => (object) $c)->toArray(),
             'beneficiarios' => $beneficiariosObj,
             'beneficiarios_sin_giro' => $beneficiariosSinGiro,
             'fecha' => date('Y-m-d'),
@@ -245,7 +249,7 @@ class CertiTrabajador
 
         return [
             'trabajador' => (object) $trabajador->first(),
-            'multiAfiliacion' => $multiAfiliacion->map(fn($m) => (object) $m)->toArray(),
+            'multiAfiliacion' => $multiAfiliacion->map(fn ($m) => (object) $m)->toArray(),
             'fecha' => date('Y-m-d'),
         ];
     }
@@ -334,7 +338,7 @@ class CertiTrabajador
 
         return [
             'trabajador' => $trabajador->isNotEmpty() ? (object) $trabajador->first() : null,
-            'devoluciones' => $devoluciones->map(fn($d) => (object) $d)->toArray(),
+            'devoluciones' => $devoluciones->map(fn ($d) => (object) $d)->toArray(),
             'aportesPlanilla' => $aportesPlanilla,
             'fecha' => date('Y-m-d'),
         ];

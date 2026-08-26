@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
@@ -10,12 +11,16 @@ use App\Models\Mercurio09;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
 use App\Models\Mercurio46;
+use App\Services\Api\ApiSubsidio;
+use App\Services\Certificados\Certificado;
+use App\Services\Certificados\CertiTrabajador;
 use App\Services\ReportGenerator\ReportService;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ConsultaController extends ApplicationController
 {
@@ -528,5 +533,140 @@ class ConsultaController extends ApplicationController
         }
 
         return $this->renderObject(['consulta' => $html], false);
+    }
+
+    public function certificadoTrabajadorView()
+    {
+        return view('cajas.consulta.certificado_trabajador', [
+            'title' => 'Certificado para Trabajador',
+            'tipos' => [
+                'A' => 'Certificación afiliación principal',
+                'I' => 'Certificación con núcleo',
+                'T' => 'Certificación de multiafiliación',
+                'P' => 'Reporte trabajador en planillas',
+            ],
+        ]);
+    }
+
+    public function trabajadoresPorNit(Request $request)
+    {
+        $nit = trim((string) $request->input('nit', ''));
+
+        if ($nit === '') {
+            return response()->json([
+                'success' => false,
+                'msj' => 'El NIT es obligatorio.',
+            ], 422);
+        }
+
+        try {
+            $trabajadores = $this->obtenerTrabajadoresPorNit($nit);
+
+            return response()->json([
+                'success' => true,
+                'trabajadores' => $trabajadores,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function certificadoTrabajador(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'nit' => 'required|string',
+                'cedtra' => 'required|string',
+                'tipo' => 'required|in:A,I,T,P',
+            ]);
+
+            $this->validarTrabajadorEmpresa($validated['nit'], $validated['cedtra']);
+
+            $certificado = new Certificado(
+                new CertiTrabajador($validated['cedtra'], $validated['tipo'])
+            );
+            $certificado->generate();
+
+            $path = $certificado->getFilePath();
+            if (! is_file($path)) {
+                throw new DebugException('No se pudo generar el archivo del certificado.', 500);
+            }
+
+            return response()->file($path, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="'.$certificado->getDownloadName().'"',
+            ]);
+        } catch (ValidationException $e) {
+            $msj = collect($e->errors())->flatten()->first() ?: 'Datos inválidos.';
+
+            return $this->respondCertificadoError($request, $msj, 422);
+        } catch (\Throwable $e) {
+            return $this->respondCertificadoError(
+                $request,
+                $e->getMessage() ?: 'No se pudo generar el certificado.',
+                (int) ($e->getCode() ?: 422) ?: 422
+            );
+        }
+    }
+
+    private function respondCertificadoError(Request $request, string $msj, int $status = 422)
+    {
+        if ($request->expectsJson() || $request->ajax() || $request->headers->has('X-Requested-With')) {
+            return response()->json([
+                'success' => false,
+                'msj' => $msj,
+            ], $status >= 400 ? $status : 422);
+        }
+
+        set_flashdata('error', [
+            'msj' => $msj,
+            'code' => $status,
+        ]);
+
+        return redirect()->route('consulta.certificadoTrabajador');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function obtenerTrabajadoresPorNit(string $nit): array
+    {
+        $ps = new ApiSubsidio;
+        $ps->send([
+            'servicio' => 'ComfacaAfilia',
+            'metodo' => 'listar_trabajadores',
+            'params' => ['nit' => $nit],
+        ]);
+
+        $out = $ps->toArray();
+
+        if (! ($out['success'] ?? false)) {
+            throw new DebugException($out['msj'] ?? 'No se pudo listar trabajadores.', 502);
+        }
+
+        $trabajadores = [];
+
+        foreach ($out['data'] ?? [] as $trabajador) {
+            $cedtra = (string) ($trabajador['cedtra'] ?? '');
+            if ($cedtra === '') {
+                continue;
+            }
+
+            $trabajadores[$cedtra] = (string) ($trabajador['nombre'] ?? $cedtra);
+        }
+
+        return $trabajadores;
+    }
+
+    private function validarTrabajadorEmpresa(string $nit, string $cedtra): void
+    {
+        $trabajadores = $this->obtenerTrabajadoresPorNit($nit);
+
+        if (! array_key_exists($cedtra, $trabajadores)) {
+            throw new DebugException('El trabajador no pertenece a la empresa indicada.', 422);
+        }
     }
 }
