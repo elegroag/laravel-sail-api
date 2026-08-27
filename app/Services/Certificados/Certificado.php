@@ -219,8 +219,8 @@ class Certificado
         $this->pdf->setPrintFooter(true);
 
         // Márgenes
-        $this->pdf->SetMargins(15, 15, 15);
-        $this->pdf->SetAutoPageBreak(true, 32);
+        $this->pdf->SetMargins(15, 10, 15);
+        $this->pdf->SetAutoPageBreak(true, 30);
 
         // Agregar página
         $this->pdf->AddPage();

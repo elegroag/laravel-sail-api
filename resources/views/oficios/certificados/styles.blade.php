@@ -61,8 +61,8 @@
     .document-title {
         font-size: 13px;
         text-align: center;
-        margin: 4px 0 6px 0;
-        padding: 4px 0;
+        margin: 3px 0 5px 0;
+        padding: 3px 0;
         border-bottom: none;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -70,7 +70,7 @@
     }
     .body-text {
         font-size: 11px;
-        line-height: 1.55;
+        line-height: 1.5;
         margin: 0 0 8px 0;
         text-align: left;
     }
