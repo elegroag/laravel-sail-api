@@ -443,7 +443,9 @@ class EcommerceController extends ApplicationController
             $data = $resultado['data'];
             $msg = $data['aprobado'] ? 'Pago aprobado' : 'Pago no aprobado';
 
-            $this->actualizarPrecompraDesdePago($data, $precompraId);
+            // Solo auditoría + ref ePayco: no promover a PA/RE aquí.
+            // guardarVenta (o el webhook) es quien cambia el estado y llama a Subsidio.
+            $this->actualizarPrecompraDesdePago($data, $precompraId, 'validacion', false);
 
             return response()->json([
                 'success' => true,
@@ -523,10 +525,11 @@ class EcommerceController extends ApplicationController
             $pagoAprobado = ($datosPago['aprobado'] ?? false) === true && (int) ($datosPago['cod_estado'] ?? 0) === 1;
 
             // Capturar PA antes de actualizar: si el webhook (u otro request) ya dejó
-            // la precompra pagada, no reenviar guardar-venta a Subsidio.
+            // la precompra pagada, no reenviar guardar-venta a Subsidio (salvo FORCE_APPROVED).
             $refPaycoDatos = (string) ($datosPago['ref_payco'] ?? $refpago);
             $precompraAntes = $this->resolverPrecompraPorRefOId($refPaycoDatos, $precompraId);
             $yaPagada = $precompraAntes?->isPagado() ?? false;
+            $forceApproved = $this->epayco->debeForzarAprobacion();
 
             $this->actualizarPrecompraDesdePago($datosPago, $precompraId);
 
@@ -547,7 +550,7 @@ class EcommerceController extends ApplicationController
                 ]);
             }
 
-            if ($yaPagada) {
+            if ($yaPagada && ! $forceApproved) {
                 Log::info('Ecommerce.guardarVenta: precompra ya PA, omitiendo Subsidio', [
                     'refpago' => $refpago,
                     'precompra_id' => $precompraAntes?->id ?? $precompraId,
@@ -560,6 +563,13 @@ class EcommerceController extends ApplicationController
                         'precompra_id' => $precompraAntes?->id,
                     ],
                     'message' => 'Venta ya registrada previamente',
+                ]);
+            }
+
+            if ($yaPagada && $forceApproved) {
+                Log::info('Ecommerce.guardarVenta: precompra ya PA pero FORCE_APPROVED, enviando a Subsidio', [
+                    'refpago' => $refpago,
+                    'precompra_id' => $precompraAntes?->id ?? $precompraId,
                 ]);
             }
 
@@ -746,6 +756,50 @@ class EcommerceController extends ApplicationController
     }
 
     /**
+     * POST /mercurio/servicios/historial-precompras
+     * AJAX: Historial local de precompras del usuario (todos los estados).
+     */
+    public function historialPrecompras(): JsonResponse
+    {
+        try {
+            $documento = $this->user['documento'] ?? '';
+
+            $precompras = PrecompraServicio::where('documento', $documento)
+                ->orderByDesc('fecha_precompra')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn (PrecompraServicio $precompra) => [
+                    'id' => $precompra->id,
+                    'codser' => $precompra->codser,
+                    'numero' => $precompra->numero,
+                    'codben' => $precompra->codben,
+                    'nota' => $precompra->nota,
+                    'valor' => $precompra->valor,
+                    'estado' => $precompra->estado,
+                    'estado_descripcion' => $precompra->estado_descripcion,
+                    'ref_payco' => $precompra->ref_payco,
+                    'cod_estado_epayco' => $precompra->cod_estado_epayco,
+                    'motivo_epayco' => $precompra->motivo_epayco,
+                    'fecha_precompra' => $precompra->fecha_precompra?->format('Y-m-d H:i'),
+                    'fecha_pago' => $precompra->fecha_pago?->format('Y-m-d H:i'),
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $precompras,
+                'message' => '',
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar el historial de precompras: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * POST /mercurio/servicios/desestimar-precompra
      * AJAX: Desestimar una precompra pendiente con un motivo del catalogo.
      * Si el motivo es OTRO se requiere el detalle en texto libre.
@@ -904,13 +958,19 @@ class EcommerceController extends ApplicationController
     }
 
     /**
-     * Actualiza el estado de la precompra segun la respuesta de ePayco.
+     * Actualiza la precompra segun la respuesta de ePayco.
      * Busca por ref_payco y, si no hay coincidencia, por el id de precompra
      * enviado desde el frontend (pendiente o abandonada por carrera con onClose).
      * Siempre registra un snapshot en epayco_transacciones para auditoria.
+     *
+     * @param  bool  $promoverEstado  Si false, solo actualiza ref/codigos ePayco sin cambiar estado (PE/AB/…).
      */
-    protected function actualizarPrecompraDesdePago(array $datosPago, int $precompraId = 0, string $origen = 'validacion'): void
-    {
+    protected function actualizarPrecompraDesdePago(
+        array $datosPago,
+        int $precompraId = 0,
+        string $origen = 'validacion',
+        bool $promoverEstado = true
+    ): void {
         try {
             $refPayco = (string) ($datosPago['ref_payco'] ?? '');
 
@@ -934,9 +994,33 @@ class EcommerceController extends ApplicationController
                 $precompra = $precompraActualizable;
             }
 
+            // Sin promover estado: permitir actualizar metadata en cualquier precompra por id
+            if (! $precompraActualizable && ! $promoverEstado && $precompraId > 0) {
+                $precompraActualizable = PrecompraServicio::where('id', $precompraId)->first();
+                if (! $precompra) {
+                    $precompra = $precompraActualizable;
+                }
+            }
+
             $this->registrarTransaccionEpayco($precompra?->id ?? $precompraActualizable?->id, $datosPago, $origen);
 
             if (! $precompraActualizable) {
+                return;
+            }
+
+            $codEstado = (int) ($datosPago['cod_estado'] ?? 0);
+            $motivo = mb_substr((string) ($datosPago['motivo'] ?: ($datosPago['respuesta'] ?? '')), 0, 255);
+
+            if (! $promoverEstado) {
+                $precompraActualizable->fill([
+                    'ref_payco' => $refPayco !== '' ? $refPayco : $precompraActualizable->ref_payco,
+                    'cod_estado_epayco' => (string) $codEstado,
+                    'motivo_epayco' => $motivo,
+                ]);
+                $precompraActualizable->save();
+
+                $this->setLogger("Precompra {$precompraActualizable->id} metadata ePayco actualizada sin cambio de estado (ePayco: {$codEstado}, ref: {$refPayco})");
+
                 return;
             }
 
@@ -945,14 +1029,13 @@ class EcommerceController extends ApplicationController
                 return;
             }
 
-            $codEstado = (int) ($datosPago['cod_estado'] ?? 0);
             $nuevoEstado = EstadoPrecompra::desdeCodigoEpayco($codEstado);
 
             $precompraActualizable->fill([
                 'estado' => $nuevoEstado,
                 'ref_payco' => $refPayco !== '' ? $refPayco : $precompraActualizable->ref_payco,
                 'cod_estado_epayco' => (string) $codEstado,
-                'motivo_epayco' => mb_substr((string) ($datosPago['motivo'] ?: ($datosPago['respuesta'] ?? '')), 0, 255),
+                'motivo_epayco' => $motivo,
             ]);
 
             if ($nuevoEstado === EstadoPrecompra::PAGADO && ! $precompraActualizable->fecha_pago) {

@@ -794,12 +794,27 @@ label.is-invalid {
 .panel-compra {
     align-self: start;
     position: relative;
+    width: 100%;
 }
 
 @media (min-width: 992px) {
+    .panel-compra-slot {
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 0.25rem;
+        scrollbar-gutter: stable;
+    }
+
     .panel-compra {
-        position: sticky;
-        top: 0;
+        /* El scroll vive en .panel-compra-slot; sticky aquí se clippea por overflow de ancestros. */
+        position: relative;
+        top: auto;
     }
 }
 
@@ -911,9 +926,16 @@ label.is-invalid {
 }
 
 .panel-compra__actions {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 28%);
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
+    margin-top: 0.75rem;
+    padding-bottom: 0.15rem;
+    padding-top: 0.75rem;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
 }
 
 .panel-compra__btn-cancelar {
@@ -1223,6 +1245,41 @@ label.is-invalid {
 .compra-card__estado--x {
     background: var(--bs-gray-200, #e9ecef);
     color: var(--bs-gray-700, #495057);
+}
+
+.compra-card__estado--pe {
+    background: color-mix(in srgb, var(--bs-info, #11cdef) 16%, #fff);
+    color: color-mix(in srgb, var(--bs-info, #11cdef) 75%, #000);
+}
+
+.compra-card__estado--pa {
+    background: color-mix(in srgb, var(--bs-success, #2dce89) 18%, #fff);
+    color: color-mix(in srgb, var(--bs-success, #2dce89) 75%, #000);
+}
+
+.compra-card__estado--ab {
+    background: color-mix(in srgb, var(--bs-secondary, #8898aa) 18%, #fff);
+    color: color-mix(in srgb, var(--bs-secondary, #8898aa) 70%, #000);
+}
+
+.compra-card__estado--re {
+    background: color-mix(in srgb, var(--bs-danger, #f5365c) 14%, #fff);
+    color: color-mix(in srgb, var(--bs-danger, #f5365c) 75%, #000);
+}
+
+.compra-card__estado--de {
+    background: color-mix(in srgb, var(--bs-warning, #fb6340) 16%, #fff);
+    color: color-mix(in srgb, var(--bs-warning, #fb6340) 70%, #000);
+}
+
+.compras-vista-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.compras-vista-tabs .btn.active {
+    box-shadow: inset 0 0 0 1px currentColor;
 }
 
 .compra-card__servicio {

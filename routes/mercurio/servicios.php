@@ -9,6 +9,7 @@ Route::middleware(['mercurio.auth'])->group(function () {
         Route::get('/ver-compras', [EcommerceController::class, 'verCompras'])->name('servicios.ver-compras');
         Route::get('/compras-pendientes', [EcommerceController::class, 'comprasPendientes'])->name('servicios.compras-pendientes');
         Route::post('/listar-precompras', [EcommerceController::class, 'listarPrecompras'])->name('servicios.listar-precompras');
+        Route::post('/historial-precompras', [EcommerceController::class, 'historialPrecompras'])->name('servicios.historial-precompras');
         Route::post('/desestimar-precompra', [EcommerceController::class, 'desestimarPrecompra'])->name('servicios.desestimar-precompra');
         Route::post('/abandonar-precompra', [EcommerceController::class, 'abandonarPrecompra'])->name('servicios.abandonar-precompra');
         Route::post('/identificar-trabajador', [EcommerceController::class, 'identificarTrabajador'])->name('servicios.identificar-trabajador');

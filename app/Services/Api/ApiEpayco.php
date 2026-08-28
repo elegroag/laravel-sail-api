@@ -138,7 +138,7 @@ class ApiEpayco extends ApiAbstract
     /**
      * Bandera temporal de QA: solo aplica fuera de production (APP_ENV y APP_MODE).
      */
-    protected function debeForzarAprobacion(): bool
+    public function debeForzarAprobacion(): bool
     {
         if (! config('app.epayco.force_approved', false)) {
             return false;

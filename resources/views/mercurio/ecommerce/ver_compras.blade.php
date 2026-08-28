@@ -8,12 +8,20 @@
         <div class="card-header border-0 servicios-catalog__header py-3 px-3 px-md-4">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                 <div>
-                    <h1 class="servicios-catalog__title mb-1">Mis compras</h1>
-                    <p class="servicios-catalog__subtitle mb-0">
+                    <h1 class="servicios-catalog__title mb-1" id="titulo_vista">Mis compras</h1>
+                    <p class="servicios-catalog__subtitle mb-0" id="subtitulo_vista">
                         Consulte el historial de servicios adquiridos y el estado de cada transacción.
                     </p>
                 </div>
-                <div class="d-flex gap-2 align-self-start align-self-md-center">
+                <div class="d-flex flex-wrap gap-2 align-self-start align-self-md-center">
+                    <div class="compras-vista-tabs" role="group" aria-label="Vista de compras">
+                        <button type="button" id="btn_vista_subsidio" class="btn btn-sm servicios-catalog__btn-compras active" data-vista="subsidio">
+                            <i class="fas fa-receipt me-1"></i> Mis compras
+                        </button>
+                        <button type="button" id="btn_vista_historial" class="btn btn-sm servicios-catalog__btn-compras" data-vista="historial">
+                            <i class="fas fa-history me-1"></i> Historial de precompras
+                        </button>
+                    </div>
                     <a href="{{ route('servicios.index') }}" class="btn btn-sm servicios-catalog__btn-compras">
                         <i class="fas fa-store me-1"></i> Volver al catálogo
                     </a>
@@ -29,7 +37,7 @@
                 <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                     <span class="sr-only">Cargando...</span>
                 </div>
-                <p class="mt-3 mb-0">Consultando compras realizadas...</p>
+                <p class="mt-3 mb-0" id="loader_texto">Consultando compras realizadas...</p>
             </div>
 
             <div id="error_compras" class="servicios-empty-state py-5" style="display:none;">
@@ -42,7 +50,7 @@
 
             <div id="sin_compras" class="servicios-empty-state py-5" style="display:none;">
                 <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-                <span class="compras-estado__texto">No se encontraron compras realizadas</span>
+                <span class="compras-estado__texto" id="sin_compras_texto">No se encontraron compras realizadas</span>
                 <a href="{{ route('servicios.index') }}" class="btn btn-primary btn-sm mt-3">
                     <i class="fas fa-store me-1"></i> Ir al catálogo
                 </a>
@@ -82,7 +90,7 @@
                 </div>
 
                 <div id="compras-grid-scroll-wrap" class="compras-grid-scroll">
-                    <div id="grid_compras" class="compras-grid" role="list" aria-label="Compras realizadas"></div>
+                    <div id="grid_compras" class="compras-grid" role="list" aria-label="Compras"></div>
                 </div>
 
                 <div class="compras-paginador">
@@ -108,9 +116,11 @@
     var busquedaCompras = '';
     var paginaActual = 0;
     var itemsPorPagina = 10;
+    var vistaActual = 'subsidio';
 
     var routes = {
         misCompras: "{{ route('servicios.mis-compras') }}",
+        historialPrecompras: "{{ route('servicios.historial-precompras') }}",
     };
 
     $.ajaxSetup({
@@ -146,14 +156,19 @@
             (compra.codben || '') + ' ' +
             (compra.cedtra_titular || '') + ' ' +
             (compra.refpago || '') + ' ' +
+            (compra.ref_payco || '') + ' ' +
             (compra.forma_pago_detalle || '') + ' ' +
             (compra.estado_texto || '') + ' ' +
+            (compra.estado_descripcion || '') + ' ' +
             (compra.estado || '') + ' ' +
             (compra.detcat || '') + ' ' +
             (compra.codcat || '') + ' ' +
             (compra.marca || '') + ' ' +
             (compra.nota || '') + ' ' +
             (compra.fecha || '') + ' ' +
+            (compra.fecha_precompra || '') + ' ' +
+            (compra.codser || '') + ' ' +
+            (compra.motivo_epayco || '') + ' ' +
             (compra.tipben_texto || '')
         ).toLowerCase();
         return texto.indexOf(query.toLowerCase()) !== -1;
@@ -170,9 +185,11 @@
     function claseEstado(estado) {
         if (!estado) return 'compra-card__estado--x';
         var est = String(estado).toUpperCase();
-        if (est === 'A') return 'compra-card__estado--a';
-        if (est === 'C') return 'compra-card__estado--c';
-        if (est === 'D') return 'compra-card__estado--d';
+        if (est === 'A' || est === 'PA') return 'compra-card__estado--pa';
+        if (est === 'C' || est === 'RE') return 'compra-card__estado--re';
+        if (est === 'D' || est === 'DE') return 'compra-card__estado--de';
+        if (est === 'PE') return 'compra-card__estado--pe';
+        if (est === 'AB') return 'compra-card__estado--ab';
         return 'compra-card__estado--x';
     }
 
@@ -182,6 +199,11 @@
         if (est === 'A') return 'Activo';
         if (est === 'C') return 'Cancelado';
         if (est === 'D') return 'Devuelto';
+        if (est === 'PE') return 'Pendiente de pago';
+        if (est === 'PA') return 'Pagado';
+        if (est === 'AB') return 'Abandonada';
+        if (est === 'RE') return 'Rechazado';
+        if (est === 'DE') return 'Desestimado';
         return estado;
     }
 
@@ -194,7 +216,7 @@
 
     function buildCardCompra(compra) {
         var estado = compra.estado || '';
-        var badgeTexto = compra.estado_texto || textoEstado(estado);
+        var badgeTexto = compra.estado_texto || compra.estado_descripcion || textoEstado(estado);
         var fecha = compra.fecha || '-';
         var hora = compra.hora || '';
         var servicio = escapeHtml(compra.nombre_servicio || '-');
@@ -245,6 +267,48 @@
         return html;
     }
 
+    function buildCardPrecompra(precompra) {
+        var estado = precompra.estado || '';
+        var badgeTexto = precompra.estado_descripcion || textoEstado(estado);
+        var servicio = escapeHtml(precompra.codser ? ('Servicio ' + precompra.codser) : 'Servicio');
+        var valor = formatearValor(precompra.valor || 0);
+        var refpago = escapeHtml(precompra.ref_payco || '-');
+        var nota = precompra.nota || '';
+        var fecha = escapeHtml(precompra.fecha_precompra || '-');
+        var fechaPago = escapeHtml(precompra.fecha_pago || '-');
+        var motivo = escapeHtml(precompra.motivo_epayco || '');
+
+        var html = '<article class="compra-card">';
+        html += '<div class="compra-card__header">';
+        html += '<span class="compra-card__doc">Precompra #' + escapeHtml(String(precompra.id || '')) + '</span>';
+        html += '<span class="compra-card__estado ' + claseEstado(estado) + '">' + escapeHtml(badgeTexto) + '</span>';
+        html += '</div>';
+        html += '<h3 class="compra-card__servicio">' + servicio + '</h3>';
+        html += '<div class="compra-card__body">';
+        html += buildFila('Fecha precompra', fecha);
+        html += buildFila('Fecha pago', fechaPago);
+        html += buildFila('Beneficiario', escapeHtml(precompra.codben || '-'));
+        html += buildFila('Cantidad', escapeHtml(String(precompra.numero || '1')));
+        html += buildFila('Ref. ePayco', '<span class="compra-card__ref">' + refpago + '</span>');
+        if (precompra.cod_estado_epayco) {
+            html += buildFila('Cód. ePayco', escapeHtml(String(precompra.cod_estado_epayco)));
+        }
+        if (motivo) {
+            html += buildFila('Motivo ePayco', motivo);
+        }
+        if (nota && String(nota).trim() !== '') {
+            html += buildFila('Nota', escapeHtml(nota));
+        }
+        html += '</div>';
+        html += '<div class="compra-card__footer">';
+        html += '<span class="compra-card__valor-label">Valor</span>';
+        html += '<span class="compra-card__valor">' + valor + '</span>';
+        html += '</div>';
+        html += '</article>';
+
+        return html;
+    }
+
     function renderizarPagina() {
         var grid = $('#grid_compras');
         grid.empty();
@@ -252,12 +316,13 @@
         var comprasFiltradas = obtenerComprasFiltradas();
         var totalCompras = comprasFiltradas.length;
         var totalPaginas = Math.max(1, Math.ceil(totalCompras / itemsPorPagina) || 1);
+        var etiqueta = vistaActual === 'historial' ? 'precompra' : 'compra';
 
         if (totalCompras === 0) {
             $('#compras-grid-scroll-wrap').hide();
             $('#sin_resultados_busqueda').toggle(comprasData.length > 0 && busquedaCompras.trim() !== '');
             $('.compras-paginador').hide();
-            $('#info_total').text('0 compras');
+            $('#info_total').text('0 ' + etiqueta + 's');
             $('#info_pagina').text('');
             return;
         }
@@ -273,10 +338,14 @@
         var fin = Math.min(inicio + itemsPorPagina, totalCompras);
 
         for (var i = inicio; i < fin; i++) {
-            grid.append(buildCardCompra(comprasFiltradas[i]));
+            if (vistaActual === 'historial') {
+                grid.append(buildCardPrecompra(comprasFiltradas[i]));
+            } else {
+                grid.append(buildCardCompra(comprasFiltradas[i]));
+            }
         }
 
-        var textoTotal = totalCompras + ' compra' + (totalCompras === 1 ? '' : 's');
+        var textoTotal = totalCompras + ' ' + etiqueta + (totalCompras === 1 ? '' : 's');
         if (busquedaCompras.trim() && comprasData.length !== totalCompras) {
             textoTotal += ' (de ' + comprasData.length + ')';
         }
@@ -294,13 +363,78 @@
         renderizarPagina();
     }
 
-    function cargarCompras() {
-        var cedtra = $('#hid_documento').val();
+    function actualizarUiVista() {
+        var esHistorial = vistaActual === 'historial';
+        $('#btn_vista_subsidio').toggleClass('active', !esHistorial);
+        $('#btn_vista_historial').toggleClass('active', esHistorial);
+        $('#titulo_vista').text(esHistorial ? 'Historial de precompras' : 'Mis compras');
+        $('#subtitulo_vista').text(
+            esHistorial
+                ? 'Consulte el estado local de cada precompra (pendiente, pagada, abandonada, rechazada o desestimada).'
+                : 'Consulte el historial de servicios adquiridos y el estado de cada transacción.'
+        );
+        $('#loader_texto').text(
+            esHistorial ? 'Consultando historial de precompras...' : 'Consultando compras realizadas...'
+        );
+        $('#sin_compras_texto').text(
+            esHistorial ? 'No se encontraron precompras registradas' : 'No se encontraron compras realizadas'
+        );
+        $('#buscar_compra').attr(
+            'placeholder',
+            esHistorial
+                ? 'Buscar por servicio, referencia, estado o beneficiario...'
+                : 'Buscar por servicio, beneficiario, referencia o estado...'
+        );
+        $('#grid_compras').attr('aria-label', esHistorial ? 'Historial de precompras' : 'Compras realizadas');
+    }
+
+    function cargarDatosVista() {
+        actualizarUiVista();
+        comprasData = [];
+        paginaActual = 0;
+        busquedaCompras = '';
+        $('#buscar_compra').val('');
 
         mostrarLoader('loader_compras');
         $('#error_compras').hide();
         $('#sin_compras').hide();
         $('#contenido_compras').hide();
+        $('#sin_resultados_busqueda').hide();
+
+        if (vistaActual === 'historial') {
+            $.ajax({
+                url: routes.historialPrecompras,
+                method: 'POST',
+                dataType: 'JSON',
+                cache: false,
+                data: {}
+            }).done(function(response) {
+                ocultarLoader('loader_compras');
+
+                if (response.success) {
+                    comprasData = Array.isArray(response.data) ? response.data : [];
+
+                    if (comprasData.length === 0) {
+                        $('#sin_compras').show();
+                        return;
+                    }
+
+                    itemsPorPagina = parseInt($('#select_por_pagina').val(), 10) || 10;
+                    $('#contenido_compras').css('display', 'flex');
+                    renderizarPagina();
+                } else {
+                    $('#error_mensaje').text(response.message || 'Error al cargar el historial');
+                    $('#error_compras').show();
+                }
+            }).fail(function() {
+                ocultarLoader('loader_compras');
+                $('#error_mensaje').text('Error de conexión al consultar el historial de precompras');
+                $('#error_compras').show();
+            });
+            return;
+        }
+
+        var cedtra = $('#hid_documento').val();
 
         $.ajax({
             url: routes.misCompras,
@@ -329,9 +463,6 @@
                     return;
                 }
 
-                paginaActual = 0;
-                busquedaCompras = '';
-                $('#buscar_compra').val('');
                 itemsPorPagina = parseInt($('#select_por_pagina').val(), 10) || 10;
                 $('#contenido_compras').css('display', 'flex');
                 renderizarPagina();
@@ -346,11 +477,30 @@
         });
     }
 
+    function cambiarVista(vista) {
+        if (vista !== 'subsidio' && vista !== 'historial') {
+            return;
+        }
+        if (vistaActual === vista) {
+            return;
+        }
+        vistaActual = vista;
+        cargarDatosVista();
+    }
+
     $(document).ready(function() {
-        cargarCompras();
+        cargarDatosVista();
+
+        $(document).on('click', '#btn_vista_subsidio', function() {
+            cambiarVista('subsidio');
+        });
+
+        $(document).on('click', '#btn_vista_historial', function() {
+            cambiarVista('historial');
+        });
 
         $(document).on('click', '#btn_reintentar', function() {
-            cargarCompras();
+            cargarDatosVista();
         });
 
         $(document).on('click', '#btn_anterior', function() {
