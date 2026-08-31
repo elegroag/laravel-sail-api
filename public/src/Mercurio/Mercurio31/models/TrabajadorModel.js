@@ -99,6 +99,9 @@ class TrabajadorModel extends Backbone.Model {
             peretn: { required: true, minlength: 1 },
             codsuc: { required: true, minlength: 1 },
             otra_empresa: { required: false },
+            numcue: { required: false },
+            tipcue: { required: false },
+            codban: { required: false },
         },
         messages: {
             nit: { required: 'Se requiere de nit' },

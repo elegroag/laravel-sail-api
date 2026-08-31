@@ -165,7 +165,7 @@
                 <% _.each(_collection, function(item){ %>
                 <tr>
                     <td><%=item.tipopc_detalle%></td>
-                    <td><%=item.usuario_nombre%></td>
+                    <td><%=item.usuario_nombre%> (<%=item.usuario%>)</td>
                     <td class='table-actions'>
                         <a href='#!'
                             class='table-action btn btn-xs btn-primary'

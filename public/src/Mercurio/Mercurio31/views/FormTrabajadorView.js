@@ -8,7 +8,6 @@ import flatpickr from 'flatpickr';
 import { Spanish } from 'flatpickr/dist/l10n/es';
 
 class FormTrabajadorView extends FormView {
-    
     constructor(options = {}) {
         super({
             ...options,
@@ -31,7 +30,7 @@ class FormTrabajadorView extends FormView {
             'click #cancel': 'cancel',
             'blur [data-toggle="is_numeric"]': 'isNumber',
             'change #peretn': 'changePeretn',
-            'change [name="captra"]': "changeCaptra"
+            'change [name="captra"]': 'changeCaptra',
         };
     }
 
@@ -73,10 +72,10 @@ class FormTrabajadorView extends FormView {
             $('#nit').removeAttr('disabled');
             $('#razsoc').removeAttr('disabled');
 
-            if(this.model.get('captra') === 'N'){
+            if (this.model.get('captra') === 'N') {
                 this.form.find('#captra2').prop('checked', true);
                 this.$el.find('#tipdis').val('00');
-            }else{
+            } else {
                 this.form.find('#captra1').prop('checked', true);
             }
 
@@ -105,7 +104,6 @@ class FormTrabajadorView extends FormView {
                 if (name) this.choiceComponents[element.name].setChoiceByValue(name);
             });
         } else {
-            
             this.form.find('#salario').val('0');
             this.form.find('#peretn').val('7');
             this.$el.find('.show-peretn').addClass('d-none');
@@ -143,7 +141,7 @@ class FormTrabajadorView extends FormView {
             locale: Spanish,
             maxDate: fechaPasada,
             minDate: '1850-01-01',
-            allowInput: true
+            allowInput: true,
         });
 
         let fechaMaximaIngreso = new Date();
@@ -155,16 +153,16 @@ class FormTrabajadorView extends FormView {
             locale: Spanish,
             maxDate: fechaMaximaIngreso,
             minDate: '1970-01-01',
-            allowInput: true
+            allowInput: true,
         });
     }
 
-    changeCaptra(e){
+    changeCaptra(e) {
         const captra = this.$el.find("[name='captra']")[0].checked ? 'S' : 'N';
-        if(captra === 'S'){
+        if (captra === 'S') {
             this.$el.find('#show_tipdis').removeClass('d-none');
             this.$el.find('#tipdis').val('00');
-        }else{
+        } else {
             this.$el.find('#show_tipdis').addClass('d-none');
         }
     }
@@ -183,10 +181,28 @@ class FormTrabajadorView extends FormView {
             this.$el.find('#show_numcue').removeClass('d-none');
             this.$el.find('#show_codban').removeClass('d-none');
             this.$el.find('#show_tipcue').removeClass('d-none');
+
+            TrabajadorModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: true },
+                { rule: 'codban', prop: 'required', value: true },
+                { rule: 'tipcue', prop: 'required', value: true },
+            ]);
         } else {
             this.$el.find('#show_numcue').addClass('d-none');
             this.$el.find('#show_codban').addClass('d-none');
             this.$el.find('#show_tipcue').addClass('d-none');
+
+            TrabajadorModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: false },
+                { rule: 'codban', prop: 'required', value: false },
+                { rule: 'tipcue', prop: 'required', value: false },
+            ]);
+        }
+        if (target == 'T' || target == '' || target == null) {
+            this.$el.find('#codban').val('');
+            this.$el.find('#numcue').val('');
+            this.$el.find('#tipcue').val('');
+            this.resetChoice('codban');
         }
     }
 
@@ -276,10 +292,10 @@ class FormTrabajadorView extends FormView {
                                                 _tab.show();
                                             }
                                         } else {
-                                            if(response.errors){
-                                                let msj ='';
+                                            if (response.errors) {
+                                                let msj = '';
                                                 $.each(response.errors, (key, items) => {
-                                                    if(items !== undefined) msj+="<p>"+items+"</p>";
+                                                    if (items !== undefined) msj += '<p>' + items + '</p>';
                                                 });
                                                 this.App.trigger('alert:error', { message: msj });
                                             } else {
@@ -341,6 +357,15 @@ class FormTrabajadorView extends FormView {
             this.$el.find('.show-peretn').addClass('d-none');
             this.$el.find('#resguardo_id').val('');
             this.$el.find('#pub_indigena_id').val('');
+            this.resetChoice('resguardo_id');
+            this.resetChoice('pub_indigena_id');
+        }
+    }
+
+    resetChoice(fieldName) {
+        if (this.choiceComponents && this.choiceComponents[fieldName]) {
+            this.choiceComponents[fieldName].removeActiveItems();
+            this.choiceComponents[fieldName].setChoiceByValue('');
         }
     }
 

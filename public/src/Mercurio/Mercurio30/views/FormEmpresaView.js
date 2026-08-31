@@ -387,12 +387,7 @@ export class FormEmpresaView extends FormView {
         this.setInput('saltra', '');
         this.setInput('fectra', '');
         this.setInput('cartra', '');
-
-        // Limpiar Choices.js para cartra
-        if (this.#choiceComponents && this.#choiceComponents['cartra']) {
-            this.#choiceComponents['cartra'].removeActiveItems();
-            this.#choiceComponents['cartra'].setChoiceByValue('');
-        }
+        this.resetChoice('cartra');
     }
 
     cleanFormTra(e) {
@@ -403,6 +398,14 @@ export class FormEmpresaView extends FormView {
         this.setInput('saltra', '');
         this.setInput('fectra', '');
         this.setInput('cartra', '');
+        this.resetChoice('cartra');
+    }
+
+    resetChoice(fieldName) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].removeActiveItems();
+            this.#choiceComponents[fieldName].setChoiceByValue('');
+        }
     }
 
     /**

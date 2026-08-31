@@ -65,6 +65,9 @@ class ConyugeModel extends Backbone.Model {
             nivedu: { required: true },
             codocu: { required: true },
             tippag: { required: true },
+            numcue: { required: false },
+            tipcue: { required: false },
+            codban: { required: false },
         },
         messages: {
             cedcon: { required: 'Se requiere del campo cedula conyuge' },

@@ -280,6 +280,21 @@ export class FormFacultativoView extends FormView {
             this.$el.find('.show-peretn').addClass('d-none');
             this.$el.find('#resguardo_id').val('2');
             this.$el.find('#pub_indigena_id').val('2');
+            this.setChoice('resguardo_id', '2');
+            this.setChoice('pub_indigena_id', '2');
+        }
+    }
+
+    resetChoice(fieldName) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].removeActiveItems();
+            this.#choiceComponents[fieldName].setChoiceByValue('');
+        }
+    }
+
+    setChoice(fieldName, value) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].setChoiceByValue(value);
         }
     }
 
@@ -292,6 +307,7 @@ export class FormFacultativoView extends FormView {
             if (target == 'D') {
                 this.setInput('codban', '51');
                 this.setInput('tipcue', 'A');
+                this.setChoice('codban', '51');
                 this.selectores.trigger('change');
             }
 
@@ -318,6 +334,13 @@ export class FormFacultativoView extends FormView {
             this.$el.find('#numcue').rules('remove', 'required');
             this.$el.find('#codban').rules('remove', 'required');
             this.$el.find('#tipcue').rules('remove', 'required');
+        }
+
+        if (target == 'T' || target == '' || target == null) {
+            this.$el.find('#codban').val('');
+            this.$el.find('#numcue').val('');
+            this.$el.find('#tipcue').val('');
+            this.resetChoice('codban');
         }
     }
 

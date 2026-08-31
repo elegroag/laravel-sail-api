@@ -93,7 +93,7 @@ class Mercurio04Controller extends ApplicationController
 
             $out = Gener02::where('estado', 'A')->get();
             foreach ($out as $usuario) {
-                $usuarios[$usuario->usuario] = $usuario->nombre;
+                $usuarios[$usuario->usuario] = $usuario->nombre . ' (' . $usuario->usuario . ')';
             }
 
             Log::info('Mercurio04Controller@index - Consultando Mercurio09');

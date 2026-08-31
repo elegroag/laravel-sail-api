@@ -12,8 +12,7 @@ use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Models\Mercurio35;
-use App\Services\Srequest;
-use App\Services\Tag;
+use App\Models\Mercurio45;
 use App\Services\Utils\GeneralService;
 use Exception;
 use Illuminate\Http\Request;
@@ -38,13 +37,13 @@ class ReasignaController extends ApplicationController
         $gener02 = Gener02::where('estado', 'A')->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')->get();
         $data_usuarios = $gener02->pluck('nombre', 'usuario');
         $data_mercurio09 = Mercurio09::all()->pluck('detalle', 'tipopc');
-        $accion = array('C' => 'CONSULTA', 'P' => 'PROCESO');
+        $accion = ['C' => 'CONSULTA', 'P' => 'PROCESO'];
 
         return view('cajas.reasigna.index', [
             'title' => 'Consulta Reasigna',
             'data_usuarios' => $data_usuarios->toArray(),
             'data_mercurio09' => $data_mercurio09->toArray(),
-            'accion' => $accion
+            'accion' => $accion,
         ]);
     }
 
@@ -73,6 +72,9 @@ class ReasignaController extends ApplicationController
             if ($tipopc == 7) {
                 $model = new Mercurio35;
             }
+            if ($tipopc == 8) {
+                $model = new Mercurio45;
+            }
             $this->reasignaProceso($model, $usuori, $usudes, $fecini, $fecfin);
 
             $response = [
@@ -89,9 +91,11 @@ class ReasignaController extends ApplicationController
         return $this->renderObject($response, false);
     }
 
-    function reasignaProceso($model, $usuori, $usudes, $fecini, $fecfin)
+    public function reasignaProceso($model, $usuori, $usudes, $fecini, $fecfin)
     {
-        if (! $model) return;
+        if (! $model) {
+            return;
+        }
         $tablaData = $model->whereRaw(" usuario='{$usuori}' AND fecsol BETWEEN '{$fecini}' AND '{$fecfin}' AND estado = 'P'")->get();
         foreach ($tablaData as $mtabla) {
             $mtabla->update([
@@ -150,8 +154,10 @@ class ReasignaController extends ApplicationController
             }
             $data['documento'] = $documento;
             $data['nombre'] = $nombre;
+
             return $data;
         });
+
         return view('cajas.reasigna._tabla', [
             'tipopc' => $tipopc,
             'solicitudes' => $solicitudes,
@@ -221,6 +227,7 @@ class ReasignaController extends ApplicationController
                 'msj' => $e->getMessage(),
             ];
         }
+
         return response()->json($response);
     }
 }

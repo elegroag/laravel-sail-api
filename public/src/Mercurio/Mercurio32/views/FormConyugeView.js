@@ -8,7 +8,6 @@ import { Spanish } from 'flatpickr/dist/l10n/es.js';
 import { ConyugeModel } from '../models/ConyugeModel';
 
 export class FormConyugeView extends FormView {
-    
     constructor(options = {}) {
         super({
             ...options,
@@ -32,7 +31,7 @@ export class FormConyugeView extends FormView {
             'click #btEnviarRadicado': 'enviarRadicado',
             'change #codocu': 'changeCodocu',
             'change #peretn': 'changePeretn',
-            'change [name="captra"]': "changeCaptra"
+            'change [name="captra"]': 'changeCaptra',
         };
     }
 
@@ -67,25 +66,22 @@ export class FormConyugeView extends FormView {
                 }
             });
 
-            if(this.model.get('comper') === 'S'){
+            if (this.model.get('comper') === 'S') {
                 this.form.find('#comper1').prop('checked', true);
-            }else{
+            } else {
                 this.form.find('#comper2').prop('checked', true);
             }
 
-            if(this.model.get('captra') === 'N'){
+            if (this.model.get('captra') === 'N') {
                 this.form.find('#captra2').prop('checked', true);
                 this.$el.find('#tipdis').val('00');
-            }else{
+            } else {
                 this.form.find('#captra1').prop('checked', true);
             }
-            
+
             this.form.find('#nit').attr('disabled', 'true');
 
-            if (
-                this.model.get('tippag') == 'A' || 
-                this.model.get('tippag') == 'D') 
-            {
+            if (this.model.get('tippag') == 'A' || this.model.get('tippag') == 'D') {
                 this.form.find('#show_numcue').removeClass('d-none');
                 this.form.find('#show_codban').removeClass('d-none');
                 this.form.find('#show_tipcue').removeClass('d-none');
@@ -103,7 +99,7 @@ export class FormConyugeView extends FormView {
                 const name = this.model.get(element.name);
                 if (name) this.choiceComponents[element.name].setChoiceByValue(name);
             });
-            
+
             if (this.model.get('cedtra')) {
                 const afiliado = this.collection.props.list_afiliados;
                 const has = _.where(afiliado, { cedula: this.model.get('cedtra') });
@@ -112,7 +108,6 @@ export class FormConyugeView extends FormView {
                 }
             }
         } else {
-            
             this.form.find('#salario').val('0');
             this.form.find('#peretn').val('7');
             this.$el.find('.show-peretn').addClass('d-none');
@@ -157,7 +152,7 @@ export class FormConyugeView extends FormView {
             locale: Spanish,
             maxDate: fechaPasada,
             minDate: '1850-01-01',
-            allowInput: true
+            allowInput: true,
         });
 
         flatpickr($el.find('#fecing'), {
@@ -166,7 +161,7 @@ export class FormConyugeView extends FormView {
             locale: Spanish,
             maxDate: 'today',
             minDate: '1970-01-01',
-            allowInput: true
+            allowInput: true,
         });
     }
 
@@ -179,12 +174,12 @@ export class FormConyugeView extends FormView {
         }
     }
 
-    changeCaptra(e){
+    changeCaptra(e) {
         const captra = this.$el.find("[name='captra']")[0].checked ? 'S' : 'N';
-        if(captra === 'S'){
+        if (captra === 'S') {
             this.$el.find('#show_tipdis').removeClass('d-none');
             this.$el.find('#tipdis').val('00');
-        }else{
+        } else {
             this.$el.find('#show_tipdis').addClass('d-none');
         }
     }
@@ -195,10 +190,28 @@ export class FormConyugeView extends FormView {
             this.$el.find('#show_numcue').removeClass('d-none');
             this.$el.find('#show_codban').removeClass('d-none');
             this.$el.find('#show_tipcue').removeClass('d-none');
+
+            ConyugeModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: true },
+                { rule: 'codban', prop: 'required', value: true },
+                { rule: 'tipcue', prop: 'required', value: true },
+            ]);
         } else {
             this.$el.find('#show_numcue').addClass('d-none');
             this.$el.find('#show_codban').addClass('d-none');
             this.$el.find('#show_tipcue').addClass('d-none');
+
+            ConyugeModel.changeRulesProperty([
+                { rule: 'numcue', prop: 'required', value: false },
+                { rule: 'codban', prop: 'required', value: false },
+                { rule: 'tipcue', prop: 'required', value: false },
+            ]);
+        }
+        if (target == 'T' || target == '' || target == null) {
+            this.$el.find('#codban').val('');
+            this.$el.find('#numcue').val('');
+            this.$el.find('#tipcue').val('');
+            this.resetChoice('codban');
         }
     }
 
@@ -291,10 +304,10 @@ export class FormConyugeView extends FormView {
                                                 _tab.show();
                                             }
                                         } else {
-                                            if(response.errors){
-                                                let msj ='';
+                                            if (response.errors) {
+                                                let msj = '';
                                                 $.each(response.errors, (key, items) => {
-                                                    if(items !== undefined) msj+="<p>"+items+"</p>";
+                                                    if (items !== undefined) msj += '<p>' + items + '</p>';
                                                 });
                                                 this.App.trigger('alert:error', { message: msj });
                                             } else {
@@ -420,6 +433,15 @@ export class FormConyugeView extends FormView {
             this.$el.find('.show-peretn').addClass('d-none');
             this.$el.find('#resguardo_id').val('');
             this.$el.find('#pub_indigena_id').val('');
+            this.resetChoice('resguardo_id');
+            this.resetChoice('pub_indigena_id');
+        }
+    }
+
+    resetChoice(fieldName) {
+        if (this.choiceComponents && this.choiceComponents[fieldName]) {
+            this.choiceComponents[fieldName].removeActiveItems();
+            this.choiceComponents[fieldName].setChoiceByValue('');
         }
     }
 

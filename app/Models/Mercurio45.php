@@ -444,4 +444,14 @@ class Mercurio45 extends ModelBase
     {
         return $this->ruuid;
     }
+
+    public function getFecsol(): ?Carbon
+    {
+        return Carbon::parse($this->fecsol);
+    }
+
+    public function setFecsol($fecsol): void
+    {
+        $this->fecsol = $fecsol;
+    }
 }

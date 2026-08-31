@@ -35,7 +35,7 @@ export class FormBeneficiarioView extends FormView {
             'click #btEnviarRadicado': 'enviarRadicado',
             'focusout #cedtra': 'validaTrabajador',
             'focusout #cedcon': 'validaMother',
-            'change [name="captra"]': "changeCaptra"
+            'change [name="captra"]': 'changeCaptra',
         };
     }
 
@@ -69,17 +69,17 @@ export class FormBeneficiarioView extends FormView {
             this.$el.find('#cedtra').attr('disabled', 'true');
             this.$el.find('#numdoc').attr('disabled', 'true');
 
-            if(this.model.get('captra') === 'N'){
+            if (this.model.get('captra') === 'N') {
                 this.form.find('#captra2').prop('checked', true);
                 this.$el.find('#tipdis').val('00');
-            }else{
+            } else {
                 this.form.find('#captra1').prop('checked', true);
             }
 
-            if(this.model.get('biodesco') == 'S'){
+            if (this.model.get('biodesco') == 'S') {
                 this.form.find('#biodesco').prop('checked', true);
                 this.$el.find('.s-bio-desco').addClass('d-none');
-            }else{
+            } else {
                 this.$el.find('.s-bio-desco').removeClass('d-none');
             }
 
@@ -162,14 +162,14 @@ export class FormBeneficiarioView extends FormView {
         });
 
         eventsFormControl(this.$el);
-      
+
         flatpickr(this.$el.find('#fecnac'), {
             enableTime: false,
             dateFormat: 'Y-m-d',
             locale: Spanish,
             maxDate: 'today',
             minDate: '1900-01-01',
-            allowInput: true
+            allowInput: true,
         });
 
         flatpickr(this.$el.find('#fecing'), {
@@ -178,16 +178,16 @@ export class FormBeneficiarioView extends FormView {
             locale: Spanish,
             maxDate: 'today',
             minDate: '1970-01-01',
-            allowInput: true
+            allowInput: true,
         });
     }
 
-    changeCaptra(e){
+    changeCaptra(e) {
         const captra = this.$el.find("[name='captra']")[0].checked ? 'S' : 'N';
-        if(captra === 'S'){
+        if (captra === 'S') {
             this.$el.find('#show_tipdis').removeClass('d-none');
             this.$el.find('#tipdis').val('00');
-        }else{
+        } else {
             this.$el.find('#show_tipdis').addClass('d-none');
         }
     }
@@ -333,10 +333,10 @@ export class FormBeneficiarioView extends FormView {
                                             _tab.show();
                                         }
                                     } else {
-                                        if(response.errors){
-                                            let msj ='';
+                                        if (response.errors) {
+                                            let msj = '';
                                             $.each(response.errors, (key, items) => {
-                                                if(items !== undefined) msj+="<p>"+items+"</p>";
+                                                if (items !== undefined) msj += '<p>' + items + '</p>';
                                             });
                                             this.App.trigger('alert:error', { message: msj });
                                         } else {
@@ -582,6 +582,23 @@ export class FormBeneficiarioView extends FormView {
             this.$el.find('.show-peretn').removeClass('d-none');
         } else {
             this.$el.find('.show-peretn').addClass('d-none');
+            this.$el.find('#resguardo_id').val('');
+            this.$el.find('#pub_indigena_id').val('');
+            this.resetChoice('resguardo_id');
+            this.resetChoice('pub_indigena_id');
+        }
+    }
+
+    resetChoice(fieldName) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].removeActiveItems();
+            this.#choiceComponents[fieldName].setChoiceByValue('');
+        }
+    }
+
+    setChoice(fieldName, value) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].setChoiceByValue(value);
         }
     }
 
@@ -594,6 +611,7 @@ export class FormBeneficiarioView extends FormView {
             if (target == 'D') {
                 this.setInput('codban', '51');
                 this.setInput('tipcue', 'A');
+                this.setChoice('codban', '51');
                 this.selectores.trigger('change');
             }
 
@@ -620,6 +638,13 @@ export class FormBeneficiarioView extends FormView {
             this.$el.find('#numcue').rules('remove', 'required');
             this.$el.find('#codban').rules('remove', 'required');
             this.$el.find('#tipcue').rules('remove', 'required');
+        }
+
+        if (target == 'T' || target == '' || target == null) {
+            this.$el.find('#codban').val('');
+            this.$el.find('#numcue').val('');
+            this.$el.find('#tipcue').val('');
+            this.resetChoice('codban');
         }
     }
 

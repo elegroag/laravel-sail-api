@@ -110,9 +110,9 @@ class CertificadosController extends ApplicationController
 
             if (
                 Mercurio45::where('codben', $codben)
-                    ->where('codcer', $codcer)
-                    ->where('estado', '!=', 'X')
-                    ->count() > 0
+                ->where('codcer', $codcer)
+                ->where('estado', '!=', 'X')
+                ->count() > 0
             ) {
                 $response = [
                     'success' => false,
@@ -142,7 +142,7 @@ class CertificadosController extends ApplicationController
 
             if ($usuario == '') {
                 throw new DebugException(
-                    'No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud.'.
+                    'No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud.' .
                         ' Comuniquese con la atencion al cliente',
                     501
                 );
@@ -154,8 +154,9 @@ class CertificadosController extends ApplicationController
             $mercurio45->setDocumento($documento);
             $mercurio45->save();
             $mercurio45->assignRuuidIfMissing();
+            $mercurio45->setFecsol($today->format('Y-m-d'));
 
-            $inputName = 'archivo_'.$codben;
+            $inputName = 'archivo_' . $codben;
             if (isset($_FILES[$inputName]['name']) && $_FILES[$inputName]['name'] != '') {
                 $extension = strtolower((string) pathinfo($_FILES[$inputName]['name'], PATHINFO_EXTENSION));
                 if ($extension !== 'pdf') {
@@ -167,7 +168,7 @@ class CertificadosController extends ApplicationController
                     throw new DebugException('No se pudo generar el radicado del certificado.', 501);
                 }
 
-                $name = $ruuid.'.'.$extension;
+                $name = $ruuid . '.' . $extension;
                 $estado = UploadFile::upload($inputName, '', $name, 'temp');
 
                 if ($estado) {
@@ -186,7 +187,7 @@ class CertificadosController extends ApplicationController
                     $mercurio10->setNota('Envio a la Caja para verificación');
                     $mercurio10->setFecsis($today->format('Y-m-d'));
                     if ($mercurio45->ruuid) {
-                        $mercurio10->setRuuid($mercurio45->ruuid.'-'.str_pad((string) $item, 2, '0', STR_PAD_LEFT));
+                        $mercurio10->setRuuid($mercurio45->ruuid . '-' . str_pad((string) $item, 2, '0', STR_PAD_LEFT));
                     }
                     $mercurio10->save();
 
@@ -266,11 +267,11 @@ class CertificadosController extends ApplicationController
         }
 
         $candidatos = [
-            storage_path('temp/'.$archivo),
-            storage_path('app/temp/certificados/'.$archivo),
-            storage_path('temp/certificados/'.$archivo),
-            public_path('temp/'.$archivo),
-            public_path('temp/certificados/'.$archivo),
+            storage_path('temp/' . $archivo),
+            storage_path('app/temp/certificados/' . $archivo),
+            storage_path('temp/certificados/' . $archivo),
+            public_path('temp/' . $archivo),
+            public_path('temp/certificados/' . $archivo),
         ];
 
         foreach ($candidatos as $path) {
