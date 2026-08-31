@@ -118,6 +118,10 @@ class ConyugeModel extends Backbone.Model {
 
     static changeRuleProperty(transfer = {}) {
         const { rule, prop, value } = transfer;
+        if (!rule || !prop) return;
+        if (!ConyugeModel.Rules.rules[rule]) {
+            ConyugeModel.Rules.rules[rule] = {};
+        }
         ConyugeModel.Rules.rules[rule][prop] = value;
     }
 

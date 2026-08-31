@@ -167,6 +167,10 @@ class FacultativoModel extends Backbone.Model {
 
 	static changeRuleProperty(transfer = {}) {
 		const { rule, prop, value } = transfer;
+		if (!rule || !prop) return;
+		if (!FacultativoModel.Rules.rules[rule]) {
+			FacultativoModel.Rules.rules[rule] = {};
+		}
 		FacultativoModel.Rules.rules[rule][prop] = value;
 	}
 

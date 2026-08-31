@@ -69,6 +69,10 @@ class UserRegisterModel extends Backbone.Model {
 
 	static changeRuleProperty(transfer = {}) {
 		const { rule, prop, value } = transfer;
+		if (!rule || !prop) return;
+		if (!UserRegisterModel.Rules.rules[rule]) {
+			UserRegisterModel.Rules.rules[rule] = {};
+		}
 		UserRegisterModel.Rules.rules[rule][prop] = value;
 	}
 

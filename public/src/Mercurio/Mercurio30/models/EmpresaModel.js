@@ -133,6 +133,10 @@ class EmpresaModel extends Backbone.Model {
 
     static changeRuleProperty(transfer = {}) {
         const { rule, prop, value } = transfer;
+        if (!rule || !prop) return;
+        if (!EmpresaModel.Rules.rules[rule]) {
+            EmpresaModel.Rules.rules[rule] = {};
+        }
         EmpresaModel.Rules.rules[rule][prop] = value;
     }
 

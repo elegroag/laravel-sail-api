@@ -45,6 +45,10 @@ class UserAuthModel extends Backbone.Model {
 
 	static changeRuleProperty(transfer = {}) {
 		const { rule, prop, value } = transfer;
+		if (!rule || !prop) return;
+		if (!UserAuthModel.Rules.rules[rule]) {
+			UserAuthModel.Rules.rules[rule] = {};
+		}
 		UserAuthModel.Rules.rules[rule][prop] = value;
 	}
 

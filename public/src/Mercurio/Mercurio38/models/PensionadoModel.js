@@ -168,6 +168,10 @@ class PensionadoModel extends Backbone.Model {
 
     static changeRuleProperty(transfer = {}) {
         const { rule, prop, value } = transfer;
+        if (!rule || !prop) return;
+        if (!PensionadoModel.Rules.rules[rule]) {
+            PensionadoModel.Rules.rules[rule] = {};
+        }
         PensionadoModel.Rules.rules[rule][prop] = value;
     }
 

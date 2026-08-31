@@ -159,6 +159,10 @@ class ServicioDomesticoModel extends Backbone.Model {
 
 	static changeRuleProperty(transfer = {}) {
 		const { rule, prop, value } = transfer;
+		if (!rule || !prop) return;
+		if (!ServicioDomesticoModel.Rules.rules[rule]) {
+			ServicioDomesticoModel.Rules.rules[rule] = {};
+		}
 		ServicioDomesticoModel.Rules.rules[rule][prop] = value;
 	}
 

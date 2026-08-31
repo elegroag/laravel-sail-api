@@ -129,6 +129,10 @@ class BeneficiarioModel extends Backbone.Model {
 
     static changeRuleProperty(transfer = {}) {
         const { rule, prop, value } = transfer;
+        if (!rule || !prop) return;
+        if (!BeneficiarioModel.Rules.rules[rule]) {
+            BeneficiarioModel.Rules.rules[rule] = {};
+        }
         BeneficiarioModel.Rules.rules[rule][prop] = value;
     }
 

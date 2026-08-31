@@ -168,6 +168,10 @@ class IndependienteModel extends Backbone.Model {
 
     static changeRuleProperty(transfer = {}) {
         const { rule, prop, value } = transfer;
+        if (!rule || !prop) return;
+        if (!IndependienteModel.Rules.rules[rule]) {
+            IndependienteModel.Rules.rules[rule] = {};
+        }
         IndependienteModel.Rules.rules[rule][prop] = value;
     }
 

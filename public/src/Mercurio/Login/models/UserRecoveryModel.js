@@ -49,6 +49,10 @@ class UserRecoveryModel extends Backbone.Model {
 
 	static changeRuleProperty(transfer = {}) {
 		const { rule, prop, value } = transfer;
+		if (!rule || !prop) return;
+		if (!UserRecoveryModel.Rules.rules[rule]) {
+			UserRecoveryModel.Rules.rules[rule] = {};
+		}
 		UserRecoveryModel.Rules.rules[rule][prop] = value;
 	}
 

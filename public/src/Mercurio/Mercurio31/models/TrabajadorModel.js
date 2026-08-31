@@ -146,6 +146,10 @@ class TrabajadorModel extends Backbone.Model {
 
     static changeRuleProperty(transfer = {}) {
         const { rule, prop, value } = transfer;
+        if (!rule || !prop) return;
+        if (!TrabajadorModel.Rules.rules[rule]) {
+            TrabajadorModel.Rules.rules[rule] = {};
+        }
         TrabajadorModel.Rules.rules[rule][prop] = value;
     }
 
