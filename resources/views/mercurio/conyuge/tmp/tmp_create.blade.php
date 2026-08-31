@@ -132,34 +132,6 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <div class="form-group" group-for='tippag'>
-                                        <label for="tippag" class="control-label">Tipo pago subsidio</label>
-                                        <span id='component_tippag'></span>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3 d-none" id="show_numcue">
-                                    <div class="form-group" group-for='numcue'>
-                                        <label for="numcue" class="control-label">Número de cuenta</label>
-                                        <span id='component_numcue'></span>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3 d-none" id='show_tipcue'>
-                                    <div class='form-group' group-for='tipcue'>
-                                        <label for="tipcue" class="control-label">Tipo de cuenta</label>
-                                        <span id='component_tipcue'></span>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3 d-none" id="show_codban">
-                                    <div class="form-group" group-for='codban'>
-                                        <label for="codban" class="control-label">Banco</label>
-                                        <span id='component_codban'></span>
-                                    </div>
-                                </div>
-
                                 <div class="col-md-5">
                                     <div class="form-group" group-for='autoriza'>
                                         <label for="autoriza" class="control-label">Autoriza el tratamiento de datos personales</label>
@@ -280,6 +252,49 @@
                                     <div class='form-group' group-for='trasin'>
                                         <label for="trasin" class="control-label">Pueblo indigena</label>
                                         <span id='component_pub_indigena_id'></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <fieldset>
+                            <legend>Datos de medio de pago subsidio cuota monetaria</legend>
+                            <div class="row justify-content-start">
+                                <div class="col-12">
+                                    <h6>¡Tenga en cuenta por favor!</h6>
+                                    <p>El medio de pago y cuenta relacionada, debe estar suscrito al cónyuge o trabajador, quien posee el beneficio y derecho al subsidio de cuota monetaria.</p>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group" group-for='tippag'>
+                                        <label for="tippag" class="control-label">Tipo medio pago Subsidio</label>
+                                        <span id='component_tippag'></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 d-none" id="show_numcue">
+                                    <div class="form-group" group-for='numcue'>
+                                        <label for="numcue" class="control-label">Número de cuenta o Daviplata</label>
+                                        <span id='component_numcue'></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 d-none" id='show_tipcue'>
+                                    <div class='form-group' group-for='tipcue'>
+                                        <label for="tipcue" class="control-label">Tipo de cuenta</label>
+                                        <span id='component_tipcue'></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 d-none" id="show_codban">
+                                    <div class="form-group" group-for='codban'>
+                                        <label for="codban" class="control-label">Banco</label>
+                                        <span id='component_codban'></span>
                                     </div>
                                 </div>
 
