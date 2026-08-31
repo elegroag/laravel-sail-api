@@ -61,7 +61,7 @@ export default class FormDatosTrabajador extends FormView {
             },
         });
 
-        this.selectores = $el.find('#codzon, #codciu');
+        this.selectores = $el.find('#tipdoc, #codzon, #codciu, #respo_tipdoc, #tippag, #codban, #tipcue');
 
         if (this.model.get('id') !== null) {
             _.each(this.model.toJSON(), (valor, key) => {
@@ -73,20 +73,31 @@ export default class FormDatosTrabajador extends FormView {
                 $el.find('#codban').prop('disabled', true);
                 $el.find('#numcue').prop('disabled', true);
                 $el.find('#tipcue').prop('disabled', true);
-                $el.find('#numcue').prop('disabled', true);
             }
 
             setTimeout(() => this.form.valid(), 200);
             $.each(this.selectores, (index, element) => {
                 this.#choiceComponents[element.name] = new Choices(element);
                 const name = this.model.get(element.name);
-                if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                if (name) this.#choiceComponents[element.name].setChoiceByValue(String(name));
             });
         } else {
             $.each(
                 this.selectores,
                 (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
             );
+
+            if (this.collection.dataDefault) {
+                $.each(this.selectores, (index, element) => {
+                    let val = this.collection.dataDefault[element.name];
+                    if (element.name === 'tipdoc' && !val && this.collection.dataDefault['coddoc']) {
+                        val = this.collection.dataDefault['coddoc'];
+                    }
+                    if (val && this.#choiceComponents[element.name]) {
+                        this.#choiceComponents[element.name].setChoiceByValue(String(val));
+                    }
+                });
+            }
         }
 
         this.selectores.on('change', (event) => {
@@ -204,6 +215,8 @@ export default class FormDatosTrabajador extends FormView {
             if (target == 'D') {
                 this.$el.find('#tipcue').val('A');
                 this.$el.find('#codban').val(51);
+                this.setChoice('tipcue', 'A');
+                this.setChoice('codban', '51');
             }
             this.$el.find('#codban').prop('disabled', false);
             this.$el.find('#numcue').prop('disabled', false);
@@ -212,9 +225,24 @@ export default class FormDatosTrabajador extends FormView {
             this.$el.find('#tipcue').val('');
             this.$el.find('#codban').val('');
             this.$el.find('#numcue').val('');
+            this.resetChoice('tipcue');
+            this.resetChoice('codban');
             this.$el.find('#codban').prop('disabled', true);
             this.$el.find('#numcue').prop('disabled', true);
             this.$el.find('#tipcue').prop('disabled', true);
+        }
+    }
+
+    resetChoice(fieldName) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].removeActiveItems();
+            this.#choiceComponents[fieldName].setChoiceByValue('');
+        }
+    }
+
+    setChoice(fieldName, value) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].setChoiceByValue(String(value));
         }
     }
 

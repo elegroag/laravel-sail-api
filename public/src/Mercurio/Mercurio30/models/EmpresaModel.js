@@ -79,6 +79,7 @@ class EmpresaModel extends Backbone.Model {
             codact: { required: true },
             tipsoc: { required: true },
             codciu: { required: true },
+            tipdoc: { required: true }
         },
         messages: {
             nit: { required: 'Se requiere del campo nit' },
@@ -108,6 +109,7 @@ class EmpresaModel extends Backbone.Model {
             codact: { required: 'Se requiere de la actividad económica' },
             tipsoc: { required: 'Se requiere de tipo sociedad' },
             codciu: { required: 'Se requiere la ciudad' },
+            tipdoc: { required: 'Se requiere de tipo documento empleador' }
         },
     };
 

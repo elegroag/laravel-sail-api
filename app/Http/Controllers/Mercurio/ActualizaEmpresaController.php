@@ -177,6 +177,8 @@ class ActualizaEmpresaController extends ApplicationController
             }
 
             $data = array_merge($solicitud->toArray(), $data);
+            $data['tipdoc'] = $request->input('tipdoc', $request->input('coddoc', $coddoc));
+            $data['coddoc'] = $request->input('coddoc', $coddoc);
             DatosEmpresaService::generarAdjuntos([
                 $empresa,
                 $data,
@@ -259,7 +261,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' - ' . $ciudades[$sucursal['codzon']];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' - '.$ciudades[$sucursal['codzon']];
                         }
                     }
                 }
@@ -391,7 +393,7 @@ class ActualizaEmpresaController extends ApplicationController
             $coddoc = $this->clp($request, 'coddoc');
             $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $numero)->where('coddoc', $coddoc)->first();
 
-            $filepath = storage_path('temp/' . $mercurio37->getArchivo());
+            $filepath = storage_path('temp/'.$mercurio37->getArchivo());
             if (file_exists($filepath)) {
                 unlink($filepath);
             }
@@ -516,7 +518,7 @@ class ActualizaEmpresaController extends ApplicationController
                 if ($sucursales) {
                     foreach ($sucursales as $sucursal) {
                         if ($sucursal['estado'] != 'I') {
-                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'] . ' ' . $sucursal['codzon'];
+                            $list_sucursales[$sucursal['codsuc']] = $sucursal['detalle'].' '.$sucursal['codzon'];
                         }
                     }
                 }
@@ -554,6 +556,12 @@ class ActualizaEmpresaController extends ApplicationController
             }
 
             $solicitud = array_merge($data, $solicitud);
+            if (! isset($solicitud['tipdoc']) && isset($solicitud['coddoc'])) {
+                $solicitud['tipdoc'] = $solicitud['coddoc'];
+            }
+            if (! isset($solicitud['tipper']) && isset($solicitud['tipdoc'])) {
+                $solicitud['tipper'] = ($solicitud['tipdoc'] == '1' || $solicitud['tipdoc'] == 1) ? 'N' : 'J';
+            }
             $salida = [
                 'success' => true,
                 'data' => $solicitud,

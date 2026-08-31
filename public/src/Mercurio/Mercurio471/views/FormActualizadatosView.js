@@ -74,7 +74,7 @@ class FormActualizadatosView extends FormView {
             },
         });
 
-        this.selectores = $el.find('#tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg');
+        this.selectores = $el.find('#tipper, #tipdoc, #tipsoc, #ciupri, #codzon, #codciu, #codact, #coddocrepleg');
 
         if (this.model.get('id') !== null) {
             $.each(this.model.toJSON(), (key, valor) => {
@@ -88,14 +88,33 @@ class FormActualizadatosView extends FormView {
 
             $.each(this.selectores, (index, element) => {
                 this.#choiceComponents[element.name] = new Choices(element);
-                const name = this.model.get(element.name);
-                if (name) this.#choiceComponents[element.name].setChoiceByValue(name);
+                let name = this.model.get(element.name);
+                if ((_.isUndefined(name) || _.isNull(name) || name === '') && element.name === 'tipdoc') {
+                    name = this.model.get('coddoc');
+                }
+                if ((_.isUndefined(name) || _.isNull(name) || name === '') && element.name === 'tipper') {
+                    const tipdocVal = this.model.get('tipdoc') || this.model.get('coddoc');
+                    if (tipdocVal) {
+                        name = tipdocVal == '1' || tipdocVal == 1 ? 'N' : 'J';
+                    }
+                }
+                if (!(_.isUndefined(name) || _.isNull(name) || name === '')) {
+                    this.$el.find(`[name="${element.name}"]`).val(name);
+                    this.#choiceComponents[element.name].setChoiceByValue(String(name));
+                }
             });
         } else {
             $.each(
                 this.selectores,
                 (index, element) => (this.#choiceComponents[element.name] = new Choices(element, { silent: true, itemSelectText: '' })),
             );
+
+            if (this.modelEmpresa instanceof EmpresaModel) {
+                $.each(this.selectores, (index, element) => {
+                    const name = this.modelEmpresa.get(element.name);
+                    if (name) this.#choiceComponents[element.name].setChoiceByValue(String(name));
+                });
+            }
         }
 
         this.selectores.on('change', (event) => {
@@ -116,11 +135,9 @@ class FormActualizadatosView extends FormView {
 
     changeTipoPer(e) {
         e.preventDefault();
-        if (this.$el.find('#tipper').val() == 'N') {
-            this.$el.find('#tipdoc').val(1);
-        } else {
-            this.$el.find('#tipdoc').val(3);
-        }
+        const tipdocVal = this.$el.find('#tipper').val() == 'N' ? '1' : '3';
+        this.$el.find('#tipdoc').val(tipdocVal);
+        this.setChoice('tipdoc', tipdocVal);
         this.selectores.trigger('change');
     }
 
@@ -128,6 +145,22 @@ class FormActualizadatosView extends FormView {
         let tipdoc = $(e.currentTarget).val();
         let coddocrepleg = ActualizadatosModel.changeTipdoc(tipdoc);
         this.$el.find('#coddocrepleg').val(coddocrepleg);
+        if (coddocrepleg) {
+            this.setChoice('coddocrepleg', coddocrepleg);
+        }
+    }
+
+    setChoice(fieldName, value) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].setChoiceByValue(String(value));
+        }
+    }
+
+    resetChoice(fieldName) {
+        if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
+            this.#choiceComponents[fieldName].removeActiveItems();
+            this.#choiceComponents[fieldName].setChoiceByValue('');
+        }
     }
 
     saveFormData(event) {
@@ -327,6 +360,15 @@ class FormActualizadatosView extends FormView {
         $('#celular').val(this.model.entity.get('telr'));
 
         this.selectores.trigger('change');
+
+        if (this.selectores && this.model.entity) {
+            $.each(this.selectores, (index, element) => {
+                const name = this.model.entity.get(element.name);
+                if (name && this.#choiceComponents[element.name]) {
+                    this.#choiceComponents[element.name].setChoiceByValue(String(name));
+                }
+            });
+        }
 
         setTimeout(function () {
             Swal.fire({

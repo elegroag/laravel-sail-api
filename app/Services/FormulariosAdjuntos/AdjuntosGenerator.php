@@ -21,11 +21,19 @@ class AdjuntosGenerator
 
             $out = $service->{$method}()->getResult();
 
+            $id = null;
+            if (is_object($modelo)) {
+                $id = $modelo->id ?? (method_exists($modelo, 'getId') ? $modelo->getId() : null);
+            } elseif (is_array($modelo)) {
+                $id = $modelo['id']
+                    ?? ($modelo[1]['id'] ?? ($modelo[1]->id ?? (isset($modelo[0]) && is_object($modelo[0]) ? ($modelo[0]->id ?? null) : null)));
+            }
+
             (new GuardarArchivoService(
                 [
                     'tipopc' => $tipopc,
                     'coddoc' => $documento['coddoc'],
-                    'id' => $modelo->id,
+                    'id' => $id,
                 ]
             ))->salvarDatos($out);
         }

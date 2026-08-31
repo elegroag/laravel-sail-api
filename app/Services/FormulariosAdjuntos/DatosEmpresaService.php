@@ -4,12 +4,10 @@ namespace App\Services\FormulariosAdjuntos;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
-use App\Library\Tcpdf\KumbiaPDF;
 use App\Models\Mercurio16;
-use App\Services\Formularios\FactoryDocuments;
-use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Formularios\Generation\DocumentGenerationManager;
+use App\Services\PreparaFormularios\CifrarDocumento;
 
 class DatosEmpresaService
 {
@@ -43,7 +41,7 @@ class DatosEmpresaService
             ->where('coddoc', $this->user['coddoc'])
             ->first();
 
-        $procesadorComando = new ApiSubsidio();
+        $procesadorComando = new ApiSubsidio;
         $procesadorComando->send(
             [
                 'servicio' => 'ComfacaAfilia',
@@ -62,8 +60,8 @@ class DatosEmpresaService
             throw new DebugException('Error no hay firma digital', 501);
         }
         $nit = $this->empresa->nit;
-        $this->filename = 'formulario-datos-empresa-' . strtotime('now') . "_{$nit}.pdf";
-        $manager = new DocumentGenerationManager();
+        $this->filename = 'formulario-datos-empresa-'.strtotime('now')."_{$nit}.pdf";
+        $manager = new DocumentGenerationManager;
         $manager->generate(
             'api',
             'actualizadatos',
@@ -77,6 +75,7 @@ class DatosEmpresaService
         );
 
         $this->cifrarDocumento();
+
         return $this;
     }
 
@@ -109,11 +108,12 @@ class DatosEmpresaService
     {
         $adjuntoService = new self($request);
         $adjuntoService->setClaveCertificado($claveCertificado);
-        AdjuntosGenerator::generar($adjuntoService, $tipopc, $request, [
+        $solicitudModel = is_array($request) && isset($request[1]) ? $request[1] : $request;
+        AdjuntosGenerator::generar($adjuntoService, $tipopc, $solicitudModel, [
             [
                 'method' => 'formulario',
                 'coddoc' => 27,
-            ]
+            ],
         ]);
     }
 }
