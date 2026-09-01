@@ -16,6 +16,7 @@ class Mercurio53 extends ModelBase
         'numero',
         'archivo',
         'orden',
+        'url',
     ];
 
     // Setters
@@ -34,6 +35,11 @@ class Mercurio53 extends ModelBase
         $this->orden = $orden;
     }
 
+    public function setUrl($url)
+    {
+        $this->url = $url;
+    }
+
     // Getters
     public function getNumero()
     {
@@ -48,5 +54,10 @@ class Mercurio53 extends ModelBase
     public function getOrden()
     {
         return $this->orden;
+    }
+
+    public function getUrl()
+    {
+        return $this->url;
     }
 }

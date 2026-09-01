@@ -1,199 +1,253 @@
-$(document).ready(function() {
-	validator = $("#form").validate({
-		rules: {
-			archivo: { required: true }
-		}
-	});
+import { $App } from '@/App';
+import { Messages } from '@/Utils';
 
-	$("#modal_imagen").on("show.bs.modal", function(e) {
-		var image = $(e.relatedTarget).css("background-image");
-		image = image.replace("url(", "").replace(")", "").replace(/\"/gi, "");
-		$("#img_zoom").attr("src", image);
-	});
+let validator;
+let isEditing = false;
+let editingNumero = null;
+window.App = $App;
 
-	$(document).on(
-		{
-			mouseenter: function() {
-				$(this)
-					.css({
-						outline: "0px solid #6EE0FF"
-					})
-					.stop()
-					.animate(
-						{
-							outlineWidth: "2px",
-							outlineColor: "#6EE0FF"
-						},
-						200
-					);
-			},
-			mouseleave: function() {
-				$(this).stop().animate(
-					{
-						outlineWidth: "0px",
-						outlineColor: "#037736"
-					},
-					150
-				);
-			}
-		},
-		".thumbnail"
-	);
+const setModalMode = (editing) => {
+    isEditing = editing;
+    if (!editing) {
+        editingNumero = null;
+    }
+    $('#captureModal .card-header h5').text(editing ? 'Editar destacada' : 'Carga de archivo');
+    $('#captureModal').find("[data-toggle='guardar']").text(editing ? 'Actualizar' : 'Guardar');
+    $('#preview_actual_wrap').toggle(editing);
+    $('#archivo_label').text(editing ? 'Reemplazar imagen' : 'Imagen *');
+    $('#archivo_help').text(
+        editing
+            ? 'Opcional. Formatos permitidos: JPG, JPEG y PNG.'
+            : 'Formatos permitidos: JPG, JPEG y PNG.',
+    );
+    if (validator) {
+        validator.destroy();
+    }
+    validatorInit();
+};
 
-	galeria();
+const validatorInit = () => {
+    validator = $('#form').validate({
+        rules: {
+            archivo: { required: () => !isEditing },
+        },
+        messages: {
+            archivo: 'El archivo es requerido',
+        },
+    });
+};
+
+const resetForm = () => {
+    const $form = $('#form');
+    $form[0].reset();
+    $('#archivo').next('.custom-file-label').text('Seleccione un archivo');
+    $('#preview_actual').attr('src', '');
+    $form.find(':input').prop('disabled', false);
+    if (validator) {
+        validator.resetForm();
+    }
+};
+
+const fillForm = ({ archivo_preview = '' } = {}) => {
+    resetForm();
+    if (archivo_preview) {
+        $('#preview_actual').attr('src', archivo_preview);
+    }
+};
+
+const submitForm = () => {
+    if (!validator.valid()) return;
+
+    const formData = new FormData($('#form')[0]);
+    if (isEditing && editingNumero) {
+        formData.append('numero', editingNumero);
+    }
+
+    const $guardarBtn = $('#captureModal').find("[data-toggle='guardar']");
+    $guardarBtn.prop('disabled', true);
+
+    window.App.trigger('upload', {
+        url: window.App.url(window.ServerController + '/guardar'),
+        data: formData,
+        callback: (response) => {
+            $guardarBtn.prop('disabled', false);
+
+            if (response?.flag === true) {
+                Messages.display(response.msg, 'success');
+                resetForm();
+                editingNumero = null;
+                isEditing = false;
+                bootstrap.Modal.getInstance(document.getElementById('captureModal'))?.hide();
+                galeria();
+            } else {
+                Messages.display(response?.msg || 'Error al guardar', 'error');
+            }
+        },
+    });
+};
+
+const galeria = () => {
+    window.App.trigger('syncro', {
+        url: window.App.url(window.ServerController + '/galeria'),
+        callback: (response) => {
+            if (!response || response.flag !== true) {
+                return Messages.display(response?.msg || 'No se pudieron cargar los datos', 'error');
+            }
+
+            const items = response.data || [];
+            if (!items.length) {
+                $('#galeria').html(
+                    '<div class="galeria-admin-empty">No hay imágenes destacadas. Use "Agregar imagen" para comenzar.</div>',
+                );
+                return;
+            }
+
+            let html = '';
+            const tmp = _.template(document.getElementById('tmp_galeria').innerHTML);
+            $.each(items, function (key, value) {
+                html += tmp({ value });
+            });
+            $('#galeria').html(html);
+        },
+        error: (xhr) => {
+            Messages.display('Error al cargar las destacadas: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+        },
+    });
+};
+
+$(() => {
+    window.App.initialize();
+    validatorInit();
+
+    const modalCaptureEl = document.getElementById('captureModal');
+    const modalZoom = new bootstrap.Modal(document.getElementById('zoomModal'));
+    const modalCapture = new bootstrap.Modal(modalCaptureEl);
+
+    modalCaptureEl.addEventListener('show.bs.modal', (event) => {
+        if (!event.relatedTarget || !$(event.relatedTarget).is("[data-bs-target='#captureModal']")) {
+            return;
+        }
+        setModalMode(false);
+        fillForm();
+    });
+
+    $(document).on('change', '#archivo', (e) => {
+        const file = e.target.files?.[0];
+        const label = $(e.target).next('.custom-file-label');
+        label.text(file ? file.name : 'Seleccione un archivo');
+    });
+
+    galeria();
+
+    $(document).on('click', "[data-toggle='editar']", (e) => {
+        e.preventDefault();
+        const numero = $(e.currentTarget).attr('data-cid');
+
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/editar'),
+            data: { numero },
+            callback: (response) => {
+                if (!response || !response.numero) {
+                    return Messages.display('No fue posible cargar el registro.', 'error');
+                }
+
+                editingNumero = response.numero;
+                setModalMode(true);
+                fillForm({ archivo_preview: response.archivo });
+                modalCapture.show();
+            },
+        });
+    });
+
+    $(document).on('click', "[data-toggle='borrar']", (e) => {
+        e.preventDefault();
+        const numero = $(e.currentTarget).attr('data-cid');
+        Swal.fire({
+            title: 'Esta seguro de borrar?',
+            text: '',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonClass: 'btn btn-success btn-fill',
+            cancelButtonClass: 'btn btn-danger btn-fill',
+            confirmButtonText: 'SI',
+            cancelButtonText: 'NO',
+        }).then((result) => {
+            if (result.value) {
+                window.App.trigger('syncro', {
+                    url: window.App.url(window.ServerController + '/borrar'),
+                    data: { numero },
+                    callback: (response) => {
+                        if (response?.flag === true) {
+                            galeria();
+                            Messages.display(response.msg, 'success');
+                        } else {
+                            Messages.display(response?.msg || 'Error al borrar', 'error');
+                        }
+                    },
+                    error: (xhr) => {
+                        Messages.display('Error al borrar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+                    },
+                });
+            }
+        });
+    });
+
+    $(document).on('click', "[data-toggle='guardar']", (e) => {
+        e.preventDefault();
+        submitForm();
+    });
+
+    $(document).on('click', "[data-toggle='arriba']", (e) => {
+        const numero = $(e.currentTarget).attr('data-cid');
+        e.preventDefault();
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/arriba'),
+            data: { numero },
+            callback: (response) => {
+                if (response?.flag === true) {
+                    Messages.display(response.msg, 'success');
+                    galeria();
+                } else {
+                    Messages.display(response?.msg || 'Error al reordenar', 'error');
+                }
+            },
+            error: (xhr) => {
+                Messages.display('Error al reordenar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+            },
+        });
+    });
+
+    $(document).on('click', "[data-toggle='abajo']", (e) => {
+        const numero = $(e.currentTarget).attr('data-cid');
+        e.preventDefault();
+        window.App.trigger('syncro', {
+            url: window.App.url(window.ServerController + '/abajo'),
+            data: { numero },
+            callback: (response) => {
+                if (response?.flag === true) {
+                    Messages.display(response.msg, 'success');
+                    galeria();
+                } else {
+                    Messages.display(response?.msg || 'Error al reordenar', 'error');
+                }
+            },
+            error: (xhr) => {
+                Messages.display('Error al reordenar: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+            },
+        });
+    });
+
+    $(document).on('click', "[data-toggle='preview']", (e) => {
+        e.preventDefault();
+        const $target = $(e.currentTarget);
+        const file = $target.attr('data-file');
+        const archivoNombre = $target.attr('data-archivo-nombre') || '';
+        const imageUrl = $target.attr('data-url') || file || '';
+        $('#zoomModalbody').html(`
+            <p class="text-muted small mb-1 text-break"><strong>Archivo:</strong> ${archivoNombre}</p>
+            <p class="text-muted small mb-2 text-break"><strong>URL:</strong> ${imageUrl}</p>
+            <img id="img_zoom" class="img-fluid" src="${file}" alt="${archivoNombre}" />
+        `);
+        modalZoom.show();
+    });
 });
-
-function guardar() {
-	if (!$("#form").valid()) {
-		return;
-	}
-	var request = $.ajax({
-		type: "POST",
-		url: Utils.getKumbiaURL($Kumbia.controller + "/guardar"),
-		data: new FormData($("#form")[0]),
-		processData: false,
-		contentType: false
-	});
-	request.done(function(transport) {
-		var response = transport;
-		if (response["flag"] == true) {
-			Messages.display(response["msg"], "success");
-			$("#form :input").each(function(elem) {
-				$(this).val("");
-				$(this).attr("disabled", false);
-			});
-			galeria();
-		} else {
-			Messages.display(response["msg"], "error");
-		}
-	});
-	request.fail(function(jqXHR, textStatus) {
-		alert("Request failed: " + textStatus);
-	});
-}
-
-function galeria() {
-	var request = $.ajax({
-		type: "POST",
-		url: Utils.getKumbiaURL($Kumbia.controller + "/galeria")
-	});
-	request.done(function(transport) {
-		var html = "";
-		var response = transport;
-		$.each(response, function(key, value) {
-			html += '<div class="col-lg-3 col-md-4 col-xs-6 mb-3">';
-			html +=
-				'<div class="thumbnail" style="opacity: 1;background-image: url(\'' +
-				value.archivo +
-				'\');background-size: 100% 100%;border-top: solid 1px #e5e5e5;border-right: solid 2px #e5e5e5;border-bottom: solid 2px #e5e5e5;border-left: solid 1px #e5e5e5;border-color: #e5e5e5;cursor: zoom-in;" data-toggle="modal" data-target="#modal_imagen">';
-			html +=
-				'<button type="button" style="float: right;" class="btn btn-default btn-sm btn-icon-only rounded-circle mt-2" onclick="borrar(\'' +
-				value.numero +
-				'\',event)"><i class="fa fa-times"></i></button>';
-			html +=
-				'<div class="caption" style="background: rgba(108, 108, 108, 0.6); margin-top: 65%; text-align: center;">';
-			html += '<h4 class="text-white">Imagen N°' + value.numero + "</h4>";
-			html += '<p class="pb-2">';
-			html +=
-				'<button type="button" class="btn btn-icon-only btn-info" onclick="arriba(\'' +
-				value.numero +
-				'\',event)"><i class="fas fa-long-arrow-alt-left"></i></button> ';
-			html +=
-				'<button type="button" class="btn btn-icon-only btn-info" onclick="abajo(\'' +
-				value.numero +
-				'\',event)"><i class="fas fa-long-arrow-alt-right"></i></button> ';
-			html += "</p>";
-			html += "</div>";
-			html += "</div>";
-			html += "</div>";
-		});
-		$("#galeria").html(html);
-	});
-	request.fail(function(jqXHR, textStatus) {
-		alert("Request failed: " + textStatus);
-	});
-}
-
-function arriba(numero, e) {
-	e.stopPropagation();
-	var request = $.ajax({
-		type: "POST",
-		url: Utils.getKumbiaURL($Kumbia.controller + "/arriba"),
-		data: {
-			numero: numero
-		}
-	});
-	request.done(function(transport) {
-		var response = transport;
-		if (response["flag"] == true) {
-			Messages.display(response["msg"], "success");
-			galeria();
-		} else {
-			Messages.display(response["msg"], "error");
-		}
-	});
-	request.fail(function(jqXHR, textStatus) {
-		alert("Request failed: " + textStatus);
-	});
-}
-
-function abajo(numero, e) {
-	e.stopPropagation();
-	var request = $.ajax({
-		type: "POST",
-		url: Utils.getKumbiaURL($Kumbia.controller + "/abajo"),
-		data: {
-			numero: numero
-		}
-	});
-	request.done(function(transport) {
-		var response = transport;
-		if (response["flag"] == true) {
-			Messages.display(response["msg"], "success");
-			galeria();
-		} else {
-			Messages.display(response["msg"], "error");
-		}
-	});
-	request.fail(function(jqXHR, textStatus) {
-		alert("Request failed: " + textStatus);
-	});
-}
-
-function borrar(numero, e) {
-	e.stopPropagation();
-	swal
-		.fire({
-			title: "Esta seguro de borrar?",
-			text: "",
-			type: "warning",
-			showCancelButton: true,
-			confirmButtonClass: "btn btn-success btn-fill",
-			cancelButtonClass: "btn btn-danger btn-fill",
-			confirmButtonText: "SI",
-			cancelButtonText: "NO"
-		})
-		.then(result => {
-			if (result.value) {
-				var request = $.ajax({
-					type: "POST",
-					url: Utils.getKumbiaURL($Kumbia.controller + "/borrar"),
-					data: {
-						numero: numero
-					}
-				});
-				request.done(function(transport) {
-					var response = transport;
-					if (response["flag"] == true) {
-						Messages.display(response["msg"], "success");
-						galeria();
-					} else {
-						Messages.display(response["msg"], "error");
-					}
-				});
-				request.fail(function(jqXHR, textStatus) {
-					alert("Request failed: " + textStatus);
-				});
-			}
-		});
-}

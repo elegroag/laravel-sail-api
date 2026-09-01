@@ -149,15 +149,33 @@ class Mercurio01 extends ModelBase
     }
 
     /**
+     * Ruta web relativa al document root (p. ej. temp/galeria), sin prefijo public/.
+     */
+    public function publicWebPath(string $relative = ''): string
+    {
+        $base = preg_replace('#^public/#', '', trim($this->path ?? '', '/'));
+        $base = trim($base, '/');
+        $relative = trim($relative, '/');
+
+        return $relative !== '' ? "{$base}/{$relative}" : $base;
+    }
+
+    /**
      * URL pública bajo el path de almacenamiento (sin prefijo public/).
      */
     public function publicUrl(string $relative = ''): string
     {
-        $base = preg_replace('#^public/#', '', trim($this->path ?? '', '/'));
-        $relative = trim($relative, '/');
-        $path = $relative !== '' ? "{$base}/{$relative}" : $base;
+        return asset($this->publicWebPath($relative));
+    }
 
-        return asset($path);
+    /**
+     * URL absoluta usando config('app.dominio') (APP_DOMINIO).
+     */
+    public function dominioUrl(string $relative = ''): string
+    {
+        $path = $this->publicWebPath($relative);
+
+        return rtrim((string) config('app.dominio'), '/').($path !== '' ? '/'.$path : '');
     }
 
     /**
