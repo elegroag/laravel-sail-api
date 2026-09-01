@@ -856,15 +856,15 @@
     margin: 0;
     padding: 0;
     background: transparent;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
 }
 
 .navbar-breadcrumb .breadcrumb-item {
-    color: rgba(255, 255, 255, 0.7);
+    color: #fdfdfd;
 }
 
 .navbar-breadcrumb .breadcrumb-item a {
-    color: rgba(255, 255, 255, 0.7);
+    color: #fff;
     text-decoration: none;
     transition: color var(--sidenav-transition);
 }
@@ -874,11 +874,11 @@
 }
 
 .navbar-breadcrumb .breadcrumb-item.active {
-    color: rgba(255, 255, 255, 0.5);
+    color: #fff;
 }
 
 .navbar-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
-    color: rgba(255, 255, 255, 0.5);
+    color: #fff;
 }
 
 /* Acciones del navbar */
@@ -1074,7 +1074,9 @@
     overflow: hidden;
     flex-shrink: 0;
     border: 2px solid #fff;
-    box-shadow: 0 0 0 1px #d1fae5, 0 2px 8px rgba(16, 185, 129, 0.18);
+    box-shadow:
+        0 0 0 1px #d1fae5,
+        0 2px 8px rgba(16, 185, 129, 0.18);
 }
 
 .dropdown-user-avatar img {
