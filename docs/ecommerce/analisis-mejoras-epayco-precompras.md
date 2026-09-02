@@ -1,9 +1,10 @@
 # Análisis y recomendaciones — mejoras ePayco / precompras (Mercurio)
 
 > **Fecha original:** 2026-08-14  
-> **Última revisión:** 2026-08-24  
+> **Última revisión:** 2026-09-02  
 > **Alcance:** pasarela ePayco y precompras de servicios (webhook, TLS,
-> Admservicios, modularización JS, `EPAYCO_FORCE_APPROVED`).  
+> Admservicios, modularización JS, `EPAYCO_FORCE_APPROVED`, validación API
+> e idempotencia PA ante error de conexión ePayco).  
 > **Audiencia:** desarrollo, operaciones y soporte de Cajas/Mercurio.
 
 Documentos relacionados:
@@ -12,6 +13,8 @@ Documentos relacionados:
 - [epayco-modal-control.md](./epayco-modal-control.md)
 - [epayco-estado-transaccion-db.md](./epayco-estado-transaccion-db.md)
 - [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md)
+- [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md)
+- [pendientes-compra-en-linea.md](./pendientes-compra-en-linea.md)
 - [precompras-job-abandonadas.md](./precompras-job-abandonadas.md)
 
 ---
@@ -145,7 +148,7 @@ Checkout monolítico main.js   Módulos + Standard/Smart Checkout
 | - | ------ | --------- | ----- |
 | R1 | Credenciales de firma no configuradas en prod | Alta | Webhook responde `503`; setear `EPAYCO_CUSTOMER_ID` / `EPAYCO_P_KEY`. |
 | R2 | Scheduler no activo en el servidor | Media | El job de abandono no corre sin cron/`schedule:work`. |
-| R3 | Migración `epayco_transacciones` no aplicada | Alta | Escrituras de auditoría fallan (logueadas; no deben tumbar el pago). |
+| R3 | ~~Migración `epayco_transacciones` no aplicada~~ | — | **Hecho en producción** (2026-09-02). |
 | R4 | Doble `guardar-venta` (cliente + webhook) | Baja | Mitigado en ambos lados si la precompra ya estaba `PA` antes de actualizar. Carrera simultánea residual (ambos leen `PE`) depende de idempotencia en Subsidio. |
 | R5 | Checkout ePayco en WebView Android | Baja | Mitigado: en móvil/WebView se fuerza Smart Checkout v2 con `type: standard` (entorno seguro ePayco). Webhook + retorno `response` siguen confirmando. |
 | R6 | `APIClient` (Subsidio u otros) sigue con `withoutVerifying()` | Baja–Media | Deuda TLS fuera de `ApiEpayco`. |
@@ -157,8 +160,10 @@ Checkout monolítico main.js   Módulos + Standard/Smart Checkout
 
 ### 3.4 Dependencias de puesta en marcha (checklist corto)
 
-- [ ] Migración `epayco_transacciones` ejecutada.
-- [ ] `.env`: `EPAYCO_CUSTOMER_ID` (o `EPAYCO_P_CUST_ID_CLIENTE`), `EPAYCO_P_KEY`, `EPAYCO_HTTP_VERIFY_SSL=true` (prod).
+- [x] Migración `epayco_transacciones` ejecutada (producción).
+- [x] `.env`: `EPAYCO_CUSTOMER_ID` (o `EPAYCO_P_CUST_ID_CLIENTE`), `EPAYCO_P_KEY`
+      (proyecto local; revalidar en cada host prod).
+- [ ] `EPAYCO_HTTP_VERIFY_SSL=true` (prod).
 - [ ] `EPAYCO_FORCE_APPROVED=false` en todo entorno productivo.
 - [ ] URL pública HTTPS de `/api/epayco/confirmation` registrada / alcanzable.
 - [ ] Cron de `schedule:run` (job 02:00).
@@ -197,27 +202,37 @@ Checkout monolítico main.js   Módulos + Standard/Smart Checkout
 
 ### 5.2 Corto plazo (1–2 sprints) — aún pendientes
 
+> Especificaciones detalladas (ID, criterios de aceptación):  
+> [pendientes-compra-en-linea.md](./pendientes-compra-en-linea.md).
+
 5. ~~**Prueba de carrera cliente + webhook / omitir reenvío si ya `PA`**~~ —
    **hecho en cliente:** `EcommerceController::guardarVenta` captura
    `yaPagada` antes de actualizar y no llama a Subsidio si ya estaba `PA`
    (mismo criterio que el webhook). Carrera simultánea residual: depende
    de idempotencia de Subsidio o de un lock futuro.
-6. **Extender TLS configurable a `APIClient`** (mismo patrón `*_HTTP_VERIFY_SSL`).
+5b. ~~**Error API reference + rechazo falso al cliente**~~ — **hecho:**
+   `validarReferencia` detecta envelopes `status: error` / “Error de datos
+   o conexión…”; `validarPagoEpayco` / `guardarVenta` responden éxito si
+   la precompra ya está `PA`. Guía:
+   [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md).
+6. **Extender TLS configurable a `APIClient`** (mismo patrón `*_HTTP_VERIFY_SSL`) — **P-08**.
 7. ~~**Incluir `transaction_id` / `approval_code` en `ReporteComprasServicios`~~ —
    **hecho** (columnas en tabla + JSON del consultar; última tx vía
    `ultimaTransaccionEpayco`).
 8. **Alerta operativa** (email/Slack) cuando el webhook reciba `400` de firma
-   o `503` por credenciales faltantes.
+   o `503` por credenciales faltantes — **P-09**.
 
 ### 5.3 Mediano plazo — aún pendientes
 
-9. **Whitelist de medios de pago** (`methods` / `methodsDisable`).
+9. **Whitelist de medios de pago** (`methods` / `methodsDisable`) — **P-11**.
 10. **Cola asíncrona para `guardar-venta` desde el webhook** si Subsidio
-    supera ~2–3 s.
+    supera ~2–3 s — **P-12**.
 11. ~~**Panel de detalle de precompra** en Admservicios~~ — **hecho**
     (`detalle/{id}` + historial).
 12. **Tests Feature** del webhook (firma OK/KO, idempotencia `PA`,
-    resolución por `extra4`) con Http::fake / DB de prueba.
+    resolución por `extra4`) con Http::fake / DB de prueba — **P-10**.
+13. **Lock / idempotencia carrera PE** (cliente + webhook) — **P-13**.
+14. **UX reintento** si falla API reference y aún no hay `PA` — **P-14**.
 
 ### 5.4 No prioritario / consciente
 

@@ -434,6 +434,22 @@ class EcommerceController extends ApplicationController
             $resultado = $this->epayco->validarReferencia($ref_payco);
 
             if (! $resultado['success']) {
+                $precompra = $this->resolverPrecompraPorRefOId((string) $ref_payco, $precompraId);
+                if ($precompra?->isPagado()) {
+                    return response()->json([
+                        'success' => true,
+                        'data' => [
+                            'aprobado' => true,
+                            'cod_estado' => 1,
+                            'respuesta' => 'Aceptada',
+                            'motivo' => $precompra->motivo_epayco ?? '',
+                            'ref_payco' => $ref_payco,
+                            'ya_pagada' => true,
+                        ],
+                        'message' => 'Pago aprobado (confirmado previamente)',
+                    ]);
+                }
+
                 return response()->json([
                     'success' => false,
                     'message' => $resultado['errors'] ?? 'Error al validar referencia',
@@ -497,6 +513,12 @@ class EcommerceController extends ApplicationController
                 ]);
             }
 
+            // Resolver precompra antes de validar: si el webhook ya dejó PA, no
+            // mostrar rechazo cuando ePayco falle en la reconsulta de referencia.
+            $precompraAntes = $this->resolverPrecompraPorRefOId((string) $refpago, $precompraId);
+            $yaPagada = $precompraAntes?->isPagado() ?? false;
+            $forceApproved = $this->epayco->debeForzarAprobacion();
+
             $pago = $this->epayco->validarReferencia($refpago);
 
             Log::info('Ecommerce.guardarVenta: resultado validarReferencia', [
@@ -507,9 +529,28 @@ class EcommerceController extends ApplicationController
                 'respuesta' => $pago['data']['respuesta'] ?? null,
                 'motivo' => $pago['data']['motivo'] ?? null,
                 'errors' => $pago['errors'] ?? null,
+                'ya_pagada' => $yaPagada,
             ]);
 
             if (! ($pago['success'] ?? false)) {
+                if ($yaPagada && ! $forceApproved) {
+                    Log::info('Ecommerce.guardarVenta: fallo validacion ePayco pero precompra ya PA', [
+                        'refpago' => $refpago,
+                        'errors' => $pago['errors'] ?? null,
+                        'precompra_id' => $precompraAntes?->id ?? $precompraId,
+                    ]);
+
+                    return response()->json([
+                        'success' => true,
+                        'data' => [
+                            'ya_pagada' => true,
+                            'precompra_id' => $precompraAntes?->id,
+                            'validacion_omitida' => true,
+                        ],
+                        'message' => 'Venta ya registrada previamente',
+                    ]);
+                }
+
                 Log::info('Ecommerce.guardarVenta: fallo validacion ePayco', [
                     'refpago' => $refpago,
                     'errors' => $pago['errors'] ?? null,
@@ -524,16 +565,33 @@ class EcommerceController extends ApplicationController
             $datosPago = $pago['data'] ?? [];
             $pagoAprobado = ($datosPago['aprobado'] ?? false) === true && (int) ($datosPago['cod_estado'] ?? 0) === 1;
 
-            // Capturar PA antes de actualizar: si el webhook (u otro request) ya dejó
-            // la precompra pagada, no reenviar guardar-venta a Subsidio (salvo FORCE_APPROVED).
             $refPaycoDatos = (string) ($datosPago['ref_payco'] ?? $refpago);
-            $precompraAntes = $this->resolverPrecompraPorRefOId($refPaycoDatos, $precompraId);
-            $yaPagada = $precompraAntes?->isPagado() ?? false;
-            $forceApproved = $this->epayco->debeForzarAprobacion();
+            if ($refPaycoDatos !== (string) $refpago || ! $precompraAntes) {
+                $precompraAntes = $this->resolverPrecompraPorRefOId($refPaycoDatos, $precompraId);
+                $yaPagada = $precompraAntes?->isPagado() ?? false;
+            }
 
             $this->actualizarPrecompraDesdePago($datosPago, $precompraId);
 
             if (! $pagoAprobado) {
+                if ($yaPagada && ! $forceApproved) {
+                    Log::info('Ecommerce.guardarVenta: API no aprobado pero precompra ya PA', [
+                        'refpago' => $refpago,
+                        'cod_estado' => $datosPago['cod_estado'] ?? null,
+                        'precompra_id' => $precompraAntes?->id ?? $precompraId,
+                    ]);
+
+                    return response()->json([
+                        'success' => true,
+                        'data' => [
+                            'ya_pagada' => true,
+                            'precompra_id' => $precompraAntes?->id,
+                            'validacion_omitida' => true,
+                        ],
+                        'message' => 'Venta ya registrada previamente',
+                    ]);
+                }
+
                 $estado = $datosPago['cod_estado'] ?? 'desconocido';
                 $motivo = $datosPago['motivo'] ?? $datosPago['respuesta'] ?? 'Pago no aprobado';
 

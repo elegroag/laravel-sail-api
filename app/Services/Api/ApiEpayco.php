@@ -13,7 +13,7 @@ class ApiEpayco extends ApiAbstract
 {
     public function __construct()
     {
-        $this->mode = config('app.epayco.mode', 'development');
+        $this->mode = (string) (config('app.epayco.mode') ?: 'development');
     }
 
     public function send(array $attr)
@@ -93,7 +93,21 @@ class ApiEpayco extends ApiAbstract
 
         $data = $response->json();
 
-        if (! $data || ! isset($data['data'])) {
+        if (! is_array($data) || $data === []) {
+            return [
+                'success' => false,
+                'errors' => 'Respuesta invalida de ePayco',
+            ];
+        }
+
+        if ($this->esRespuestaErrorEpayco($data)) {
+            return [
+                'success' => false,
+                'errors' => $this->mensajeErrorEpayco($data),
+            ];
+        }
+
+        if (! isset($data['data']) || ! is_array($data['data'])) {
             return [
                 'success' => false,
                 'errors' => 'Respuesta invalida de ePayco',
@@ -102,26 +116,36 @@ class ApiEpayco extends ApiAbstract
 
         $tx = $data['data'];
 
+        // data presente pero sin campos de transacción (p. ej. {} o error parcial)
+        if (! isset($tx['x_cod_transaction_state']) && ! isset($tx['x_cod_respuesta'])) {
+            return [
+                'success' => false,
+                'errors' => $this->mensajeErrorEpayco($data),
+            ];
+        }
+
+        $codEstado = (int) ($tx['x_cod_transaction_state'] ?? $tx['x_cod_respuesta'] ?? 0);
+
         $resultado = [
             'success' => true,
             'data' => [
-                'aprobado' => (int) ($tx['x_cod_transaction_state'] ?? 0) === 1,
-                'cod_estado' => intval($tx['x_cod_transaction_state'] ?? 0),
-                'respuesta' => $tx['x_response'] ?? 'Sin respuesta',
+                'aprobado' => $codEstado === 1,
+                'cod_estado' => $codEstado,
+                'respuesta' => $tx['x_response'] ?? $tx['x_respuesta'] ?? 'Sin respuesta',
                 'motivo' => $tx['x_response_reason_text'] ?? '',
                 'monto' => $tx['x_amount'] ?? '0',
                 'ref_payco' => $tx['x_ref_payco'] ?? $refPayco,
-                'x_id_invoice' => $tx['x_id_invoice'] ?? null,
+                'x_id_invoice' => $tx['x_id_invoice'] ?? $tx['x_id_factura'] ?? null,
                 'x_transaction_id' => $tx['x_transaction_id'] ?? null,
                 'x_approval_code' => $tx['x_approval_code'] ?? null,
                 'x_bank_name' => $tx['x_bank_name'] ?? null,
                 'x_franchise' => $tx['x_franchise'] ?? null,
-                'x_card_number' => $tx['x_card_number'] ?? null,
+                'x_card_number' => $tx['x_card_number'] ?? $tx['x_cardnumber'] ?? null,
                 'x_quotas' => $tx['x_quotas'] ?? null,
                 'x_currency_code' => $tx['x_currency_code'] ?? null,
-                'x_date' => $tx['x_date'] ?? null,
+                'x_date' => $tx['x_date'] ?? $tx['x_transaction_date'] ?? $tx['x_fecha_transaccion'] ?? null,
                 'x_signature' => $tx['x_signature'] ?? null,
-                'payload_raw' => is_array($tx) ? $tx : null,
+                'payload_raw' => $tx,
             ],
         ];
 
@@ -133,6 +157,54 @@ class ApiEpayco extends ApiAbstract
         }
 
         return $resultado;
+    }
+
+    /**
+     * Detecta envelopes de error de ePayco (HTTP 200 con fallo de datos/conexión).
+     *
+     * Ejemplos:
+     * - {"status":false,"message":"...","data":{"status":"error","description":"..."}}
+     * - {"status":"error","description":"..."}
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    protected function esRespuestaErrorEpayco(array $payload): bool
+    {
+        $status = $payload['status'] ?? null;
+        if ($status === false || $status === 'error') {
+            return true;
+        }
+
+        if (($payload['success'] ?? null) === false) {
+            return true;
+        }
+
+        $inner = $payload['data'] ?? null;
+        if (is_array($inner) && ($inner['status'] ?? null) === 'error') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function mensajeErrorEpayco(array $payload): string
+    {
+        $inner = is_array($payload['data'] ?? null) ? $payload['data'] : [];
+
+        $mensaje = $inner['description']
+            ?? $payload['description']
+            ?? $payload['message']
+            ?? $payload['textResponse']
+            ?? null;
+
+        if (is_string($mensaje) && trim($mensaje) !== '') {
+            return trim($mensaje);
+        }
+
+        return 'Error de datos o conexion con ePayco';
     }
 
     /**

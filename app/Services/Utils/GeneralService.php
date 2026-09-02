@@ -19,8 +19,11 @@ use App\Services\Entidades\ConyugeService;
 use App\Services\Entidades\DatosTrabajadorService;
 use App\Services\Entidades\EmpresaService;
 use App\Services\Entidades\FacultativoService;
+use App\Services\Entidades\IndependienteService;
+use App\Services\Entidades\MadresComuniService;
 use App\Services\Entidades\PensionadoService;
 use App\Services\Entidades\RetiroService;
+use App\Services\Entidades\ServicioDomesticoService;
 use App\Services\Entidades\TrabajadorService;
 use App\Services\Srequest;
 use Carbon\Carbon;
@@ -2166,46 +2169,7 @@ class GeneralService
             'condi_extra' => $condi_extra,
         ];
 
-        switch ($tipopc) {
-            case '1':
-                $entityService = new TrabajadorService;
-                break;
-            case '2':
-                $entityService = new EmpresaService;
-                break;
-            case '3':
-                $entityService = new ConyugeService;
-                break;
-            case '4':
-                $entityService = new BeneficiarioService;
-                break;
-            case '5':
-                $entityService = new ActualizaEmpresaService;
-                break;
-            case '6':
-            case '14':
-                $entityService = new DatosTrabajadorService;
-                break;
-            case '7':
-                $entityService = new RetiroService;
-                break;
-            case '8':
-                $entityService = new CertificadoService;
-                break;
-            case '9':
-                $entityService = new PensionadoService;
-                break;
-            case '10':
-                $entityService = new FacultativoService;
-                break;
-            case '11':
-            case '12':
-            case '13':
-                $entityService = new EmpresaService;
-                break;
-            default:
-                throw new DebugException("Tipo de operación no válido: {$tipopc}");
-        }
+        $entityService = $this->resolveEntityService($tipopc);
 
         $out = $entityService->consultaTipopc(
             new Srequest($params)
@@ -2220,5 +2184,38 @@ class GeneralService
         ];
 
         return $response;
+    }
+
+    /**
+     * Resuelve el servicio de entidad según tipopc (fuente de datos correcta).
+     */
+    public function resolveEntityService(string $tipopc): object
+    {
+        $class = $this->entityServiceClass($tipopc);
+
+        return new $class;
+    }
+
+    /**
+     * @return class-string
+     */
+    public function entityServiceClass(string $tipopc): string
+    {
+        return match ($tipopc) {
+            '1' => TrabajadorService::class,
+            '2' => EmpresaService::class,
+            '3' => ConyugeService::class,
+            '4' => BeneficiarioService::class,
+            '5' => ActualizaEmpresaService::class,
+            '6', '14' => DatosTrabajadorService::class,
+            '7' => RetiroService::class,
+            '8' => CertificadoService::class,
+            '9' => PensionadoService::class,
+            '10' => FacultativoService::class,
+            '11' => MadresComuniService::class,
+            '12' => ServicioDomesticoService::class,
+            '13' => IndependienteService::class,
+            default => throw new DebugException("Tipo de operación no válido: {$tipopc}"),
+        };
     }
 }

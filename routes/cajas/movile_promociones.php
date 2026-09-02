@@ -8,6 +8,7 @@ Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio57')->group(function () {
         Route::get('/index', [Mercurio57Controller::class, 'index']);
         Route::post('/galeria', [Mercurio57Controller::class, 'galeria']);
+        Route::post('/editar', [Mercurio57Controller::class, 'editar']);
         Route::post('/guardar', [Mercurio57Controller::class, 'guardar']);
         Route::post('/arriba', [Mercurio57Controller::class, 'arriba']);
         Route::post('/abajo', [Mercurio57Controller::class, 'abajo']);

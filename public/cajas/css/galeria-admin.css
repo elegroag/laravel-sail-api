@@ -167,3 +167,7 @@
     align-items: center;
     justify-content: center;
 }
+
+.galeria-admin-card--inactive {
+    opacity: 0.65;
+}

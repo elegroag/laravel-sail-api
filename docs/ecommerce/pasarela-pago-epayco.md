@@ -6,8 +6,8 @@ catálogo de servicios de Mercurio, accesible en
 `/mercurio/servicios/index`).
 
 > **Audiencia:** desarrolladores y mantenedores del módulo de ecommerce Mercurio.
-> **Última revisión:** 2026-08-24 (sync docs: webhook, Admservicios detalle,
-> módulos JS, checkout v1/v2, `EPAYCO_FORCE_APPROVED`).
+> **Última revisión:** 2026-09-02 (validación API: error ePayco + idempotencia
+> PA; respuesta al cliente documentada).
 
 Documentos relacionados:
 - [epayco-modal-control.md](./epayco-modal-control.md) — control de la modal.
@@ -15,6 +15,11 @@ Documentos relacionados:
   campos ePayco persistidos.
 - [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md) —
   webhook + firma.
+- [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md)
+  — validación API, errores de conexión ePayco, SweetAlert por caso e
+  excepciones si la precompra ya está `PA`.
+- [pendientes-compra-en-linea.md](./pendientes-compra-en-linea.md) —
+  backlog P0–P3 (ops, TLS, alertas, tests, cola, whitelist, UX reintento).
 - [precompras-job-abandonadas.md](./precompras-job-abandonadas.md) — job TTL.
 - [analisis-mejoras-epayco-precompras.md](./analisis-mejoras-epayco-precompras.md)
   — inventario aplicado vs pendientes.
@@ -405,43 +410,23 @@ dispara `POST /mercurio/servicios/validar-pago-epayco` →
 $resultado = $this->epayco->validarReferencia($ref_payco);
 ```
 
-[`ApiEpayco::validarReferencia()`](../app/Services/Api/ApiEpayco.php#L53-L115)
-hace `GET https://secure.epayco.co/validation/v1/reference/{refPayco}` (sin
-verificar SSL por un quirk histórico — ver §10) y devuelve un payload
-normalizado **enriquecido**:
+[`ApiEpayco::validarReferencia()`](../app/Services/Api/ApiEpayco.php)
+hace `GET https://secure.epayco.co/validation/v1/reference/{refPayco}`
+(TLS según `EPAYCO_HTTP_VERIFY_SSL`) y:
 
-```php
-return [
-    'success' => true,
-    'data' => [
-        // snapshot operativo
-        'aprobado'    => (int)$tx['x_cod_transaction_state'] === 1,
-        'cod_estado'  => intval($tx['x_cod_transaction_state'] ?? 0),
-        'respuesta'   => $tx['x_response'] ?? 'Sin respuesta',
-        'motivo'      => $tx['x_response_reason_text'] ?? '',
-        'monto'       => $tx['x_amount'] ?? '0',
-        'ref_payco'   => $tx['x_ref_payco'] ?? $refPayco,
+1. Detecta envelopes de **error de datos/conexión** de ePayco
+   (`status: false` / `data.status: "error"`) → `success: false` + mensaje.
+2. Si hay transacción válida, normaliza `aprobado` / `cod_estado` /
+   `payload_raw` (aliases `x_cod_respuesta`, `x_respuesta`, etc.).
+3. Detalle de casos y SweetAlert al cliente:
+   [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md).
 
-        // campos crudos extraídos (para auditoría)
-        'x_id_invoice'     => $tx['x_id_invoice']      ?? null,
-        'x_transaction_id' => $tx['x_transaction_id']  ?? null,
-        'x_approval_code'  => $tx['x_approval_code']   ?? null,
-        'x_bank_name'      => $tx['x_bank_name']       ?? null,
-        'x_franchise'      => $tx['x_franchise']       ?? null,
-        'x_card_number'    => $tx['x_card_number']     ?? null,
-        'x_quotas'         => $tx['x_quotas']          ?? null,
-        'x_currency_code'  => $tx['x_currency_code']   ?? null,
-        'x_date'           => $tx['x_date']            ?? null,
-        'x_signature'      => $tx['x_signature']       ?? null,
-
-        // payload crudo completo (para persistir 1:1 en epayco_transacciones)
-        'payload_raw'      => is_array($tx) ? $tx : null,
-    ],
-];
-```
+Si `validarReferencia` falla pero la precompra ya está `PA` (webhook),
+`validarPagoEpayco` responde como aprobado (`ya_pagada`) para no bloquear
+el flujo.
 
 Si la respuesta es válida, el controller llama a
-[`actualizarPrecompraDesdePago()`](../app/Http/Controllers/Mercurio/EcommerceController.php#L712-L769)
+[`actualizarPrecompraDesdePago()`](../app/Http/Controllers/Mercurio/EcommerceController.php)
 que ejecuta, en este orden:
 
 1. **Localiza la precompra**:
@@ -468,20 +453,16 @@ dispara `POST /mercurio/servicios/guardar-venta` con los datos originales
 
 [`EcommerceController@guardarVenta`](../app/Http/Controllers/Mercurio/EcommerceController.php):
 
-1. Vuelve a llamar a `ApiEpayco::validarReferencia($refpago)` (doble check
-   server-side → también deja otra fila en `epayco_transacciones`).
-2. Si `x_cod_transaction_state !== 1`, rechaza la venta y actualiza la
-   precompra.
-3. Si está aprobada, llama al servicio externo de subsidio:
-   ```
-   ApiSubsidio::send([
-       'servicio' => 'Movil',
-       'metodo'   => 'guardar-venta',
-       'params'   => ['cedtra', 'codser', 'numero', 'refpago', 'nota', 'codben']
-   ])
-   ```
-4. Devuelve el resultado al frontend, que muestra SweetAlert "Compra exitosa"
-   y limpia el formulario después de 3 s.
+1. Resuelve la precompra (ref / id) **antes** de interpretar ePayco.
+2. Vuelve a llamar a `ApiEpayco::validarReferencia($refpago)` (doble check).
+3. Si la API falla o no aprueba **pero** la precompra ya está `PA` →
+   responde éxito “Venta ya registrada previamente” (no rechazo falso).
+4. Si aprueba y aún no estaba `PA`, llama a Subsidio `guardar-venta`.
+5. Si ya estaba `PA` y la API aprueba → omite Subsidio (idempotencia).
+6. Frontend: SweetAlert “Compra exitosa” (o “Error” solo si no hay `PA`).
+
+Matriz completa de mensajes UI:
+[epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md).
 
 #### ⑩ Si el usuario cierra el checkout sin pagar → abandonar
 
@@ -717,6 +698,7 @@ Todas viven bajo `middleware('mercurio.auth')`.
 | ePayco devuelve código distinto de 1 pero la precompra queda `PE`  | El usuario reabrió la URL de respuesta tras un pago válido anterior.           | `actualizarPrecompraDesdePago()` no degrada `PA` → `RE` ni `PE` → `PE` si ya estaba pagada.  |
 | Precompra pasa a `AB` aunque el pago se completó                  | Carrera entre `onClose` y la response URL cuando la red es lenta.              | Revisar `epayco_transacciones` por `precompra_id`; si hay una fila con `cod_estado=1` y la precompra está `AB`, re-marcar manualmente como `PA`. |
 | No aparecen filas en `epayco_transacciones`                       | `validarReferencia()` no devolvió HTTP 200 o no llegó al insert.               | Revisar `setLogger('Error registrando epayco_transacciones: ...')` en backend.              |
+| Cliente ve “Error” / “pago no aprobado” pero cobro y webhook OK   | Reconsulta `reference` devolvió error de conexión ePayco; sin idempotencia PA. | Ver [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md). Con el fix, si precompra `PA` → “Compra exitosa”. |
 | `precompras:marcar-abandonadas` no se ejecuta                     | Scheduler no configurado o `withoutOverlapping()` trabado.                      | `php artisan schedule:list` y `schedule:run`.                                                |
 | Cupos del mes en 0                                               | El beneficiario ya agotó la cuota mensual del servicio.                         | `validar-tarifa` retorna `cupos_mes = 0` y el frontend bloquea el botón "Procesar pago".    |
 
@@ -788,4 +770,5 @@ El frontend lee `ref_payco` desde varios nombres
 | 14 | Tests Feature del webhook | Pendiente |
 | 15 | Alertas operativas firma `400` / credenciales `503` | Pendiente |
 
-Detalle de backlog: [analisis-mejoras-epayco-precompras.md](./analisis-mejoras-epayco-precompras.md).
+Detalle de backlog: [analisis-mejoras-epayco-precompras.md](./analisis-mejoras-epayco-precompras.md).  
+Especificaciones a implementar: [pendientes-compra-en-linea.md](./pendientes-compra-en-linea.md).

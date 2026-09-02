@@ -1,8 +1,9 @@
 # Estado real de la transacción ePayco en base de datos
 
 Diagnóstico complementario a
-[pasarela-pago-epayco.md](./pasarela-pago-epayco.md) y
-[epayco-modal-control.md](./epayco-modal-control.md).
+[pasarela-pago-epayco.md](./pasarela-pago-epayco.md),
+[epayco-modal-control.md](./epayco-modal-control.md) y
+[epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md).
 
 > **Última revisión:** 2026-08-24  
 > **Pregunta evaluada:** ¿El estado real que emite ePayco se almacena en

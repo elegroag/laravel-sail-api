@@ -14,6 +14,10 @@ con validación de `x_signature`.
 > `ApiEpayco::validarReferencia()` en entornos non-prod. El webhook exige
 > firma válida y payload real de ePayco.
 
+> Si el webhook deja la precompra en `PA` y luego falla la API `reference`,
+> el cliente no debe ver rechazo: ver
+> [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md).
+
 ---
 
 ## 1. Qué hace

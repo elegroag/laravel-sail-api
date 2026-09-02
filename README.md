@@ -193,3 +193,9 @@ php artisan mercurio10:backfill-ruuid --tipopc=1
 php artisan mercurio10:backfill-feccie --dry-run
 php artisan mercurio10:backfill-feccie
 ```
+
+#### Configuración de epayco .env
+
+```bash
+php artisan config:show-app --section=epayco
+```
