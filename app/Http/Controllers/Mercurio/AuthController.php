@@ -7,6 +7,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
 use App\Library\Auth\SessionCookies;
 use App\Models\Adapter\DbBase;
+use App\Models\Banner;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
@@ -51,7 +52,18 @@ class AuthController extends Controller
 
     public function index()
     {
-        return Inertia::render('Auth/Login');
+        $promoBanner = null;
+        $banner = Banner::findActiveForLogin();
+        if ($banner) {
+            $promoBanner = $banner->toLoginPayload();
+            if (empty($promoBanner['image_url']) && empty($promoBanner['content_html'])) {
+                $promoBanner = null;
+            }
+        }
+
+        return Inertia::render('Auth/Login', [
+            'promoBanner' => $promoBanner,
+        ]);
     }
 
     public function register()

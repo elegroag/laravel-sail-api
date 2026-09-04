@@ -68,12 +68,21 @@ export type FormActionRecovery =
     | { type: 'SET_SUCCESS'; payload: boolean }
     | { type: 'CLEAR_ERROR'; field: string };
 
+export type PromoBanner = {
+    id?: number;
+    content_html?: string | null;
+    image_url?: string | null;
+    fecha_inicia?: string;
+    fecha_finaliza?: string;
+};
+
 export type LoginProps = {
     Coddoc?: { [key: string]: string };
     Tipsoc?: { [key: string]: string };
     Codciu?: { [key: string]: string };
     Detadoc?: { [key: string]: string };
     errors?: Record<string, string>;
+    promoBanner?: PromoBanner | null;
 };
 
 export type DocumentTypeOption = { value: string; label: string };

@@ -10,14 +10,58 @@ import AuthBackgroundShapes from "@/components/ui/auth-background-shapes"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { usePage } from "@inertiajs/react"
+import { useCallback, useEffect, useState } from "react"
 import useLoginController from "./hooks/useLoginController";
 
+const PROMO_COOLDOWN_MS = 10 * 60 * 1000;
+
+function promoBannerStorageKey(bannerId?: number): string {
+  return `promo_banner_last_shown_at_${bannerId ?? 'default'}`;
+}
+
+function shouldShowPromoBanner(bannerId?: number): boolean {
+  try {
+    const last = Number(localStorage.getItem(promoBannerStorageKey(bannerId)) || 0);
+    return !last || Date.now() - last >= PROMO_COOLDOWN_MS;
+  } catch {
+    return true;
+  }
+}
+
+function markPromoBannerShown(bannerId?: number): void {
+  try {
+    localStorage.setItem(promoBannerStorageKey(bannerId), String(Date.now()));
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
 export default function Login({
-    errors
+    errors,
+    promoBanner = null,
 }: LoginProps)
 {
   const { props: pageProps } = usePage<{ recaptcha_site_key?: string }>();
   const recaptchaSiteKey = pageProps.recaptcha_site_key;
+  const [promoOpen, setPromoOpen] = useState(false);
+
+  useEffect(() => {
+    if (!promoBanner || (!promoBanner.image_url && !promoBanner.content_html)) {
+      return;
+    }
+
+    if (shouldShowPromoBanner(promoBanner.id)) {
+      markPromoBannerShown(promoBanner.id);
+      setPromoOpen(true);
+    }
+  }, [promoBanner]);
+
+  const handlePromoOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      markPromoBannerShown(promoBanner?.id);
+    }
+    setPromoOpen(open);
+  }, [promoBanner?.id]);
 
   const {
     documentTypeOptions,
@@ -106,6 +150,47 @@ export default function Login({
 
       {/* Loading animado durante la autenticación */}
       <LoadingAnimated show={processing} />
+
+      {/* Dialog promocional configurable desde Cajas */}
+      <Dialog open={promoOpen} onOpenChange={handlePromoOpenChange}>
+        <DialogContent
+          className={[
+            'gap-2 overflow-y-auto border-zinc-800 bg-zinc-950 text-zinc-100 dark:bg-zinc-950',
+            // Tamaño mínimo 350px; mobile con márgenes seguros
+            'top-[50%] left-[50%] min-w-[350px] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] max-h-[min(92dvh,92vh)] translate-x-[-50%] translate-y-[-50%] p-2',
+            // Desktop+: se adapta al contenido / tamaño natural de la imagen
+            'sm:w-fit sm:min-w-[350px] sm:max-w-[min(100vw-2rem,96vw)] sm:max-h-[95vh] sm:p-2',
+          ].join(' ')}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Información</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {promoBanner?.image_url ? (
+              <img
+                src={promoBanner.image_url}
+                alt="Banner promocional"
+                className="mx-auto block h-auto w-full max-w-full rounded-md object-contain sm:w-auto sm:max-w-none"
+              />
+            ) : null}
+            {promoBanner?.content_html ? (
+              <div
+                className="prose prose-sm prose-invert max-w-none px-1 text-zinc-200"
+                dangerouslySetInnerHTML={{ __html: promoBanner.content_html }}
+              />
+            ) : null}
+          </div>
+          <DialogFooter className="sm:justify-end">
+            <Button
+              variant="outline"
+              className="w-full border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 hover:text-white sm:w-auto"
+              onClick={() => handlePromoOpenChange(false)}
+            >
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal dialog para mensajes */}
       <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>

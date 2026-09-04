@@ -130,6 +130,7 @@ require __DIR__.'/cajas/servicios.php';
 require __DIR__.'/cajas/notificaciones.php';
 require __DIR__.'/cajas/archivo_areas.php';
 require __DIR__.'/cajas/galeria.php';
+require __DIR__.'/cajas/banners.php';
 require __DIR__.'/cajas/usuario_externo.php';
 require __DIR__.'/cajas/auditoria.php';
 require __DIR__.'/cajas/consulta.php';

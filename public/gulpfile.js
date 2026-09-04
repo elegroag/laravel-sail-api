@@ -90,6 +90,7 @@ const appModules = {
         'Mercurio72',
         'Mercurio73',
         'Mercurio74',
+        'Banners',
         'Reasigna',
         'Indicadores',
         'Auditoria',
