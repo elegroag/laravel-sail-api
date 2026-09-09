@@ -91,6 +91,7 @@ const appModules = {
         'Mercurio73',
         'Mercurio74',
         'Banners',
+        'EpaycoCuentas',
         'Reasigna',
         'Indicadores',
         'Auditoria',

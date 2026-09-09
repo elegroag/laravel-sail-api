@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             MenuConsultaDocumentoSolicitudSeeder::class,
             MenuReporteComprasServiciosSeeder::class,
             MenuBannersSeeder::class,
+            MenuEpaycoCuentasSeeder::class,
 
             // Tablas Mercurio
             Mercurio01Seeder::class,
