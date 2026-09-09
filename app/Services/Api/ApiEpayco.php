@@ -21,7 +21,8 @@ class ApiEpayco
 
     public function __construct()
     {
-        $this->mode = (string) (config('app.epayco.mode') ?: 'development');
+        // Mode de comercio se fija con withCuenta(); default solo para validaciones sin cuenta.
+        $this->mode = 'development';
     }
 
     /**

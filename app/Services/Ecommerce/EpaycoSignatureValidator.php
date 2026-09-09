@@ -14,8 +14,8 @@ class EpaycoSignatureValidator
         protected ?string $customerId = null,
         protected ?string $pKey = null,
     ) {
-        $this->customerId = $customerId ?? (string) config('app.epayco.customer_id', '');
-        $this->pKey = $pKey ?? (string) config('app.epayco.p_key', '');
+        $this->customerId = (string) ($customerId ?? '');
+        $this->pKey = (string) ($pKey ?? '');
     }
 
     public function credentialsConfigured(): bool

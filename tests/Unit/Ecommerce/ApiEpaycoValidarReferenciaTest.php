@@ -8,13 +8,6 @@ use Tests\TestCase;
 
 class ApiEpaycoValidarReferenciaTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        config(['app.epayco.mode' => 'development']);
-    }
-
     public function test_detecta_error_de_datos_o_conexion_en_envelope(): void
     {
         $payload = [
