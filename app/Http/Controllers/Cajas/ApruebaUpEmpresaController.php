@@ -25,6 +25,7 @@ use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ApruebaUpEmpresaController extends ApplicationController
 {
@@ -111,7 +112,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         $help = 'Esta opcion permite manejar los ';
         $this->setParamToView('help', $help);
         $this->setParamToView('title', 'Aprobacion Empresa');
-        $mercurio30 = Mercurio30::whereRaw("estado='{$estado}' AND usuario=".$this->user['usuario'])->orderBy('fecini', 'ASC')->get();
+        $mercurio30 = Mercurio30::whereRaw("estado='{$estado}' AND usuario=" . $this->user['usuario'])->orderBy('fecini', 'ASC')->get();
         $empresas = [];
         foreach ($mercurio30 as $ai => $mercurio) {
             $background = '';
@@ -123,7 +124,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                     $background = '#f5b2b2';
                 }
             }
-            $url = config('app.url').'Cajas/aprobacionemp/info_empresa/'.$mercurio->getId();
+            $url = config('app.url') . 'Cajas/aprobacionemp/info_empresa/' . $mercurio->getId();
             $sat = 'NORMAL';
             if ($mercurio->getDocumentoRepresentanteSat() > 0) {
                 $sat = 'SAT';
@@ -226,9 +227,9 @@ class ApruebaUpEmpresaController extends ApplicationController
             if (! $mercurio10->save()) {
                 $msj = '';
                 foreach ($mercurio10->getMessages() as $key => $message) {
-                    $msj .= $message.'<br/>';
+                    $msj .= $message . '<br/>';
                 }
-                throw new DebugException('Error '.$msj, 501);
+                throw new DebugException('Error ' . $msj, 501);
             }
             Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update([
                 'campos_corregir' => $campos_corregir,
@@ -301,9 +302,9 @@ class ApruebaUpEmpresaController extends ApplicationController
             if (! $mercurio10->save()) {
                 $msj = '';
                 foreach ($mercurio10->getMessages() as $key => $mess) {
-                    $msj .= $mess->getMessage().'<br/>';
+                    $msj .= $mess->getMessage() . '<br/>';
                 }
-                throw new DebugException('Error '.$msj, 501);
+                throw new DebugException('Error ' . $msj, 501);
             }
 
             Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
@@ -445,7 +446,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         }
         $_codact = [];
         foreach ($datos_captura['actividades'] as $data) {
-            $_codact["{$data['codact']}"] = $data['codact'].' - '.$data['detalle'];
+            $_codact["{$data['codact']}"] = $data['codact'] . ' - ' . $data['detalle'];
         }
 
         $_coddocrepleg = [];
@@ -583,16 +584,23 @@ class ApruebaUpEmpresaController extends ApplicationController
      *
      * @return void
      */
-    public function info(Request $request)
+    public function infor(Request $request)
     {
         try {
             $upServices = new UpDatosEmpresaServices;
             $id = $request->input('id');
+            Log::info('actualizaemp.infor: inicio', ['id' => $id]);
+
             if (! $id) {
                 throw new DebugException('Error se requiere del id independiente', 501);
             }
 
             $mercurio47 = Mercurio47::where('id', $id)->where('tipact', 'E')->first();
+            if (! $mercurio47) {
+                Log::warning('actualizaemp.infor: solicitud no encontrada', ['id' => $id, 'tipact' => 'E']);
+                throw new DebugException("No se encontro la actualizacion de empresa id={$id}", 404);
+            }
+
             $mercurio33 = Mercurio33::where('actualizacion', $id)->get();
             $dataItems = [];
 
@@ -600,6 +608,41 @@ class ApruebaUpEmpresaController extends ApplicationController
                 $campo = $row->getCampo();
                 $dataItems["{$campo}"] = $row->getValor();
             }
+
+            // Completar claves esperadas por la vista consulta (campos opcionales pueden no venir en mercurio33).
+            $dataItems = array_merge([
+                'ruuid' => '',
+                'nit' => '',
+                'razsoc' => '',
+                'codact' => '',
+                'codsuc' => '',
+                'direccion' => '',
+                'barrio_notificacion' => '',
+                'cedrep' => '',
+                'priape' => '',
+                'segape' => '',
+                'prinom' => '',
+                'segnom' => '',
+                'email' => '',
+                'matmer' => '',
+                'sigla' => '',
+                'telefono' => '',
+                'celular' => '',
+                'codzon' => '',
+                'celpri' => '',
+                'telpri' => '',
+                'codciu' => '',
+                'ciupri' => '',
+                'dirpri' => '',
+                'coddocrepleg' => '',
+            ], $dataItems);
+
+            Log::debug('actualizaemp.infor: mercurio33 cargado', [
+                'id' => $id,
+                'campos' => count($dataItems),
+                'documento' => $mercurio47->getDocumento(),
+                'tipo' => $mercurio47->getTipo(),
+            ]);
 
             $ps = new ApiSubsidio;
             $ps->send(
@@ -610,14 +653,29 @@ class ApruebaUpEmpresaController extends ApplicationController
             );
 
             $datos_captura = $ps->toArray();
+            Log::debug('actualizaemp.infor: parametros_empresa', [
+                'id' => $id,
+                'empty' => empty($datos_captura),
+                'keys' => is_array($datos_captura) ? array_keys($datos_captura) : gettype($datos_captura),
+            ]);
+
             $paramsIndependiente = new ParamsEmpresa;
             $paramsIndependiente->setDatosCaptura($datos_captura);
+
+            $mercurio06 = Mercurio06::where('tipo', $mercurio47->getTipo())->first();
+            if (! $mercurio06) {
+                Log::warning('actualizaemp.infor: Mercurio06 no encontrado', [
+                    'id' => $id,
+                    'tipo' => $mercurio47->getTipo(),
+                ]);
+                throw new DebugException('No se encontro el tipo de afiliado en Mercurio06', 404);
+            }
 
             $htmlEmpresa = view('cajas/actualizaemp/tmp/consulta', [
                 'mercurio47' => $mercurio47,
                 'dataItems' => $dataItems,
                 'mercurio01' => Mercurio01::first(),
-                'det_tipo' => Mercurio06::where('tipo', $mercurio47->getTipo())->first()->getDetalle(),
+                'det_tipo' => $mercurio06->getDetalle(),
                 '_coddoc' => ParamsEmpresa::getTipoDocumentos(),
                 '_calemp' => ParamsEmpresa::getCalidadEmpresa(),
                 '_codciu' => ParamsEmpresa::getCiudades(),
@@ -638,8 +696,14 @@ class ApruebaUpEmpresaController extends ApplicationController
                 ]
             );
             $out = $ps->toArray();
+            Log::debug('actualizaemp.infor: informacion_empresa', [
+                'id' => $id,
+                'nit' => $mercurio47->getDocumento(),
+                'success' => (bool) ($out['success'] ?? false),
+                'has_data' => ! empty($out['data'] ?? null),
+            ]);
 
-            if ($out['success']) {
+            if ($out['success'] ?? false) {
                 $empresa_sisuweb = $out['data'];
             } else {
                 $empresa_sisuweb = false;
@@ -654,7 +718,24 @@ class ApruebaUpEmpresaController extends ApplicationController
                 'campos_disponibles' => $mercurio47->CamposDisponibles(),
                 'empresa_sisuweb' => $empresa_sisuweb,
             ];
+            Log::info('actualizaemp.infor: ok', ['id' => $id]);
         } catch (DebugException $err) {
+            Log::warning('actualizaemp.infor: DebugException', [
+                'id' => $request->input('id'),
+                'msj' => $err->getMessage(),
+                'code' => $err->getCode(),
+            ]);
+            $response = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+            ];
+        } catch (\Throwable $err) {
+            Log::error('actualizaemp.infor: error', [
+                'id' => $request->input('id'),
+                'msj' => $err->getMessage(),
+                'file' => $err->getFile(),
+                'line' => $err->getLine(),
+            ]);
             $response = [
                 'success' => false,
                 'msj' => $err->getMessage(),

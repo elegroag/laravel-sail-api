@@ -220,6 +220,7 @@ class CertiTrabajador
 
         $multiAfiliacion = $legacy->select("SELECT 
             s168.*,
+            subsi02.razsoc,
             IF(s168.agro = 'S', 'SI', 'NO') as agro_detalle,
             s48.detalle as 'codsuc_detalle', 
             s73.detalle as 'codlis_detalle',
@@ -239,6 +240,7 @@ class CertiTrabajador
             IF(s168.giro2 IS NULL, 'N', s168.giro2) as giro2, 
             IF(s168.codgir2 IS NULL, 'N', s168.codgir2) as codgir2
             FROM subsi168 s168
+            LEFT JOIN subsi02 ON subsi02.nit = s168.nit
             LEFT JOIN subsi48 s48 ON s48.nit = s168.nit and s48.codsuc = s168.codsuc 
             LEFT JOIN subsi73 s73 ON s73.nit = s168.nit and s73.codlis = s168.codlis 
             LEFT JOIN gener09 ON gener09.codzon = s168.codzon 

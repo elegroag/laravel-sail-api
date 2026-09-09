@@ -2,16 +2,15 @@
 
 namespace Tests\Feature\Settings;
 
-use App\Models\User;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\Refresh\NoRefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 /**
- * @group skipped
  * Skipped: /settings/password route does not exist in the system.
  * No equivalent password update functionality exists in this application.
  */
+#[Group('skipped')]
 class PasswordUpdateTest extends TestCase
 {
     use NoRefreshDatabase;

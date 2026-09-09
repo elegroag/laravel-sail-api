@@ -2,16 +2,16 @@
 
 namespace Tests\Feature\Settings;
 
-use App\Models\User;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\Refresh\NoRefreshDatabase;
 use Tests\TestCase;
 
 /**
- * @group skipped
  * Skipped: /settings/profile and /settings/password routes do not exist in the system.
  * The User model (gener02 table) uses 'nombre' not 'name', and has no email_verified_at field.
  * No equivalent settings functionality exists in this application.
  */
+#[Group('skipped')]
 class ProfileUpdateTest extends TestCase
 {
     use NoRefreshDatabase;

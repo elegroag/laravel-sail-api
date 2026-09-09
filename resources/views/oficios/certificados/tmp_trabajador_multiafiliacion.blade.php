@@ -39,18 +39,17 @@
         <thead>
             <tr>
                 <th width="15%" style="width: 15%; text-align: center;">NIT</th>
-                <th width="40%" style="width: 45%; text-align: center;">Razón Social</th>
+                <th width="40%" style="width: 40%; text-align: center;">Razón Social</th>
                 <th width="15%" style="width: 15%; text-align: center;" class="center">Estado</th>
                 <th width="15%" style="width: 15%; text-align: center;" class="center">Fecha Afiliación</th>
                 <th width="15%" style="width: 15%; text-align: center;" class="center">Fecha Retiro</th>
-                
             </tr>
         </thead>
         <tbody>
             @forelse ($multiAfiliacion as $multi)
             <tr>
                 <td width="15%" style="width: 15%; text-align: center">{{ $multi->nit ?? 'N/A' }}</td>
-                <td width="45%" style="width: 45%;">{{ $multi->razsoc ?? 'N/A' }}</td>
+                <td width="40%" style="width: 40%;">{{ $multi->razsoc ?? 'N/A' }}</td>
                 <td width="15%" style="width: 15%; text-align: center" class="center">{{ $multi->estado_detalle ?? 'N/A' }}</td>
                 <td width="15%" style="width: 15%; text-align: center" class="center">{{ $multi->fecafi ?? 'N/A' }}</td>
                 <td width="15%" style="width: 15%; text-align: center" class="center">{{ $multi->fecret ?? '-' }}</td>

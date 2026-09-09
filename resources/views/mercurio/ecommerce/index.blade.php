@@ -8,7 +8,7 @@
 <script src="https://checkout.epayco.co/checkout.js"></script>
 @endif
 
-<div class="col-12 col-xl-11 mx-auto mt-3 servicios-catalog">
+<div class="col-12 mt-3 servicios-catalog">
     <div class="card shadow-sm border-0 servicios-page-card">
         <div class="card-header border-0 servicios-catalog__header py-3 px-3 px-md-4">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">

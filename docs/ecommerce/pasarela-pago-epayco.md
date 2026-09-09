@@ -616,8 +616,8 @@ Todas viven bajo `middleware('mercurio.auth')`.
 - **URL:** `https://secure.epayco.co/validation/v1/reference/{ref_payco}`
 - **Auth:** ninguno en este endpoint público (solo el path lleva la
   referencia). Las credenciales `EPAYCO_PUBLIC_KEY` / `EPAYCO_PRIVATE_KEY`
-  se usan en `ApiEpayco::send()` para otros endpoints administrativos que el
-  módulo no usa todavía.
+  se usan en Apify (`obtenerTokenApify` / login Basic → Bearer) para crear
+  sesiones de Smart Checkout.
 - **Llamador:** [`ApiEpayco::validarReferencia()`](../app/Services/Api/ApiEpayco.php).
 - **Campos consumidos de la respuesta:** `x_cod_transaction_state`,
   `x_response`, `x_response_reason_text`, `x_amount`, `x_ref_payco`,

@@ -430,8 +430,7 @@ label.is-invalid {
 }
 
 #formulario_servicio > .servicios-catalog__main {
-    flex: 1;
-    min-height: 0;
+    flex: 1 1 auto;
 }
 
 .servicios-catalog__header {
@@ -531,66 +530,57 @@ label.is-invalid {
     .servicios-catalog > .card {
         display: flex;
         flex-direction: column;
-        max-height: calc(100dvh - 3.5rem);
-        overflow: hidden;
     }
 
     .servicios-catalog .card-body {
-        flex: 1;
-        min-height: 0;
-        overflow: hidden;
+        flex: 1 1 auto;
     }
 
     #formulario_servicio {
-        flex: 1;
-        min-height: 0;
-        overflow: hidden;
+        flex: 1 1 auto;
     }
 
     .servicios-catalog__main {
-        align-items: stretch;
-        flex: 1;
+        align-items: start;
+        flex: 1 1 auto;
         grid-template-columns: 1fr 300px;
-        grid-template-rows: minmax(0, 1fr);
-        min-height: 0;
     }
 
     .servicios-catalog__content {
         display: flex;
         flex-direction: column;
-        min-height: 0;
-        overflow: hidden;
     }
 
     .servicios-catalog__content > .servicios-catalog__section {
         display: flex;
-        flex: 1;
         flex-direction: column;
-        min-height: 0;
     }
 
     .servicios-catalog__servicios-wrap {
         display: flex;
-        flex: 1;
         flex-direction: column;
-        min-height: 0;
     }
 
     .servicios-catalog__grid-scroll {
-        flex: 1 1 auto;
-        max-height: none;
-        min-height: 0;
         overflow-x: hidden;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
+        overflow-y: visible;
         padding-bottom: 1rem;
-        padding-right: 0.15rem;
-        scrollbar-gutter: stable;
     }
 
     .servicios-grid {
         padding-bottom: 0.5rem;
+    }
+
+    .panel-compra-slot {
+        align-self: start;
+        min-height: 0;
+        overflow: visible;
+        padding-bottom: 0.25rem;
+    }
+
+    .panel-compra {
+        position: relative;
+        top: auto;
     }
 }
 
@@ -795,27 +785,6 @@ label.is-invalid {
     align-self: start;
     position: relative;
     width: 100%;
-}
-
-@media (min-width: 992px) {
-    .panel-compra-slot {
-        align-self: stretch;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        overflow-x: hidden;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-        padding-bottom: 0.25rem;
-        scrollbar-gutter: stable;
-    }
-
-    .panel-compra {
-        /* El scroll vive en .panel-compra-slot; sticky aquí se clippea por overflow de ancestros. */
-        position: relative;
-        top: auto;
-    }
 }
 
 .panel-compra__inner {

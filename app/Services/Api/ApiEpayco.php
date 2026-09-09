@@ -2,53 +2,21 @@
 
 namespace App\Services\Api;
 
-use App\Exceptions\DebugException;
-use App\Library\APIClient\APIClient;
-use App\Library\APIClient\BasicAuth;
 use App\Models\ApiEndpoint;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-class ApiEpayco extends ApiAbstract
+/**
+ * Cliente ePayco para validación de referencia y Smart Checkout (Apify).
+ * No hereda ApiAbstract: el flujo vigente no usa send()/BasicAuth en el consumo.
+ */
+class ApiEpayco
 {
+    protected string $mode;
+
     public function __construct()
     {
         $this->mode = (string) (config('app.epayco.mode') ?: 'development');
-    }
-
-    public function send(array $attr)
-    {
-        $servicio = $attr['servicio'];
-        $metodo = $attr['metodo'] ?? null;
-        $params = $attr['params'] ?? null;
-
-        $basicAuth = new BasicAuth(config('app.epayco.public_key'), config('app.epayco.private_key'));
-
-        if (is_null($metodo) || $metodo === '') {
-            throw new DebugException('Error no es valido el metodo de acceso API ', 501);
-        }
-
-        $endpoint = ApiEndpoint::where('connection_name', 'api-epayco')
-            ->where('service_name', $servicio)
-            ->first();
-
-        if (! $endpoint) {
-            throw new DebugException("Error no existe configuración de endpoint para el servicio {$servicio}", 501);
-        }
-
-        $host = $this->mode == 'development' ? $endpoint->host_dev : $endpoint->host_pro;
-
-        $url = "{$endpoint->endpoint_name}/".urlencode($metodo);
-        $this->setCurlCommand($host, $url, $params, $basicAuth);
-
-        $api = new APIClient($basicAuth, $host, $url);
-        $api->setTypeJson(true);
-        $this->output = $api->consumeAPI(
-            'POST',
-            $params
-        );
-
-        return $this;
     }
 
     public function validarReferencia(string $refPayco): array
@@ -365,15 +333,10 @@ class ApiEpayco extends ApiAbstract
         return (string) base64_decode(strtr($data, '-_', '+/'));
     }
 
-    public function setCurlCommand(string $hostConnection, string $url, array $params, BasicAuth $basicAuth)
-    {
-        $token = $basicAuth->authenticate();
-        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"".
-            " -H 'Content-Type: application/json' ".
-            " -H 'Authorization: Basic {$token}'".
-            ' -d "'.json_encode($params).'" "';
-    }
-
+    /**
+     * Catálogo de referencia: códigos generales de validación/parámetros de ePayco.
+     * No se usa en runtime; el manejo de errores toma el mensaje de la respuesta.
+     */
     public function generalErrors()
     {
         return [
