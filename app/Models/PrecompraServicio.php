@@ -25,6 +25,7 @@ class PrecompraServicio extends Model
         'codben',
         'nota',
         'valor',
+        'p_id_customer',
         'estado',
         'ref_payco',
         'cod_estado_epayco',

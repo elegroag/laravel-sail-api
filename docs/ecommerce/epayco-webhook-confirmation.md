@@ -3,12 +3,13 @@
 Guía para poner en marcha el endpoint server-side de confirmación de ePayco
 con validación de `x_signature`.
 
-> **Última revisión:** 2026-08-24  
+> **Última revisión:** 2026-09-09 (firma por cuenta DB, no `.env`)  
 > **URL del webhook:** `POST {APP_URL}/api/epayco/confirmation`  
 > **Ruta Laravel:** `api.epayco.confirmation`  
 > **Código:** [`EpaycoWebhookController`](../app/Http/Controllers/Api/EpaycoWebhookController.php),
 > [`EpaycoSignatureValidator`](../app/Services/Ecommerce/EpaycoSignatureValidator.php),
-> [`EpaycoConfirmationService`](../app/Services/Ecommerce/EpaycoConfirmationService.php)
+> [`EpaycoConfirmationService`](../app/Services/Ecommerce/EpaycoConfirmationService.php),
+> [`EpaycoCuentaResolver`](../app/Services/Ecommerce/EpaycoCuentaResolver.php)
 
 > **Nota:** `EPAYCO_FORCE_APPROVED` **no** aplica a este endpoint. Solo altera
 > `ApiEpayco::validarReferencia()` en entornos non-prod. El webhook exige
@@ -25,12 +26,14 @@ con validación de `x_signature`.
 Cuando ePayco notifica un pago (aunque el usuario cierre el navegador):
 
 1. Recibe el POST (form o JSON).
-2. Valida `x_signature` con la fórmula oficial.
-3. Inserta un snapshot en `epayco_transacciones` (`origen = webhook`).
-4. Actualiza `precompras_servicios` (puede recuperar `AB` → `PA` si el pago llegó).
-5. Si el pago es aceptado y la precompra **no** estaba ya `PA`, llama a
+2. Resuelve la **precompra** (`extra4` / `ref_payco` / extras).
+3. Carga `EpaycoCuenta` por `precompra.p_id_customer`.
+4. Valida `x_signature` con `p_id_customer` + `p_key` de esa cuenta.
+5. Inserta un snapshot en `epayco_transacciones` (`origen = webhook`).
+6. Actualiza `precompras_servicios` (puede recuperar `AB` → `PA` si el pago llegó).
+7. Si el pago es aceptado y la precompra **no** estaba ya `PA`, llama a
    `guardar-venta` en ApiSubsidio.
-6. Responde `200 OK` (o `400` / `503` / `500` según el caso).
+8. Responde `200 OK` (o `400` / `503` / `500` según el caso).
 
 Fórmula:
 
@@ -40,40 +43,26 @@ sha256( P_CUST_ID_CLIENTE ^ P_KEY ^ x_ref_payco ^ x_transaction_id ^ x_amount ^ 
 
 ---
 
-## 2. Variables de entorno
+## 2. Credenciales (base de datos)
 
-En `.env` (valores del **panel ePayco** → configuración / llaves):
+Las llaves de firma **ya no** se leen de `EPAYCO_CUSTOMER_ID` / `EPAYCO_P_KEY`
+en el flujo de confirmation. Se administran en Cajas → **Cuentas ePayco**
+(`epayco_cuentas`) y se asocian al servicio vía el campo `epayco` del catálogo
+(`listar-servicios` → `p_id_customer`).
+
+Al crear la precompra/sesión se persiste `precompras_servicios.p_id_customer`.
+
+Infraestructura que **sí** permanece en `.env`:
 
 ```ini
-EPAYCO_CUSTOMER_ID="tu_p_cust_id_cliente"
-EPAYCO_P_KEY="tu_p_key"
+EPAYCO_APIFY_URL="https://apify.epayco.co"
+EPAYCO_CHECKOUT_VERSION="2"
+EPAYCO_HTTP_VERIFY_SSL=true
+EPAYCO_FORCE_APPROVED=false
 ```
 
-| Variable | Origen en panel ePayco | Uso |
-| -------- | ---------------------- | --- |
-| `EPAYCO_CUSTOMER_ID` | `P_CUST_ID_CLIENTE` | Primer segmento de la firma |
-| `EPAYCO_P_CUST_ID_CLIENTE` | (alias) | Mismo valor; `config` acepta ambos |
-| `EPAYCO_P_KEY` | `P_KEY` | Segundo segmento de la firma |
-
-> **Nota:** No confundir con `EPAYCO_PUBLIC_KEY` / `EPAYCO_PRIVATE_KEY`
-> (checkout JS y Basic Auth de la API). `P_KEY` es la llave de firma del
-> webhook; suele verse aparte en el dashboard.
-
-Tras editar `.env`:
-
-```bash
-php artisan config:clear
-```
-
-Mapeo en `config/app.php`:
-
-```php
-'epayco' => [
-    // ...
-    'customer_id' => env('EPAYCO_CUSTOMER_ID'),
-    'p_key' => env('EPAYCO_P_KEY'),
-],
-```
+> Las vars `EPAYCO_PUBLIC_KEY`, `EPAYCO_PRIVATE_KEY`, `EPAYCO_P_KEY`,
+> `EPAYCO_CUSTOMER_ID` quedan deprecadas para el checkout/webhook.
 
 ---
 

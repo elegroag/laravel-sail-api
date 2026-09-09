@@ -2,6 +2,7 @@
 
 namespace App\Services\Ecommerce;
 
+use App\Models\EpaycoCuenta;
 use App\Models\EpaycoTransaccion;
 use App\Models\PrecompraServicio;
 use App\Services\Api\ApiSubsidio;
@@ -10,11 +11,13 @@ use Illuminate\Support\Facades\Log;
 /**
  * Procesa el webhook confirmation de ePayco: firma, auditoría, estado de precompra
  * y registro de venta en subsidio cuando el pago es aceptado.
+ *
+ * La firma se valida con la cuenta ePayco asociada a la precompra (p_id_customer).
  */
 class EpaycoConfirmationService
 {
     public function __construct(
-        protected EpaycoSignatureValidator $signatureValidator,
+        protected EpaycoCuentaResolver $cuentaResolver,
         protected ?ApiSubsidio $apiSubsidio = null,
     ) {
         $this->apiSubsidio = $apiSubsidio ?? new ApiSubsidio;
@@ -26,8 +29,28 @@ class EpaycoConfirmationService
      */
     public function handle(array $payload): array
     {
-        if (! $this->signatureValidator->credentialsConfigured()) {
-            Log::error('ePayco confirmation: faltan EPAYCO_CUSTOMER_ID / EPAYCO_P_KEY');
+        $datosPago = $this->normalizarPayload($payload);
+        $precompra = $this->resolverPrecompra($payload, $datosPago);
+
+        if (! $precompra) {
+            Log::warning('ePayco confirmation: precompra no encontrada', [
+                'ref_payco' => $payload['x_ref_payco'] ?? null,
+                'extra4' => $payload['x_extra4'] ?? $payload['extra4'] ?? null,
+            ]);
+
+            return [
+                'ok' => false,
+                'http' => 400,
+                'message' => 'Precompra no encontrada',
+            ];
+        }
+
+        $cuenta = $this->resolverCuenta($precompra);
+        if (! $cuenta) {
+            Log::error('ePayco confirmation: cuenta ePayco no configurada', [
+                'precompra_id' => $precompra->id,
+                'p_id_customer' => $precompra->p_id_customer,
+            ]);
 
             return [
                 'ok' => false,
@@ -36,9 +59,17 @@ class EpaycoConfirmationService
             ];
         }
 
-        if (! $this->signatureValidator->isValid($payload)) {
+        $cuenta->makeVisible(['p_key']);
+        $signatureValidator = new EpaycoSignatureValidator(
+            (string) $cuenta->p_id_customer,
+            (string) $cuenta->p_key,
+        );
+
+        if (! $signatureValidator->isValid($payload)) {
             Log::warning('ePayco confirmation: firma invalida', [
                 'ref_payco' => $payload['x_ref_payco'] ?? null,
+                'precompra_id' => $precompra->id,
+                'p_id_customer' => $cuenta->p_id_customer,
             ]);
 
             return [
@@ -48,33 +79,29 @@ class EpaycoConfirmationService
             ];
         }
 
-        $datosPago = $this->normalizarPayload($payload);
-        $precompra = $this->resolverPrecompra($payload, $datosPago);
-        $yaPagada = $precompra?->isPagado() ?? false;
+        $yaPagada = $precompra->isPagado();
 
         EpaycoTransaccion::registrarDesdeValidacion(
-            $precompra?->id,
+            $precompra->id,
             $datosPago,
             'webhook'
         );
 
-        if ($precompra) {
-            $this->actualizarPrecompra($precompra, $datosPago);
-            $precompra->refresh();
-        }
+        $this->actualizarPrecompra($precompra, $datosPago);
+        $precompra->refresh();
 
         $aprobado = ($datosPago['aprobado'] ?? false) === true
             && (int) ($datosPago['cod_estado'] ?? 0) === 1;
 
         $ventaRegistrada = false;
-        if ($aprobado && $precompra && ! $yaPagada) {
+        if ($aprobado && ! $yaPagada) {
             $ventaRegistrada = $this->registrarVentaSubsidio($precompra, $datosPago);
         }
 
         Log::info('ePayco confirmation procesado', [
             'ref_payco' => $datosPago['ref_payco'] ?? null,
             'cod_estado' => $datosPago['cod_estado'] ?? null,
-            'precompra_id' => $precompra?->id,
+            'precompra_id' => $precompra->id,
             'ya_pagada' => $yaPagada,
             'venta_registrada' => $ventaRegistrada,
         ]);
@@ -84,13 +111,27 @@ class EpaycoConfirmationService
             'http' => 200,
             'message' => 'OK',
             'data' => [
-                'precompra_id' => $precompra?->id,
-                'estado' => $precompra?->estado,
+                'precompra_id' => $precompra->id,
+                'estado' => $precompra->estado,
                 'aprobado' => $aprobado,
                 'venta_registrada' => $ventaRegistrada,
                 'ya_pagada' => $yaPagada,
             ],
         ];
+    }
+
+    protected function resolverCuenta(PrecompraServicio $precompra): ?EpaycoCuenta
+    {
+        $pId = trim((string) ($precompra->p_id_customer ?? ''));
+        if ($pId === '') {
+            return null;
+        }
+
+        try {
+            return $this->cuentaResolver->findByPIdCustomer($pId);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /**
@@ -170,7 +211,6 @@ class EpaycoConfirmationService
             return;
         }
 
-        // No reabrir desestimadas manualmente
         if ($precompra->isDesestimado()) {
             return;
         }

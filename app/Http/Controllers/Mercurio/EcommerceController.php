@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Mercurio;
 
+use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\EpaycoTransaccion;
 use App\Models\PrecompraServicio;
 use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Ecommerce\EpaycoCuentaResolver;
 use App\Services\Ecommerce\EstadoPrecompra;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -30,14 +32,17 @@ class EcommerceController extends ApplicationController
 
     protected ApiEpayco $epayco;
 
+    protected EpaycoCuentaResolver $epaycoCuentaResolver;
+
     protected ?array $user;
 
     protected ?string $tipo;
 
-    public function __construct(ApiEpayco $epayco)
+    public function __construct(ApiEpayco $epayco, EpaycoCuentaResolver $epaycoCuentaResolver)
     {
         $this->api = new ApiSubsidio;
         $this->epayco = $epayco;
+        $this->epaycoCuentaResolver = $epaycoCuentaResolver;
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -62,8 +67,6 @@ class EcommerceController extends ApplicationController
         return view(
             'mercurio/ecommerce/index',
             [
-                'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
-                'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? true : false,
                 'EPAYCO_CHECKOUT_VERSION' => (string) config('app.epayco.checkout_version', '1'),
                 'documento' => $documento,
                 'pendientesCount' => PrecompraServicio::where('documento', $documento)
@@ -81,8 +84,6 @@ class EcommerceController extends ApplicationController
     public function comprasPendientes()
     {
         return view('mercurio/ecommerce/pendientes', [
-            'EPAYCO_PUBLIC_KEY' => config('app.epayco.public_key'),
-            'EPAYCO_TEST' => config('app.epayco.mode') === 'development' ? true : false,
             'EPAYCO_CHECKOUT_VERSION' => (string) config('app.epayco.checkout_version', '1'),
             'documento' => self::getActUser('documento'),
             'motivosDesestimacion' => EstadoPrecompra::MOTIVOS_DESESTIMACION,
@@ -269,7 +270,10 @@ class EcommerceController extends ApplicationController
                 'codben' => 'nullable|string|max:20',
                 'nota' => 'nullable|string',
                 'valor' => 'nullable|numeric|min:0',
+                'epayco' => 'required|string|max:80',
             ]);
+
+            $cuenta = $this->epaycoCuentaResolver->findByPIdCustomer($data['epayco']);
 
             $precompra = PrecompraServicio::create([
                 'documento' => $data['cedtra'],
@@ -278,6 +282,7 @@ class EcommerceController extends ApplicationController
                 'codben' => ! empty($data['codben']) ? $data['codben'] : $data['cedtra'],
                 'nota' => $data['nota'] ?? '',
                 'valor' => $data['valor'] ?? null,
+                'p_id_customer' => $cuenta->p_id_customer,
                 'estado' => EstadoPrecompra::PENDIENTE,
                 'fecha_precompra' => now(),
             ]);
@@ -289,8 +294,16 @@ class EcommerceController extends ApplicationController
                 'data' => [
                     'id' => $precompra->id,
                     'estado' => $precompra->estado,
+                    'public_key' => $cuenta->public_key,
+                    'test' => $cuenta->env_mode === 'development',
+                    'p_id_customer' => $cuenta->p_id_customer,
                 ],
                 'message' => 'Precompra registrada',
+            ]);
+        } catch (DebugException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -327,6 +340,7 @@ class EcommerceController extends ApplicationController
                 'nombre' => 'nullable|string|max:150',
                 'email' => 'nullable|string|max:150',
                 'precompra_id' => 'nullable|integer',
+                'epayco' => 'nullable|string|max:80',
             ]);
 
             $precompra = null;
@@ -337,6 +351,18 @@ class EcommerceController extends ApplicationController
                     ->first();
             }
 
+            $pIdCustomer = trim((string) ($data['epayco'] ?? ''));
+            if ($pIdCustomer === '' && $precompra?->p_id_customer) {
+                $pIdCustomer = (string) $precompra->p_id_customer;
+            }
+
+            if ($pIdCustomer === '') {
+                throw new DebugException('El campo epayco del servicio es requerido para iniciar el pago.');
+            }
+
+            $cuenta = $this->epaycoCuentaResolver->findByPIdCustomer($pIdCustomer);
+            $apiEpayco = $this->epayco->withCuenta($cuenta);
+
             if (! $precompra) {
                 $precompra = PrecompraServicio::create([
                     'documento' => $data['cedtra'],
@@ -345,14 +371,18 @@ class EcommerceController extends ApplicationController
                     'codben' => ! empty($data['codben']) ? $data['codben'] : $data['cedtra'],
                     'nota' => $data['nota'] ?? '',
                     'valor' => $data['valor'],
+                    'p_id_customer' => $cuenta->p_id_customer,
                     'estado' => EstadoPrecompra::PENDIENTE,
                     'fecha_precompra' => now(),
                 ]);
+            } elseif (empty($precompra->p_id_customer)) {
+                $precompra->p_id_customer = $cuenta->p_id_customer;
+                $precompra->save();
             }
 
             $nombreServicio = ! empty($data['nombre_servicio']) ? $data['nombre_servicio'] : 'Compra de servicio';
 
-            $sesion = $this->epayco->crearSesionCheckout([
+            $sesion = $apiEpayco->crearSesionCheckout([
                 'name' => $nombreServicio,
                 'description' => $nombreServicio,
                 'invoice' => 'ORD' . $precompra->id . '-' . time(),
@@ -390,8 +420,16 @@ class EcommerceController extends ApplicationController
                 'data' => [
                     'sessionId' => $sesion['sessionId'],
                     'precompra_id' => $precompra->id,
+                    'public_key' => $cuenta->public_key,
+                    'test' => $apiEpayco->isTestMode(),
+                    'p_id_customer' => $cuenta->p_id_customer,
                 ],
                 'message' => 'Sesion de checkout creada',
+            ]);
+        } catch (DebugException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -431,7 +469,10 @@ class EcommerceController extends ApplicationController
                 ]);
             }
 
-            $resultado = $this->epayco->validarReferencia($ref_payco);
+            $apiEpayco = $this->apiEpaycoParaPrecompra(
+                $this->resolverPrecompraPorRefOId((string) $ref_payco, $precompraId)
+            );
+            $resultado = $apiEpayco->validarReferencia($ref_payco);
 
             if (! $resultado['success']) {
                 $precompra = $this->resolverPrecompraPorRefOId((string) $ref_payco, $precompraId);
@@ -517,9 +558,10 @@ class EcommerceController extends ApplicationController
             // mostrar rechazo cuando ePayco falle en la reconsulta de referencia.
             $precompraAntes = $this->resolverPrecompraPorRefOId((string) $refpago, $precompraId);
             $yaPagada = $precompraAntes?->isPagado() ?? false;
-            $forceApproved = $this->epayco->debeForzarAprobacion();
+            $apiEpayco = $this->apiEpaycoParaPrecompra($precompraAntes);
+            $forceApproved = $apiEpayco->debeForzarAprobacion();
 
-            $pago = $this->epayco->validarReferencia($refpago);
+            $pago = $apiEpayco->validarReferencia($refpago);
 
             Log::info('Ecommerce.guardarVenta: resultado validarReferencia', [
                 'refpago' => $refpago,
@@ -793,6 +835,7 @@ class EcommerceController extends ApplicationController
                     'codben' => $precompra->codben,
                     'nota' => $precompra->nota,
                     'valor' => $precompra->valor,
+                    'p_id_customer' => $precompra->p_id_customer,
                     'estado' => $precompra->estado,
                     'estado_descripcion' => $precompra->estado_descripcion,
                     'fecha_precompra' => $precompra->fecha_precompra?->format('Y-m-d H:i'),
@@ -833,6 +876,7 @@ class EcommerceController extends ApplicationController
                     'codben' => $precompra->codben,
                     'nota' => $precompra->nota,
                     'valor' => $precompra->valor,
+                    'p_id_customer' => $precompra->p_id_customer,
                     'estado' => $precompra->estado,
                     'estado_descripcion' => $precompra->estado_descripcion,
                     'ref_payco' => $precompra->ref_payco,
@@ -1120,6 +1164,30 @@ class EcommerceController extends ApplicationController
             EpaycoTransaccion::registrarDesdeValidacion($precompraId, $datosPago, $origen);
         } catch (\Throwable $e) {
             $this->setLogger('Error registrando epayco_transacciones: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cliente ePayco con mode/host según la cuenta de la precompra (si existe).
+     */
+    protected function apiEpaycoParaPrecompra(?PrecompraServicio $precompra): ApiEpayco
+    {
+        if (! $precompra?->p_id_customer) {
+            return $this->epayco;
+        }
+
+        try {
+            $cuenta = $this->epaycoCuentaResolver->findByPIdCustomer((string) $precompra->p_id_customer);
+
+            return $this->epayco->withCuenta($cuenta);
+        } catch (DebugException $e) {
+            Log::warning('Ecommerce: no se resolvió cuenta ePayco para validación', [
+                'precompra_id' => $precompra->id,
+                'p_id_customer' => $precompra->p_id_customer,
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->epayco;
         }
     }
 }

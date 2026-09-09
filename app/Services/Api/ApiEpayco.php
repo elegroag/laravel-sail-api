@@ -3,20 +3,54 @@
 namespace App\Services\Api;
 
 use App\Models\ApiEndpoint;
+use App\Models\EpaycoCuenta;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 /**
  * Cliente ePayco para validación de referencia y Smart Checkout (Apify).
- * No hereda ApiAbstract: el flujo vigente no usa send()/BasicAuth en el consumo.
+ * Credenciales de comercio: EpaycoCuenta (DB) vía withCuenta().
  */
 class ApiEpayco
 {
     protected string $mode;
 
+    protected string $publicKey = '';
+
+    protected string $privateKey = '';
+
     public function __construct()
     {
         $this->mode = (string) (config('app.epayco.mode') ?: 'development');
+    }
+
+    /**
+     * Fija llaves y modo desde una cuenta administrada en Cajas.
+     */
+    public function withCuenta(EpaycoCuenta $cuenta): self
+    {
+        $clone = clone $this;
+        $cuenta->makeVisible(['private_key', 'p_key']);
+        $clone->publicKey = (string) $cuenta->public_key;
+        $clone->privateKey = (string) $cuenta->private_key;
+        $clone->mode = (string) ($cuenta->env_mode ?: 'development');
+
+        return $clone;
+    }
+
+    public function isTestMode(): bool
+    {
+        return $this->mode === 'development';
+    }
+
+    public function getPublicKey(): string
+    {
+        return $this->publicKey;
+    }
+
+    public function getMode(): string
+    {
+        return $this->mode;
     }
 
     public function validarReferencia(string $refPayco): array
@@ -197,8 +231,8 @@ class ApiEpayco
      */
     public function obtenerTokenApify(): ?string
     {
-        $publicKey = (string) config('app.epayco.public_key');
-        $privateKey = (string) config('app.epayco.private_key');
+        $publicKey = $this->publicKey;
+        $privateKey = $this->privateKey;
 
         if ($publicKey === '' || $privateKey === '') {
             return null;
@@ -254,7 +288,7 @@ class ApiEpayco
         if (! $token) {
             return [
                 'success' => false,
-                'errors' => 'No se pudo autenticar con ePayco (Apify). Verifique EPAYCO_PUBLIC_KEY/EPAYCO_PRIVATE_KEY.',
+                'errors' => 'No se pudo autenticar con ePayco (Apify). Verifique la cuenta ePayco en Cajas.',
             ];
         }
 

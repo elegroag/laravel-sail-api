@@ -1,15 +1,12 @@
 /**
  * Retomar el pago de una precompra pendiente: valida tarifa vigente y reabre el
  * checkout de ePayco (Standard v1 o Smart v2) reutilizando la misma precompra.
- *
- * Depende de globales del layout: $ (jQuery), Swal (SweetAlert2), ePayco,
- * sessionStorage.
  */
 import store from './store.js';
 import {
     escapeHtml,
     sanitizarTexto,
-    obtenerEpaycoHandler,
+    configurarCheckoutV1,
     esCheckoutV2,
     epaycoTestActivo,
     tipoCheckoutV2,
@@ -20,14 +17,23 @@ import { cargarDatos } from './carga.js';
 
 export function retomarPago(precompra) {
     var cedtra = $('#hid_documento').val();
-    var epaycoHandler = obtenerEpaycoHandler();
 
-    if (!esCheckoutV2() && !epaycoHandler) {
+    if (!esCheckoutV2() && typeof ePayco === 'undefined') {
         Swal.fire({
             title: 'Error',
             text: 'No se pudo inicializar la pasarela de pago. Recargue la página.',
             icon: 'error',
-            confirmButtonText: 'Entendido'
+            confirmButtonText: 'Entendido',
+        });
+        return;
+    }
+
+    if (!precompra.p_id_customer) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Esta precompra no tiene cuenta ePayco asociada. No se puede retomar el pago.',
+            icon: 'error',
+            confirmButtonText: 'Entendido',
         });
         return;
     }
@@ -37,7 +43,7 @@ export function retomarPago(precompra) {
         text: 'Consultando la disponibilidad y el valor vigente del servicio.',
         icon: 'info',
         showConfirmButton: false,
-        allowOutsideClick: false
+        allowOutsideClick: false,
     });
 
     $.ajax({
@@ -49,115 +55,178 @@ export function retomarPago(precompra) {
             cedtra: cedtra,
             codser: precompra.codser,
             numero: precompra.numero,
-            codben: precompra.codben || cedtra
-        }
-    }).done(function (response) {
-        if (!response.success) {
+            codben: precompra.codben || cedtra,
+        },
+    })
+        .done(function (response) {
+            if (!response.success) {
+                Swal.fire({
+                    title: 'Servicio no disponible',
+                    html:
+                        '<p>' +
+                        escapeHtml(response.message || 'No se pudo validar la tarifa del servicio.') +
+                        '</p>' +
+                        '<p class="text-muted mb-0">Puede desestimar esta compra si ya no desea continuar.</p>',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido',
+                });
+                return;
+            }
+
+            var data = response.data || {};
+            var valor = data.valser;
+
+            if (!valor || parseFloat(valor) <= 0) {
+                Swal.fire({
+                    title: 'Atención',
+                    text: 'No se pudo obtener el valor vigente del servicio.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido',
+                });
+                return;
+            }
+
+            var cuposMes = null;
+            if (data.cupos_mes !== undefined && data.cupos_mes !== null && data.cupos_mes !== '') {
+                cuposMes = parseInt(data.cupos_mes, 10) || 0;
+            }
+
+            if (cuposMes === 0) {
+                Swal.fire({
+                    title: 'Sin cupos disponibles',
+                    html:
+                        '<p>No hay cupos disponibles para este servicio en el mes actual.</p>' +
+                        '<p class="text-muted mb-0">Puede desestimar esta compra si ya no desea continuar.</p>',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido',
+                });
+                return;
+            }
+
+            Swal.close();
+            abrirCheckout(precompra, valor);
+        })
+        .fail(function () {
             Swal.fire({
-                title: 'Servicio no disponible',
-                html: '<p>' + escapeHtml(response.message || 'No se pudo validar la tarifa del servicio.') + '</p>' +
-                    '<p class="text-muted mb-0">Puede desestimar esta compra si ya no desea continuar.</p>',
-                icon: 'warning',
-                confirmButtonText: 'Entendido'
+                title: 'Error de conexión',
+                text: 'No se pudo validar la tarifa del servicio. Intente nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Entendido',
             });
-            return;
-        }
-
-        var data = response.data || {};
-        var valor = data.valser;
-
-        if (!valor || parseFloat(valor) <= 0) {
-            Swal.fire({
-                title: 'Atención',
-                text: 'No se pudo obtener el valor vigente del servicio.',
-                icon: 'warning',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
-
-        var cuposMes = null;
-        if (data.cupos_mes !== undefined && data.cupos_mes !== null && data.cupos_mes !== '') {
-            cuposMes = parseInt(data.cupos_mes, 10) || 0;
-        }
-
-        if (cuposMes === 0) {
-            Swal.fire({
-                title: 'Sin cupos disponibles',
-                html: '<p>No hay cupos disponibles para este servicio en el mes actual.</p>' +
-                    '<p class="text-muted mb-0">Puede desestimar esta compra si ya no desea continuar.</p>',
-                icon: 'warning',
-                confirmButtonText: 'Entendido'
-            });
-            return;
-        }
-
-        Swal.close();
-        abrirCheckout(precompra, valor);
-    }).fail(function () {
-        Swal.fire({
-            title: 'Error de conexión',
-            text: 'No se pudo validar la tarifa del servicio. Intente nuevamente.',
-            icon: 'error',
-            confirmButtonText: 'Entendido'
         });
-    });
 }
 
 function abrirCheckout(precompra, valor) {
     var cedtra = $('#hid_documento').val();
-    var epaycoHandler = obtenerEpaycoHandler();
     var servicioNombre = sanitizarTexto(nombreServicio(precompra)) || 'Compra de servicio';
-    var nombre = sanitizarTexto((store.trabajadorData && store.trabajadorData.nombre) ? store.trabajadorData.nombre : 'Cliente');
-    var email = (store.trabajadorData && store.trabajadorData.email) ? store.trabajadorData.email.trim() : 'sin@email.com';
+    var nombre = sanitizarTexto(
+        store.trabajadorData && store.trabajadorData.nombre ? store.trabajadorData.nombre : 'Cliente',
+    );
+    var email =
+        store.trabajadorData && store.trabajadorData.email
+            ? store.trabajadorData.email.trim()
+            : 'sin@email.com';
     var invoice = 'ORD' + Date.now();
 
-    // Reutilizar la misma precompra: el flujo del catalogo la retomara al validar el pago
     sessionStorage.setItem('epayco_cedtra', cedtra);
     sessionStorage.setItem('epayco_codser', String(precompra.codser));
     sessionStorage.setItem('epayco_numero', String(precompra.numero));
     sessionStorage.setItem('epayco_nota', precompra.nota || '');
     sessionStorage.setItem('epayco_codben', precompra.codben || cedtra);
     sessionStorage.setItem('epayco_precompra_id', String(precompra.id));
+    sessionStorage.setItem('epayco_p_id_customer', String(precompra.p_id_customer));
 
     if (esCheckoutV2()) {
         abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra);
         return;
     }
 
-    var data = {
-        name: servicioNombre,
-        description: servicioNombre,
-        invoice: invoice,
-        currency: 'cop',
-        amount: String(valor),
-        tax_base: '0',
-        tax: '0',
-        country: 'co',
-        lang: 'es',
-        external: 'false',
-        extra1: cedtra,
-        extra2: String(precompra.codser),
-        extra3: String(precompra.numero),
-        extra4: String(precompra.id),
-        response: store.routes.catalogo,
-        confirmation: store.routes.epaycoConfirmation || '',
-        name_billing: nombre,
-        type_doc_billing: 'cc',
-        number_doc_billing: cedtra,
-        email_billing: email
-    };
-
-    epaycoHandler.onCloseModal = function () {
-        setTimeout(function () {
-            marcarPrecompraAbandonadaV2(precompra.id);
-        }, 2500);
-    };
-
-    epaycoHandler.open(data);
+    abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra, invoice);
 }
 
-// Smart Checkout v2: crea la sesion en backend reutilizando la precompra pendiente.
+function abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra, invoice) {
+    $.ajax({
+        url: store.routes.crearSesionEpayco,
+        method: 'POST',
+        dataType: 'JSON',
+        cache: false,
+        data: {
+            cedtra: cedtra,
+            codser: precompra.codser,
+            numero: precompra.numero,
+            codben: precompra.codben || cedtra,
+            nota: precompra.nota || '',
+            valor: valor,
+            nombre_servicio: servicioNombre,
+            nombre: nombre,
+            email: email,
+            precompra_id: precompra.id,
+            epayco: precompra.p_id_customer,
+        },
+    })
+        .done(function (response) {
+            if (!response.success || !response.data || !response.data.public_key) {
+                Swal.fire({
+                    title: 'No se pudo iniciar el pago',
+                    text: response.message || 'No se resolvió la cuenta ePayco del servicio.',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                });
+                return;
+            }
+
+            var handler = configurarCheckoutV1(response.data.public_key, response.data.test);
+            if (!handler) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo inicializar la pasarela de pago.',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                });
+                return;
+            }
+
+            var data = {
+                name: servicioNombre,
+                description: servicioNombre,
+                invoice: invoice,
+                currency: 'cop',
+                amount: String(valor),
+                tax_base: '0',
+                tax: '0',
+                country: 'co',
+                lang: 'es',
+                external: 'false',
+                extra1: cedtra,
+                extra2: String(precompra.codser),
+                extra3: String(precompra.numero),
+                extra4: String(precompra.id),
+                response: store.routes.catalogo,
+                confirmation: store.routes.epaycoConfirmation || '',
+                name_billing: nombre,
+                type_doc_billing: 'cc',
+                number_doc_billing: cedtra,
+                email_billing: email,
+            };
+
+            handler.onCloseModal = function () {
+                setTimeout(function () {
+                    marcarPrecompraAbandonadaV2(precompra.id);
+                }, 2500);
+            };
+
+            handler.open(data);
+        })
+        .fail(function () {
+            Swal.fire({
+                title: 'Error de conexión',
+                text: 'No se pudo preparar el pago. Intente nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Entendido',
+            });
+        });
+}
+
 function abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra) {
     asegurarSdkCheckoutV2(function (errSdk) {
         if (errSdk) {
@@ -186,12 +255,14 @@ function abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra
                 nombre: nombre,
                 email: email,
                 precompra_id: precompra.id,
+                epayco: precompra.p_id_customer,
             },
         })
             .done(function (response) {
                 if (response.success && response.data && response.data.sessionId) {
                     sessionStorage.setItem('epayco_precompra_id', String(response.data.precompra_id));
                     window.__epaycoPagoEnValidacion = false;
+                    window.EPAYCO_TEST = !!response.data.test;
 
                     var tipo = tipoCheckoutV2();
                     var checkout;
@@ -199,7 +270,7 @@ function abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra
                         checkout = ePayco.checkout.configure({
                             sessionId: response.data.sessionId,
                             type: tipo,
-                            test: epaycoTestActivo(),
+                            test: epaycoTestActivo(response.data.test),
                         });
                     } catch (e) {
                         console.log('Error inicializando ePayco v2:', e);
@@ -281,6 +352,7 @@ function marcarPrecompraAbandonadaV2(precompraId) {
         sessionStorage.removeItem('epayco_nota');
         sessionStorage.removeItem('epayco_codben');
         sessionStorage.removeItem('epayco_precompra_id');
+        sessionStorage.removeItem('epayco_p_id_customer');
 
         Swal.fire({
             title: 'Pago no completado',

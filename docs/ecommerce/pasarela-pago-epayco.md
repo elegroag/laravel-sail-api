@@ -5,9 +5,9 @@ catálogo de servicios de Mercurio, accesible en
 `http://comfaca.ecommerce.com.co:9043/mercurio/servicios/index` (ruta
 `/mercurio/servicios/index`).
 
+> **Última revisión:** 2026-09-09 (multi-cuenta desde `epayco_cuentas`;
+> catálogo `epayco` → `p_id_customer`).
 > **Audiencia:** desarrolladores y mantenedores del módulo de ecommerce Mercurio.
-> **Última revisión:** 2026-09-02 (validación API: error ePayco + idempotencia
-> PA; respuesta al cliente documentada).
 
 Documentos relacionados:
 - [epayco-modal-control.md](./epayco-modal-control.md) — control de la modal.
@@ -52,6 +52,10 @@ El diseño se articula en torno a cinco principios:
 4. **Detección de abandonos** — `onCloseModal` / `onClosed` → `PE → AB` y job
    nocturno para PE huérfanas (> N días).
 5. **Confirmación híbrida** — Cliente (`response`) + webhook firmado.
+6. **Multi-cuenta ePayco** — Las llaves de comercio **no** salen del `.env`.
+   Cada servicio del catálogo trae `epayco` (= `P_CUST_ID_CLIENTE`); se resuelve
+   en `epayco_cuentas` (`EpaycoCuenta.p_id_customer`) y se guarda en la
+   precompra para firmar el webhook.
 
 ---
 
@@ -67,7 +71,9 @@ El diseño se articula en torno a cinco principios:
 | Routes consola    | [routes/console.php](../routes/console.php)                                                            |
 | Controller        | [app/Http/Controllers/Mercurio/EcommerceController.php](../app/Http/Controllers/Mercurio/EcommerceController.php) |
 | Admin Cajas       | [AdmserviciosController](../app/Http/Controllers/Cajas/AdmserviciosController.php) (tabla, CSV, `detalle/{id}`) |
-| Servicio ePayco   | [app/Services/Api/ApiEpayco.php](../app/Services/Api/ApiEpayco.php)                                    |
+| Servicio ePayco   | [app/Services/Api/ApiEpayco.php](../app/Services/Api/ApiEpayco.php) (`withCuenta`) |
+| Resolver cuenta   | [EpaycoCuentaResolver](../app/Services/Ecommerce/EpaycoCuentaResolver.php) |
+| Cuentas (Cajas)   | [EpaycoCuenta](../app/Models/EpaycoCuenta.php) / CRUD `/cajas/epayco-cuentas` |
 | Confirmación      | [EpaycoConfirmationService](../app/Services/Ecommerce/EpaycoConfirmationService.php) / [EpaycoSignatureValidator](../app/Services/Ecommerce/EpaycoSignatureValidator.php) |
 | Servicio Subsidio | [app/Services/Api/ApiSubsidio.php](../app/Services/Api/ApiSubsidio.php)                                |
 | Estados           | [app/Services/Ecommerce/EstadoPrecompra.php](../app/Services/Ecommerce/EstadoPrecompra.php)            |
@@ -84,22 +90,24 @@ El diseño se articula en torno a cinco principios:
 
 ### 3.1 Variables de entorno (`.env`)
 
+**Infra (siguen en `.env`):**
+
 ```ini
-EPAYCO_MODE="development"                 # development | production
-EPAYCO_PUBLIC_KEY="..."                   # llave pública (JS + Basic Auth Apify)
-EPAYCO_PRIVATE_KEY="..."                  # llave privada (Basic Auth backend / Apify)
-EPAYCO_CHECKOUT_VERSION="1"               # 1 = Standard, 2 = Smart Checkout
-EPAYCO_APIFY_URL="https://apify.epayco.co" # base API Smart Checkout (opcional)
-EPAYCO_CUSTOMER_ID=                       # P_CUST_ID_CLIENTE (firma webhook)
-# alias aceptado: EPAYCO_P_CUST_ID_CLIENTE
-EPAYCO_P_KEY=                             # P_KEY (firma webhook)
-EPAYCO_HTTP_VERIFY_SSL=true               # false solo si el CA/proxy del entorno falla
-EPAYCO_FORCE_APPROVED=false               # TEMPORAL QA: solo non-prod; nunca true en production
+EPAYCO_CHECKOUT_VERSION="2"               # 1 = Standard, 2 = Smart Checkout
+EPAYCO_APIFY_URL="https://apify.epayco.co" # base API Smart Checkout
+EPAYCO_HTTP_VERIFY_SSL=true
+EPAYCO_FORCE_APPROVED=false               # TEMPORAL QA: solo non-prod
 ```
 
-`config/app.php` mapea estas variables al bloque `epayco` (`mode`, `public_key`,
-`private_key`, `checkout_version`, `apify_url`, `customer_id`, `p_key`,
-`verify_ssl`, `force_approved`).
+**Comercio (desde DB `epayco_cuentas`, admin Cajas):**
+`account`, `env_mode`, `public_key`, `private_key`, `p_key`, `p_id_customer`.
+
+Lookup por servicio: campo **`epayco`** en `listar-servicios` =
+`EpaycoCuenta.p_id_customer`. Se persiste en `precompras_servicios.p_id_customer`.
+
+> Deprecadas para checkout/webhook: `EPAYCO_PUBLIC_KEY`, `EPAYCO_PRIVATE_KEY`,
+> `EPAYCO_CUSTOMER_ID`, `EPAYCO_P_KEY`, `EPAYCO_MODE` (el modo viene de
+> `cuenta.env_mode`).
 
 ### 3.2 Endpoint dinámico en `api_endpoints`
 
@@ -111,9 +119,8 @@ tabla `api_endpoints` (ver
 | --------------- | ------------------- | ------------- | ----------------------------------------- |
 | `api-epayco`    | `Epayco-Reference`  | `reference`   | `https://secure.epayco.co/validation/v1`  |
 
-`ApiEpayco::validarReferencia()` resuelve el host según
-`config('app.epayco.mode')`: si es `development` usa `host_dev`, si no,
-`host_pro`.
+`ApiEpayco::validarReferencia()` resuelve el host según el `mode` de la
+instancia (`withCuenta` → `env_mode` de la cuenta).
 
 ---
 

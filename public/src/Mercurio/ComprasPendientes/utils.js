@@ -44,6 +44,24 @@ export function obtenerEpaycoHandler() {
     return window.epaycoHandler || null;
 }
 
+export function configurarCheckoutV1(publicKey, test) {
+    if (!publicKey) {
+        return null;
+    }
+
+    window.EPAYCO_TEST = !!test;
+    try {
+        window.epaycoHandler = ePayco.checkout.configure({
+            key: publicKey,
+            test: !!test,
+        });
+        return window.epaycoHandler;
+    } catch (e) {
+        console.log('Error inicializando ePayco v1:', e);
+        return null;
+    }
+}
+
 export function esVistaMovil() {
     return window.matchMedia('(max-width: 991.98px)').matches;
 }
@@ -77,7 +95,10 @@ export function tipoCheckoutV2() {
     return esEntornoMovil() ? 'standard' : 'onpage';
 }
 
-export function epaycoTestActivo() {
+export function epaycoTestActivo(testOverride) {
+    if (typeof testOverride === 'boolean') {
+        return testOverride;
+    }
     return window.EPAYCO_TEST === true || String(window.EPAYCO_TEST) === 'true';
 }
 

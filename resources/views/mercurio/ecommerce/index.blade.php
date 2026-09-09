@@ -199,27 +199,11 @@
 
 @push('scripts')
 <script>
-    // Valores que provienen de Blade (config y rutas). La logica del modulo
-    // vive en public/src/Mercurio/Ecommerce/main.js (compilado a mercurio/build/Ecommerce.js)
-    var EPAYCO_PUBLIC_KEY = '{{ $EPAYCO_PUBLIC_KEY }}';
-    var EPAYCO_TEST = {{ $EPAYCO_TEST === true ? 'true' : 'false' }};
+    // Infra de checkout (version). Llaves/test por cuenta vienen al crear precompra/sesión.
     var EPAYCO_CHECKOUT_VERSION = '{{ $EPAYCO_CHECKOUT_VERSION }}';
-
-    // En Smart Checkout v2 la sesion se crea en backend; no se configura un handler global con key.
+    var EPAYCO_TEST = false;
     var epaycoHandler = null;
-    if (EPAYCO_CHECKOUT_VERSION !== '2') {
-        try {
-            epaycoHandler = ePayco.checkout.configure({
-                key: EPAYCO_PUBLIC_KEY,
-                test: EPAYCO_TEST
-            });
-        } catch (e) {
-            console.log('Error inicializando ePayco:', e);
-        }
-    }
 
-    console.log('EPAYCO_PUBLIC_KEY', EPAYCO_PUBLIC_KEY);
-    console.log('EPAYCO_TEST', EPAYCO_TEST);
     console.log('EPAYCO_CHECKOUT_VERSION', EPAYCO_CHECKOUT_VERSION);
 
     var routes = {

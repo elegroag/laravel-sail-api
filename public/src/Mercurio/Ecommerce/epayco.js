@@ -17,6 +17,27 @@ export function obtenerEpaycoHandler() {
     return window.epaycoHandler || null;
 }
 
+/**
+ * Configura Standard Checkout v1 con la public key de la cuenta del servicio.
+ */
+export function configurarCheckoutV1(publicKey, test) {
+    if (!publicKey) {
+        return null;
+    }
+
+    window.EPAYCO_TEST = !!test;
+    try {
+        window.epaycoHandler = ePayco.checkout.configure({
+            key: publicKey,
+            test: !!test,
+        });
+        return window.epaycoHandler;
+    } catch (e) {
+        console.log('Error inicializando ePayco v1:', e);
+        return null;
+    }
+}
+
 export function limpiarSessionEpayco() {
     sessionStorage.removeItem('epayco_cedtra');
     sessionStorage.removeItem('epayco_codser');
@@ -24,6 +45,7 @@ export function limpiarSessionEpayco() {
     sessionStorage.removeItem('epayco_nota');
     sessionStorage.removeItem('epayco_codben');
     sessionStorage.removeItem('epayco_precompra_id');
+    sessionStorage.removeItem('epayco_p_id_customer');
 }
 
 export function marcarPagoEnValidacion(activo) {
@@ -90,7 +112,10 @@ export function tipoCheckoutV2() {
     return esEntornoMovil() ? 'standard' : 'onpage';
 }
 
-export function epaycoTestActivo() {
+export function epaycoTestActivo(testOverride) {
+    if (typeof testOverride === 'boolean') {
+        return testOverride;
+    }
     return window.EPAYCO_TEST === true || String(window.EPAYCO_TEST) === 'true';
 }
 
@@ -198,12 +223,14 @@ export function abrirCheckoutV2(ctx, target) {
                 nombre_servicio: ctx.servicioNombre,
                 nombre: ctx.nombre,
                 email: ctx.email,
+                epayco: ctx.epayco,
             },
         })
             .done(function (response) {
                 if (response.success && response.data && response.data.sessionId) {
                     sessionStorage.setItem('epayco_precompra_id', response.data.precompra_id);
                     marcarPagoEnValidacion(false);
+                    window.EPAYCO_TEST = !!response.data.test;
 
                     var tipo = tipoCheckoutV2();
                     var checkout;
@@ -211,7 +238,7 @@ export function abrirCheckoutV2(ctx, target) {
                         checkout = ePayco.checkout.configure({
                             sessionId: response.data.sessionId,
                             type: tipo,
-                            test: epaycoTestActivo(),
+                            test: epaycoTestActivo(response.data.test),
                         });
                     } catch (e) {
                         console.log('Error inicializando ePayco v2:', e);

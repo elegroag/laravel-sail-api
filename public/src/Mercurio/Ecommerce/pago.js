@@ -8,7 +8,7 @@ import store from './store.js';
 import { sanitizarTexto } from './utils.js';
 import { obtenerCuposMes, mostrarAlertaCuposMesCero } from './cupos.js';
 import {
-    obtenerEpaycoHandler,
+    configurarCheckoutV1,
     esCheckoutV2,
     abrirCheckoutV2,
     marcarPagoEnValidacion,
@@ -44,8 +44,7 @@ export function procesarPago(event) {
         return;
     }
 
-    var epaycoHandler = obtenerEpaycoHandler();
-    if (!esCheckoutV2() && !epaycoHandler) {
+    if (!esCheckoutV2() && typeof ePayco === 'undefined') {
         Swal.fire({
             title: 'Error',
             text: 'No se pudo inicializar la pasarela de pago. Recargue la pagina.',
@@ -76,14 +75,29 @@ export function procesarPago(event) {
         valor: valor,
         servicioNombre: servicioNombre,
         nombre: nombre,
-        email: email
+        email: email,
+        epayco: (store.servicioSeleccionado && store.servicioSeleccionado.epayco)
+            ? String(store.servicioSeleccionado.epayco)
+            : '',
     };
+
+    if (!ctx.epayco) {
+        Swal.fire({
+            title: 'Error',
+            text: 'El servicio no tiene cuenta ePayco configurada (campo epayco).',
+            icon: 'error',
+            confirmButtonText: 'Entendido',
+        });
+        target.removeAttr('disabled');
+        return;
+    }
 
     sessionStorage.setItem('epayco_cedtra', documento);
     sessionStorage.setItem('epayco_codser', ctx.codser);
     sessionStorage.setItem('epayco_numero', ctx.numero);
     sessionStorage.setItem('epayco_nota', ctx.nota);
     sessionStorage.setItem('epayco_codben', ctx.codben);
+    sessionStorage.setItem('epayco_p_id_customer', ctx.epayco);
 
     if (esCheckoutV2()) {
         abrirCheckoutV2(ctx, target);
@@ -125,18 +139,31 @@ export function procesarPago(event) {
             numero: ctx.numero,
             codben: ctx.codben,
             nota: ctx.nota,
-            valor: valor
+            valor: valor,
+            epayco: ctx.epayco,
         }
     }).done(function (response) {
         if (response.success && response.data && response.data.id) {
+            var handler = configurarCheckoutV1(response.data.public_key, response.data.test);
+            if (!handler) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo inicializar la pasarela de pago con la cuenta del servicio.',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                });
+                target.removeAttr('disabled');
+                return;
+            }
+
             sessionStorage.setItem('epayco_precompra_id', response.data.id);
             marcarPagoEnValidacion(false);
-            registrarOnCloseEpayco(epaycoHandler, response.data.id);
+            registrarOnCloseEpayco(handler, response.data.id);
             data.extra4 = String(response.data.id);
             if (store.routes.epaycoConfirmation) {
                 data.confirmation = store.routes.epaycoConfirmation;
             }
-            epaycoHandler.open(data);
+            handler.open(data);
         } else {
             Swal.fire({
                 title: 'No se pudo iniciar el pago',
