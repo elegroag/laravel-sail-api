@@ -187,8 +187,8 @@ return [
         // Verificación TLS en llamadas Apify (default true).
         // Solo poner false en entornos dev con CA/proxy problemáticos.
         'verify_ssl' => filter_var(env('EPAYCO_HTTP_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
-        // TEMPORAL (solo non-prod): fuerza aprobado=true / cod_estado=1 en validarReferenciaApify
-        // para probar guardar-venta sin un pago realmente aceptado. Default false.
+        // TEMPORAL (solo non-prod): omite Apify y fuerza aprobado=true / cod_estado=1
+        // en validarReferenciaApify. Default false. Nunca true en production.
         'force_approved' => filter_var(env('EPAYCO_FORCE_APPROVED', false), FILTER_VALIDATE_BOOLEAN),
     ],
 ];

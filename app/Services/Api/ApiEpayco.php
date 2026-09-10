@@ -58,7 +58,11 @@ class ApiEpayco
      * Valida un pago consultando la transacción en Apify
      * (POST /payment/transaction con referencePayco).
      *
-     * Requiere withCuenta() (PUBLIC/PRIVATE) para obtener el Bearer token.
+     * Con EPAYCO_FORCE_APPROVED (solo non-prod) no consulta Apify: retorna
+     * aprobado simulado de inmediato.
+     *
+     * Requiere withCuenta() (PUBLIC/PRIVATE) para obtener el Bearer token
+     * cuando no se fuerza aprobación.
      *
      * @return array{success: bool, data?: array<string, mixed>, errors?: string}
      */
@@ -69,6 +73,39 @@ class ApiEpayco
             return [
                 'success' => false,
                 'errors' => 'Referencia de pago no proporcionada',
+            ];
+        }
+
+        if ($this->debeForzarAprobacion()) {
+            Log::info('ApiEpayco.validarReferenciaApify: FORCE_APPROVED, omitiendo Apify', [
+                'ref_payco' => $refPayco,
+            ]);
+
+            return [
+                'success' => true,
+                'data' => [
+                    'aprobado' => true,
+                    'cod_estado' => 1,
+                    'respuesta' => 'Aceptada (FORCE_APPROVED)',
+                    'motivo' => 'Simulado por EPAYCO_FORCE_APPROVED',
+                    'monto' => '0',
+                    'ref_payco' => $refPayco,
+                    'x_id_invoice' => null,
+                    'x_transaction_id' => null,
+                    'x_approval_code' => null,
+                    'x_bank_name' => null,
+                    'x_franchise' => null,
+                    'x_card_number' => null,
+                    'x_quotas' => null,
+                    'x_currency_code' => null,
+                    'x_date' => null,
+                    'x_signature' => null,
+                    'payload_raw' => [
+                        'force_approved' => true,
+                        'refPayco' => $refPayco,
+                    ],
+                    'origen_consulta' => 'force_approved',
+                ],
             ];
         }
 
@@ -204,13 +241,6 @@ class ApiEpayco
                 'origen_consulta' => 'apify',
             ],
         ];
-
-        if ($this->debeForzarAprobacion()) {
-            $resultado['data']['aprobado'] = true;
-            $resultado['data']['cod_estado'] = 1;
-            $resultado['data']['respuesta'] = 'Aceptada (FORCE_APPROVED)';
-            $resultado['data']['motivo'] = 'Simulado por EPAYCO_FORCE_APPROVED';
-        }
 
         Log::info('ApiEpayco.validarReferenciaApify: ok', [
             'ref_payco' => $resultado['data']['ref_payco'],

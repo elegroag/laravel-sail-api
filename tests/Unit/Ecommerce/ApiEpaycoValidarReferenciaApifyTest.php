@@ -118,6 +118,42 @@ class ApiEpaycoValidarReferenciaApifyTest extends TestCase
         $this->assertStringContainsString('autenticar', $resultado['errors']);
     }
 
+    public function test_force_approved_omite_apify_y_retorna_aprobado(): void
+    {
+        config([
+            'app.epayco.force_approved' => true,
+            'app.env' => 'local',
+            'app.app_mode' => 'development',
+        ]);
+
+        Http::fake();
+
+        $resultado = (new ApiEpayco)->validarReferenciaApify('QA-FORCE-001');
+
+        $this->assertTrue($resultado['success']);
+        $this->assertTrue($resultado['data']['aprobado']);
+        $this->assertSame(1, $resultado['data']['cod_estado']);
+        $this->assertSame('Aceptada (FORCE_APPROVED)', $resultado['data']['respuesta']);
+        $this->assertSame('Simulado por EPAYCO_FORCE_APPROVED', $resultado['data']['motivo']);
+        $this->assertSame('QA-FORCE-001', $resultado['data']['ref_payco']);
+        $this->assertSame('force_approved', $resultado['data']['origen_consulta']);
+        Http::assertNothingSent();
+    }
+
+    public function test_force_approved_no_aplica_en_production(): void
+    {
+        config([
+            'app.epayco.force_approved' => true,
+            'app.env' => 'production',
+            'app.app_mode' => 'production',
+        ]);
+
+        $resultado = (new ApiEpayco)->validarReferenciaApify('385298450');
+
+        $this->assertFalse($resultado['success']);
+        $this->assertStringContainsString('autenticar', $resultado['errors']);
+    }
+
     private function apiConLlaves(): ApiEpayco
     {
         $api = new ApiEpayco;
