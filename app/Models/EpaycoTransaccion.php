@@ -49,7 +49,7 @@ class EpaycoTransaccion extends Model
     }
 
     /**
-     * Persiste un snapshot de la respuesta normalizada de ApiEpayco::validarReferencia().
+     * Persiste un snapshot de la respuesta normalizada de ApiEpayco::validarReferenciaApify().
      *
      * @param  array<string, mixed>  $datosPago
      */

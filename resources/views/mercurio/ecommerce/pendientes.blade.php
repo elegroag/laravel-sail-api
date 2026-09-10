@@ -127,6 +127,8 @@
         desestimarPrecompra: "{{ route('servicios.desestimar-precompra') }}",
         abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
         crearSesionEpayco: "{{ route('servicios.crear-sesion-epayco') }}",
+        validarPagoEpayco: "{{ route('servicios.validar-pago-epayco') }}",
+        guardarVenta: "{{ route('servicios.guardar-venta') }}",
         epaycoConfirmation: "{{ route('api.epayco.confirmation') }}",
     };
 </script>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mercurio;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\EpaycoTransaccion;
+use App\Models\Mercurio07;
 use App\Models\PrecompraServicio;
 use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
@@ -381,8 +382,16 @@ class EcommerceController extends ApplicationController
             }
 
             $nombreServicio = ! empty($data['nombre_servicio']) ? $data['nombre_servicio'] : 'Compra de servicio';
+            $billing = $this->resolverBillingCheckout($data);
+
+            Log::info('Ecommerce.crearSesionCheckout: billing ePayco', [
+                'precompra_id' => $precompra->id,
+                'cedtra' => $data['cedtra'] ?? null,
+                'billing' => $billing,
+            ]);
 
             $sesion = $apiEpayco->crearSesionCheckout([
+                "checkout_version" => "2",
                 'name' => $nombreServicio,
                 'description' => $nombreServicio,
                 'invoice' => 'ORD' . $precompra->id . '-' . time(),
@@ -397,13 +406,10 @@ class EcommerceController extends ApplicationController
                     'extra2' => $data['codser'],
                     'extra3' => (string) $data['numero'],
                     'extra4' => (string) $precompra->id,
+                    'extra5' => $billing['name'] ?? '',
+                    'extra6' => $billing['email'] ?? '',
                 ],
-                'billing' => [
-                    'email' => ! empty($data['email']) ? $data['email'] : 'sin@email.com',
-                    'name' => ! empty($data['nombre']) ? $data['nombre'] : 'Cliente',
-                    'typeDoc' => 'CC',
-                    'numberDoc' => $data['cedtra'],
-                ],
+                'billing' => $billing,
             ]);
 
             if (! ($sesion['success'] ?? false)) {
@@ -462,34 +468,74 @@ class EcommerceController extends ApplicationController
             $ref_payco = $request->input('ref_payco');
             $precompraId = (int) $request->input('precompra_id', 0);
 
+            Log::info('Ecommerce.validarPagoEpayco: inicio', [
+                'ref_payco' => $ref_payco,
+                'precompra_id' => $precompraId,
+            ]);
+
             if (empty(trim($ref_payco))) {
+                Log::info('Ecommerce.validarPagoEpayco: ref_payco vacia');
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Referencia de pago no proporcionada',
                 ]);
             }
 
-            $apiEpayco = $this->apiEpaycoParaPrecompra(
-                $this->resolverPrecompraPorRefOId((string) $ref_payco, $precompraId)
-            );
-            $resultado = $apiEpayco->validarReferencia($ref_payco);
+            $precompraAntes = $this->resolverPrecompraPorRefOId((string) $ref_payco, $precompraId);
+            $yaPagada = $precompraAntes?->isPagado() ?? false;
+
+            Log::info('Ecommerce.validarPagoEpayco: precompra resuelta', [
+                'precompra_id' => $precompraAntes?->id ?? $precompraId,
+                'estado' => $precompraAntes?->estado,
+                'cod_estado_epayco' => $precompraAntes?->cod_estado_epayco,
+                'ref_payco_db' => $precompraAntes?->ref_payco,
+                'ya_pagada' => $yaPagada,
+            ]);
+
+            $apiEpayco = $this->apiEpaycoParaPrecompra($precompraAntes);
+            $resultado = $apiEpayco->validarReferenciaApify($ref_payco);
+
+            Log::info('Ecommerce.validarPagoEpayco: resultado validarReferenciaApify', [
+                'ref_payco' => $ref_payco,
+                'success' => $resultado['success'] ?? false,
+                'aprobado' => $resultado['data']['aprobado'] ?? null,
+                'cod_estado' => $resultado['data']['cod_estado'] ?? null,
+                'respuesta' => $resultado['data']['respuesta'] ?? null,
+                'motivo' => $resultado['data']['motivo'] ?? null,
+                'errors' => $resultado['errors'] ?? null,
+                'ya_pagada' => $yaPagada,
+                'origen_consulta' => $resultado['data']['origen_consulta'] ?? 'apify',
+            ]);
 
             if (! $resultado['success']) {
-                $precompra = $this->resolverPrecompraPorRefOId((string) $ref_payco, $precompraId);
-                if ($precompra?->isPagado()) {
+                if ($yaPagada) {
+                    Log::info('Ecommerce.validarPagoEpayco: fallo API pero precompra ya PA', [
+                        'ref_payco' => $ref_payco,
+                        'errors' => $resultado['errors'] ?? null,
+                        'precompra_id' => $precompraAntes?->id ?? $precompraId,
+                    ]);
+
                     return response()->json([
                         'success' => true,
                         'data' => [
                             'aprobado' => true,
                             'cod_estado' => 1,
                             'respuesta' => 'Aceptada',
-                            'motivo' => $precompra->motivo_epayco ?? '',
+                            'motivo' => $precompraAntes->motivo_epayco ?? '',
                             'ref_payco' => $ref_payco,
                             'ya_pagada' => true,
                         ],
                         'message' => 'Pago aprobado (confirmado previamente)',
                     ]);
                 }
+
+                Log::info('Ecommerce.validarPagoEpayco: fallo validacion ePayco', [
+                    'ref_payco' => $ref_payco,
+                    'errors' => $resultado['errors'] ?? null,
+                    'precompra_id' => $precompraAntes?->id ?? $precompraId,
+                    'cod_estado_epayco' => $precompraAntes?->cod_estado_epayco,
+                ]);
 
                 return response()->json([
                     'success' => false,
@@ -504,12 +550,25 @@ class EcommerceController extends ApplicationController
             // guardarVenta (o el webhook) es quien cambia el estado y llama a Subsidio.
             $this->actualizarPrecompraDesdePago($data, $precompraId, 'validacion', false);
 
+            Log::info('Ecommerce.validarPagoEpayco: ok', [
+                'ref_payco' => $ref_payco,
+                'aprobado' => $data['aprobado'] ?? null,
+                'cod_estado' => $data['cod_estado'] ?? null,
+                'message' => $msg,
+                'precompra_id' => $precompraAntes?->id ?? $precompraId,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'data' => $data,
                 'message' => $msg,
             ]);
         } catch (\Throwable $e) {
+            Log::info('Ecommerce.validarPagoEpayco: excepcion', [
+                'message' => $e->getMessage(),
+                'ref_payco' => $request->input('ref_payco'),
+                'precompra_id' => (int) $request->input('precompra_id', 0),
+            ]);
             $this->setLogger($e->getMessage());
 
             return response()->json(
@@ -561,9 +620,9 @@ class EcommerceController extends ApplicationController
             $apiEpayco = $this->apiEpaycoParaPrecompra($precompraAntes);
             $forceApproved = $apiEpayco->debeForzarAprobacion();
 
-            $pago = $apiEpayco->validarReferencia($refpago);
+            $pago = $apiEpayco->validarReferenciaApify($refpago);
 
-            Log::info('Ecommerce.guardarVenta: resultado validarReferencia', [
+            Log::info('Ecommerce.guardarVenta: resultado validarReferenciaApify', [
                 'refpago' => $refpago,
                 'success' => $pago['success'] ?? false,
                 'aprobado' => $pago['data']['aprobado'] ?? null,
@@ -572,6 +631,7 @@ class EcommerceController extends ApplicationController
                 'motivo' => $pago['data']['motivo'] ?? null,
                 'errors' => $pago['errors'] ?? null,
                 'ya_pagada' => $yaPagada,
+                'origen_consulta' => $pago['data']['origen_consulta'] ?? 'apify',
             ]);
 
             if (! ($pago['success'] ?? false)) {
@@ -836,6 +896,9 @@ class EcommerceController extends ApplicationController
                     'nota' => $precompra->nota,
                     'valor' => $precompra->valor,
                     'p_id_customer' => $precompra->p_id_customer,
+                    'ref_payco' => $precompra->ref_payco,
+                    'cod_estado_epayco' => $precompra->cod_estado_epayco,
+                    'motivo_epayco' => $precompra->motivo_epayco,
                     'estado' => $precompra->estado,
                     'estado_descripcion' => $precompra->estado_descripcion,
                     'fecha_precompra' => $precompra->fecha_precompra?->format('Y-m-d H:i'),
@@ -1165,6 +1228,84 @@ class EcommerceController extends ApplicationController
         } catch (\Throwable $e) {
             $this->setLogger('Error registrando epayco_transacciones: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Billing ePayco: usa request si viene completo; si nombre/email faltan o son
+     * placeholders, completa desde Mercurio07 del usuario en sesión.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{email: string, name: string, typeDoc: string, numberDoc: string, callingCode: string, mobilePhone: ?string}
+     */
+    protected function resolverBillingCheckout(array $data): array
+    {
+        $nombre = trim((string) ($data['nombre'] ?? ''));
+        $email = trim((string) ($data['email'] ?? ''));
+        $numberDoc = trim((string) ($data['cedtra'] ?? ''));
+        $mobilePhone = '';
+
+        $placeholdersNombre = ['', 'cliente', 'sin nombre'];
+        $placeholdersEmail = ['', 'sin@email.com', 'noreply@email.com'];
+
+        $nombreVacio = in_array(mb_strtolower($nombre), $placeholdersNombre, true);
+        $emailVacio = in_array(mb_strtolower($email), $placeholdersEmail, true);
+
+        if ($nombreVacio || $emailVacio || $numberDoc === '') {
+            $mercurio07 = $this->usuarioMercurio07Sesion();
+            if ($mercurio07) {
+                if ($nombreVacio) {
+                    $nombre = trim((string) $mercurio07->getNombre());
+                }
+                if ($emailVacio) {
+                    $email = trim((string) $mercurio07->getEmail());
+                }
+                if ($numberDoc === '') {
+                    $numberDoc = trim((string) $mercurio07->getDocumento());
+                }
+                $whatsapp = trim((string) ($mercurio07->getWhatsapp() ?? ''));
+                if ($whatsapp !== '') {
+                    $mobilePhone = $whatsapp;
+                }
+            }
+        }
+
+        if ($nombre === '') {
+            $nombre = 'Cliente';
+        }
+        if ($email === '') {
+            $email = 'sin@email.com';
+        }
+        if ($numberDoc === '') {
+            $numberDoc = (string) (self::getActUser('documento') ?? '');
+        }
+
+        return [
+            'email' => $email,
+            'name' => $nombre,
+            'typeDoc' => 'CC',
+            'numberDoc' => $numberDoc,
+            'callingCode' => '+57',
+            'mobilePhone' => $mobilePhone,
+            'address' => ''
+        ];
+    }
+
+    protected function usuarioMercurio07Sesion(): ?Mercurio07
+    {
+        $user = session('user') ?? null;
+        $tipo = session('tipo') ?? null;
+        $documento = $user['documento'];
+        $coddoc = $user['coddoc'];
+
+        if (empty($documento) || $coddoc === null || $coddoc === '' || empty($tipo)) {
+            return null;
+        }
+
+        return Mercurio07::where([
+            'documento' => $documento,
+            'coddoc' => $coddoc,
+            'tipo' => $tipo,
+        ])->first();
     }
 
     /**

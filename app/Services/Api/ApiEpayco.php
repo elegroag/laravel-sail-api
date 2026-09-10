@@ -2,10 +2,10 @@
 
 namespace App\Services\Api;
 
-use App\Models\ApiEndpoint;
 use App\Models\EpaycoCuenta;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Cliente ePayco para validación de referencia y Smart Checkout (Apify).
@@ -54,101 +54,154 @@ class ApiEpayco
         return $this->mode;
     }
 
-    public function validarReferencia(string $refPayco): array
+    /**
+     * Valida un pago consultando la transacción en Apify
+     * (POST /payment/transaction con referencePayco).
+     *
+     * Requiere withCuenta() (PUBLIC/PRIVATE) para obtener el Bearer token.
+     *
+     * @return array{success: bool, data?: array<string, mixed>, errors?: string}
+     */
+    public function validarReferenciaApify(string $refPayco): array
     {
-        $endpoint = ApiEndpoint::where('connection_name', 'api-epayco')
-            ->where('service_name', 'Epayco-Reference')
-            ->first();
-
-        if (! $endpoint) {
+        $refPayco = trim($refPayco);
+        if ($refPayco === '') {
             return [
                 'success' => false,
-                'errors' => 'No existe configuración de endpoint para validar pagos ePayco (Epayco-Reference)',
+                'errors' => 'Referencia de pago no proporcionada',
             ];
         }
 
-        $host = $this->mode === 'development' ? $endpoint->host_dev : $endpoint->host_pro;
-        $url = $host."/{$endpoint->endpoint_name}/".urlencode($refPayco);
+        $token = $this->obtenerTokenApify();
+        if (! $token) {
+            return [
+                'success' => false,
+                'errors' => 'No se pudo autenticar con ePayco (Apify). Verifique la cuenta ePayco en Cajas.',
+            ];
+        }
+
+        $apifyUrl = rtrim((string) config('app.epayco.apify_url', 'https://apify.epayco.co'), '/');
+        $url = $apifyUrl.'/payment/transaction';
+        $payload = ['referencePayco' => $refPayco];
+
+        Log::info('ApiEpayco.validarReferenciaApify: request', [
+            'ref_payco' => $refPayco,
+            'url' => $url,
+            'mode' => $this->mode,
+            'verify_ssl' => (bool) config('app.epayco.verify_ssl', true),
+        ]);
 
         try {
-            $http = Http::timeout(30);
+            $http = Http::timeout(30)->withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer '.$token,
+            ]);
 
             if (! config('app.epayco.verify_ssl', true)) {
                 $http = $http->withoutVerifying();
             }
 
-            $response = $http->get($url);
+            $response = $http->post($url, $payload);
         } catch (\Throwable $e) {
+            Log::info('ApiEpayco.validarReferenciaApify: excepcion HTTP', [
+                'ref_payco' => $refPayco,
+                'url' => $url,
+                'message' => $e->getMessage(),
+            ]);
+
             return [
                 'success' => false,
-                'errors' => 'Error de conexion con ePayco: '.$e->getMessage(),
+                'errors' => 'Error de conexion con ePayco Apify: '.$e->getMessage(),
             ];
         }
 
         $status = $response->status();
+        $bodyRaw = $response->body();
+        $bodyLog = mb_strlen($bodyRaw) > 2000
+            ? mb_substr($bodyRaw, 0, 2000).'…[truncated]'
+            : $bodyRaw;
+
+        Log::info('ApiEpayco.validarReferenciaApify: response', [
+            'ref_payco' => $refPayco,
+            'url' => $url,
+            'http_status' => $status,
+            'body' => $bodyLog,
+        ]);
 
         if ($status !== 200) {
             return [
                 'success' => false,
-                'errors' => "ePayco respondio con codigo HTTP: {$status}",
+                'errors' => "ePayco Apify respondio con codigo HTTP: {$status}",
             ];
         }
 
         $data = $response->json();
-
         if (! is_array($data) || $data === []) {
             return [
                 'success' => false,
-                'errors' => 'Respuesta invalida de ePayco',
+                'errors' => 'Respuesta invalida de ePayco Apify',
             ];
         }
 
-        if ($this->esRespuestaErrorEpayco($data)) {
+        if (($data['success'] ?? null) === false) {
+            $mensaje = $data['textResponse']
+                ?? $data['titleResponse']
+                ?? 'Transacción no encontrada en ePayco';
+
+            Log::info('ApiEpayco.validarReferenciaApify: transaccion no encontrada o error', [
+                'ref_payco' => $refPayco,
+                'errors' => $mensaje,
+            ]);
+
             return [
                 'success' => false,
-                'errors' => $this->mensajeErrorEpayco($data),
+                'errors' => is_string($mensaje) ? $mensaje : 'Transacción no encontrada en ePayco',
             ];
         }
 
-        if (! isset($data['data']) || ! is_array($data['data'])) {
+        $tx = $data['data'] ?? null;
+        if (! is_array($tx) || $tx === []) {
             return [
                 'success' => false,
-                'errors' => 'Respuesta invalida de ePayco',
+                'errors' => 'Respuesta invalida de ePayco Apify',
             ];
         }
 
-        $tx = $data['data'];
+        // Apify a veces anida la tx en data.transaction; otras responde plana en data.
+        if (isset($tx['transaction']) && is_array($tx['transaction'])) {
+            $tx = $tx['transaction'];
+        }
 
-        // data presente pero sin campos de transacción (p. ej. {} o error parcial)
-        if (! isset($tx['x_cod_transaction_state']) && ! isset($tx['x_cod_respuesta'])) {
+        if (! isset($tx['codTransactionState']) && ! isset($tx['codeResponse']) && ! isset($tx['refPayco'])) {
             return [
                 'success' => false,
-                'errors' => $this->mensajeErrorEpayco($data),
+                'errors' => 'Respuesta invalida de ePayco Apify (sin datos de transaccion)',
             ];
         }
 
-        $codEstado = (int) ($tx['x_cod_transaction_state'] ?? $tx['x_cod_respuesta'] ?? 0);
+        $codEstado = (int) ($tx['codTransactionState'] ?? $tx['codeResponse'] ?? 0);
 
         $resultado = [
             'success' => true,
             'data' => [
                 'aprobado' => $codEstado === 1,
                 'cod_estado' => $codEstado,
-                'respuesta' => $tx['x_response'] ?? $tx['x_respuesta'] ?? 'Sin respuesta',
-                'motivo' => $tx['x_response_reason_text'] ?? '',
-                'monto' => $tx['x_amount'] ?? '0',
-                'ref_payco' => $tx['x_ref_payco'] ?? $refPayco,
-                'x_id_invoice' => $tx['x_id_invoice'] ?? $tx['x_id_factura'] ?? null,
-                'x_transaction_id' => $tx['x_transaction_id'] ?? null,
-                'x_approval_code' => $tx['x_approval_code'] ?? null,
-                'x_bank_name' => $tx['x_bank_name'] ?? null,
-                'x_franchise' => $tx['x_franchise'] ?? null,
-                'x_card_number' => $tx['x_card_number'] ?? $tx['x_cardnumber'] ?? null,
-                'x_quotas' => $tx['x_quotas'] ?? null,
-                'x_currency_code' => $tx['x_currency_code'] ?? null,
-                'x_date' => $tx['x_date'] ?? $tx['x_transaction_date'] ?? $tx['x_fecha_transaccion'] ?? null,
-                'x_signature' => $tx['x_signature'] ?? null,
+                'respuesta' => $tx['status'] ?? $tx['response'] ?? 'Sin respuesta',
+                'motivo' => $tx['responseReasonText'] ?? '',
+                'monto' => $tx['amount'] ?? $tx['amountOk'] ?? '0',
+                'ref_payco' => $tx['refPayco'] ?? $refPayco,
+                'x_id_invoice' => $tx['invoice'] ?? null,
+                'x_transaction_id' => $tx['transactionId'] ?? null,
+                'x_approval_code' => $tx['autorizacion'] ?? null,
+                'x_bank_name' => $tx['bank'] ?? null,
+                'x_franchise' => $tx['franchise'] ?? null,
+                'x_card_number' => $tx['cardNumber'] ?? null,
+                'x_quotas' => $tx['quotas'] ?? null,
+                'x_currency_code' => $tx['currency'] ?? null,
+                'x_date' => $tx['date'] ?? null,
+                'x_signature' => $tx['signature'] ?? null,
                 'payload_raw' => $tx,
+                'origen_consulta' => 'apify',
             ],
         ];
 
@@ -159,55 +212,14 @@ class ApiEpayco
             $resultado['data']['motivo'] = 'Simulado por EPAYCO_FORCE_APPROVED';
         }
 
+        Log::info('ApiEpayco.validarReferenciaApify: ok', [
+            'ref_payco' => $resultado['data']['ref_payco'],
+            'aprobado' => $resultado['data']['aprobado'],
+            'cod_estado' => $resultado['data']['cod_estado'],
+            'respuesta' => $resultado['data']['respuesta'],
+        ]);
+
         return $resultado;
-    }
-
-    /**
-     * Detecta envelopes de error de ePayco (HTTP 200 con fallo de datos/conexión).
-     *
-     * Ejemplos:
-     * - {"status":false,"message":"...","data":{"status":"error","description":"..."}}
-     * - {"status":"error","description":"..."}
-     *
-     * @param  array<string, mixed>  $payload
-     */
-    protected function esRespuestaErrorEpayco(array $payload): bool
-    {
-        $status = $payload['status'] ?? null;
-        if ($status === false || $status === 'error') {
-            return true;
-        }
-
-        if (($payload['success'] ?? null) === false) {
-            return true;
-        }
-
-        $inner = $payload['data'] ?? null;
-        if (is_array($inner) && ($inner['status'] ?? null) === 'error') {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    protected function mensajeErrorEpayco(array $payload): string
-    {
-        $inner = is_array($payload['data'] ?? null) ? $payload['data'] : [];
-
-        $mensaje = $inner['description']
-            ?? $payload['description']
-            ?? $payload['message']
-            ?? $payload['textResponse']
-            ?? null;
-
-        if (is_string($mensaje) && trim($mensaje) !== '') {
-            return trim($mensaje);
-        }
-
-        return 'Error de datos o conexion con ePayco';
     }
 
     /**

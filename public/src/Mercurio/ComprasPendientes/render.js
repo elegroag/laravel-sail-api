@@ -31,6 +31,10 @@ function buildCardPendiente(precompra) {
     html += buildFila('Fecha', fecha);
     html += buildFila('Beneficiario', beneficiario);
 
+    if (precompra.ref_payco) {
+        html += buildFila('Ref. ePayco', escapeHtml(String(precompra.ref_payco)));
+    }
+
     if (nota && nota.trim() !== '') {
         html += buildFila('Nota', escapeHtml(nota));
     }
@@ -40,7 +44,11 @@ function buildCardPendiente(precompra) {
     html += '<span class="compra-card__valor-label">Valor</span>';
     html += '<span class="compra-card__valor">' + valor + '</span>';
     html += '</div>';
-    html += '<div class="d-flex gap-2 mt-3">';
+    html += '<div class="d-flex flex-wrap gap-2 mt-3">';
+    if (precompra.ref_payco) {
+        html += '<button type="button" class="btn btn-success btn-sm flex-fill btn-verificar-pago" data-id="' + escapeHtml(String(precompra.id)) + '">' +
+            '<i class="fas fa-sync-alt me-1"></i> Verificar pago</button>';
+    }
     html += '<button type="button" class="btn btn-primary btn-sm flex-fill btn-retomar-pago" data-id="' + escapeHtml(String(precompra.id)) + '">' +
         '<i class="fas fa-credit-card me-1"></i> Retomar pago</button>';
     html += '<button type="button" class="btn btn-outline-danger btn-sm flex-fill btn-desestimar" data-id="' + escapeHtml(String(precompra.id)) + '">' +

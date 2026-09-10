@@ -7,6 +7,7 @@
  * desestimar).
  *
  * Lista las precompras en estado pendiente de pago (PE) y permite:
+ *   - Verificar pago: reconsulta ePayco + guardar-venta si ya fue aceptado
  *   - Retomar el pago: valida la tarifa vigente y reabre el checkout de ePayco
  *     reutilizando la misma precompra (via sessionStorage epayco_precompra_id).
  *   - Desestimar: registra un motivo del catalogo (texto libre si es OTRO).
@@ -21,6 +22,7 @@ import { MOTIVO_OTRO } from './constants.js';
 import { buscarPrecompra } from './datos.js';
 import { cargarDatos } from './carga.js';
 import { retomarPago } from './pago.js';
+import { verificarPago } from './revalidar.js';
 import { abrirModalDesestimar, confirmarDesestimar } from './desestimar.js';
 
 function bindHandlers() {
@@ -31,6 +33,13 @@ function bindHandlers() {
 
     $(document).on('click', '#btn_reintentar', function () {
         cargarDatos();
+    });
+
+    $(document).on('click', '.btn-verificar-pago', function () {
+        var precompra = buscarPrecompra($(this).data('id'));
+        if (precompra) {
+            verificarPago(precompra);
+        }
     });
 
     $(document).on('click', '.btn-retomar-pago', function () {
