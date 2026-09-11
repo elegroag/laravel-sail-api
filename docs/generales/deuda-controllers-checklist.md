@@ -154,3 +154,7 @@ Orden sugerido (recomendación, no arrancar):
 ## Middleware
 
 Inventario aparte: `docs/generales/deuda-middleware-checklist.md` (ACL/sesión/flash/CSRF). No mezclar con este corte de queries.
+
+## Models
+
+Inventario aparte: `docs/generales/deuda-models-checklist.md` (ModelBase / ActiveRecord). No mezclar con este corte de queries.

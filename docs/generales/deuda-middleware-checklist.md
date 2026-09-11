@@ -51,3 +51,4 @@ Colaterales (no son clases de `app/Http/Middleware` pero los middleware las usan
 
 `Filter.php` / `beforeFilter` / `afterFilter`: no existen. No mezclar con Corte 8/9 de queries. No borrar `SessionCookies` ni `flash.php` hasta vaciar consumidores.
 
+Models: `docs/generales/deuda-models-checklist.md`.
