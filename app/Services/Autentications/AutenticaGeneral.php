@@ -82,7 +82,7 @@ class AutenticaGeneral
             'asunto' => $asunto,
         ])->render();
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
 
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
@@ -178,7 +178,7 @@ class AutenticaGeneral
         )->render();
 
         $asunto = 'Comprobación usuario portal Comfaca En Linea COMFACA';
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
             "emisor_email: {$emailCaja->getEmail()}",

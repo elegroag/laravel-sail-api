@@ -102,7 +102,7 @@ class SolicitaClaveService
         $mclave = $cl[0];
         $pass = $cl[1];
         $nombre = ($this->tipo == 'T') ? $afiliado['priape'] . ' ' . $afiliado['segape'] . ' ' . $afiliado['prinom'] . ' ' . $afiliado['segnom'] : $afiliado['razsoc'];
-        $mercurio07 = (new Mercurio07)->findFirst("tipo='{$this->tipo}' AND documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
+        $mercurio07 = Mercurio07::where('tipo', $this->tipo)->where('documento', $this->documento)->where('coddoc', $this->coddoc)->first();
         if ($mercurio07) {
             if (trim(strtolower($mercurio07->getEmail())) != trim(strtolower($this->email))) {
                 throw new DebugException('La dirección de email no es igual a la que tenemos registrada.' .
@@ -117,7 +117,7 @@ class SolicitaClaveService
             // /validacion extra para empresas
             if ($this->tipo == 'E') {
                 // otros registros previos, con otro codigo de documento coddoc, tipdoc
-                $mercurio07 = (new Mercurio07)->findFirst("tipo='E' AND documento='{$this->documento}'");
+                $mercurio07 = Mercurio07::where('tipo', 'E')->where('documento', $this->documento)->first();
                 if ($mercurio07) {
                     throw new DebugException("Error el tipo de documento no coincide con el registro disponible de la empresa. {$this->documento}", 503);
                 }
@@ -131,8 +131,7 @@ class SolicitaClaveService
 
         $this->crear_usuario($nombre, $this->email, '18001', $mclave);
 
-        $mtipoDocumentos = new Gener18;
-        $entity = $mtipoDocumentos->findFirst(" coddoc='{$afiliado['coddoc']}'");
+        $entity = Gener18::where('coddoc', $afiliado['coddoc'])->first();
         $this->coddoc_detalle = ($entity == false) ? '' : $entity->getDetdoc();
 
         if ($this->tipo == 'E' && $afiliado != false) {
@@ -140,7 +139,7 @@ class SolicitaClaveService
             $this->crearEmpresa($afiliado);
         }
 
-        $mercurio02 = (new Mercurio02)->findFirst();
+        $mercurio02 = Mercurio02::first();
         $arreglo = [
             'titulo' => "Cordial saludo,<br/>Señor@ {$nombre}",
             'msj' => "Bienvenido a {$mercurio02->getRazsoc()}, a continuación confirmamos sus datos de usuario para el ingreso a nuestro portal web. <br/>",
@@ -161,7 +160,7 @@ class SolicitaClaveService
         $html = view('login/tmp/mail', $arreglo)->render();
 
         $asunto = 'Solicitud de clave sistema Comfaca En Línea';
-        $email_caja = (new Mercurio01)->findFirst();
+        $email_caja = Mercurio01::first();
 
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
@@ -174,7 +173,7 @@ class SolicitaClaveService
             $html
         );
 
-        $afiliadoUser = (new Mercurio07)->findFirst(" tipo='{$this->tipo}' AND documento='{$this->documento}' AND coddoc='{$this->coddoc}'");
+        $afiliadoUser = Mercurio07::where('tipo', $this->tipo)->where('documento', $this->documento)->where('coddoc', $this->coddoc)->first();
 
         return $afiliadoUser;
     }
@@ -203,7 +202,7 @@ class SolicitaClaveService
     public function crear_usuario($repleg, $email, $codciu, $mclave)
     {
         $today = Carbon::now();
-        $mercurio07 = (new Mercurio07)->findFirst(" tipo='{$this->tipo}' and coddoc='{$this->coddoc}' and documento='{$this->documento}' ");
+        $mercurio07 = Mercurio07::where('tipo', $this->tipo)->where('coddoc', $this->coddoc)->where('documento', $this->documento)->first();
         if ($mercurio07 == false) {
             $mercurio07 = new Mercurio07;
             $mercurio07->setTipo($this->tipo);
@@ -229,7 +228,7 @@ class SolicitaClaveService
             throw new DebugException("Error \n" . $msj, 503);
         }
 
-        $mercurio19 = (new Mercurio19)->findFirst(" tipo='{$this->tipo}' and coddoc='{$this->coddoc}' and documento='{$this->documento}'");
+        $mercurio19 = Mercurio19::where('tipo', $this->tipo)->where('coddoc', $this->coddoc)->where('documento', $this->documento)->first();
         if ($mercurio19 == false) {
             $mercurio19 = new Mercurio19;
             $mercurio19->setTipo($this->tipo);
@@ -251,7 +250,7 @@ class SolicitaClaveService
 
     public function crearEmpresa($datos)
     {
-        $mercurio30 = (new Mercurio30)->findFirst(" nit='{$datos['nit']}' AND tipo='E' AND coddoc='{$datos['coddoc']}' ");
+        $mercurio30 = Mercurio30::where('nit', $datos['nit'])->where('tipo', 'E')->where('coddoc', $datos['coddoc'])->first();
         if (! $mercurio30) {
 
             $usuario = 450;

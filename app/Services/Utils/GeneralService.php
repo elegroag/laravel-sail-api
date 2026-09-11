@@ -186,7 +186,7 @@ class GeneralService
 
     public function sendEmail2($correo, $nombre, $asunto, $msj, $file = '')
     {
-        $mercurio02 = (new Mercurio02)->findFirst();
+        $mercurio02 = Mercurio02::first();
         $mcontenido = '';
         $mcontenido .= "<div style='padding:0px;margin:0px'>";
         $mcontenido .= "<table width='100%' bgcolor='#EEEEEE' cellpadding='0' cellspacing='0' border='0'>";
@@ -2119,14 +2119,14 @@ class GeneralService
 
     public function asignarFuncionario($tipopc, $codciu)
     {
-        $mercurio05 = (new Mercurio05)->findFirst("codciu = '$codciu'");
+        $mercurio05 = Mercurio05::where('codciu', $codciu)->first();
         if ($mercurio05 == false) {
-            $mercurio04 = (new Mercurio04)->findFirst("principal='S'");
+            $mercurio04 = Mercurio04::where('principal', 'S')->first();
             $codofi = $mercurio04->getCodofi();
         } else {
             $codofi = $mercurio05->getCodofi();
         }
-        $mercurio08 = (new Mercurio08)->findFirst("codofi = '$codofi' and tipopc='{$tipopc}' and orden='1'");
+        $mercurio08 = Mercurio08::where('codofi', $codofi)->where('tipopc', $tipopc)->where('orden', '1')->first();
         if ($mercurio08 == false) {
             $usuario = Mercurio08::whereRaw("codofi = '{$codofi}' and tipopc='{$tipopc}' ")->min('usuario');
         } else {

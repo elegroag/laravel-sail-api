@@ -196,27 +196,27 @@ Orden recomendado:
 - [x] `GestionFirmas.php` — `Mercurio16::where()->first()`; reload usa la misma instancia
 - [x] `TrabajadorFormulario.php` — `findFirst`/`getFind` → `where`/`whereIn`/`first`/`get`
 
-### Services/Autentications (1 pendiente + 1 omitido)
+### Services/Autentications — cerrado
 
-- [ ] `AutenticaGeneral.php` — `findFirst`×2 (`Mercurio01`)
+- [x] `AutenticaGeneral.php` — `Mercurio01::first()` ×2
 - [x] `AutenticaService.php` — **omitido**: solo `new Mercurio19` Eloquent
 
-### Services/Signup (1 pendiente + 4 omitidos)
+### Services/Signup — cerrado
 
-- [ ] `SignupDomestico.php` — `findFirst`×2 (`Mercurio07`, `Mercurio01`)
+- [x] `SignupDomestico.php` — `Mercurio07::where()->first()` / `Mercurio01::first()`
 - [x] `SignupEmpresas.php` — **omitido**: solo `new Mercurio30` Eloquent
 - [x] `SignupFacultativos.php` — **omitido**: solo `new Mercurio36` Eloquent
 - [x] `SignupIndependientes.php` — **omitido**: solo `new Mercurio41` Eloquent
 - [x] `SignupPensionados.php` — **omitido**: solo `new Mercurio38` Eloquent
 
-### Services/Utils (3 pendientes + 3 omitidos)
+### Services/Utils — cerrado
 
-- [ ] `ChangeCuentaService.php` — `findFirst`×1 (`Mercurio07`)
+- [x] `ChangeCuentaService.php` — `Mercurio07::where()->first()`
 - [x] `CrearUsuario.php` — **omitido**: solo `new MercurioNN` Eloquent
-- [ ] `GeneralService.php` — `findFirst`×4 (archivo grande)
+- [x] `GeneralService.php` — `findFirst`×4 → Eloquent `first()`; `whereRaw` en `asignarFuncionario` intacto
 - [x] `GuardarArchivoService.php` — **omitido**: solo `use DbBase` sin usos
 - [x] `RegistroSeguimiento.php` — **omitido**: solo `new Mercurio10` Eloquent
-- [ ] `SolicitaClaveService.php` — `findFirst`×9
+- [x] `SolicitaClaveService.php` — `findFirst`×9 → Eloquent `first()`; `new MercurioNN` de create intacto
 
 ### Services/Menu (2)
 
@@ -238,7 +238,7 @@ Orden recomendado:
 
 Destino por pieza: queries → Eloquent; tablas lookup → Cache; input HTTP → `Request` / FormRequest. No mezclar `findFirst("col='x'")` nuevo.
 
-**Corte 8 Services — progreso.** Cerrados: Aprueba, Entidades, CajaServices, Cajas, Formularios, PreparaFormularios. Omitidos: `whereRaw`, `new Model`, FormulariosAdjuntos, Reportes, varios Signup/Utils. **Pendiente:** AutenticaGeneral, SignupDomestico, Utils (`ChangeCuenta`, `GeneralService`, `SolicitaClave`), Menu (2), SatApi (2), Certificados (1).
+**Corte 8 Services — progreso.** Cerrados: Aprueba, Entidades, CajaServices, Cajas, Formularios, PreparaFormularios, Autentications, Signup, Utils. Omitidos: `whereRaw`, `new Model`, FormulariosAdjuntos, Reportes, varios Signup/Utils. **Pendiente:** Menu (2), SatApi (2), Certificados (1).
 
 ---
 

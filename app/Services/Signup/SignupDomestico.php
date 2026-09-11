@@ -83,7 +83,7 @@ class SignupDomestico
     public function createUserMercurio()
     {
         $this->generaCode();
-        $usuarioParticular = (new Mercurio07)->findFirst("tipo='P' AND coddoc='{$this->coddoc}' AND documento='{$this->documento}'");
+        $usuarioParticular = Mercurio07::where('tipo', 'P')->where('coddoc', $this->coddoc)->where('documento', $this->documento)->first();
         $this->crearSolicitud = false;
 
         if ($usuarioParticular == false) {
@@ -148,7 +148,7 @@ class SignupDomestico
         )->render();
 
         $asunto = 'Registro de usuario particular portal Comfaca En Linea';
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
         $senderEmail->setters(
             "emisor_email: {$emailCaja->getEmail()}",

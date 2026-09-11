@@ -25,7 +25,7 @@ class ChangeCuentaService
         $documento = $request->getParam('documento');
         $usuario = $request->getParam('usuario');
 
-        $empresa_registrada = (new Mercurio07)->findFirst(" documento='{$documento}' AND tipo='{$tipo}' AND coddoc='{$coddoc}' AND estado='A'");
+        $empresa_registrada = Mercurio07::where('documento', $documento)->where('tipo', $tipo)->where('coddoc', $coddoc)->where('estado', 'A')->first();
         if ($empresa_registrada == false) {
             throw new AuthException('La empresa no está disponible para su administración.', 501);
         }
