@@ -46,7 +46,9 @@ class GestionFirmas
     public function guardarFirma($imagenBase64, $usuario)
     {
 
-        $lfirma = (new Mercurio16)->findFirst(" documento='{$usuario->getDocumento()}' AND coddoc='{$usuario->getCoddoc()}'");
+        $lfirma = Mercurio16::where('documento', $usuario->getDocumento())
+            ->where('coddoc', $usuario->getCoddoc())
+            ->first();
 
         // Decodificar la imagen base64
         $imagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $imagenBase64));
@@ -83,10 +85,7 @@ class GestionFirmas
             }
             $lfirma->save();
 
-            $this->lfirma = (new Mercurio16)->findFirst("
-                documento='{$usuario->getDocumento()}' AND
-                coddoc='{$usuario->getCoddoc()}'
-            ");
+            $this->lfirma = $lfirma;
 
             return true;
         } else {

@@ -72,7 +72,12 @@ class TrabajadorFormulario
         $trabajadorConyuges = ($out['success'] == true) ? $out['data'] : false;
 
         // solicitud en estado temporal
-        $conyuge_comper = (new Mercurio32)->findFirst(" documento='{$this->documento}' and coddoc='{$this->coddoc}' and cedtra='{$mercurio31->getCedtra()}' and comper='S' and estado IN('T','P')");
+        $conyuge_comper = Mercurio32::where('documento', $this->documento)
+            ->where('coddoc', $this->coddoc)
+            ->where('cedtra', $mercurio31->getCedtra())
+            ->where('comper', 'S')
+            ->whereIn('estado', ['T', 'P'])
+            ->first();
 
         if ($conyuge_comper == false) {
             $data_conyuge = false;
@@ -109,7 +114,11 @@ class TrabajadorFormulario
         }
 
         $conyuge_otra = false;
-        $beneficiarios = (new Mercurio34)->getFind(" cedtra='{$mercurio31->getCedtra()}' and documento='{$this->documento}' and coddoc='{$this->coddoc}' and estado IN('T','P')");
+        $beneficiarios = Mercurio34::where('cedtra', $mercurio31->getCedtra())
+            ->where('documento', $this->documento)
+            ->where('coddoc', $this->coddoc)
+            ->whereIn('estado', ['T', 'P'])
+            ->get();
         if ($beneficiarios) {
             foreach ($beneficiarios as $beneficiario) {
                 if ($beneficiario->getCedcon() && $beneficiario->getParent() == '1') {
