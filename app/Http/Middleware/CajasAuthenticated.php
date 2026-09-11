@@ -49,7 +49,7 @@ class CajasAuthenticated
 
             if (! ($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
                 set_flashdata('error', [
-                    'msj' => 'No autorizado para acceder al modulo. '.__LINE__.' '.$this->controller,
+                    'msj' => 'No autorizado para acceder al modulo. '.$this->controller,
                     'code' => 401,
                 ]);
 
@@ -67,7 +67,7 @@ class CajasAuthenticated
             if (! ($this->controller == 'PrincipalController' && $this->actionMethod == 'index')) {
 
                 set_flashdata('error', [
-                    'msj' => 'No autorizado para acceder a la acción. '.__LINE__.' '.$this->controller.' '.$this->actionMethod,
+                    'msj' => 'No autorizado para acceder a la acción. '.$this->controller.' '.$this->actionMethod,
                     'code' => 401,
                 ]);
 

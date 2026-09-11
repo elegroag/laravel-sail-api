@@ -151,3 +151,6 @@ Orden sugerido (recomendación, no arrancar):
 - `Adapter/ApplicationController.php` — no migrar primero; 78 controllers lo extienden.
 - `Api/*` (6) y `Web/WebController.php` ya extienden `Controller` Laravel.
 
+## Middleware
+
+Inventario aparte: `docs/generales/deuda-middleware-checklist.md` (ACL/sesión/flash/CSRF). No mezclar con este corte de queries.

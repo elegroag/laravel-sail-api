@@ -264,3 +264,5 @@ Cortes 1–7 no iniciados (salvo `dd()`/`dump()` en Corte 1, hecho). Corte 8 Ser
 ## Fuera de alcance de este checklist
 
 `dd()`/`dump()` ya se quitó (`e6870011`). Corte 8 Services cerrado en el inventario de abajo. CSRF/CORS y el resto de cortes 1–7 no se tocan hasta que Ricardo los elija. El push a origin espera su ok.
+
+Middleware (ACL Kumbia, SessionCookies, flash, CSRF except): inventario en `docs/generales/deuda-middleware-checklist.md`. No implementar hasta que Ricardo elija alcance.
