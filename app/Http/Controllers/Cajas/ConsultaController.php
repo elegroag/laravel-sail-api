@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
 use App\Models\Mercurio07;
 use App\Models\Mercurio09;
@@ -24,7 +23,6 @@ use Illuminate\Validation\ValidationException;
 
 class ConsultaController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -32,7 +30,6 @@ class ConsultaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }

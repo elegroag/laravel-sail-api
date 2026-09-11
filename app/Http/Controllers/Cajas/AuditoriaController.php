@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
 use App\Models\Mercurio09;
 use App\Services\ReportGenerator\Products\OptimizedXlsxProduct;
@@ -19,7 +18,6 @@ use Illuminate\Support\Collection;
 
 class AuditoriaController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -27,7 +25,6 @@ class AuditoriaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }

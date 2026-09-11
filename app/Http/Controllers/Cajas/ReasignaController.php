@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Gener02;
 use App\Models\Mercurio09;
 use App\Models\Mercurio30;
@@ -19,7 +19,6 @@ use Illuminate\Http\Request;
 
 class ReasignaController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -27,7 +26,6 @@ class ReasignaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -203,7 +201,7 @@ class ReasignaController extends ApplicationController
             $id = $request->input('id');
             $usuario = $request->input('usuario');
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             $generalService = new GeneralService;
             $out = $generalService->consultaTipopc($tipopc, 'one', $id, '');
             $solicitud = $out['datos'];
@@ -215,7 +213,7 @@ class ReasignaController extends ApplicationController
                 'usuario' => $usuario,
             ]);
 
-            $this->db->commit();
+            DB::commit();
 
             $response = [
                 'success' => true,

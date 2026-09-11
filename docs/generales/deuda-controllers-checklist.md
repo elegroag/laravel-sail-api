@@ -15,7 +15,7 @@ Misma política que Corte 8:
 
 | App | Archivos | `ApplicationController` | Deuda query | Sin deuda query |
 | --- | --- | --- | --- | --- |
-| Cajas | 63 | 56 | 18 | 45 |
+| Cajas | 63 | 56 | 13 | 50 |
 | Mercurio | 25 | 22 | 22 | 3 |
 
 Fuera de este checklist: `Adapter/ApplicationController.php`, `Api/*` (6), `Web/WebController.php`, `Controller.php` base.
@@ -79,18 +79,18 @@ Orden sugerido (recomendación, no arrancar):
 - [x] `Mercurio73Controller.php` — txs → `DB::*`; omitir `new Model`
 - [x] `Mercurio74Controller.php` — txs → `DB::*`; omitir `new Model`
 
-## Cajas — Reportes / consultas / auditoría
+## Cajas — Reportes / consultas / auditoría — parcial
 
-- [ ] `AuditoriaController.php` — `ApplicationController`, 352 LOC — `DbBase`×2/`rawConnect`×1
-- [ ] `ConsultaController.php` — `ApplicationController`, 673 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×1
-- [x] `ConsultaDocumentoSolicitudController.php` — `ApplicationController`, 32 LOC — **omitido queries**: sin `findFirst`/`inQueryAssoc`/`DbBase` (sigue `ApplicationController`)
-- [x] `InformeSolicitudController.php` — `ApplicationController`, 80 LOC — **omitido queries**: sin `findFirst`/`inQueryAssoc`/`DbBase` (sigue `ApplicationController`)
-- [ ] `ReasignaController.php` — `ApplicationController`, 234 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×6
-- [ ] `ReportesController.php` — `ApplicationController`, 732 LOC — `findFirst`×18, `DbBase`×2/`rawConnect`×1; `setParamToView`×1
-- [ ] `ReportesolController.php` — `ApplicationController`, 77 LOC — `DbBase`×3/`rawConnect`×1
-- [ ] `ReporteOportunidadAfiliacionController.php` — `ApplicationController`, 147 LOC — `DbBase`×3/`rawConnect`×1
-- [x] `ReporteComprasServiciosController.php` — `ApplicationController`, 32 LOC — **omitido queries**: sin `findFirst`/`inQueryAssoc`/`DbBase` (sigue `ApplicationController`)
-- [x] `ReporteSolicitudesEmpresaController.php` — `ApplicationController`, 39 LOC — **omitido queries**: sin `findFirst`/`inQueryAssoc`/`DbBase` (sigue `ApplicationController`)
+- [x] `AuditoriaController.php` — `DbBase` constructor sin usos, retirado
+- [x] `ConsultaController.php` — `DbBase` constructor sin usos, retirado; omitir `whereRaw`/`new Model`
+- [x] `ConsultaDocumentoSolicitudController.php` — **omitido queries**
+- [x] `InformeSolicitudController.php` — **omitido queries**
+- [x] `ReasignaController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [ ] `ReportesController.php` — `DbBase` retirado; `Gener02::where()->first()` ×9. **Pendiente:** `$this->Sat20->findFirst` ×9 y `$this->SatNN->find` (no hay modelos `Sat02`/`Sat20`/etc.)
+- [x] `ReportesolController.php` — `DbBase` constructor sin usos, retirado
+- [x] `ReporteOportunidadAfiliacionController.php` — `DbBase` constructor sin usos, retirado
+- [x] `ReporteComprasServiciosController.php` — **omitido queries**
+- [x] `ReporteSolicitudesEmpresaController.php` — **omitido queries**
 
 ## Cajas — Admin / menú / otros
 

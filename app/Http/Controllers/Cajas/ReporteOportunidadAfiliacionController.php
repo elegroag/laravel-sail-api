@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Requests\Cajas\ReporteOportunidadAfiliacionRequest;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio09;
 use App\Services\Reports\OportunidadAfiliacionExcelExporter;
 use App\Services\Reports\OportunidadAfiliacionService;
@@ -13,7 +12,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReporteOportunidadAfiliacionController extends ApplicationController
 {
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -22,7 +20,6 @@ class ReporteOportunidadAfiliacionController extends ApplicationController
     public function __construct(
         protected OportunidadAfiliacionService $oportunidadAfiliacionService
     ) {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }

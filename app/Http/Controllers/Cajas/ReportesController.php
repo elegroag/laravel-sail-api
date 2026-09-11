@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use App\Models\Gener02;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use Illuminate\Http\Request;
 use UserReportExcel;
 
 class ReportesController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -17,7 +16,6 @@ class ReportesController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -428,7 +426,7 @@ class ReportesController extends ApplicationController
         $msat02 = $this->Sat02->find("numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '1'  )", 'order: numtraccf  ASC ');
         foreach ($msat02 as $sat02) {
             $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat02->getNumtraccf()}'   ");
-            $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+            $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
             $report->put('fecha', trim($sat20->getFecha()));
             $report->put('hora', trim($sat20->getHora()));
             $report->put('usuario', $sat20->getUsuario() . ' ' . trim($mgener02->getNombre()));
@@ -471,7 +469,7 @@ class ReportesController extends ApplicationController
             $msat03 = $this->Sat03->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '2'  )", 'order: numtraccf  ASC ');
             foreach ($msat03 as $sat03) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat03->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
@@ -517,7 +515,7 @@ class ReportesController extends ApplicationController
             $msat06 = $this->Sat06->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '3'  )", 'order: numtraccf  ASC  ');
             foreach ($msat06 as $sat06) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat06->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
@@ -544,7 +542,7 @@ class ReportesController extends ApplicationController
             $msat08 = $this->Sat08->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '4'  )", 'order: numtraccf  ASC  ');
             foreach ($msat08 as $sat08) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat08->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
@@ -569,7 +567,7 @@ class ReportesController extends ApplicationController
             $msat09 = $this->Sat09->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '5'  )", 'order: numtraccf  ASC ');
             foreach ($msat09 as $sat09) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat09->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
@@ -610,7 +608,7 @@ class ReportesController extends ApplicationController
             $msat10 = $this->Sat10->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '6'  )", 'order: numtraccf  ASC ');
             foreach ($msat10 as $sat10) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat10->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
@@ -639,7 +637,7 @@ class ReportesController extends ApplicationController
             $msat11 = $this->Sat11->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '7'  )", 'order: numtraccf  ASC ');
             foreach ($msat11 as $sat11) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat11->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
@@ -669,7 +667,7 @@ class ReportesController extends ApplicationController
             $msat12 = $this->Sat12->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '8'  )", 'order: numtraccf  ASC ');
             foreach ($msat12 as $sat12) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat12->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
@@ -700,7 +698,7 @@ class ReportesController extends ApplicationController
             $msat13 = $this->Sat13->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '9'  )", 'order: numtraccf  ASC ');
             foreach ($msat13 as $sat13) {
                 $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat13->getNumtraccf()}' ");
-                $mgener02 = $this->Gener02->findFirst(" usuario = '{$sat20->getUsuario()}' ");
+                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
                 $report->put('fecha', trim($sat20->getFecha()));
                 $report->put('hora', trim($sat20->getHora()));
                 $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));

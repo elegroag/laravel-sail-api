@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio09;
 use App\Services\Reportes\ReporteSolicitudes;
 use App\Services\Reportes\SolicitudesExcelExporter;
@@ -21,7 +20,6 @@ class ReportesolController extends ApplicationController
      */
     protected $pagination;
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -30,7 +28,6 @@ class ReportesolController extends ApplicationController
     public function __construct()
     {
         $this->pagination = new Pagination;
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipfun') ?? null;
     }
