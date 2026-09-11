@@ -29,6 +29,7 @@ use App\Services\Utils\Logger;
 use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ConsultasEmpresaController extends ApplicationController
 {
@@ -63,11 +64,17 @@ class ConsultasEmpresaController extends ApplicationController
         $mercurio31 = Mercurio31::where('nit', $documento)
             ->orderBy('id', 'desc');
 
-        $mercurio33 = Mercurio33::where([
-            ['tipo', $tipo],
-            ['coddoc', $coddoc],
-            ['documento', $documento],
-        ])->orderBy('id', 'desc');
+        $mercurio33 = Mercurio33::select(DB::raw('mercurio33.*'), DB::raw('mercurio28.detalle as campo_detalle'))
+            ->leftJoin('mercurio28', function ($join) use ($tipo) {
+                $join->on('mercurio33.campo', '=', 'mercurio28.campo')
+                    ->where('mercurio28.tipo', '=', $tipo);
+            })
+            ->where([
+                ['mercurio33.tipo', $tipo],
+                ['mercurio33.coddoc', $coddoc],
+                ['mercurio33.documento', $documento],
+            ])
+            ->orderBy('mercurio33.id', 'desc');
 
         $mercurio35 = Mercurio35::where('nit', $documento)
             ->orderBy('id', 'desc');

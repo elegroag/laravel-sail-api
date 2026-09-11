@@ -132,7 +132,7 @@
                                 @endif
                                 @foreach ($mercurio33->get() as $mmercurio33)
                                     <tr>
-                                        <td>{{$mmercurio28->getDetalle()}}</td>
+                                        <td>{{ $mmercurio33->campo_detalle ?: $mmercurio33->campo }}</td>
                                         <td>{{$mmercurio33->antval}}</td>
                                         <td>{{$mmercurio33->valor}}</td>
                                         <td>{{$mmercurio33->getEstadoDetalle()}}</td>
