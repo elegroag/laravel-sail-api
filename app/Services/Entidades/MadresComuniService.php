@@ -39,7 +39,7 @@ class MadresComuniService
                     ->get();
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio39::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio39::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio39::where('mercurio39.usuario', $usuario)
@@ -57,7 +57,7 @@ class MadresComuniService
                 $response['count'] = $res->count();
                 break;
             case 'one':
-                $response['datos'] = Mercurio39::whereRaw("id='{$numero}' and estado='P'")->first();
+                $response['datos'] = Mercurio39::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio39::where('id', $numero)->first();

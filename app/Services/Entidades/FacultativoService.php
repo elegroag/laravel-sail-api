@@ -473,7 +473,7 @@ class FacultativoService
                     ->get();
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio36::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio36::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio36::where('mercurio36.usuario', $usuario)
@@ -491,7 +491,7 @@ class FacultativoService
                 $response['all'] = $res;
                 break;
             case 'one':
-                $response['datos'] = Mercurio36::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio36::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio36::where('id', $numero)->first();

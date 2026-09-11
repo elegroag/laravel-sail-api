@@ -432,7 +432,7 @@ class CertificadoService
                 ];
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio45::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio45::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio45::where('mercurio45.usuario', $usuario)
@@ -450,7 +450,7 @@ class CertificadoService
                 $response['count'] = $res->count();
                 break;
             case 'one':
-                $response['datos'] = Mercurio45::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio45::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio45::where('id', $numero)->first();

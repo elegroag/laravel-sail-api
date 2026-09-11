@@ -47,7 +47,7 @@ class ConyugeService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if (Mercurio32::whereRaw("documento='{$documento}' and coddoc='{$coddoc}'")->count() == 0) {
+        if (Mercurio32::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return [];
         }
 
@@ -86,7 +86,7 @@ class ConyugeService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if (Mercurio32::whereRaw("documento='{$documento}' and coddoc='{$coddoc}'")->count() == 0) {
+        if (Mercurio32::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return ['items' => [], 'total' => 0, 'page' => 1, 'per_page' => max(1, min(100, $perPage))];
         }
 
@@ -520,7 +520,7 @@ class ConyugeService
                 ];
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio32::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio32::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio32::where('mercurio32.usuario', $usuario)
@@ -538,7 +538,7 @@ class ConyugeService
                 $response['all'] = $res;
                 break;
             case 'one':
-                $response['datos'] = Mercurio32::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio32::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio32::where('id', $numero)->first();

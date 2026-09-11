@@ -39,7 +39,7 @@ class ServicioDomesticoService
                     ->get();
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio40::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio40::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio40::where('mercurio40.usuario', $usuario)
@@ -57,7 +57,7 @@ class ServicioDomesticoService
                 $response['count'] = $res->count();
                 break;
             case 'one':
-                $response['datos'] = Mercurio40::whereRaw("id='{$numero}' and estado='P'")->first();
+                $response['datos'] = Mercurio40::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio40::where('id', $numero)->first();

@@ -461,7 +461,7 @@ class PensionadoService
                     ->get();
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio38::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio38::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio38::where('mercurio38.usuario', $usuario)
@@ -479,7 +479,7 @@ class PensionadoService
                 $response['count'] = $res->count();
                 break;
             case 'one':
-                $response['datos'] = Mercurio38::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio38::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio38::where('id', $numero)->first();

@@ -52,7 +52,7 @@ class TrabajadorService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if (Mercurio31::whereRaw("documento='{$documento}' and coddoc='{$coddoc}'")->count() == 0) {
+        if (Mercurio31::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return [];
         }
 
@@ -93,7 +93,7 @@ class TrabajadorService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if (Mercurio31::whereRaw("documento='{$documento}' and coddoc='{$coddoc}'")->count() == 0) {
+        if (Mercurio31::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return ['items' => [], 'total' => 0, 'page' => 1, 'per_page' => max(1, min(100, $perPage))];
         }
 

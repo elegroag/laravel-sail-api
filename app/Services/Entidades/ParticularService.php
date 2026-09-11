@@ -2,7 +2,6 @@
 
 namespace App\Services\Entidades;
 
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
@@ -12,15 +11,12 @@ class ParticularService
 {
     private $user;
 
-    private $db;
-
     private $tipo;
 
     public function __construct()
     {
         $this->user = session('user');
         $this->tipo = session('tipo');
-        $this->db = DbBase::rawConnect();
     }
 
     public function resumenServicios()

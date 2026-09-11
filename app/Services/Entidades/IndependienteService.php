@@ -592,7 +592,7 @@ class IndependienteService
                     ->get();
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio41::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio41::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio41::where('mercurio41.usuario', $usuario)
@@ -610,7 +610,7 @@ class IndependienteService
                 $response['count'] = $res->count();
                 break;
             case 'one':
-                $response['datos'] = Mercurio41::whereRaw("id='{$numero}' and estado='P'")->first();
+                $response['datos'] = Mercurio41::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio41::where('id', $numero)->first();

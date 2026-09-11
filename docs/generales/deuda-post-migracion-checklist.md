@@ -114,21 +114,34 @@ Alcance recomendado: **solo queries**. No tocar `procesar()` de negocio, ni `App
 
 ### Services/Entidades (14 + concern)
 
-- [ ] `ActualizaEmpresaService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `BeneficiarioService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `CertificadoService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `ConyugeService.php` — whereRaw, DbBase, rawConnect, DB::select
-- [ ] `DatosTrabajadorService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `EmpresaService.php` — whereRaw, DbBase, rawConnect, DB::select
-- [ ] `FacultativoService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `IndependienteService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `MadresComuniService.php` — whereRaw×4
-- [ ] `ParticularService.php` — DbBase, rawConnect
-- [ ] `PensionadoService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `RetiroService.php` — whereRaw, DbBase, inQueryAssoc, rawConnect
-- [ ] `ServicioDomesticoService.php` — whereRaw×4
-- [ ] `TrabajadorService.php` — whereRaw, DbBase, rawConnect, DB::select
-- [ ] `Entidades/Concerns/PaginatesSolicitudQueries.php` — DbBase, inQueryAssoc, DB::select (compartido)
+Dos capas: (A) `whereRaw` interpolado en `consultaTipopc` / `findSolicitante`; (B) `DbBase::rawConnect` + `inQueryAssoc` SQL. No tocar `whereRaw($condi_extra)` string (viene del request). `ApiEndpointService` y `NotificacionService` ya son Eloquent.
+
+Orden recomendado:
+1. `ParticularService` — constructor `DbBase` sin usarse; queries ya Eloquent.
+2. `MadresComuniService` + `ServicioDomesticoService` (clones, 74 LOC) — `whereRaw` usuario/id.
+3. Mismo patrón `consultaTipopc` en el resto.
+4. Trait `PaginatesSolicitudQueries` + `inQueryAssoc` de listados (SQL crudo).
+
+**Capa A (whereRaw interpolado) — hecha, sin commit.** Queda `whereRaw($condi_extra)`.
+
+- [x] `ParticularService.php` — sin `DbBase`
+- [x] `MadresComuniService.php` / `ServicioDomesticoService.php` — usuario/id
+- [x] `consultaTipopc` interpolado: ActualizaEmpresa, Beneficiario, Certificado, Conyuge, DatosTrabajador, Facultativo, Independiente, Pensionado, Retiro, Trabajador (counts documento+coddoc)
+
+**Capa B (DbBase / inQueryAssoc) — pendiente:**
+
+- [ ] `ActualizaEmpresaService.php` — DbBase, inQueryAssoc, fetchOne
+- [ ] `BeneficiarioService.php` — DbBase, inQueryAssoc
+- [ ] `CertificadoService.php` — DbBase, inQueryAssoc
+- [ ] `ConyugeService.php` — DbBase, DB::select
+- [ ] `DatosTrabajadorService.php` — DbBase, inQueryAssoc
+- [ ] `EmpresaService.php` — DbBase, DB::select (`condi_extra` only)
+- [ ] `FacultativoService.php` — DbBase, inQueryAssoc
+- [ ] `IndependienteService.php` — DbBase, inQueryAssoc
+- [ ] `PensionadoService.php` — DbBase, inQueryAssoc
+- [ ] `RetiroService.php` — DbBase, inQueryAssoc
+- [ ] `TrabajadorService.php` — DbBase, DB::select
+- [ ] `Entidades/Concerns/PaginatesSolicitudQueries.php` — DbBase opcional / DB::select
 
 ### Services/CajaServices (16)
 

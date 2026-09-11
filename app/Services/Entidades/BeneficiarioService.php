@@ -496,7 +496,7 @@ class BeneficiarioService
                 ];
                 break;
             case 'alluser':
-                $response['datos'] = Mercurio34::whereRaw("usuario='{$usuario}' and estado='P'")->get();
+                $response['datos'] = Mercurio34::where('usuario', $usuario)->where('estado', 'P')->get();
                 break;
             case 'count':
                 $res = Mercurio34::where('mercurio34.usuario', $usuario)
@@ -514,7 +514,7 @@ class BeneficiarioService
                 $response['all'] = $res;
                 break;
             case 'one':
-                $response['datos'] = Mercurio34::whereRaw("id='$numero' and estado='P'")->first();
+                $response['datos'] = Mercurio34::where('id', $numero)->where('estado', 'P')->first();
                 break;
             case 'info':
                 $mercurio = Mercurio34::where('id', $numero)->first();
