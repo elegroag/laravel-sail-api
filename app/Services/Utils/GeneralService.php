@@ -2004,7 +2004,6 @@ class GeneralService
 
         $col = "<div class='col-md-4 border-top border-right'>";
 
-        dump('sss', $mercurio34->getCedcon());
         $response = '';
         $response .= "<h6 class='heading-small text-muted mb-4'>Datos Beneficiario</h6>";
 

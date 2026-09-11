@@ -90,8 +90,6 @@ class ApruebaMadreComuni
             throw new Exception('Error, no hay respuesta del servidor para validación del resultado.', 501);
         }
 
-        dd($this->procesadorComando->getLineaComando());
-
         $out = $this->procesadorComando->toArray();
 
         if (is_null($out)) {
@@ -109,7 +107,10 @@ class ApruebaMadreComuni
          * Crea de una vez e registro, permitiendo que el usuario entre con la misma password
          * como empresa sin tener que hacer la solicitud de clave
          */
-        $empresa = (new Mercurio07)->findFirst("coddoc='{$this->solicitud->getTipdoc()}' and documento='{$this->solicitud->getNit()}' and tipo='E'");
+        $empresa = Mercurio07::where('coddoc', $this->solicitud->getTipdoc())
+            ->where('documento', $this->solicitud->getNit())
+            ->where('tipo', 'E')
+            ->first();
         $feccla = $this->solicitante->getFeccla();
         $fecreg = $this->solicitante->getFecreg();
 
@@ -185,7 +186,7 @@ class ApruebaMadreComuni
 
         $html = view('cajas.layouts.aprobar', $data)->render();
         $asunto = "Afiliación trabajador pensionado realizada con éxito, identificación {$this->solicitud->getNit()}";
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail;
 
         $senderEmail->setters(
@@ -204,14 +205,17 @@ class ApruebaMadreComuni
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio39)->findFirst("id='{$idSolicitud}'");
+        $this->solicitud = Mercurio39::where('id', $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst("documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'");
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->getDocumento())
+            ->where('coddoc', $this->solicitud->getCoddoc())
+            ->where('tipo', $this->solicitud->getTipo())
+            ->first();
 
         return $this->solicitante;
     }

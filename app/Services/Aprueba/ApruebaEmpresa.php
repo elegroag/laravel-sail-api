@@ -307,9 +307,10 @@ class ApruebaEmpresa
 
     public function findSolicitante()
     {
-        $this->solicitante = Mercurio07::whereRaw(
-            "documento='{$this->solicitud->documento}' and coddoc='{$this->solicitud->coddoc}' and tipo='{$this->solicitud->tipo}'"
-        )->first();
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->documento)
+            ->where('coddoc', $this->solicitud->coddoc)
+            ->where('tipo', $this->solicitud->tipo)
+            ->first();
 
         return $this->solicitante;
     }

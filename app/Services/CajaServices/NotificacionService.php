@@ -35,7 +35,13 @@ class NotificacionService
 
         );
         if (! $notificacion->save()) {
-            dd($notificacion->getMessages());
+            $parts = [];
+            foreach ($notificacion->getMessages() as $message) {
+                $parts[] = (string) $message;
+            }
+            throw new \RuntimeException(
+                $parts !== [] ? implode('; ', $parts) : 'No se pudo crear la notificación.'
+            );
         }
 
         return $notificacion;

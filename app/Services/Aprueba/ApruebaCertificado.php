@@ -91,7 +91,7 @@ class ApruebaCertificado
         $html = view('layouts/mail_aprobar', $data)->render();
         $asunto = "Presentación certificado realizada con éxito, identificación {$this->solicitud->getDocumento()}";
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         $senderEmail = new SenderEmail(
             new Srequest(
                 [
@@ -112,16 +112,17 @@ class ApruebaCertificado
 
     public function findSolicitud($idSolicitud)
     {
-        $this->solicitud = (new Mercurio45)->findFirst("id='{$idSolicitud}'");
+        $this->solicitud = Mercurio45::where('id', $idSolicitud)->first();
 
         return $this->solicitud;
     }
 
     public function findSolicitante()
     {
-        $this->solicitante = (new Mercurio07)->findFirst(
-            "documento='{$this->solicitud->getDocumento()}' and coddoc='{$this->solicitud->getCoddoc()}' and tipo='{$this->solicitud->getTipo()}'"
-        );
+        $this->solicitante = Mercurio07::where('documento', $this->solicitud->getDocumento())
+            ->where('coddoc', $this->solicitud->getCoddoc())
+            ->where('tipo', $this->solicitud->getTipo())
+            ->first();
 
         return $this->solicitante;
     }

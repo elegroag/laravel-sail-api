@@ -155,8 +155,6 @@ class BeneficiariosDocuments
             ...$this->beneficiario->toArray(),
         ];
 
-        #dd($context);
-
         $ps = new ApiPython();
         $ps->send([
             'servicio' => 'Python',
