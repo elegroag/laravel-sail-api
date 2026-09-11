@@ -2,7 +2,7 @@
 
 namespace App\Services\Menu;
 
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 
 class MenuCajas
 {
@@ -11,8 +11,6 @@ class MenuCajas
     private $breadcrumbs = [];
 
     private $menuItems;
-
-    private $db;
 
     private $codapl;
 
@@ -25,7 +23,6 @@ class MenuCajas
     public function __construct($codapl)
     {
         $this->codapl = $codapl;
-        $this->db = DbBase::rawConnect();
         $this->tipfun = session('tipfun');
         $this->initialize();
     }
@@ -38,6 +35,14 @@ class MenuCajas
         } else {
             $this->path = config('app.dominio');
         }
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function selectAssoc(string $sql): array
+    {
+        return json_decode(json_encode(DB::select($sql)), true) ?? [];
     }
 
     private function getMenuItems($parentId)
@@ -58,9 +63,7 @@ class MenuCajas
             $query .= ' AND menu_items.parent_id = '.intval($parentId);
         }
         $query .= ' ORDER BY menu_tipos.position ASC';
-        $sql = $this->db->inQueryAssoc($query);
-
-        return $sql;
+        return $this->selectAssoc($query);
     }
 
     private function normalizeTitle($title)

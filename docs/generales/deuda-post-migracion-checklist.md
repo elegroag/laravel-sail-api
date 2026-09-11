@@ -1,6 +1,6 @@
 # Checklist — deuda post-migración Mercurio/Cajas
 
-Fuente: diagnóstico de operador-edwin (2026-09-11). Corte 8 Services en curso; CSRF/CORS y cortes 1–7 esperan decisión.
+Fuente: diagnóstico de operador-edwin (2026-09-11). Corte 8 Services cerrado (omitidos aparte); CSRF/CORS y cortes 1–7 esperan decisión.
 
 | Dato | Valor |
 | --- | --- |
@@ -218,19 +218,19 @@ Orden recomendado:
 - [x] `RegistroSeguimiento.php` — **omitido**: solo `new Mercurio10` Eloquent
 - [x] `SolicitaClaveService.php` — `findFirst`×9 → Eloquent `first()`; `new MercurioNN` de create intacto
 
-### Services/Menu (2)
+### Services/Menu — cerrado
 
-- [ ] `Menu.php` — `DbBase`, `inQueryAssoc`, `rawConnect`
-- [ ] `MenuCajas.php` — `DbBase`, `inQueryAssoc`, `rawConnect`
+- [x] `Menu.php` — `DbBase`/`inQueryAssoc` → `DB::select` (`selectAssoc`)
+- [x] `MenuCajas.php` — `DbBase`/`inQueryAssoc` → `DB::select` (`selectAssoc`)
 
-### Services/SatApi (2)
+### Services/SatApi — cerrado
 
-- [ ] `SatConsultaServices.php` — `findFirst`×5 (archivo grande)
-- [ ] `SatServices.php` — `findFirst`×1 (`Mercusat02`)
+- [x] `SatConsultaServices.php` — **omitido**: `findFirst`×5 en `sendWebServiceSat` comentado (muerto)
+- [x] `SatServices.php` — `Mercusat02::where()->count()` / `first()`
 
-### Services/Certificados (1)
+### Services/Certificados — cerrado
 
-- [ ] `EnviarCertificadoEmailService.php` — `findFirst`×1 (`Mercurio01`)
+- [x] `EnviarCertificadoEmailService.php` — `Mercurio01::first()`
 
 ### Services/Reportes (1 omitido)
 
@@ -238,13 +238,13 @@ Orden recomendado:
 
 Destino por pieza: queries → Eloquent; tablas lookup → Cache; input HTTP → `Request` / FormRequest. No mezclar `findFirst("col='x'")` nuevo.
 
-**Corte 8 Services — progreso.** Cerrados: Aprueba, Entidades, CajaServices, Cajas, Formularios, PreparaFormularios, Autentications, Signup, Utils. Omitidos: `whereRaw`, `new Model`, FormulariosAdjuntos, Reportes, varios Signup/Utils. **Pendiente:** Menu (2), SatApi (2), Certificados (1).
+**Corte 8 Services — progreso.** Cerrados: Aprueba, Entidades, CajaServices, Cajas, Formularios, PreparaFormularios, Autentications, Signup, Utils, Menu, SatApi, Certificados. Omitidos: `whereRaw`, `new Model`, FormulariosAdjuntos, Reportes, varios Signup/Utils. **Pendiente:** ninguno en Corte 8 Services (omitidos: `whereRaw`, `new Model`, FormulariosAdjuntos, Reportes, SatConsultaServices comentado, GuardarArchivoService).
 
 ---
 
 ## Cortes sugeridos (elegir alcance)
 
-Cortes 1–7 no iniciados (salvo `dd()`/`dump()` en Corte 1, hecho). Corte 8 Services en curso.
+Cortes 1–7 no iniciados (salvo `dd()`/`dump()` en Corte 1, hecho). Corte 8 Services cerrado (omitidos: `whereRaw`, `new Model`, código muerto).
 
 | Corte | Alcance | Ítems |
 | --- | --- | --- |
@@ -261,4 +261,4 @@ Cortes 1–7 no iniciados (salvo `dd()`/`dump()` en Corte 1, hecho). Corte 8 Ser
 
 ## Fuera de alcance de este checklist
 
-`dd()`/`dump()` ya se quitó (`e6870011`). Corte 8 Services sigue el inventario de abajo. CSRF/CORS y el resto de cortes 1–7 no se tocan hasta que Ricardo los elija. El push a origin espera su ok.
+`dd()`/`dump()` ya se quitó (`e6870011`). Corte 8 Services cerrado en el inventario de abajo. CSRF/CORS y el resto de cortes 1–7 no se tocan hasta que Ricardo los elija. El push a origin espera su ok.

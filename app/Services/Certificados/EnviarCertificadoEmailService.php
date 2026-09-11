@@ -47,7 +47,7 @@ class EnviarCertificadoEmailService
             'tipo_certificado' => $tipoCertificadoLabel,
         ])->render();
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
         if (! $emailCaja) {
             throw new DebugException('No se encontró la configuración de correo de la caja.');
         }

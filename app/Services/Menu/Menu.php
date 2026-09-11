@@ -2,7 +2,7 @@
 
 namespace App\Services\Menu;
 
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 
 class Menu
 {
@@ -13,8 +13,6 @@ class Menu
     private $breadcrumbs = [];
 
     private $menuItems;
-
-    private $db;
 
     private $codapl;
 
@@ -28,7 +26,6 @@ class Menu
         if (session()->has('user')) {
             $this->user = session()->all();
         }
-        $this->db = DbBase::rawConnect();
         $this->initialize();
     }
 
@@ -43,6 +40,14 @@ class Menu
         } else {
             $this->path = config('app.dominio');
         }
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function selectAssoc(string $sql): array
+    {
+        return json_decode(json_encode(DB::select($sql)), true) ?? [];
     }
 
     private function getMenuItems($parentId)
@@ -83,9 +88,7 @@ class Menu
             $query .= ' AND menu_items.parent_id = '.intval($parentId);
         }
         $query .= ' ORDER BY menu_tipos.position ASC';
-        $sql = $this->db->inQueryAssoc($query);
-
-        return $sql;
+        return $this->selectAssoc($query);
     }
 
     private function normalizeTitle($title)

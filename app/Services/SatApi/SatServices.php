@@ -28,16 +28,19 @@ class SatServices
     {
         try {
             $ps = new ApiSubsidio();
-            $numsat02 = (new Mercusat02())->count(
-                '*',
-                "conditions: id='{$entity->getId()}' AND documento='{$entity->getDocumento()}' AND coddoc='{$entity->getCoddoc()}'"
-            );
+            $numsat02 = Mercusat02::where('id', $entity->getId())
+                ->where('documento', $entity->getDocumento())
+                ->where('coddoc', $entity->getCoddoc())
+                ->count();
 
             if ($numsat02 == 0) {
                 return false;
             }
 
-            $mercusat02 = (new Mercusat02)->findFirst("id='{$entity->getId()}' AND documento='{$entity->getDocumento()}' AND coddoc='{$entity->getCoddoc()}'");
+            $mercusat02 = Mercusat02::where('id', $entity->getId())
+                ->where('documento', $entity->getDocumento())
+                ->where('coddoc', $entity->getCoddoc())
+                ->first();
             $ps->send(
                 [
                     'servicio' => 'Funcionalidades',
