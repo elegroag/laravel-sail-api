@@ -21,7 +21,7 @@ Nombres de tabla SISU (`mercurio31`, `gener02`), no de dominio. Renombrar duele:
 
 ## Adapter (crítica)
 
-- [ ] `ModelBase.php` — `findFirst`, `getFind`, `findBySql`, `findAllBySql`, `updateAll`, `deleteAll`, `maximum`, `minimum`, `getCount`, `getSource`. `findFirst` arma `whereRaw` sobre strings; si `conditions` es array, `implode(',', …)` no es AND válido. Cada `__construct` llama `DbBase::rawConnect()`.
+- [x] `ModelBase.php` — **quitados (sin callers de producto):** `findBySql`, `findAllBySql`, `updateAll`, `deleteAll`, `maximum`, `minimum`, `getSource`. Tests de esos métodos también. **Quedan** porque aún hay callers: `findFirst` (`SatConsultaServices` ×5), `getFind` (Generales + 7 controllers), `getCount` (4 controllers). Helpers vivos: `getArray`, `setCreateAttributes`. `__construct` sigue llamando `DbBase::rawConnect()`. Getters de dominio **no se tocaron**.
 - [ ] `ActiveRecordBase.php` — `insert` / `update` / `delete` / `fetchOne` / `inQueryAssoc` / `find` concatenan SQL **sin bindings**.
 - [ ] `DbBase.php` — `rawConnect()` (conexión global estilo `$db`).
 - [ ] `get_params_destructures()` (helpers) — firma Kumbia `find('conditions: …')`. Aún la usan `ModelBase`, `Tag`, `SignupDomestico`, `SenderEmail`, `CrearUsuario`.
