@@ -8,7 +8,7 @@ use App\Http\Resources\ApiResource;
 use App\Http\Resources\ErrorResource;
 use App\Library\Collections\ParamsIndependiente;
 use App\Library\Collections\ParamsPensionado;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
 use App\Models\Mercurio10;
@@ -34,7 +34,6 @@ class ApruebaPensionadoController extends ApplicationController
 {
     protected $tipopc = '9';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -48,7 +47,6 @@ class ApruebaPensionadoController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -348,7 +346,7 @@ class ApruebaPensionadoController extends ApplicationController
      */
     public function aprueba(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $apruebaSolicitud = new ApruebaSolicitud;
@@ -359,16 +357,16 @@ class ApruebaPensionadoController extends ApplicationController
                     $request->all()
                 );
                 $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
-                $this->db->commit();
+                DB::commit();
 
                 return ApiResource::success([], 'Registro completado con éxito')->response();
             } catch (DebugException $e) {
-                $this->db->rollback();
+                DB::rollBack();
 
                 return response()->json($e->render($request));
             }
         } catch (\Exception $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return ErrorResource::errorResponse($e->getMessage(), $e->getTraceAsString())->response();
         }
@@ -380,13 +378,13 @@ class ApruebaPensionadoController extends ApplicationController
         $pensionadoServices = new PensionadoServices;
         $notifyEmailServices = new NotifyEmailServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $codest = $request->input('codest');
             $nota = $request->input('nota');
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
 
-            $mercurio38 = (new Mercurio38)->findFirst("id='{$id}'");
+            $mercurio38 = Mercurio38::where('id', $id)->first();
             if ($mercurio38->getEstado() == 'D') {
                 throw new DebugException('El registro ya se encuentra devuelto, no se requiere de repetir la acción.', 201);
             }
@@ -419,11 +417,11 @@ class ApruebaPensionadoController extends ApplicationController
         $notifyEmailServices = new NotifyEmailServices;
         $pensionadoServices = new PensionadoServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $nota = $request->input('nota');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codest = $request->input('codest');
 
-            $mercurio38 = (new Mercurio38)->findFirst(" id='{$id}'");
+            $mercurio38 = Mercurio38::where('id', $id)->first();
 
             if ($mercurio38->getEstado() == 'X') {
                 throw new DebugException('El registro ya se encuentra rechazado, no se requiere de repetir la acción.', 201);
@@ -505,7 +503,7 @@ class ApruebaPensionadoController extends ApplicationController
     public function buscarEnSisuView(Request $request, $id, $nit)
     {
         $user = session()->get('user');
-        $mercurio38 = (new Mercurio38)->findFirst("nit='{$nit}'");
+        $mercurio38 = Mercurio38::where('nit', $nit)->first();
         if (! $mercurio38) {
             set_flashdata('error', [
                 'msj' => 'La empresa no se encuentra registrada.',
@@ -694,7 +692,7 @@ class ApruebaPensionadoController extends ApplicationController
         $this->setResponse('ajax');
         try {
             try {
-                $mercurio38 = (new Mercurio38)->findFirst(" id='{$id}'");
+                $mercurio38 = Mercurio38::where('id', $id)->first();
                 if (! $mercurio38) {
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
@@ -742,7 +740,7 @@ class ApruebaPensionadoController extends ApplicationController
         try {
             $id = $request->input('id');
 
-            $mercurio38 = (new Mercurio38)->findFirst("id='{$id}'");
+            $mercurio38 = Mercurio38::where('id', $id)->first();
             if (! $mercurio38) {
                 throw new DebugException('Los datos del pensionado no son validos para procesar.', 501);
             }

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -23,7 +23,6 @@ class ApruebaCertificadoController extends ApplicationController
 {
     protected $tipopc = '8';
 
-    protected $db;
 
     protected $user;
 
@@ -31,7 +30,6 @@ class ApruebaCertificadoController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
@@ -175,7 +173,7 @@ class ApruebaCertificadoController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $aprueba = new ApruebaCertificado;
@@ -184,7 +182,7 @@ class ApruebaCertificadoController extends ApplicationController
                 $aprueba->findSolicitud($idSolicitud);
                 $aprueba->findSolicitante();
                 $aprueba->procesar($postData);
-                $this->db->commit();
+                DB::commit();
                 $aprueba->enviarMail($request->input('actapr'));
                 $salida = [
                     'success' => true,
@@ -192,7 +190,7 @@ class ApruebaCertificadoController extends ApplicationController
                 ];
             } catch (DebugException $err) {
 
-                $this->db->rollback();
+                DB::rollBack();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
@@ -211,7 +209,7 @@ class ApruebaCertificadoController extends ApplicationController
 
     public function rechazar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
 
             $id = $request->input('id');
@@ -252,13 +250,13 @@ class ApruebaCertificadoController extends ApplicationController
             );
 
             $senderEmail->send($mercurio07->getEmail(), $body);
-            $this->db->commit();
+            DB::commit();
             $response = [
                 'success' => true,
                 'msj' => 'El registro se completo con éxito',
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage(),

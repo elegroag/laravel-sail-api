@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsBeneficiario;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio06;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -30,7 +30,6 @@ class ApruebaBeneficiarioController extends ApplicationController
 {
     protected $tipopc = '4';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -42,7 +41,6 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -222,7 +220,7 @@ class ApruebaBeneficiarioController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $aprueba = new ApruebaBeneficiario;
@@ -238,9 +236,9 @@ class ApruebaBeneficiarioController extends ApplicationController
                     'msj' => 'El registro se completo con éxito',
                 ];
 
-                $this->db->commit();
+                DB::commit();
             } catch (DebugException $err) {
-                $this->db->rollback();
+                DB::rollBack();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
@@ -690,7 +688,7 @@ class ApruebaBeneficiarioController extends ApplicationController
 
     public function reaprobar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         $comando = '';
         try {
             $validated = $request->validate([
@@ -744,7 +742,7 @@ class ApruebaBeneficiarioController extends ApplicationController
                 throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
             } else {
 
-                $this->db->commit();
+                DB::commit();
                 $response = [
                     'success' => true,
                     'msj' => 'Movimiento realizado con éxito',

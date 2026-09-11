@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsConyuge;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio06;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
@@ -30,7 +30,6 @@ class ApruebaConyugeController extends ApplicationController
 {
     protected $tipopc = '3';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -51,7 +50,6 @@ class ApruebaConyugeController extends ApplicationController
      */
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -258,7 +256,7 @@ class ApruebaConyugeController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $validated = $request->validate([
@@ -276,9 +274,9 @@ class ApruebaConyugeController extends ApplicationController
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
-                $this->db->commit();
+                DB::commit();
             } catch (DebugException $err) {
-                $this->db->rollback();
+                DB::rollBack();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
@@ -290,7 +288,7 @@ class ApruebaConyugeController extends ApplicationController
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
-            $this->db->rollback();
+            DB::rollBack();
         }
 
         return response()->json($salida);
@@ -677,9 +675,8 @@ class ApruebaConyugeController extends ApplicationController
                 $setters = trim($setters, ',');
                 Mercurio32::where('id', $id)->where('cedcon', $cedcon)->update($data);
 
-                $db = DbBase::rawConnect();
-
-                $data = $db->fetchOne("SELECT max(id), mercurio32.* FROM mercurio32 WHERE cedcon='{$cedcon}'");
+                $row = DB::select("SELECT max(id), mercurio32.* FROM mercurio32 WHERE cedcon='{$cedcon}'");
+                $data = $row ? json_decode(json_encode($row[0]), true) : null;
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
                     'success' => true,

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsIndependiente;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio06;
@@ -34,7 +34,6 @@ class ApruebaIndependienteController extends ApplicationController
 {
     protected $tipopc = '13';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -48,7 +47,6 @@ class ApruebaIndependienteController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -309,11 +307,11 @@ class ApruebaIndependienteController extends ApplicationController
         $notifyEmailServices = new NotifyEmailServices;
         $indeServices = new IndependienteServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $nota = $request->input('nota');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codest = $request->input('codest');
 
-            $mercurio41 = (new Mercurio41)->findFirst(" id='{$id}'");
+            $mercurio41 = Mercurio41::where('id', $id)->first();
 
             if ($mercurio41->getEstado() == 'X') {
                 throw new DebugException('El registro ya se encuentra rechazado, no se requiere de repetir la acción.', 201);
@@ -948,7 +946,7 @@ class ApruebaIndependienteController extends ApplicationController
      */
     public function aprueba(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $apruebaSolicitud = new ApruebaSolicitud;
@@ -961,14 +959,14 @@ class ApruebaIndependienteController extends ApplicationController
                     $postData
                 );
 
-                $this->db->commit();
+                DB::commit();
                 $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
                 $salida = [
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
             } catch (DebugException $err) {
-                $this->db->rollback();
+                DB::rollBack();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
@@ -1036,7 +1034,7 @@ class ApruebaIndependienteController extends ApplicationController
         $request = request();
         try {
             try {
-                $mercurio41 = (new Mercurio41)->findFirst(" id='{$id}'");
+                $mercurio41 = Mercurio41::where('id', $id)->first();
                 if (! $mercurio41) {
                     throw new DebugException('La empresa no se encuentra registrada.', 201);
                 }
@@ -1079,7 +1077,7 @@ class ApruebaIndependienteController extends ApplicationController
     public function infoAprobadoView($id)
     {
         try {
-            $mercurio41 = (new Mercurio41)->findFirst(" id='{$id}' and estado='A' ");
+            $mercurio41 = Mercurio41::where('id', $id)->where('estado', 'A')->first();
             if (! $mercurio41) {
                 throw new DebugException('La empresa no se encuentra aprobada para consultar sus datos.', 501);
             }

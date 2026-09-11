@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
@@ -27,7 +27,6 @@ class ApruebaUpTrabajadorController extends ApplicationController
 {
     protected string $tipopc = '14';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -37,7 +36,6 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -305,11 +303,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 }
                 $idSolicitud = $request->input('id');
                 $apruebaSolicitud = new ApruebaDatosTrabajador;
-                $this->db->begin();
+                DB::beginTransaction();
                 $apruebaSolicitud->findSolicitud($idSolicitud);
                 $apruebaSolicitud->findSolicitante();
                 $apruebaSolicitud->procesar($_POST);
-                $this->db->commit();
+                DB::commit();
                 $apruebaSolicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
                 $salida = [
                     'success' => true,
@@ -317,7 +315,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 ];
             } catch (DebugException $err) {
 
-                $this->db->rollback();
+                DB::rollBack();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
@@ -340,7 +338,7 @@ class ApruebaUpTrabajadorController extends ApplicationController
     public function rechazar(Request $request)
     {
         $this->setResponse('ajax');
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $nota = $request->input('nota');
@@ -381,13 +379,13 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
             Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
-            $this->db->commit();
+            DB::commit();
             $salida = [
                 'success' => true,
                 'msj' => 'El proceso se ha completado con éxito',
             ];
         } catch (\Throwable $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),

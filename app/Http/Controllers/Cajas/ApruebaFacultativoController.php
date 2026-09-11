@@ -6,7 +6,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsFacultativo;
 use App\Library\Collections\ParamsPensionado;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
@@ -32,7 +32,6 @@ class ApruebaFacultativoController extends ApplicationController
 {
     protected $tipopc = '10';
 
-    protected $db;
 
     protected $user;
 
@@ -61,7 +60,6 @@ class ApruebaFacultativoController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
@@ -326,7 +324,7 @@ class ApruebaFacultativoController extends ApplicationController
     public function aprueba(Request $request)
     {
         $apruebaSolicitud = new ApruebaSolicitud;
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $solicitud = $apruebaSolicitud->main(
@@ -339,9 +337,9 @@ class ApruebaFacultativoController extends ApplicationController
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
-                $this->db->commit();
+                DB::commit();
             } catch (DebugException $err) {
-                $this->db->rollback();
+                DB::rollBack();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),
@@ -349,7 +347,7 @@ class ApruebaFacultativoController extends ApplicationController
                 ];
             }
         } catch (\Exception $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
@@ -379,7 +377,7 @@ class ApruebaFacultativoController extends ApplicationController
         }
         $facultativoServices = new FacultativoServices;
         $this->setParamToView('hide_header', true);
-        $mercurio36 = (new Mercurio36)->findFirst("id='{$id}'");
+        $mercurio36 = Mercurio36::where('id', $id)->first();
         $this->setParamToView('mercurio36', $mercurio36);
         $this->setParamToView('tipopc', 2);
         $this->setParamToView('seguimiento', $facultativoServices->seguimiento($mercurio36));
@@ -532,9 +530,9 @@ class ApruebaFacultativoController extends ApplicationController
         $notifyEmailServices = new NotifyEmailServices;
         $this->facultativoServices = new FacultativoServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $nota = sanetizar($request->input('nota'));
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codest = $request->input('codest');
 
             $mercurio41 = Mercurio41::whereRaw(" id='{$id}'")->first();
 
@@ -567,8 +565,8 @@ class ApruebaFacultativoController extends ApplicationController
         $this->facultativoServices = new FacultativoServices;
         $notifyEmailServices = new NotifyEmailServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $codest = $request->input('codest');
             $nota = sanetizar($request->input('nota'));
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);

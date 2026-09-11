@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio35;
@@ -22,7 +22,6 @@ class ApruebaRetiroController extends ApplicationController
 
     protected $query = '';
 
-    protected $db;
 
     protected $user;
 
@@ -30,7 +29,6 @@ class ApruebaRetiroController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
@@ -181,7 +179,7 @@ class ApruebaRetiroController extends ApplicationController
             $validacionesControl = ValidacionControlChecklist::preparar($postData);
             $nota = $postData['nota_aprobar'];
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             $today = new \DateTime;
             $mercurio35 = Mercurio35::where('id', $id)->first();
             if (! $fecest) {
@@ -202,7 +200,7 @@ class ApruebaRetiroController extends ApplicationController
             $mercurio10->setFecsis($today->format('Y-m-d'));
             if (! $mercurio10->save()) {
 
-                $this->db->rollback();
+                DB::rollBack();
             } else {
                 Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
             }
@@ -230,7 +228,7 @@ class ApruebaRetiroController extends ApplicationController
             $msj = "se informa que el trabajador {$mercurio35->getCedtra()} fue retirado exitsomante";
             $senderEmail = new SenderEmail;
             $senderEmail->send($mercurio07->getEmail(), $msj);
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Movimiento Realizado Con Exito');
 
             return $this->renderObject($response, false);
@@ -246,12 +244,12 @@ class ApruebaRetiroController extends ApplicationController
         try {
 
             $this->setResponse('ajax');
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $nota = $request->input('nota', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $nota = $request->input('nota');
+            $codest = $request->input('codest');
             $modelos = ['mercurio10', 'mercurio35'];
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             $today = new \DateTime;
             $mercurio35 = Mercurio35::whereRaw("id='$id'")->first();
             $mercurio35->update([
@@ -272,7 +270,7 @@ class ApruebaRetiroController extends ApplicationController
             $mercurio10->setFecsis($today->format('Y-m-d'));
             if (! $mercurio10->save()) {
 
-                $this->db->rollback();
+                DB::rollBack();
             } else {
                 Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
             }
@@ -282,7 +280,7 @@ class ApruebaRetiroController extends ApplicationController
             $msj = 'acabas de utilizar';
             $senderEmail = new SenderEmail;
             $senderEmail->send($mercurio07->getEmail(), $msj);
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Movimiento Realizado Con Exito');
 
             return $this->renderObject($response, false);

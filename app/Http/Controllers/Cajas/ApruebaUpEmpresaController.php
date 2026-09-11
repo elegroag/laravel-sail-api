@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Gener42;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
@@ -31,7 +31,6 @@ class ApruebaUpEmpresaController extends ApplicationController
 {
     protected string $tipopc = '5';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -39,7 +38,6 @@ class ApruebaUpEmpresaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -194,10 +192,10 @@ class ApruebaUpEmpresaController extends ApplicationController
         $this->setResponse('ajax');
         $modelos = ['mercurio10', 'mercurio47'];
 
-        $this->db->begin();
+        DB::beginTransaction();
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $codest = $request->input('codest');
             $nota = $request->input('nota');
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
@@ -243,7 +241,7 @@ class ApruebaUpEmpresaController extends ApplicationController
                 'Solicitud de actualización de datos empresa devolución'
             );
 
-            $this->db->commit();
+            DB::commit();
 
             $salida = [
                 'success' => true,
@@ -270,7 +268,7 @@ class ApruebaUpEmpresaController extends ApplicationController
         $this->setResponse('ajax');
         $modelos = ['mercurio10', 'mercurio47'];
 
-        $this->db->begin();
+        DB::beginTransaction();
         try {
 
             $id = $request->input('id');
@@ -309,7 +307,7 @@ class ApruebaUpEmpresaController extends ApplicationController
 
             Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
-            $this->db->commit();
+            DB::commit();
             $salida = [
                 'success' => true,
                 'msj' => 'El proceso se ha completado con éxito',
@@ -345,10 +343,10 @@ class ApruebaUpEmpresaController extends ApplicationController
                 'code' => 200,
             ]);
         }
-        $mercurio28 = $this->db->inQueryAssoc("SELECT * FROM mercurio28 WHERE tipo='E'");
-        $mercurio33 = $this->db->inQueryAssoc("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'");
-        $mercurio37 = $this->db->inQueryAssoc("SELECT * FROM  mercurio37 WHERE tipopc='{$this->tipopc}' and numero='{$mercurio47->getId()}'");
-        $mercurio12 = $this->db->inQueryAssoc('SELECT * FROM mercurio12');
+        $mercurio28 = json_decode(json_encode(DB::select("SELECT * FROM mercurio28 WHERE tipo='E'")), true);
+        $mercurio33 = json_decode(json_encode(DB::select("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'")), true);
+        $mercurio37 = json_decode(json_encode(DB::select("SELECT * FROM  mercurio37 WHERE tipopc='{$this->tipopc}' and numero='{$mercurio47->getId()}'")), true);
+        $mercurio12 = json_decode(json_encode(DB::select('SELECT * FROM mercurio12')), true);
         $_mercurio12 = [];
         foreach ($mercurio12 as $ai => $m12) {
             $_mercurio12["{$m12['coddoc']}"] = $m12['detalle'];
@@ -531,10 +529,10 @@ class ApruebaUpEmpresaController extends ApplicationController
                     return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
                 }
                 $apruebaSolicitud = new ApruebaSolicitud;
-                $this->db->begin();
+                DB::beginTransaction();
 
                 $postData = $_POST;
-                $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+                $idSolicitud = $request->input('id');
                 $calemp = 'UE';
                 $solicitud = $apruebaSolicitud->main(
                     $calemp,
@@ -542,14 +540,14 @@ class ApruebaUpEmpresaController extends ApplicationController
                     $postData
                 );
 
-                $this->db->commit();
+                DB::commit();
                 $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
                 $salida = [
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
             } catch (DebugException $err) {
-                $this->db->rollback();
+                DB::rollBack();
                 $salida = [
                     'success' => false,
                     'msj' => $err->getMessage(),

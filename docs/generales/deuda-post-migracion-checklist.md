@@ -84,6 +84,8 @@ Ya en Eloquent (no reabrir): `EpaycoCuenta`, `EpaycoTransaccion`, `PrecompraServ
 
 ### Módulos consumidores (migrar por corte, no big-bang)
 
+**Controllers (Corte 9, inventario aparte).** Lista por archivo: [`docs/generales/deuda-controllers-checklist.md`](deuda-controllers-checklist.md). No mezclar con Corte 8 Services.
+
 **Cajas (backoffice)** — 56 controllers con `ApplicationController` / `rawConnect`:
 
 - [ ] Auth Cajas (`Cajas/AuthController`)

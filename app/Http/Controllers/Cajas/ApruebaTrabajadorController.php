@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio07;
@@ -35,7 +35,6 @@ class ApruebaTrabajadorController extends ApplicationController
 {
     protected $tipopc = '1';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -49,7 +48,6 @@ class ApruebaTrabajadorController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -405,7 +403,7 @@ class ApruebaTrabajadorController extends ApplicationController
      */
     public function aprueba(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
 
@@ -421,15 +419,15 @@ class ApruebaTrabajadorController extends ApplicationController
                     'success' => true,
                     'msj' => 'El registro se completo con éxito',
                 ];
-                $this->db->commit();
+                DB::commit();
             } catch (DebugException $err) {
 
-                $this->db->rollback();
+                DB::rollBack();
 
                 return $err->render($request);
             }
         } catch (Exception $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
@@ -791,9 +789,8 @@ class ApruebaTrabajadorController extends ApplicationController
                 $setters = trim($setters, ',');
                 Mercurio31::where('id', $id)->where('cedtra', $cedtra)->update($setters);
 
-                $db = DbBase::rawConnect();
-
-                $data = $db->fetchOne("SELECT max(id), mercurio31.* FROM mercurio31 WHERE cedtra='{$cedtra}'");
+                $row = DB::select("SELECT max(id), mercurio31.* FROM mercurio31 WHERE cedtra='{$cedtra}'");
+                $data = $row ? json_decode(json_encode($row[0]), true) : null;
                 $salida = [
                     'msj' => 'Proceso se ha completado con éxito',
                     'success' => true,

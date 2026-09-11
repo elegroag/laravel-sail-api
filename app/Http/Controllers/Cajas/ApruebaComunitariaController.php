@@ -6,7 +6,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
 use App\Models\Mercurio10;
@@ -27,7 +27,6 @@ class ApruebaComunitariaController extends ApplicationController
 {
     protected $tipopc = '11';
 
-    protected $db;
 
     protected $user;
 
@@ -64,7 +63,6 @@ class ApruebaComunitariaController extends ApplicationController
     public function __construct()
     {
         $this->pagination = new Pagination;
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
@@ -321,7 +319,7 @@ class ApruebaComunitariaController extends ApplicationController
         $this->apruebaSolicitud = new ApruebaSolicitud;
         try {
             $postData = $request->all();
-            $idSolicitud = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $idSolicitud = $request->input('id');
             $calemp = 'M';
             $solicitud = $this->apruebaSolicitud->main(
                 $calemp,
@@ -329,16 +327,16 @@ class ApruebaComunitariaController extends ApplicationController
                 $postData
             );
 
-            $this->db->begin();
+            DB::beginTransaction();
             $solicitud->enviarMail($request->input('actapr'), $request->input('feccap'));
             $salida = [
                 'success' => true,
                 'msj' => 'El registro se completo con éxito',
             ];
 
-            $this->db->commit();
+            DB::commit();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
@@ -359,8 +357,8 @@ class ApruebaComunitariaController extends ApplicationController
         $this->madreComuniServices = new MadresComuniServices;
         $notifyEmailServices = new NotifyEmailServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
+            $codest = $request->input('codest');
             $nota = sanetizar($request->input('nota'));
             $array_corregir = $request->input('campos_corregir');
             $campos_corregir = implode(';', $array_corregir);
@@ -412,9 +410,9 @@ class ApruebaComunitariaController extends ApplicationController
         $notifyEmailServices = new NotifyEmailServices;
         $this->madreComuniServices = new MadresComuniServices;
         try {
-            $id = $request->input('id', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $id = $request->input('id');
             $nota = sanetizar($request->input('nota'));
-            $codest = $request->input('codest', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+            $codest = $request->input('codest');
 
             $mercurio39 = Mercurio39::where("id", $id)->first();
 

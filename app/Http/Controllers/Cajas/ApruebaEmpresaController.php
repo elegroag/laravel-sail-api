@@ -7,7 +7,7 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Resources\ApiResource;
 use App\Http\Resources\ErrorResource;
 use App\Library\Collections\ParamsEmpresa;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio06;
 use App\Models\Mercurio07;
@@ -35,7 +35,6 @@ class ApruebaEmpresaController extends ApplicationController
 
     protected mixed $services;
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -50,7 +49,6 @@ class ApruebaEmpresaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -809,7 +807,7 @@ class ApruebaEmpresaController extends ApplicationController
 
     public function aprueba(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $apruebaSolicitud = new ApruebaSolicitud;
@@ -822,17 +820,17 @@ class ApruebaEmpresaController extends ApplicationController
                     $postData
                 );
 
-                $this->db->commit();
+                DB::commit();
                 $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
 
                 return ApiResource::success([], 'Registro completado con éxito')->response();
             } catch (DebugException $err) {
-                $this->db->rollback();
+                DB::rollBack();
 
                 return response()->json($err->render($request));
             }
         } catch (\Exception $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return ErrorResource::errorResponse($e->getMessage(), $e->getTraceAsString())->response();
         }
