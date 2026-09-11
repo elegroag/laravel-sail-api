@@ -40,10 +40,7 @@ class Mercurio11Service
 
     public function editar($codest)
     {
-        $mercurio11 = Mercurio11::where('codest', $codest)->first();
-        if ($mercurio11 == false) {
-            $mercurio11 = new Mercurio11;
-        }
+        $mercurio11 = Mercurio11::firstOrNew(['codest' => $codest]);
         return [
             'success' => true,
             'data' => $mercurio11->toArray(),
@@ -88,16 +85,11 @@ class Mercurio11Service
             $codest = $request->input('codest');
             $detalle = $request->input('detalle');
 
-            $mercurio11 = Mercurio11::where('codest', $codest)->first();
+            Mercurio11::updateOrCreate(
+                ['codest' => $codest],
+                ['detalle' => $detalle]
+            );
 
-            if (! $mercurio11) {
-                $mercurio11 = new Mercurio11;
-                $mercurio11->setCodest($codest);
-            }
-            
-            $mercurio11->setDetalle($detalle);
-            $mercurio11->save();
-            
             DB::commit();
 
             return [

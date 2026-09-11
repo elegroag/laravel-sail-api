@@ -80,8 +80,7 @@ class JuramentadaBeneficiario extends Documento
 
     public function bloqueBeneficiarioCuidador()
     {
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->beneficiario->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
         $nombre = capitalize($this->beneficiario->getPrinom().' '.$this->beneficiario->getSegnom().' '.$this->beneficiario->getPriape().' '.$this->beneficiario->getSegape());
         $mparent = ParamsBeneficiario::getParentesco();
@@ -105,8 +104,7 @@ class JuramentadaBeneficiario extends Documento
 
     public function bloqueBeneficiarioPadre()
     {
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->beneficiario->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
         $nombre = capitalize($this->beneficiario->getPrinom().' '.$this->beneficiario->getSegnom().' '.$this->beneficiario->getPriape().' '.$this->beneficiario->getSegape());
         $mparent = ParamsBeneficiario::getParentesco();
@@ -136,8 +134,7 @@ class JuramentadaBeneficiario extends Documento
         $today = Carbon::now();
         $_codciu = ParamsBeneficiario::getCiudades();
         $ciudad = ($this->trabajador->getCodzon()) ? $_codciu[$this->trabajador->getCodzon()] : 'Florencia';
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->trabajador->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
 
         $this->pdf->SetFont('helvetica', '', 8.5);
@@ -155,8 +152,7 @@ class JuramentadaBeneficiario extends Documento
 
     public function bloqueHijo()
     {
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->beneficiario->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
         $nombre = capitalize($this->beneficiario->getPrinom().' '.$this->beneficiario->getSegnom().' '.$this->beneficiario->getPriape().' '.$this->beneficiario->getSegape());
         $mparent = ParamsBeneficiario::getParentesco();
@@ -175,8 +171,7 @@ class JuramentadaBeneficiario extends Documento
 
     public function bloqueHijastro()
     {
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->beneficiario->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
         $nombre = capitalize($this->beneficiario->getPrinom().' '.$this->beneficiario->getSegnom().' '.$this->beneficiario->getPriape().' '.$this->beneficiario->getSegape());
         $mparent = ParamsBeneficiario::getParentesco();
@@ -212,8 +207,7 @@ class JuramentadaBeneficiario extends Documento
 
     public function bloqueCustodia()
     {
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->beneficiario->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
         $nombre = capitalize($this->beneficiario->getPrinom().' '.$this->beneficiario->getSegnom().' '.$this->beneficiario->getPriape().' '.$this->beneficiario->getSegape());
         $mparent = ParamsBeneficiario::getParentesco();

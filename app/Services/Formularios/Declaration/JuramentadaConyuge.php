@@ -64,8 +64,7 @@ class JuramentadaConyuge extends Documento
         $nomtra = capitalize($this->trabajador->getPrinom().' '.$this->trabajador->getSegnom().' '.$this->trabajador->getPriape().' '.$this->trabajador->getSegape());
         $today = Carbon::now();
         $ciudad = ($this->conyuge->getCodzon()) ? $_codciu[$this->conyuge->getCodzon()] : 'Florencia';
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->trabajador->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
 
         $this->pdf->SetFont('helvetica', '', 9);
@@ -87,8 +86,7 @@ class JuramentadaConyuge extends Documento
 
     public function bloqueConyuge()
     {
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->conyuge->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->conyuge->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getCodrua() : 'CC';
         $nomcony = capitalize($this->conyuge->getPrinom().' '.$this->conyuge->getSegnom().' '.$this->conyuge->getPriape().' '.$this->conyuge->getSegape());
 

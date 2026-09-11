@@ -84,8 +84,7 @@ class FormularioConyuge extends Documento
 
     public function dataTrabajador($y)
     {
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->trabajador->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de ciudadania';
 
         $nombtra = capitalize($this->trabajador->getPrinom() . ' ' . $this->trabajador->getSegnom() . ' ' . $this->trabajador->getPriape() . ' ' . $this->trabajador->getSegape());
@@ -119,8 +118,7 @@ class FormularioConyuge extends Documento
         $ocupaciones = ParamsConyuge::getOcupaciones();
         $ocupation = ($this->conyuge->getCodocu()) ? $ocupaciones[$this->conyuge->getCodocu()] : 'NINGUNA';
 
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->conyuge->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->conyuge->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de ciudadania';
 
         $mtipdisca = ParamsConyuge::getTipoDiscapacidad();
@@ -181,8 +179,7 @@ class FormularioConyuge extends Documento
                 140
             ));
 
-            $mtipoDocumentos = new Gener18;
-            $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->conyuge->getTipdoc()}'");
+            $mtidocs = Gener18::where('coddoc', $this->conyuge->getTipdoc())->first();
             $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
             $numerocedula = $this->conyuge->getCedcon();
         }

@@ -170,18 +170,18 @@ Orden recomendado:
 - [x] `UpDatosEmpresaServices.php`
 - [x] `UpDatosTrabajadorService.php`
 
-### Services/Cajas (2 pendientes + 1 omitido)
+### Services/Cajas — cerrado
 
-- [ ] `Mercurio01Service.php` — `new Mercurio01`
+- [x] `Mercurio01Service.php` — ya Eloquent (`first()` / `fill`); `whereRaw` omitido
 - [x] `Mercurio02Service.php` — **omitido**: solo `whereRaw` Eloquent
-- [ ] `Mercurio11Service.php` — `new Mercurio11`
+- [x] `Mercurio11Service.php` — `updateOrCreate` / `firstOrNew`; `whereRaw` omitido
 
-### Services/Formularios (4)
+### Services/Formularios (4) — cerrado
 
-- [ ] `Afiliacion/FormularioBeneficiario.php` — findFirst×4
-- [ ] `Afiliacion/FormularioConyuge.php` — findFirst×3
-- [ ] `Declaration/JuramentadaBeneficiario.php` — findFirst×6
-- [ ] `Declaration/JuramentadaConyuge.php` — findFirst×2
+- [x] `Afiliacion/FormularioBeneficiario.php` — `Gener18::where('coddoc')->first()`
+- [x] `Afiliacion/FormularioConyuge.php` — `Gener18::where('coddoc')->first()`
+- [x] `Declaration/JuramentadaBeneficiario.php` — `Gener18::where('coddoc')->first()`
+- [x] `Declaration/JuramentadaConyuge.php` — `Gener18::where('coddoc')->first()`
 
 ### Services/FormulariosAdjuntos (3)
 

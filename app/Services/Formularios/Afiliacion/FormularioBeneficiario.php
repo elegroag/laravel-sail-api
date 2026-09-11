@@ -142,8 +142,7 @@ class FormularioBeneficiario extends Documento
         $mpueblos = ParamsBeneficiario::getPueblosIndigenas();
         $pueblo = ($this->beneficiario->getPub_indigena_id()) ? $mpueblos[$this->beneficiario->getPub_indigena_id()] : 'NO APLICA';
 
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->beneficiario->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
         $nombre = capitalize($this->beneficiario->getPrinom() . ' ' . $this->beneficiario->getSegnom() . ' ' . $this->beneficiario->getPriape() . ' ' . $this->beneficiario->getSegape());
 
@@ -191,8 +190,7 @@ class FormularioBeneficiario extends Documento
         $mpueblos = ParamsBeneficiario::getPueblosIndigenas();
         $pueblo = ($this->beneficiario->getPub_indigena_id()) ? $mpueblos[$this->beneficiario->getPub_indigena_id()] : 'NO APLICA';
 
-        $mtipoDocumentos = new Gener18;
-        $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->beneficiario->getTipdoc()}'");
+        $mtidocs = Gener18::where('coddoc', $this->beneficiario->getTipdoc())->first();
         $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
         $nombre = capitalize($this->beneficiario->getPrinom() . ' ' . $this->beneficiario->getSegnom() . ' ' . $this->beneficiario->getPriape() . ' ' . $this->beneficiario->getSegape());
 
@@ -230,8 +228,7 @@ class FormularioBeneficiario extends Documento
         if ($this->bioconyu) {
             $mciudad = ParamsBeneficiario::getCiudades();
             $ciudad = ($this->bioconyu->getCiures()) ? $mciudad[$this->bioconyu->getCiures()] : ' FLORENCIA';
-            $mtipoDocumentos = new Gener18;
-            $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->bioconyu->getTipdoc()}'");
+            $mtidocs = Gener18::where('coddoc', $this->bioconyu->getTipdoc())->first();
             $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de ciudadania';
             $telefono = $this->bioconyu->getTelefono();
             $email = $this->bioconyu->getEmail();
@@ -274,8 +271,7 @@ class FormularioBeneficiario extends Documento
                 140
             ));
 
-            $mtipoDocumentos = new Gener18;
-            $mtidocs = $mtipoDocumentos->findFirst(" coddoc='{$this->trabajador->getTipdoc()}'");
+            $mtidocs = Gener18::where('coddoc', $this->trabajador->getTipdoc())->first();
             $detdoc = ($mtidocs) ? $mtidocs->getDetdoc() : 'Cedula de Ciudadania';
             $numerocedtra = $this->trabajador->getCedtra();
         }

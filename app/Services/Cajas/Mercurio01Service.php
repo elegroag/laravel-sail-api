@@ -20,17 +20,17 @@ class Mercurio01Service
         try {
             DB::beginTransaction();
 
-            $mercurio01 = Mercurio01::first() ?? new Mercurio01();
-            
-            $mercurio01->codapl = $request->input('codapl');
-            $mercurio01->email = $request->input('email');
-            $mercurio01->clave = $request->input('clave');
-            $mercurio01->path = $request->input('path');
-            $mercurio01->ftpserver = $request->input('ftpserver');
-            $mercurio01->pathserver = $request->input('pathserver');
-            $mercurio01->userserver = $request->input('userserver');
-            $mercurio01->passserver = $request->input('passserver');
-            
+            $mercurio01 = Mercurio01::first() ?? new Mercurio01;
+            $mercurio01->fill($request->only([
+                'codapl',
+                'email',
+                'clave',
+                'path',
+                'ftpserver',
+                'pathserver',
+                'userserver',
+                'passserver',
+            ]));
             $mercurio01->save();
 
             DB::commit();
