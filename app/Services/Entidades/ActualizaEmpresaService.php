@@ -3,7 +3,6 @@
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -23,12 +22,9 @@ class ActualizaEmpresaService
 
     private ?array $user;
 
-    private ?DbBase $db;
-
     public function __construct()
     {
         $this->user = session('user') ?? null;
-        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -40,7 +36,7 @@ class ActualizaEmpresaService
     public function findAllByEstado($estado = '')
     {
         $sql = $this->buildSolicitudesSql($estado);
-        $mercurio47 = $this->db->inQueryAssoc($sql);
+        $mercurio47 = $this->selectAssoc($sql);
 
         return $this->enrichSolicitudes($mercurio47);
     }
@@ -51,7 +47,7 @@ class ActualizaEmpresaService
     public function findByEstadoPaginated(?string $estado, int $page, int $perPage): array
     {
         $sql = $this->buildSolicitudesSql($estado ?? '');
-        $paginated = $this->paginateRawQuery($sql, $page, $perPage, true);
+        $paginated = $this->paginateRawQuery($sql, $page, $perPage);
 
         return [
             'items' => $this->enrichSolicitudes($paginated['items']),
@@ -93,14 +89,14 @@ class ActualizaEmpresaService
     private function enrichSolicitudes(array $mercurio47): array
     {
         foreach ($mercurio47 as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
+            $rqs = $this->selectOneAssoc("SELECT count(mercurio10.numero) as cantidad
                 FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id = mercurio10.numero
                 WHERE mercurio10.tipopc='{$this->tipopc}' AND
                 mercurio47.id ='{$row['id']}'
             ");
 
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
+            $trayecto = $this->selectOneAssoc("SELECT max(mercurio10.item), mercurio10.*
                 FROM mercurio10
                 LEFT JOIN mercurio47 ON mercurio47.id=mercurio10.numero
                 WHERE mercurio10.tipopc='{$this->tipopc}' AND

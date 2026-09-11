@@ -2,15 +2,35 @@
 
 namespace App\Services\Entidades\Concerns;
 
-use App\Models\Adapter\DbBase;
 use Illuminate\Support\Facades\DB;
 
 trait PaginatesSolicitudQueries
 {
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function selectAssoc(string $sql): array
+    {
+        return json_decode(json_encode(DB::select($sql)), true) ?? [];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    protected function selectOneAssoc(string $sql): ?array
+    {
+        $row = DB::selectOne($sql);
+        if ($row === null) {
+            return null;
+        }
+
+        return json_decode(json_encode($row), true);
+    }
+
+    /**
      * @return array{items: array<int, array<string, mixed>>, total: int, page: int, per_page: int}
      */
-    protected function paginateRawQuery(string $selectSql, int $page, int $perPage, bool $useDbBase = false): array
+    protected function paginateRawQuery(string $selectSql, int $page, int $perPage): array
     {
         $page = max(1, $page);
         $perPage = max(1, min(100, $perPage));
@@ -28,13 +48,7 @@ trait PaginatesSolicitudQueries
         }
 
         $countSql = 'SELECT COUNT(*) as c FROM ('.$baseSql.') as solicitudes_paginadas';
-
-        if ($useDbBase && property_exists($this, 'db') && $this->db instanceof DbBase) {
-            $countRow = $this->db->inQueryAssoc($countSql);
-            $total = (int) ($countRow[0]['c'] ?? 0);
-        } else {
-            $total = (int) (DB::selectOne($countSql)->c ?? 0);
-        }
+        $total = (int) (DB::selectOne($countSql)->c ?? 0);
 
         $totalPages = $total > 0 ? (int) ceil($total / $perPage) : 0;
         if ($totalPages > 0 && $page > $totalPages) {
@@ -43,12 +57,7 @@ trait PaginatesSolicitudQueries
 
         $offset = ($page - 1) * $perPage;
         $pagedSql = $baseSql.($orderSql !== '' ? ' '.$orderSql : '')." LIMIT {$perPage} OFFSET {$offset}";
-
-        if ($useDbBase && property_exists($this, 'db') && $this->db instanceof DbBase) {
-            $items = $this->db->inQueryAssoc($pagedSql);
-        } else {
-            $items = json_decode(json_encode(DB::select($pagedSql)), true);
-        }
+        $items = $this->selectAssoc($pagedSql);
 
         return [
             'items' => $items,

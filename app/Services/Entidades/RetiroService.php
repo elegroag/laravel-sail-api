@@ -4,7 +4,6 @@ namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -13,16 +12,17 @@ use App\Models\Mercurio13;
 use App\Models\Mercurio35;
 use App\Models\Mercurio37;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\Concerns\PaginatesSolicitudQueries;
 use App\Services\Srequest;
 use Illuminate\Support\Facades\DB;
 
 class RetiroService
 {
+    use PaginatesSolicitudQueries;
+
     private $tipopc = '7';
 
     private $user;
-
-    private $db;
 
     private $tipo;
 
@@ -30,7 +30,6 @@ class RetiroService
     {
         $this->user = session('user');
         $this->tipo = session('tipo');
-        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -44,10 +43,7 @@ class RetiroService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio35)->getCount(
-            '*',
-            "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
-        ) == 0) {
+        if (Mercurio35::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return [];
         }
 
@@ -73,7 +69,7 @@ class RetiroService
             WHERE m35.documento='{$documento}' and m35.coddoc='{$coddoc}' {$conditions}
             ORDER BY m35.fecsol ASC";
 
-        return $this->db->inQueryAssoc($sql);
+        return $this->selectAssoc($sql);
     }
 
     /**

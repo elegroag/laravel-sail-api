@@ -4,7 +4,6 @@ namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsEmpresa;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio12;
@@ -35,13 +34,10 @@ class EmpresaService
 
     private ?string $tipo;
 
-    private DbBase $db;
-
     public function __construct()
     {
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
-        $this->db = DbBase::rawConnect();
     }
 
     /**

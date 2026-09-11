@@ -122,26 +122,26 @@ Orden recomendado:
 3. Mismo patrón `consultaTipopc` en el resto.
 4. Trait `PaginatesSolicitudQueries` + `inQueryAssoc` de listados (SQL crudo).
 
-**Capa A (whereRaw interpolado) — hecha, sin commit.** Queda `whereRaw($condi_extra)`.
+**Capa A (whereRaw interpolado) — hecha (`5d3c2962`).** Queda `whereRaw($condi_extra)`.
 
 - [x] `ParticularService.php` — sin `DbBase`
 - [x] `MadresComuniService.php` / `ServicioDomesticoService.php` — usuario/id
 - [x] `consultaTipopc` interpolado: ActualizaEmpresa, Beneficiario, Certificado, Conyuge, DatosTrabajador, Facultativo, Independiente, Pensionado, Retiro, Trabajador (counts documento+coddoc)
 
-**Capa B (DbBase / inQueryAssoc) — pendiente:**
+**Capa B (DbBase / inQueryAssoc) — hecha.** SQL crudo pasa por `DB::select`/`selectOne` (helpers del trait). No se reescribió a query builder. Queda `whereRaw($condi_extra)`.
 
-- [ ] `ActualizaEmpresaService.php` — DbBase, inQueryAssoc, fetchOne
-- [ ] `BeneficiarioService.php` — DbBase, inQueryAssoc
-- [ ] `CertificadoService.php` — DbBase, inQueryAssoc
-- [ ] `ConyugeService.php` — DbBase, DB::select
-- [ ] `DatosTrabajadorService.php` — DbBase, inQueryAssoc
-- [ ] `EmpresaService.php` — DbBase, DB::select (`condi_extra` only)
-- [ ] `FacultativoService.php` — DbBase, inQueryAssoc
-- [ ] `IndependienteService.php` — DbBase, inQueryAssoc
-- [ ] `PensionadoService.php` — DbBase, inQueryAssoc
-- [ ] `RetiroService.php` — DbBase, inQueryAssoc
-- [ ] `TrabajadorService.php` — DbBase, DB::select
-- [ ] `Entidades/Concerns/PaginatesSolicitudQueries.php` — DbBase opcional / DB::select
+- [x] `ActualizaEmpresaService.php` — `selectAssoc` / `selectOneAssoc`; sin DbBase
+- [x] `BeneficiarioService.php` — `selectAssoc`; `getCount` a Eloquent count
+- [x] `CertificadoService.php` — `selectAssoc`; `getCount` a Eloquent count
+- [x] `ConyugeService.php` — constructor DbBase muerto retirado
+- [x] `DatosTrabajadorService.php` — `selectAssoc`; sin DbBase
+- [x] `EmpresaService.php` — constructor DbBase muerto retirado (`condi_extra` intacto)
+- [x] `FacultativoService.php` — `selectAssoc`; sin DbBase
+- [x] `IndependienteService.php` — `selectAssoc`; sin DbBase
+- [x] `PensionadoService.php` — `selectAssoc`; sin DbBase
+- [x] `RetiroService.php` — `selectAssoc`; `getCount` a Eloquent count
+- [x] `TrabajadorService.php` — constructor DbBase muerto retirado
+- [x] `Entidades/Concerns/PaginatesSolicitudQueries.php` — solo `DB::select`/`selectOne`; helpers `selectAssoc`/`selectOneAssoc`
 
 ### Services/CajaServices (16)
 

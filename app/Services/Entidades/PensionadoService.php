@@ -4,7 +4,6 @@ namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsPensionado;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -28,12 +27,9 @@ class PensionadoService
 
     private ?array $user;
 
-    private DbBase $db;
-
     public function __construct()
     {
         $this->user = session('user');
-        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -71,7 +67,7 @@ class PensionadoService
             WHERE solis.documento='{$documento}' and solis.coddoc='{$coddoc}' {$conditions}
             ORDER BY solis.fecini ASC;";
 
-        $solicitudes = $this->db->inQueryAssoc($sql);
+        $solicitudes = $this->selectAssoc($sql);
 
         return $solicitudes;
     }
@@ -110,7 +106,7 @@ class PensionadoService
             WHERE solis.documento='{$documento}' and solis.coddoc='{$coddoc}' {$conditions}
             ORDER BY solis.fecini ASC";
 
-        return $this->paginateRawQuery($sql, $page, $perPage, true);
+        return $this->paginateRawQuery($sql, $page, $perPage);
     }
 
     /**

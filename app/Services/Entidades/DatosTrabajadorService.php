@@ -4,7 +4,6 @@ namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -26,12 +25,9 @@ class DatosTrabajadorService
 
     private $user;
 
-    private $db;
-
     public function __construct()
     {
         $this->user = session('user');
-        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -43,7 +39,7 @@ class DatosTrabajadorService
     public function findAllByEstado($estado = '')
     {
         $sql = $this->buildSolicitudesSql($estado ?? '');
-        $mercurio47 = $this->db->inQueryAssoc($sql);
+        $mercurio47 = $this->selectAssoc($sql);
 
         return $this->enrichSolicitudes($mercurio47);
     }
@@ -54,7 +50,7 @@ class DatosTrabajadorService
     public function findByEstadoPaginated(?string $estado, int $page, int $perPage): array
     {
         $sql = $this->buildSolicitudesSql($estado ?? '');
-        $paginated = $this->paginateRawQuery($sql, $page, $perPage, true);
+        $paginated = $this->paginateRawQuery($sql, $page, $perPage);
 
         return [
             'items' => $this->enrichSolicitudes($paginated['items']),

@@ -4,7 +4,6 @@ namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -29,8 +28,6 @@ class TrabajadorService
 
     private string $tipopc = '1';
 
-    private DbBase $db;
-
     private ?array $user;
 
     private ?string $tipo;
@@ -39,7 +36,6 @@ class TrabajadorService
     {
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
-        $this->db = DbBase::rawConnect();
     }
 
     /**

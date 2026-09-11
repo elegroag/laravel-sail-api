@@ -5,7 +5,6 @@ namespace App\Services\Entidades;
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsIndependiente;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -36,8 +35,6 @@ class IndependienteService
 
     private ?string $tipo;
 
-    private DbBase $db;
-
     /**
      * __construct function
      *
@@ -48,7 +45,6 @@ class IndependienteService
     {
         $this->user = session('user');
         $this->tipo = session('tipo');
-        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -89,7 +85,7 @@ class IndependienteService
             m41.coddoc='{$coddoc}' {$conditions}
             ORDER BY m41.fecini ASC;";
 
-        return $this->db->inQueryAssoc($sql);
+        return $this->selectAssoc($sql);
     }
 
     /**
@@ -129,7 +125,7 @@ class IndependienteService
             m41.coddoc='{$coddoc}' {$conditions}
             ORDER BY m41.fecini ASC";
 
-        return $this->paginateRawQuery($sql, $page, $perPage, true);
+        return $this->paginateRawQuery($sql, $page, $perPage);
     }
 
     /**

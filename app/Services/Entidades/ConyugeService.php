@@ -4,7 +4,6 @@ namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsConyuge;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -29,13 +28,10 @@ class ConyugeService
 
     private ?string $tipo;
 
-    private DbBase $db;
-
     public function __construct()
     {
         $this->user = session('user');
         $this->tipo = session('tipo');
-        $this->db = DbBase::rawConnect();
     }
 
     /**

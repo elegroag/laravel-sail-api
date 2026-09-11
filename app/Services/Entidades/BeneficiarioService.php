@@ -3,7 +3,6 @@
 namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -27,13 +26,10 @@ class BeneficiarioService
 
     private ?string $tipo;
 
-    private DbBase $db;
-
     public function __construct()
     {
         $this->user = session('user');
         $this->tipo = session('tipo');
-        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -45,15 +41,12 @@ class BeneficiarioService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio34)->getCount(
-            '*',
-            "conditions: documento='{$documento}' AND coddoc='{$coddoc}'"
-        ) == 0) {
+        if (Mercurio34::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return [];
         }
         $conditions = (empty($estado)) ? " AND m34.estado NOT IN('I') " : " AND m34.estado='{$estado}' ";
 
-        return $this->db->inQueryAssoc(
+        return $this->selectAssoc(
             "SELECT m34.*,
                 (SELECT COUNT(*) FROM mercurio10 as me10 WHERE me10.tipopc='{$this->tipopc}' and m34.id = me10.numero) as 'cantidad_eventos',
                 (SELECT MAX(fecsis) FROM mercurio10 as mr10 WHERE mr10.tipopc='{$this->tipopc}' and m34.id = mr10.numero) as 'fecha_ultima_solicitud',
@@ -80,10 +73,7 @@ class BeneficiarioService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio34)->getCount(
-            '*',
-            "conditions: documento='{$documento}' AND coddoc='{$coddoc}'"
-        ) == 0) {
+        if (Mercurio34::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return ['items' => [], 'total' => 0, 'page' => 1, 'per_page' => max(1, min(100, $perPage))];
         }
 
@@ -105,7 +95,7 @@ class BeneficiarioService
                 WHERE m34.documento='{$documento}' and m34.coddoc='{$coddoc}' {$conditions}
                 ORDER BY m34.fecsol ASC";
 
-        return $this->paginateRawQuery($sql, $page, $perPage, true);
+        return $this->paginateRawQuery($sql, $page, $perPage);
     }
 
     /**

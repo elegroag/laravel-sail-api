@@ -4,7 +4,6 @@ namespace App\Services\Entidades;
 
 use App\Exceptions\DebugException;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio10;
@@ -13,17 +12,18 @@ use App\Models\Mercurio13;
 use App\Models\Mercurio37;
 use App\Models\Mercurio45;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\Concerns\PaginatesSolicitudQueries;
 use App\Services\Srequest;
 use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Support\Facades\DB;
 
 class CertificadoService
 {
+    use PaginatesSolicitudQueries;
+
     private string $tipopc = '8';
 
     private ?array $user;
-
-    private DbBase $db;
 
     private ?string $tipo;
 
@@ -31,7 +31,6 @@ class CertificadoService
     {
         $this->user = session('user');
         $this->tipo = session('tipo');
-        $this->db = DbBase::rawConnect();
     }
 
     /**
@@ -42,10 +41,7 @@ class CertificadoService
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
 
-        if ((new Mercurio45)->getCount(
-            '*',
-            "conditions: documento='{$documento}' and coddoc='{$coddoc}'"
-        ) == 0) {
+        if (Mercurio45::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
             return [];
         }
 
@@ -71,7 +67,7 @@ class CertificadoService
             WHERE m45.documento='{$documento}' and m45.coddoc='{$coddoc}' {$conditions}
             ORDER BY m45.fecsol ASC";
 
-        return $this->db->inQueryAssoc($sql);
+        return $this->selectAssoc($sql);
     }
 
     /**
