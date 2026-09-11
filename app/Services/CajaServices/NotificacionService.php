@@ -2,21 +2,18 @@
 
 namespace App\Services\CajaServices;
 
-use App\Models\Adapter\DbBase;
 use App\Models\Notificaciones;
 
 class NotificacionService
 {
-    protected $db;
-
-    public function __construct()
-    {
-        $this->db = DbBase::rawConnect();
-    }
-
     public function getNotificacionesByUser($user)
     {
-        return $this->db->inQueryAssoc("SELECT * FROM notificaciones WHERE estado='P' and user='{$user}' order by dia DESC, hora DESC limit 5 offset 0");
+        return Notificaciones::where('estado', 'P')
+            ->where('user', $user)
+            ->orderByDesc('dia')
+            ->orderByDesc('hora')
+            ->limit(5)
+            ->get();
     }
 
     public function createNotificacion($data)
@@ -49,10 +46,17 @@ class NotificacionService
 
     public function getPaginatedByUser($user, $pagina, $limit)
     {
+        $pagina = max(1, (int) $pagina);
+        $limit = max(1, (int) $limit);
         $offset = ($pagina - 1) * $limit;
-        $notificaciones = $this->db->inQueryAssoc("SELECT * FROM notificaciones WHERE user='{$user}' order by dia DESC, hora DESC limit {$limit} offset {$offset}");
+        $notificaciones = Notificaciones::where('user', $user)
+            ->orderByDesc('dia')
+            ->orderByDesc('hora')
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
         $total_registros = Notificaciones::where('user', $user)->count();
-        $total_pages = ceil($total_registros / $limit);
+        $total_pages = $limit > 0 ? (int) ceil($total_registros / $limit) : 0;
 
         return [
             'total_pages' => $total_pages,

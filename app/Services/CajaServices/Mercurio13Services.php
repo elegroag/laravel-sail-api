@@ -63,7 +63,7 @@ class Mercurio13Services
 
     public function findPagination($query)
     {
-        return (new Mercurio13)->find($query);
+        return Mercurio13::whereRaw($query)->get();
     }
 
     public function getTemplateTable()

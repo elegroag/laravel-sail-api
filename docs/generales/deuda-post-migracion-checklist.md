@@ -59,7 +59,7 @@ Estado medido:
 | --- | --- |
 | Models `extends ModelBase` | 95 |
 | Models Eloquent puro (`extends Model`, sin ModelBase) | 21 |
-| `whereRaw` / `DB::select` en `app/` | 239 |
+| `whereRaw` / `DB::select` en `app/` | 239 (conteo bruto; `whereRaw` Eloquent **no** es Corte 8) |
 | Controllers `extends ApplicationController` | 78 (56 Cajas + 22 Mercurio) |
 | APIs Kumbia aún usadas | `findFirst`, `findAllBySql`, `inQueryAssoc`, `DbBase::rawConnect`, `getSource` |
 
@@ -98,7 +98,9 @@ Ya en Eloquent (no reabrir): `EpaycoCuenta`, `EpaycoTransaccion`, `PrecompraServ
 - [ ] Afiliación: `Empresa`, `Trabajador`, `Conyuge`, `Beneficiario`, `Independiente`, `Facultativo`, `Pensionado`, `Domestico`, `Comunitaria`, `Particular`
 - [ ] Consultas / movimientos / certificados / firmas / productos / actualiza empresa-trabajador
 
-**Services — empezar por aquí** (67 de ~200 PHP en `app/Services`; cada uno con `findFirst` / `inQueryAssoc` / `rawConnect` / `whereRaw` / `new MercurioNN`). El resto de services no toca ActiveRecord en este inventario.
+**Services — empezar por aquí** (inventario original 67; Corte 8 ya no cuenta `whereRaw` Eloquent). Deuda restante: `findFirst` / `inQueryAssoc` / `rawConnect` / `new MercurioNN`. El resto de services no toca ActiveRecord en este inventario.
+
+**Omitir `whereRaw` en Corte 8.** Es API de Eloquent (query builder), no Kumbia. Incluye `whereRaw($condi_extra)` que viene del request. No reescribirlo aquí; si se endurece después, whitelist de columnas / `where()`, no migración. El `whereRaw` interpolado tipo `col='$x'` sí era deuda y ya se sustituyó en Entidades capa A (`5d3c2962`).
 
 ### Services/Aprueba (5 de 14, cerrado)
 
@@ -112,9 +114,9 @@ Alcance recomendado: **solo queries**. No tocar `procesar()` de negocio, ni `App
 - [x] `ApruebaDatosEmpresa.php` — Eloquent (2026-09-11, sin commit): `where` bindings en Mercurio47/33/30/07; `procesar()` intacto.
 - [x] `ApruebaEmpresa.php` — Eloquent (2026-09-11, sin commit): `findSolicitante` con where encadenados. `procesar()` intacto. **Services/Aprueba cerrado.**
 
-### Services/Entidades (14 + concern)
+### Services/Entidades (14 + concern) — cerrado
 
-Dos capas: (A) `whereRaw` interpolado en `consultaTipopc` / `findSolicitante`; (B) `DbBase::rawConnect` + `inQueryAssoc` SQL. No tocar `whereRaw($condi_extra)` string (viene del request). `ApiEndpointService` y `NotificacionService` ya son Eloquent.
+Dos capas hechas: (A) `whereRaw` interpolado → Eloquent `where` (`5d3c2962`); (B) `DbBase`/`inQueryAssoc` → `DB::select` (`697d3937`). `whereRaw($condi_extra)` **omitido** (Eloquent). `ApiEndpointService` y `NotificacionService` ya eran Eloquent.
 
 Orden recomendado:
 1. `ParticularService` — constructor `DbBase` sin usarse; queries ya Eloquent.
@@ -122,20 +124,20 @@ Orden recomendado:
 3. Mismo patrón `consultaTipopc` en el resto.
 4. Trait `PaginatesSolicitudQueries` + `inQueryAssoc` de listados (SQL crudo).
 
-**Capa A (whereRaw interpolado) — hecha (`5d3c2962`).** Queda `whereRaw($condi_extra)`.
+**Capa A (whereRaw interpolado) — hecha (`5d3c2962`).**
 
 - [x] `ParticularService.php` — sin `DbBase`
 - [x] `MadresComuniService.php` / `ServicioDomesticoService.php` — usuario/id
 - [x] `consultaTipopc` interpolado: ActualizaEmpresa, Beneficiario, Certificado, Conyuge, DatosTrabajador, Facultativo, Independiente, Pensionado, Retiro, Trabajador (counts documento+coddoc)
 
-**Capa B (DbBase / inQueryAssoc) — hecha.** SQL crudo pasa por `DB::select`/`selectOne` (helpers del trait). No se reescribió a query builder. Queda `whereRaw($condi_extra)`.
+**Capa B (DbBase / inQueryAssoc) — hecha (`697d3937`).** SQL crudo pasa por `DB::select`/`selectOne` (helpers del trait). No se reescribió a query builder.
 
 - [x] `ActualizaEmpresaService.php` — `selectAssoc` / `selectOneAssoc`; sin DbBase
 - [x] `BeneficiarioService.php` — `selectAssoc`; `getCount` a Eloquent count
 - [x] `CertificadoService.php` — `selectAssoc`; `getCount` a Eloquent count
 - [x] `ConyugeService.php` — constructor DbBase muerto retirado
 - [x] `DatosTrabajadorService.php` — `selectAssoc`; sin DbBase
-- [x] `EmpresaService.php` — constructor DbBase muerto retirado (`condi_extra` intacto)
+- [x] `EmpresaService.php` — constructor DbBase muerto retirado
 - [x] `FacultativoService.php` — `selectAssoc`; sin DbBase
 - [x] `IndependienteService.php` — `selectAssoc`; sin DbBase
 - [x] `PensionadoService.php` — `selectAssoc`; sin DbBase
@@ -143,30 +145,36 @@ Orden recomendado:
 - [x] `TrabajadorService.php` — constructor DbBase muerto retirado
 - [x] `Entidades/Concerns/PaginatesSolicitudQueries.php` — solo `DB::select`/`selectOne`; helpers `selectAssoc`/`selectOneAssoc`
 
-### Services/CajaServices (16)
+### Services/CajaServices (12 pendientes writes + queries hechas)
 
-- [ ] `BeneficiarioServices.php` — whereRaw
-- [ ] `CertificadosServices.php` — whereRaw, findFirst
-- [ ] `ConyugeServices.php` — whereRaw
-- [ ] `EmpresaServices.php` — whereRaw
-- [ ] `FacultativoServices.php` — whereRaw
-- [ ] `IndependienteServices.php` — whereRaw
-- [ ] `MadresComuniServices.php` — whereRaw
-- [ ] `Mercurio13Services.php` — new Mercurio
-- [ ] `Mercurio14Services.php` — new Mercurio
-- [ ] `NotificacionService.php` — inQueryAssoc, DbBase, rawConnect
-- [ ] `PensionadoServices.php` — whereRaw
-- [ ] `ServicioDomesticoServices.php` — whereRaw
-- [ ] `TrabajadorServices.php` — whereRaw
-- [ ] `UpDatosEmpresaServices.php` — whereRaw
-- [ ] `UpDatosTrabajadorService.php` — whereRaw
-- [ ] `UsuarioServices.php` — whereRaw
+**Capa A (queries) — hecha, sin commit.** `whereRaw` Eloquent omitido.
 
-### Services/Cajas (3)
+- [x] `NotificacionService.php` — `DbBase`/`inQueryAssoc` → Eloquent `where`/`orderByDesc`
+- [x] `CertificadosServices.php` — `findFirst` → `Mercurio01::first()` (queda `new Mercurio10` en rechazar/devolver)
+- [x] `Mercurio13Services.php` — `find($query)` → `Mercurio13::whereRaw($query)->get()` (mismo patrón que el resto)
+- [x] `Mercurio14Services.php` — `find($query)` → `Mercurio14::whereRaw($query)->get()`
+- [x] `UsuarioServices.php` — **omitido**: solo `whereRaw` Eloquent
 
-- [ ] `Mercurio01Service.php` — whereRaw
-- [ ] `Mercurio02Service.php` — whereRaw
-- [ ] `Mercurio11Service.php` — whereRaw
+**Capa B (writes `new Mercurio10` en rechazar/devolver) — pendiente.** Mismo patrón en 12 archivos: setters + `save()`. No es query; análogo a no tocar `procesar()` en Aprueba.
+
+- [ ] `BeneficiarioServices.php`
+- [ ] `CertificadosServices.php`
+- [ ] `ConyugeServices.php`
+- [ ] `EmpresaServices.php`
+- [ ] `FacultativoServices.php`
+- [ ] `IndependienteServices.php`
+- [ ] `MadresComuniServices.php`
+- [ ] `PensionadoServices.php`
+- [ ] `ServicioDomesticoServices.php`
+- [ ] `TrabajadorServices.php`
+- [ ] `UpDatosEmpresaServices.php`
+- [ ] `UpDatosTrabajadorService.php`
+
+### Services/Cajas (2 pendientes + 1 omitido)
+
+- [ ] `Mercurio01Service.php` — `new Mercurio01`
+- [x] `Mercurio02Service.php` — **omitido**: solo `whereRaw` Eloquent
+- [ ] `Mercurio11Service.php` — `new Mercurio11`
 
 ### Services/Formularios (4)
 
@@ -203,7 +211,7 @@ Orden recomendado:
 
 - [ ] `ChangeCuentaService.php` — findFirst
 - [ ] `CrearUsuario.php` — new MercurioNN
-- [ ] `GeneralService.php` — findFirst, whereRaw (archivo grande)
+- [ ] `GeneralService.php` — `findFirst`, `new MercurioNN` (archivo grande; `whereRaw` omitido)
 - [ ] `GuardarArchivoService.php` — DbBase
 - [ ] `RegistroSeguimiento.php` — new MercurioNN
 - [ ] `SolicitaClaveService.php` — findFirst×9
@@ -222,9 +230,9 @@ Orden recomendado:
 
 - [ ] `EnviarCertificadoEmailService.php` — findFirst
 
-### Services/Reportes (1)
+### Services/Reportes (1 omitido)
 
-- [ ] `ReporteSolicitudes.php` — whereRaw
+- [x] `ReporteSolicitudes.php` — **omitido**: solo `whereRaw` Eloquent
 
 Destino por pieza: queries → Eloquent; tablas lookup → Cache; input HTTP → `Request` / FormRequest. No mezclar `findFirst("col='x'")` nuevo. Orden sugerido para arrancar: `Entidades` (núcleo de solicitudes) o `CajaServices` (mismo dominio, más chicos).
 
@@ -243,7 +251,7 @@ Orden propuesto por operador; no iniciado.
 | 5 | Mail + Swagger | Unificar mail; instalar swagger o borrar del README |
 | 6 | Tests | Smoke login Mercurio/Cajas + 1 Aprueba; DB test aislada |
 | 7 | Git | Push de los +25 (no paga esta deuda) |
-| 8 | ActiveRecord → Laravel | Empezar por **Services** (67 listados). Eloquent + Cache + Request. No borrar el adapter hasta vaciar consumidores |
+| 8 | ActiveRecord → Laravel | Services: `findFirst` / `inQueryAssoc` / `DbBase` / `new MercurioNN`. **Omitir `whereRaw` Eloquent.** No borrar el adapter hasta vaciar consumidores |
 
 ---
 

@@ -70,7 +70,7 @@ class CertificadosServices
      */
     public function showTabla($paginate)
     {
-        $mercurio01 = (new Mercurio01)->findFirst();
+        $mercurio01 = Mercurio01::first();
         $this->table->set_template(Table::TmpGeneral());
 
         $this->table->set_heading(
@@ -297,7 +297,7 @@ class CertificadosServices
      */
     public function adjuntos($mercurio45)
     {
-        $path = (new Mercurio01)->findFirst()->getPath();
+        $path = Mercurio01::first()->getPath();
         $adjuntos = '';
         $adjuntos .= "<div class='col-md-4 mb-2 shw-adjuntos'>";
         $adjuntos .= "<button class='btn-icon btn-block btn-outline-default' type='button' data-toggle='adjunto' data-path='{$path}' data-file='{$mercurio45->getArchivo()}' >";
