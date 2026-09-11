@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Cajas;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\PinesAfiliado;
 use App\Models\ServiciosCupos;
 use App\Services\Api\ApiSubsidio;
@@ -15,7 +14,6 @@ use Throwable;
 
 class AdmproductosController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -23,7 +21,6 @@ class AdmproductosController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
@@ -56,9 +53,11 @@ class AdmproductosController extends ApplicationController
 
             foreach ($collect as $servicioCupo) {
                 $todosServicios[$ai] = $servicioCupo->getArray();
-                $model = $this->db->fetchOne("SELECT count(DISTINCT cedtra) as numtra, count(DISTINCT docben) as numben
-                FROM pines_afiliado
-                WHERE codser='{$servicioCupo->getCodser()}'");
+                $row = PinesAfiliado::query()
+                    ->where('codser', $servicioCupo->getCodser())
+                    ->selectRaw('count(DISTINCT cedtra) as numtra, count(DISTINCT docben) as numben')
+                    ->first();
+                $model = $row ? $row->toArray() : [];
 
                 $todosServicios[$ai]['cantidad_trabajadores'] = $model['numtra'] ?? 0;
                 $todosServicios[$ai]['cantidad_beneficiarios'] = $model['numben'] ?? 0;
@@ -107,8 +106,7 @@ class AdmproductosController extends ApplicationController
                 $serviciosCupos->setServicio($servicio);
                 $serviciosCupos->setEstado($estado);
             } else {
-                $model = new ServiciosCupos;
-                $serviciosCupos = $model->findFirst(" id='{$id}'");
+                $serviciosCupos = ServiciosCupos::where('id', $id)->first();
                 if ($serviciosCupos == false) {
                     throw new DebugException('Error el servicio no es valido para continuar.', 501);
                 }
@@ -153,8 +151,7 @@ class AdmproductosController extends ApplicationController
             exit;
         }
 
-        $model = new ServiciosCupos;
-        $servicioCupo = $model->findFirst("id='{$id}'");
+        $servicioCupo = ServiciosCupos::where('id', $id)->first();
         if ($servicioCupo == false) {
             set_flashdata('error', [
                 'msj' => 'El servicio no está disponible para editar.',
@@ -181,8 +178,7 @@ class AdmproductosController extends ApplicationController
                 'estado' => $estado,
             ]);
 
-            $model = new ServiciosCupos;
-            $serviciosCupo = $model->findFirst(" id='{$id}'");
+            $serviciosCupo = ServiciosCupos::where('id', $id)->first();
             if ($serviciosCupo === null) {
                 throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
@@ -354,7 +350,7 @@ class AdmproductosController extends ApplicationController
 
             Log::info('AdmproductosController@detalleAplicado - iniciando consulta', ['id' => $id]);
 
-            $pineAfiliado = (new PinesAfiliado)->findFirst(" id='{$id}'");
+            $pineAfiliado = PinesAfiliado::where('id', $id)->first();
             if ($pineAfiliado === null) {
                 throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
@@ -458,7 +454,7 @@ class AdmproductosController extends ApplicationController
 
             Log::info('AdmproductosController@rechazar - iniciando rechazo', ['id' => $id]);
 
-            $pineAfiliado = (new PinesAfiliado)->findFirst(" id='{$id}'");
+            $pineAfiliado = PinesAfiliado::where('id', $id)->first();
             if ($pineAfiliado === null) {
                 throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
@@ -466,7 +462,7 @@ class AdmproductosController extends ApplicationController
             $pineAfiliado->setEstado('R');
             $pineAfiliado->save();
 
-            $servicioCupo = (new ServiciosCupos)->findFirst("codser='{$pineAfiliado->getCodser()}'");
+            $servicioCupo = ServiciosCupos::where('codser', $pineAfiliado->getCodser())->first();
             if ($servicioCupo === null) {
                 throw new DebugException('Error el servicio no es valido para continuar.', 501);
             }
@@ -520,11 +516,6 @@ class AdmproductosController extends ApplicationController
         $codser = $this->normalizeCodser($codser);
         if ($codser === '') {
             return null;
-        }
-
-        $servicio = (new ServiciosCupos)->findFirst(" codser='{$codser}'");
-        if ($servicio !== null) {
-            return $servicio;
         }
 
         return ServiciosCupos::where('codser', $codser)->first();

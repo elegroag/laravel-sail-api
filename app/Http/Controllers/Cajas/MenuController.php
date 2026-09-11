@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
-use App\Models\Adapter\DbBase;
 use App\Models\Gener42;
 use App\Models\MenuItem;
 use App\Models\MenuTipo;
@@ -16,7 +15,6 @@ use Inertia\Inertia;
 
 class MenuController extends Controller
 {
-    protected ?DbBase $db;
 
     protected mixed $user;
 
@@ -24,7 +22,6 @@ class MenuController extends Controller
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -426,7 +423,7 @@ class MenuController extends Controller
             $permisos = $request->input('permisos');
             $permisos = explode(';', $permisos);
 
-            $this->db->begin();
+            DB::beginTransaction();
             if ($tipo == 'A') {
                 foreach ($permisos as $permiso) {
                     if (empty($permiso)) {
@@ -437,7 +434,7 @@ class MenuController extends Controller
                     $table->setUsuario($usuario);
                     $table->setPermiso($permiso);
                     if (! $table->save()) {
-                        $this->db->rollback();
+                        DB::rollBack();
                     }
                 }
             }
@@ -449,13 +446,13 @@ class MenuController extends Controller
                     Gener42::whereRaw("usuario='{$usuario}' and permiso='{$permiso}'")->delete();
                 }
             }
-            $this->db->commit();
+            DB::commit();
             $response = [
                 'flag' => true,
                 'msg' => 'Operación realizada correctamente',
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'flag' => false,
                 'msg' => $e->getMessage(),
@@ -467,7 +464,7 @@ class MenuController extends Controller
 
     public function borrar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         $response = null;
         try {
             $tipo = $request->input('tipo');
@@ -475,7 +472,7 @@ class MenuController extends Controller
             $permisos = $request->input('permisos');
             $permisos = explode(';', $permisos);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'flag' => false,
                 'msg' => $e->getMessage(),

@@ -15,7 +15,7 @@ Misma política que Corte 8:
 
 | App | Archivos | `ApplicationController` | Deuda query | Sin deuda query |
 | --- | --- | --- | --- | --- |
-| Cajas | 63 | 56 | 13 | 50 |
+| Cajas | 63 | 56 | 12 | 51 |
 | Mercurio | 25 | 22 | 22 | 3 |
 
 Fuera de este checklist: `Adapter/ApplicationController.php`, `Api/*` (6), `Web/WebController.php`, `Controller.php` base.
@@ -26,12 +26,12 @@ Orden sugerido (recomendación, no arrancar):
 3. Cajas `Aprueba*` (gordos; Services/Aprueba ya Eloquent).
 4. Mercurio portal (afiliación + Principal).
 
-## Cajas — Auth / principal
+## Cajas — Auth / principal — cerrado
 
-- [ ] `AuthController.php` — `ApplicationController`, 290 LOC — `findFirst`×1, `DbBase`×4/`rawConnect`×2; `setParamToView`×7
-- [x] `PrincipalController.php` — `Controller`, 321 LOC — **omitido**: Eloquent / `Controller` Laravel, sin APIs Kumbia de query
-- [x] `CaptchaController.php` — `Controller`, 100 LOC — **omitido**: Eloquent / `Controller` Laravel, sin APIs Kumbia de query
-- [x] `UsuarioController.php` — `Controller`, 492 LOC — **omitido**: Eloquent / `Controller` Laravel, sin APIs Kumbia de query
+- [x] `AuthController.php` — `fetchOne`/`findFirst`/`updateAll`/`DbBase` → `Gener02` Eloquent; `setParamToView` intacto
+- [x] `PrincipalController.php` — **omitido**: Eloquent / `Controller` Laravel
+- [x] `CaptchaController.php` — **omitido**: Eloquent / `Controller` Laravel
+- [x] `UsuarioController.php` — **omitido**: Eloquent / `Controller` Laravel
 
 ## Cajas — Aprueba — cerrado
 
@@ -92,19 +92,19 @@ Orden sugerido (recomendación, no arrancar):
 - [x] `ReporteComprasServiciosController.php` — **omitido queries**
 - [x] `ReporteSolicitudesEmpresaController.php` — **omitido queries**
 
-## Cajas — Admin / menú / otros
+## Cajas — Admin / menú / otros — cerrado
 
-- [ ] `AdmproductosController.php` — `ApplicationController`, 533 LOC — `findFirst`×7, `DbBase`×2/`rawConnect`×1; `setParamToView`×3
-- [ ] `AdmserviciosController.php` — `ApplicationController`, 213 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1
-- [ ] `BannerController.php` — `ApplicationController`, 262 LOC — `DbBase`×2/`rawConnect`×1
-- [ ] `ComandoController.php` — `ApplicationController`, 113 LOC — `findFirst`×3, `inQueryAssoc`×1, `DbBase`×2/`rawConnect`×1
-- [ ] `ComponenteDinamicoController.php` — `Controller`, 411 LOC — `DbBase`×2/`rawConnect`×1
-- [ ] `EpaycoCuentaController.php` — `ApplicationController`, 228 LOC — `DbBase`×2/`rawConnect`×1
-- [ ] `FormularioDinamicoController.php` — `Controller`, 290 LOC — `DbBase`×2/`rawConnect`×1
-- [ ] `Gener42Controller.php` — `ApplicationController`, 117 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×3, `new Model`×1
-- [ ] `MenuController.php` — `Controller`, 535 LOC — `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×1
-- [x] `MenuPermissionController.php` — `Controller`, 186 LOC — **omitido**: Eloquent / `Controller` Laravel, sin APIs Kumbia de query
-- [ ] `NotificacionesController.php` — `ApplicationController`, 149 LOC — `findFirst`×1, `DbBase`×2/`rawConnect`×1; `setParamToView`×3
+- [x] `AdmproductosController.php` — `findFirst`/`fetchOne` → `ServiciosCupos`/`PinesAfiliado` Eloquent; `DbBase` retirado; `setParamToView` intacto
+- [x] `AdmserviciosController.php` — `DbBase` constructor sin usos, retirado; omitir `whereRaw`
+- [x] `BannerController.php` — txs → `DB::*`
+- [x] `ComandoController.php` — `$this->Comandos->findFirst`/`inQueryAssoc` → `Comandos` Eloquent; `DbBase` retirado
+- [x] `ComponenteDinamicoController.php` — `DbBase` constructor sin usos, retirado
+- [x] `EpaycoCuentaController.php` — txs → `DB::*`
+- [x] `FormularioDinamicoController.php` — `DbBase` constructor sin usos, retirado
+- [x] `Gener42Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `MenuController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `MenuPermissionController.php` — **omitido**: Eloquent / `Controller` Laravel
+- [x] `NotificacionesController.php` — `findFirst`/`count` → `Notificaciones` Eloquent; `DbBase` retirado; `setParamToView` intacto
 
 ## Mercurio — Auth / principal / usuario / notificaciones
 

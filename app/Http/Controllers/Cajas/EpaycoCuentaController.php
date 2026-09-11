@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\EpaycoCuenta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EpaycoCuentaController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -18,7 +17,6 @@ class EpaycoCuentaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -73,7 +71,7 @@ class EpaycoCuentaController extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $this->db->begin();
+            DB::beginTransaction();
 
             $id = $request->input('id');
             $isUpdate = ! empty($id);
@@ -134,20 +132,20 @@ class EpaycoCuentaController extends ApplicationController
             }
 
             if (! $cuenta->save()) {
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar la cuenta ePayco.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc($isUpdate ? 'Actualización terminada con éxito' : 'Creación terminada con éxito');
 
             return $this->renderObject($response);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return $this->renderObject(parent::errorFunc('No se puede guardar el registro: '.$e->getMessage()));
         } catch (\Throwable $e) {
-            $this->db->rollback();
+            DB::rollBack();
             parent::setLogger($e->getMessage());
 
             return $this->renderObject(parent::errorFunc('No se puede guardar el registro.'));
@@ -160,7 +158,7 @@ class EpaycoCuentaController extends ApplicationController
             $this->setResponse('ajax');
             $id = $request->input('id');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $cuenta = EpaycoCuenta::where('id', $id)->first();
 
             if (! $cuenta) {
@@ -168,15 +166,15 @@ class EpaycoCuentaController extends ApplicationController
             }
 
             $cuenta->delete();
-            $this->db->commit();
+            DB::commit();
 
             return $this->renderObject(parent::successFunc('Borrado con éxito'));
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return $this->renderObject(parent::errorFunc('No se puede borrar el registro: '.$e->getMessage()));
         } catch (\Throwable $e) {
-            $this->db->rollback();
+            DB::rollBack();
             parent::setLogger($e->getMessage());
 
             return $this->renderObject(parent::errorFunc('No se puede borrar el registro.'));

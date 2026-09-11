@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Gener02;
 use App\Models\Gener40;
 use App\Models\Gener42;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Gener42Controller extends ApplicationController
 {
@@ -16,7 +16,6 @@ class Gener42Controller extends ApplicationController
 
     protected $cantidad_pagina = 0;
 
-    protected $db;
 
     protected $user;
 
@@ -26,7 +25,6 @@ class Gener42Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
         $this->tipo = 'A';
@@ -80,7 +78,7 @@ class Gener42Controller extends ApplicationController
             $permisos = $request->input('permisos');
             $permisos = explode(';', $permisos);
 
-            $response = $this->db->begin();
+            DB::beginTransaction();
             if ($tipo == 'A') {
                 foreach ($permisos as $permiso) {
                     if (empty($permiso)) continue;
@@ -89,7 +87,7 @@ class Gener42Controller extends ApplicationController
                     $table->setUsuario($usuario);
                     $table->setPermiso($permiso);
                     if (! $table->save()) {
-                        $this->db->rollback();
+                        DB::rollBack();
                     }
                 }
             }
@@ -99,13 +97,13 @@ class Gener42Controller extends ApplicationController
                     Gener42::whereRaw("usuario='{$usuario}' and permiso='{$permiso}'")->delete();
                 }
             }
-            $this->db->commit();
+            DB::commit();
             $response = [
                 'flag' => true,
                 'msg' => 'Operación realizada correctamente'
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'flag' => false,
                 'msg' => $e->getMessage()

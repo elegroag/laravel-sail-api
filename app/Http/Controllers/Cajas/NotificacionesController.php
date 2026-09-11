@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Notificaciones;
 use App\Services\CajaServices\NotificacionService;
 use Illuminate\Http\Request;
 
 class NotificacionesController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -20,7 +18,6 @@ class NotificacionesController extends ApplicationController
     public function __construct()
     {
         $this->setParamToView('instancePath', config('app.url') . 'Cajas/');
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -32,7 +29,7 @@ class NotificacionesController extends ApplicationController
             $notificacionService = new NotificacionService;
             $usuario = parent::getActUser();
             $notificaciones = $notificacionService->getNotificacionesByUser($usuario);
-            $num = $this->Notificaciones->count('*', "conditions: user='{$usuario}' AND estado='P'");
+            $num = Notificaciones::where('user', $usuario)->where('estado', 'P')->count();
             $salida = [
                 'success' => true,
                 'msj' => 'Proceso de consulta exitoso de las notificaciones',
@@ -129,7 +126,7 @@ class NotificacionesController extends ApplicationController
     {
         $this->setResponse('ajax');
         try {
-            $notificacion = (new Notificaciones)->findFirst(" id={$request->input('id')}");
+            $notificacion = Notificaciones::where('id', $request->input('id'))->first();
             $notificacion->setEstado($request->input('estado'));
             $notificacion->save();
             $salida = [

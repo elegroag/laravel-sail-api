@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\PrecompraServicio;
 use App\Services\Ecommerce\EstadoPrecompra;
 use App\Services\Utils\GeneralService;
@@ -22,7 +21,6 @@ class AdmserviciosController extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -30,7 +28,6 @@ class AdmserviciosController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }

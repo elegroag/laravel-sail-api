@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use App\Models\Comandos;
 use Illuminate\Http\Request;
 
 class ComandoController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -16,7 +15,6 @@ class ComandoController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -31,11 +29,16 @@ class ComandoController extends ApplicationController
         $this->setResponse('ajax');
         $id = $request->input('id');
         if ($id) {
-            $comando = $this->Comandos->findFirst("id='{$id}'");
+            $comando = Comandos::where('id', $id)->first();
         } else {
             $proceso = $request->input('proceso');
             $servicio = $request->input('servicio');
-            $comando = $this->Comandos->findFirst(" usuario='{$$this->usuario}' and (linea_comando like '%{$servicio}%' OR proceso='{$proceso}')");
+            $comando = Comandos::where('usuario', $this->usuario)
+                ->where(function ($q) use ($servicio, $proceso) {
+                    $q->where('linea_comando', 'like', "%{$servicio}%")
+                        ->orWhere('proceso', $proceso);
+                })
+                ->first();
         }
         if ($comando) {
             $salida = [
@@ -64,8 +67,12 @@ class ComandoController extends ApplicationController
         $servicio = $request->input('servicio');
         $fechaini = ($request->input('fechaini') == '') ? date('Y-m-d') : $request->input('fechaini');
         $fechafin = ($request->input('fechafin') == '') ? date('Y-m-d') : $request->input('fechafin');
-        $sql = "SELECT * FROM comandos WHERE usuario='{$this->usuario}' and (linea_comando like '%{$servicio}%') and (fecha_runner >='{$fechaini}' and fecha_runner <='{$fechafin}')";
-        $comandos = $this->db->inQueryAssoc($sql);
+        $comandos = Comandos::where('usuario', $this->usuario)
+            ->where('linea_comando', 'like', "%{$servicio}%")
+            ->where('fecha_runner', '>=', $fechaini)
+            ->where('fecha_runner', '<=', $fechafin)
+            ->get()
+            ->toArray();
         if ($comandos) {
             $salida = [
                 'success' => true,
@@ -88,7 +95,7 @@ class ComandoController extends ApplicationController
         $this->setResponse('ajax');
         $id = $request->input('id');
 
-        $comando = $this->Comandos->findFirst("id='{$id}' and usuario='{$this->usuario}'");
+        $comando = Comandos::where('id', $id)->where('usuario', $this->usuario)->first();
         if ($comando) {
             if ($comando->getEstado() == 'F') {
                 $salida = [

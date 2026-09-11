@@ -4,15 +4,14 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Banner;
 use App\Models\Mercurio01;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BannerController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -20,7 +19,6 @@ class BannerController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -81,7 +79,7 @@ class BannerController extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $this->db->begin();
+            DB::beginTransaction();
 
             $mercurio01 = $this->resolveMercurio01();
             $id = $request->input('id');
@@ -133,7 +131,7 @@ class BannerController extends ApplicationController
                     // Guardar primero para obtener id y nombrar el archivo.
                     if (! $banner->save()) {
                         parent::setLogger($banner->getMessages());
-                        $this->db->rollback();
+                        DB::rollBack();
                         throw new DebugException('Error al guardar el banner.');
                     }
                 }
@@ -146,16 +144,16 @@ class BannerController extends ApplicationController
 
             if (! $banner->save()) {
                 parent::setLogger($banner->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el banner.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc($isUpdate ? 'Actualización terminada con éxito' : 'Creación terminada con éxito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
@@ -168,7 +166,7 @@ class BannerController extends ApplicationController
             $this->setResponse('ajax');
             $id = $request->input('id');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $banner = Banner::where('id', $id)->first();
 
             if ($banner) {
@@ -186,12 +184,12 @@ class BannerController extends ApplicationController
                 throw new DebugException('El registro a borrar no existe.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Borrado con éxito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);

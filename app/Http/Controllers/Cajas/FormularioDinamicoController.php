@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Controller;
-use App\Models\Adapter\DbBase;
 use App\Models\ComponenteDinamico;
 use App\Models\FormularioDinamico;
 use Illuminate\Http\Request;
@@ -12,7 +11,6 @@ use Inertia\Inertia;
 
 class FormularioDinamicoController extends Controller
 {
-    protected $db;
 
     protected $user;
 
@@ -20,7 +18,6 @@ class FormularioDinamicoController extends Controller
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }

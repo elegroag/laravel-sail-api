@@ -7,7 +7,7 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthCajas;
 use App\Library\Auth\SessionCookies;
-use App\Models\Adapter\DbBase;
+use App\Models\Gener02;
 use App\Services\CajaServices\UsuarioServices;
 use App\Services\Utils\SenderEmail;
 use App\Services\CaptchaService;
@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends ApplicationController
 {
-    protected ?DbBase $db = null;
 
     protected ?array $user = null;
 
@@ -27,7 +26,6 @@ class AuthController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -108,7 +106,7 @@ class AuthController extends ApplicationController
             $captcha = $request->input('captcha');
             $_usuario = $request->input('recovery_usuario');
 
-            $gener02 = $this->db->fetchOne("SELECT * FROM gener02 WHERE cedtra='{$cedula}' AND usuario='{$_usuario}' AND estado IN('A','B') LIMIT 1");
+            $gener02 = Gener02::where('cedtra', $cedula)->where('usuario', $_usuario)->whereIn('estado', ['A', 'B'])->first();
 
             if (! $gener02) {
                 throw new AuthException('El usuario no se encuentra registrado en el sistema. No se puede continuar el proceso de recuperación de la cuenta.', 1);
@@ -125,8 +123,12 @@ class AuthController extends ApplicationController
                 // Migrado a Hash de Laravel
                 $hash = Hash::make($nueva_clave);
 
-                // TODO: Migrar a Eloquent
-                $this->Gener02->updateAll("clave='{$hash}', update_at='{$fecha}', estado='A', intentos='0'", "conditions: cedtra='{$cedula}' and usuario='{$_usuario}'");
+                Gener02::where('cedtra', $cedula)->where('usuario', $_usuario)->update([
+                    'clave' => $hash,
+                    'update_at' => $fecha,
+                    'estado' => 'A',
+                    'intentos' => '0',
+                ]);
 
                 // TODO: Migrar a Mail de Laravel
                 $mensaje = view('login.tmp.mail_recovery', [
@@ -181,7 +183,7 @@ class AuthController extends ApplicationController
             if (! validar_clave($clave_nueva)) {
                 throw new AuthException('La clave no cumple con las reglas exigidas para la seguridad en la autenticación.', 5);
             }
-            $usuario = $this->Gener02->findFirst("estado='A' AND usuario='{$user}'");
+            $usuario = Gener02::where('estado', 'A')->where('usuario', $user)->first();
             if (! $usuario) {
                 throw new AuthException('El usuario no es correcto para continuar con la autenticación.', 6);
             }
@@ -206,7 +208,12 @@ class AuthController extends ApplicationController
             $fecha = date('Y-m-d');
             $update_at = date('Y-m-d H:i:s');
             $nhash = clave_hash($clave_nueva, 10);
-            $res = $this->Gener02->updateAll("feccla='{$fecha}', update_at='{$update_at}', criptada='{$nhash}', clave='{$mclave}'", "conditions: estado='A' AND usuario='{$user}'");
+            $res = Gener02::where('estado', 'A')->where('usuario', $user)->update([
+                'feccla' => $fecha,
+                'update_at' => $update_at,
+                'criptada' => $nhash,
+                'clave' => $mclave,
+            ]);
             if ($res) {
                 ob_start();
                 $this->setParamToView('assets', 'https://comfacaenlinea.com/public/');
@@ -262,10 +269,9 @@ class AuthController extends ApplicationController
     {
         $request = request();
         try {
-            $db = DbBase::rawConnect();
             $usuario = $request->input('usuario');
             $correo = $request->input('correo');
-            $this->Gener02->updateAll("estacion='{$correo}'", "conditions: usuario='{$usuario}'");
+            Gener02::where('usuario', $usuario)->update(['estacion' => $correo]);
             session()->flash('success', [
                 'msj' => 'El correo electrónico se ha actualizado correctamente.',
             ]);
