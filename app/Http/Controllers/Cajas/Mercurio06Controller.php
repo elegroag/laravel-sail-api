@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio06;
 use App\Models\Mercurio28;
 use App\Services\Utils\GeneralService;
@@ -17,7 +17,6 @@ class Mercurio06Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -25,7 +24,6 @@ class Mercurio06Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -109,15 +107,15 @@ class Mercurio06Controller extends ApplicationController
             $this->setResponse('ajax');
             $tipo = $request->input('tipo');
 
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio06::where('tipo', $tipo)->delete();
-            $this->db->commit();
+            DB::commit();
 
             $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro');
 
             return $this->renderObject($response, false);
@@ -131,7 +129,7 @@ class Mercurio06Controller extends ApplicationController
             $tipo = $request->input('tipo');
             $detalle = $request->input('detalle');
 
-            $this->db->begin();
+            DB::beginTransaction();
 
             // Buscar si ya existe un registro con el mismo tipo
             $mercurio06 = Mercurio06::where('tipo', $tipo)->first();
@@ -145,16 +143,16 @@ class Mercurio06Controller extends ApplicationController
 
             if (! $mercurio06->save()) {
                 parent::setLogger($mercurio06->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Operación exitosa');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se pudo guardar el registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
@@ -222,7 +220,7 @@ class Mercurio06Controller extends ApplicationController
     public function guardarCampo(Request $request)
     {
         try {
-            $this->db->begin();
+            DB::beginTransaction();
             $tipo = $request->input('tipo');
             $campo = $request->input('campo');
             $detalle = $request->input('detalle');
@@ -240,18 +238,18 @@ class Mercurio06Controller extends ApplicationController
             $mercurio28->setOrden($orden);
 
             if (! $mercurio28->save()) {
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el campo');
             }
 
-            $this->db->commit();
+            DB::commit();
 
             $response = [
                 'success' => true,
                 'msj' => 'Movimiento Realizado Con Exito'
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'success' => false,
                 'msj' => 'No se pudo realizar el movimiento: ' . $e->getMessage()
@@ -290,14 +288,14 @@ class Mercurio06Controller extends ApplicationController
             $tipo = $request->input('tipo');
             $campo = $request->input('campo');
 
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio28::where('tipo', $tipo)->where('campo', $campo)->delete();
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Movimiento Realizado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se pudo realizar el movimiento');
 
             return $this->renderObject($response, false);

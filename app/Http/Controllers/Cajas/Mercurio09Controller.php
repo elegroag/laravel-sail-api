@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio09;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
@@ -21,7 +21,6 @@ class Mercurio09Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -29,7 +28,6 @@ class Mercurio09Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -125,15 +123,15 @@ class Mercurio09Controller extends ApplicationController
             $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
 
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio09::where('tipopc', $tipopc)->delete();
-            $this->db->commit();
+            DB::commit();
 
             $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro');
 
             return $this->renderObject($response, false);
@@ -148,7 +146,7 @@ class Mercurio09Controller extends ApplicationController
             $detalle = $request->input('detalle');
             $dias = $request->input('dias');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio09 = Mercurio09::where('tipopc', $tipopc)->first();
 
             if (! $mercurio09) {
@@ -160,16 +158,16 @@ class Mercurio09Controller extends ApplicationController
             $mercurio09->setDias($dias);
 
             if (! $mercurio09->save()) {
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = 'Creacion Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = 'No se puede guardar/editar el Registro: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
@@ -224,25 +222,25 @@ class Mercurio09Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $acc = $request->input('acc');
 
-            $this->db->begin();
+            DB::beginTransaction();
             if ($acc == '1') {
                 $mercurio13 = new Mercurio13;
                 $mercurio13->setTipopc($tipopc);
                 $mercurio13->setCoddoc($coddoc);
                 $mercurio13->setObliga('N');
                 if (! $mercurio13->save()) {
-                    $this->db->rollback();
+                    DB::rollBack();
                     throw new DebugException('Error al guardar archivo');
                 }
             } else {
                 Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
             }
-            $this->db->commit();
+            DB::commit();
             $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
             return $this->renderObject($response, false);
         }
@@ -256,14 +254,14 @@ class Mercurio09Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $obliga = $request->input('obliga');
 
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->update(['obliga' => $obliga]);
-            $this->db->commit();
+            DB::commit();
             $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
@@ -300,7 +298,7 @@ class Mercurio09Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $acc = $request->input('acc');
 
-            $this->db->begin();
+            DB::beginTransaction();
             if ($acc == '1') {
                 $mercurio14 = new Mercurio14;
                 $mercurio14->setTipopc($tipopc);
@@ -308,18 +306,18 @@ class Mercurio09Controller extends ApplicationController
                 $mercurio14->setCoddoc($coddoc);
                 $mercurio14->setObliga('N');
                 if (! $mercurio14->save()) {
-                    $this->db->rollback();
+                    DB::rollBack();
                     throw new DebugException('Error al guardar archivo de empresa');
                 }
             } else {
                 Mercurio14::where('tipopc', $tipopc)->where('tipsoc', $tipsoc)->where('coddoc', $coddoc)->delete();
             }
-            $this->db->commit();
+            DB::commit();
             $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
 
             return $this->renderObject($response, false);
@@ -335,17 +333,17 @@ class Mercurio09Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $obliga = $request->input('obliga');
 
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio14::where('tipopc', $tipopc)
                 ->where('tipsoc', $tipsoc)
                 ->where('coddoc', $coddoc)
                 ->update(['obliga' => $obliga]);
-            $this->db->commit();
+            DB::commit();
             $response = 'Movimiento Realizado Con Exito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
 
             return $this->renderObject($response, false);

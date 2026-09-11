@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio09;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
@@ -21,7 +21,6 @@ class Mercurio14Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -29,7 +28,6 @@ class Mercurio14Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -134,7 +132,7 @@ class Mercurio14Controller extends ApplicationController
             $nota = $request->input('nota');
             $auto_generado = $request->input('auto_generado');
 
-            $this->db->begin();
+            DB::beginTransaction();
 
             $mercurio14 = Mercurio14::firstOrNew([
                 'tipopc' => $tipopc,
@@ -147,16 +145,16 @@ class Mercurio14Controller extends ApplicationController
 
             if (! $mercurio14->save()) {
                 parent::setLogger($mercurio14->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error no se puede guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('El registro se completo con éxito.');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc($e->getMessage());
 
             return $this->renderObject($response, false);
@@ -171,7 +169,7 @@ class Mercurio14Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $tipsoc = $request->input('tipsoc');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $deleted = Mercurio14::where('tipopc', $tipopc)
                 ->where('coddoc', $coddoc)
                 ->where('tipsoc', $tipsoc)
@@ -181,13 +179,13 @@ class Mercurio14Controller extends ApplicationController
                 throw new DebugException('Error no se puede borrar el registro, no está disponible.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = [
                 'success' => true,
                 'msj' => 'El registro se borro con éxito.'
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage()

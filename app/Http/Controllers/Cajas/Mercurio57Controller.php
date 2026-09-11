@@ -4,14 +4,13 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio57;
 use Illuminate\Http\Request;
 
 class Mercurio57Controller extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -19,7 +18,6 @@ class Mercurio57Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -85,7 +83,7 @@ class Mercurio57Controller extends ApplicationController
     {
         try {
             $this->setResponse('ajax');
-            $this->db->begin();
+            DB::beginTransaction();
 
             $mercurio01 = $this->resolveMercurio01();
             $numpro = $request->input('numpro');
@@ -122,16 +120,16 @@ class Mercurio57Controller extends ApplicationController
 
             if (! $mercurio57->save()) {
                 parent::setLogger($mercurio57->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar la promoción.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc($isUpdate ? 'Actualización terminada con éxito' : 'Creacion terminada Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
@@ -144,7 +142,7 @@ class Mercurio57Controller extends ApplicationController
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $objetivo = Mercurio57::where('numpro', $numpro)->first();
             if (! $objetivo) {
                 throw new DebugException('Registro no encontrado.');
@@ -163,12 +161,12 @@ class Mercurio57Controller extends ApplicationController
                     $superior->save();
                 }
             }
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Ordenado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
@@ -181,7 +179,7 @@ class Mercurio57Controller extends ApplicationController
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $objetivo = Mercurio57::where('numpro', $numpro)->first();
             if (! $objetivo) {
                 throw new DebugException('Registro no encontrado.');
@@ -200,12 +198,12 @@ class Mercurio57Controller extends ApplicationController
                     $inferior->save();
                 }
             }
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Ordenado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
@@ -218,7 +216,7 @@ class Mercurio57Controller extends ApplicationController
             $this->setResponse('ajax');
             $numpro = $request->input('numpro');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio57 = Mercurio57::where('numpro', $numpro)->first();
 
             if ($mercurio57) {
@@ -236,12 +234,12 @@ class Mercurio57Controller extends ApplicationController
                 throw new DebugException('El registro a borrar no existe.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);

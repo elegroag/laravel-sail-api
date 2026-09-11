@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio12;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -16,7 +16,6 @@ class Mercurio12Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -24,7 +23,6 @@ class Mercurio12Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -106,15 +104,15 @@ class Mercurio12Controller extends ApplicationController
             $this->setResponse('ajax');
             $coddoc = $request->input('coddoc');
 
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio12::where('coddoc', $coddoc)->delete();
-            $this->db->commit();
+            DB::commit();
 
             $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro');
 
             return $this->renderObject($response, false);
@@ -128,7 +126,7 @@ class Mercurio12Controller extends ApplicationController
             $coddoc = $request->input('coddoc');
             $detalle = $request->input('detalle');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio12 = Mercurio12::where('coddoc', $coddoc)->first();
 
             if (! $mercurio12) {
@@ -140,16 +138,16 @@ class Mercurio12Controller extends ApplicationController
 
             if (! $mercurio12->save()) {
                 parent::setLogger($mercurio12->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Creacion Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);

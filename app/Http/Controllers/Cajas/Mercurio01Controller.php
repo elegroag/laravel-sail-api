@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -16,7 +16,6 @@ class Mercurio01Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -24,7 +23,6 @@ class Mercurio01Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
@@ -107,7 +105,7 @@ class Mercurio01Controller extends ApplicationController
             $userserver = $request->input('userserver');
             $passserver = $request->input('passserver');
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             $mercurio01 = new Mercurio01;
 
             $mercurio01->setCodapl($codapl);
@@ -120,9 +118,9 @@ class Mercurio01Controller extends ApplicationController
             $mercurio01->setPassserver($passserver);
 
             if (! $mercurio01->save()) {
-                $this->db->rollback();
+                DB::rollBack();
             }
-            $this->db->commit();
+            DB::commit();
             $response = 'Creacion Con Exito';
 
             return $this->renderObject($response, false);

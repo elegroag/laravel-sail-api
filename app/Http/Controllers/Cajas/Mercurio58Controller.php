@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio58;
 use Illuminate\Http\Request;
@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\File;
 
 class Mercurio58Controller extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -20,7 +19,6 @@ class Mercurio58Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -67,7 +65,7 @@ class Mercurio58Controller extends ApplicationController
         try {
             $this->setResponse('ajax');
             $codare = $request->input('codare');
-            $this->db->begin();
+            DB::beginTransaction();
 
             $numero = (Mercurio58::max('numero') ?? 0) + 1;
             $orden = (Mercurio58::max('orden') ?? 0) + 1;
@@ -95,16 +93,16 @@ class Mercurio58Controller extends ApplicationController
 
             if (! $mercurio58->save()) {
                 parent::setLogger($mercurio58->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el archivo del área.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Creacion terminada Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
@@ -117,7 +115,7 @@ class Mercurio58Controller extends ApplicationController
             $this->setResponse('ajax');
             $numero = $request->input('numero');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $objetivo = Mercurio58::where('numero', $numero)->first();
             if (! $objetivo) {
                 throw new DebugException('Registro no encontrado.');
@@ -138,12 +136,12 @@ class Mercurio58Controller extends ApplicationController
                     $superior->save();
                 }
             }
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Ordenado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
@@ -156,7 +154,7 @@ class Mercurio58Controller extends ApplicationController
             $this->setResponse('ajax');
             $numero = $request->input('numero');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $objetivo = Mercurio58::where('numero', $numero)->first();
             if (! $objetivo) {
                 throw new DebugException('Registro no encontrado.');
@@ -177,12 +175,12 @@ class Mercurio58Controller extends ApplicationController
                     $inferior->save();
                 }
             }
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Ordenado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
@@ -195,7 +193,7 @@ class Mercurio58Controller extends ApplicationController
             $this->setResponse('ajax');
             $numero = $request->input('numero');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio58 = Mercurio58::where('numero', $numero)->first();
 
             if ($mercurio58) {
@@ -213,12 +211,12 @@ class Mercurio58Controller extends ApplicationController
                 throw new DebugException('El registro a borrar no existe.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);

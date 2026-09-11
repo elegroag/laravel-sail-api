@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio02;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Utils\Comman;
@@ -18,7 +18,6 @@ class Mercurio02Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -26,7 +25,6 @@ class Mercurio02Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
@@ -134,7 +132,7 @@ class Mercurio02Controller extends ApplicationController
             $pagtwi = $request->input('pagtwi');
             $pagyou = $request->input('pagyou');
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             $mercurio02 = Mercurio02::firstOrNew(['codcaj' => $codcaj]);
 
             $mercurio02->setCodcaj($codcaj);
@@ -151,16 +149,16 @@ class Mercurio02Controller extends ApplicationController
             $mercurio02->setPagyou($pagyou);
 
             if (! $mercurio02->save()) {
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = 'Operación realizada con éxito';
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = 'No se pudo guardar/editar el registro: ' . $e->getMessage();
 
             return $this->renderObject($response, false);

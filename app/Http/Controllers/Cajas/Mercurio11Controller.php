@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio11;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -16,7 +16,6 @@ class Mercurio11Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -24,7 +23,6 @@ class Mercurio11Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -111,16 +109,16 @@ class Mercurio11Controller extends ApplicationController
     {
         try {
             $codest = $request->input('codest');
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio11::where('codest', $codest)->delete();
-            $this->db->commit();
+            DB::commit();
 
             $response = [
                 'success' => true,
                 'msj' => 'Proceso completado con éxito.',
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage(),
@@ -136,7 +134,7 @@ class Mercurio11Controller extends ApplicationController
             $codest = $request->input('codest');
             $detalle = $request->input('detalle');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio11 = Mercurio11::where('codest', $codest)->first();
 
             if (! $mercurio11) {
@@ -147,14 +145,14 @@ class Mercurio11Controller extends ApplicationController
                 $mercurio11->setDetalle($detalle);
             }
             $mercurio11->save();
-            $this->db->commit();
+            DB::commit();
 
             $response = [
                 'success' => true,
                 'msj' => 'Proceso completado con éxito.',
             ];
         } catch (\Exception $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage(),

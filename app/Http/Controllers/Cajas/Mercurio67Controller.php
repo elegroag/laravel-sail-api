@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio67;
 use App\Services\Tag;
 use App\Services\Utils\GeneralService;
@@ -17,7 +17,6 @@ class Mercurio67Controller extends ApplicationController
 
     protected $cantidad_pagina = 0;
 
-    protected $db;
 
     protected $user;
 
@@ -25,7 +24,6 @@ class Mercurio67Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -101,7 +99,7 @@ class Mercurio67Controller extends ApplicationController
             $this->renderObject($mercurio67->toArray(), false);
         } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
-            $this->db->rollback();
+            DB::rollBack();
         }
     }
 
@@ -111,9 +109,9 @@ class Mercurio67Controller extends ApplicationController
             $this->setResponse('ajax');
             $codcla = $request->input('codcla');
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             Mercurio67::where('codcla', $codcla)->delete();
-            $this->db->commit();
+            DB::commit();
             $response = 'Borrado Con Exito';
 
             return $this->renderObject($response, false);
@@ -130,16 +128,16 @@ class Mercurio67Controller extends ApplicationController
             $codcla = $request->input('codcla');
             $detalle = $request->input('detalle');
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             $mercurio67 = new Mercurio67;
 
             $mercurio67->setCodcla($codcla);
             $mercurio67->setDetalle($detalle);
             if (! $mercurio67->save()) {
                 parent::setLogger($mercurio67->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
             }
-            $this->db->commit();
+            DB::commit();
             $response = 'Creacion Con Exito';
 
             return $this->renderObject($response, false);

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio72;
 use App\Services\Utils\UploadFile;
@@ -13,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class Mercurio72Controller extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -21,7 +19,6 @@ class Mercurio72Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -49,7 +46,7 @@ class Mercurio72Controller extends ApplicationController
             $this->renderObject($response, false);
         } catch (DebugException $e) {
             parent::setLogger($e->getMessage());
-            $this->db->rollback();
+            DB::rollBack();
         }
     }
 
@@ -62,7 +59,7 @@ class Mercurio72Controller extends ApplicationController
             $orden = Mercurio72::max('orden') + 1;
             $url = $request->input('url');
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             $mercurio72 = new Mercurio72;
 
             $mercurio72->setNumtur($numtur);
@@ -83,10 +80,10 @@ class Mercurio72Controller extends ApplicationController
 
             if (! $mercurio72->save()) {
                 parent::setLogger($mercurio72->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Creacion terminada Con Exito');
 
             return $this->renderObject($response, false);
@@ -168,9 +165,9 @@ class Mercurio72Controller extends ApplicationController
                 unlink("{$mercurio01->getPath()}galeria/" . $archivo);
             }
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
             Mercurio72::where('numtur', $numpro)->delete();
-            $this->db->commit();
+            DB::commit();
             $response = 'Inactivado Con Exito';
 
             return $this->renderObject($response, false);

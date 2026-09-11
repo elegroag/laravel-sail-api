@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio09;
 use App\Models\Mercurio12;
 use App\Models\Mercurio13;
@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 
 class Mercurio13Controller extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -26,7 +25,6 @@ class Mercurio13Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -112,7 +110,7 @@ class Mercurio13Controller extends ApplicationController
 
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
@@ -125,7 +123,7 @@ class Mercurio13Controller extends ApplicationController
             $mercurio13->auto_generado = $auto_generado;
             $mercurio13->nota = $nota;
             $mercurio13->save();
-            $this->db->commit();
+            DB::commit();
 
             $salida = [
                 'success' => true,
@@ -133,14 +131,14 @@ class Mercurio13Controller extends ApplicationController
             ];
             return response()->json($salida);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
             return $this->handleException($e, $request);
         }
     }
 
     public function borrar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $tipopc = $request->input('tipopc');
             $coddoc = $request->input('coddoc');
@@ -148,13 +146,13 @@ class Mercurio13Controller extends ApplicationController
             if ($deleted == 0) {
                 throw new DebugException('Error no se puede borrar el registro, no está disponible.');
             }
-            $this->db->commit();
+            DB::commit();
             $response = [
                 'success' => true,
                 'msj' => 'El registro se borro con éxito.'
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'success' => false,
                 'msj' => $e->getMessage(),

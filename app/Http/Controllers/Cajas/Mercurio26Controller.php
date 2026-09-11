@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio26;
 use Illuminate\Http\Request;
@@ -13,7 +13,6 @@ use Illuminate\Validation\ValidationException;
 
 class Mercurio26Controller extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -21,7 +20,6 @@ class Mercurio26Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -81,7 +79,7 @@ class Mercurio26Controller extends ApplicationController
                 ],
             ]);
 
-            $this->db->begin();
+            DB::beginTransaction();
 
             $numero = (Mercurio26::max('numero') ?? 0) + 1;
             $orden = (Mercurio26::max('orden') ?? 0) + 1;
@@ -117,11 +115,11 @@ class Mercurio26Controller extends ApplicationController
 
             if (! $mercurio26->save()) {
                 parent::setLogger($mercurio26->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro de la galería.');
             }
 
-            $this->db->commit();
+            DB::commit();
 
             return $this->renderObject(parent::successFunc('Creacion terminada Con Exito'));
         } catch (ValidationException $e) {
@@ -129,11 +127,11 @@ class Mercurio26Controller extends ApplicationController
 
             return $this->renderObject(parent::errorFunc($message));
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return $this->renderObject(parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage()));
         } catch (\Throwable $e) {
-            $this->db->rollback();
+            DB::rollBack();
             parent::setLogger($e->getMessage());
 
             return $this->renderObject(parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage()));
@@ -145,7 +143,7 @@ class Mercurio26Controller extends ApplicationController
         try {
             $numero = $request->input('numero');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $objetivo = Mercurio26::where('numero', $numero)->first();
             if (! $objetivo) {
                 throw new DebugException('Registro no encontrado.');
@@ -164,15 +162,15 @@ class Mercurio26Controller extends ApplicationController
                     $superior->save();
                 }
             }
-            $this->db->commit();
+            DB::commit();
 
             return $this->renderObject(parent::successFunc('Ordenado Con Exito'));
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
         } catch (\Throwable $e) {
-            $this->db->rollback();
+            DB::rollBack();
             parent::setLogger($e->getMessage());
 
             return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
@@ -184,7 +182,7 @@ class Mercurio26Controller extends ApplicationController
         try {
             $numero = $request->input('numero');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $objetivo = Mercurio26::where('numero', $numero)->first();
             if (! $objetivo) {
                 throw new DebugException('Registro no encontrado.');
@@ -203,15 +201,15 @@ class Mercurio26Controller extends ApplicationController
                     $inferior->save();
                 }
             }
-            $this->db->commit();
+            DB::commit();
 
             return $this->renderObject(parent::successFunc('Ordenado Con Exito'));
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
         } catch (\Throwable $e) {
-            $this->db->rollback();
+            DB::rollBack();
             parent::setLogger($e->getMessage());
 
             return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
@@ -223,7 +221,7 @@ class Mercurio26Controller extends ApplicationController
         try {
             $numero = $request->input('numero');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio26 = Mercurio26::where('numero', $numero)->first();
 
             if (! $mercurio26) {
@@ -242,15 +240,15 @@ class Mercurio26Controller extends ApplicationController
 
             $mercurio26->delete();
 
-            $this->db->commit();
+            DB::commit();
 
             return $this->renderObject(parent::successFunc('Borrado Con Exito'));
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
 
             return $this->renderObject(parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage()));
         } catch (\Throwable $e) {
-            $this->db->rollback();
+            DB::rollBack();
             parent::setLogger($e->getMessage());
 
             return $this->renderObject(parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage()));

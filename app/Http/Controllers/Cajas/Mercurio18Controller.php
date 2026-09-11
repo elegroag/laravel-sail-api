@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio18;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -16,7 +16,6 @@ class Mercurio18Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -24,7 +23,6 @@ class Mercurio18Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipfun = session()->has('tipfun') ? session('tipfun') : null;
     }
@@ -132,15 +130,15 @@ class Mercurio18Controller extends ApplicationController
             $this->setResponse('ajax');
             $codigo = $request->input('codigo');
 
-            $this->db->begin();
+            DB::beginTransaction();
             Mercurio18::where('codigo', $codigo)->delete();
-            $this->db->commit();
+            DB::commit();
 
             $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro');
 
             return $this->renderObject($response, false);
@@ -154,7 +152,7 @@ class Mercurio18Controller extends ApplicationController
             $codigo = $request->input('codigo');
             $detalle = $request->input('detalle');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio18 = Mercurio18::where('codigo', $codigo)->first();
 
             if (! $mercurio18) {
@@ -166,16 +164,16 @@ class Mercurio18Controller extends ApplicationController
 
             if (! $mercurio18->save()) {
                 parent::setLogger($mercurio18->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Creacion Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);

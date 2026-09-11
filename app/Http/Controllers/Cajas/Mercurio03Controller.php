@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio03;
 use App\Services\Utils\GeneralService;
@@ -18,7 +17,6 @@ class Mercurio03Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -26,7 +24,6 @@ class Mercurio03Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }

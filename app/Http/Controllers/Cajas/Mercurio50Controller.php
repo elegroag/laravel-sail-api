@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio50;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
@@ -16,7 +16,6 @@ class Mercurio50Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -24,7 +23,6 @@ class Mercurio50Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -104,7 +102,7 @@ class Mercurio50Controller extends ApplicationController
             $urlonl = $request->input('urlonl');
             $puncom = $request->input('puncom');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio50 = Mercurio50::first();
             if (! $mercurio50) {
                 $mercurio50 = new Mercurio50;
@@ -118,16 +116,16 @@ class Mercurio50Controller extends ApplicationController
 
             if (! $mercurio50->save()) {
                 parent::setLogger($mercurio50->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Creacion Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede guardar/editar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);

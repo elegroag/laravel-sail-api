@@ -15,7 +15,7 @@ Misma política que Corte 8:
 
 | App | Archivos | `ApplicationController` | Deuda query | Sin deuda query |
 | --- | --- | --- | --- | --- |
-| Cajas | 63 | 56 | 42 | 21 |
+| Cajas | 63 | 56 | 18 | 45 |
 | Mercurio | 25 | 22 | 22 | 3 |
 
 Fuera de este checklist: `Adapter/ApplicationController.php`, `Api/*` (6), `Web/WebController.php`, `Controller.php` base.
@@ -48,34 +48,36 @@ Orden sugerido (recomendación, no arrancar):
 - [x] `ApruebaUpEmpresaController.php` — `inQueryAssoc`×4 → `DB::select`; txs → `DB::*`; `setParamToView` intacto; omitir `whereRaw`/`new Model`
 - [x] `ApruebaUpTrabajadorController.php` — txs → `DB::*`; `setParamToView` intacto; omitir `whereRaw`/`new Model`
 
-## Cajas — Tablas MercurioNN
+## Cajas — Tablas MercurioNN — cerrado
 
-- [ ] `Mercurio01Controller.php` — `ApplicationController`, 147 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio02Controller.php` — `ApplicationController`, 170 LOC — `DbBase`×2/`rawConnect`×1; `setParamToView`×1; omitir `whereRaw`×1, `new Model`×1
-- [ ] `Mercurio03Controller.php` — `ApplicationController`, 299 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio04Controller.php` — `ApplicationController`, 540 LOC — `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×11, `new Model`×4
-- [ ] `Mercurio06Controller.php` — `ApplicationController`, 320 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×4
-- [ ] `Mercurio09Controller.php` — `ApplicationController`, 368 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×4
-- [ ] `Mercurio11Controller.php` — `ApplicationController`, 210 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio12Controller.php` — `ApplicationController`, 190 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio13Controller.php` — `ApplicationController`, 191 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio14Controller.php` — `ApplicationController`, 200 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×1
-- [ ] `Mercurio18Controller.php` — `ApplicationController`, 216 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio26Controller.php` — `ApplicationController`, 260 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×1
-- [ ] `Mercurio50Controller.php` — `ApplicationController`, 137 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio51Controller.php` — `ApplicationController`, 212 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×3
-- [ ] `Mercurio52Controller.php` — `ApplicationController`, 254 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×3
-- [ ] `Mercurio53Controller.php` — `ApplicationController`, 306 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×1
-- [ ] `Mercurio55Controller.php` — `ApplicationController`, 250 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×1
-- [ ] `Mercurio56Controller.php` — `ApplicationController`, 246 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio57Controller.php` — `ApplicationController`, 318 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×1
-- [ ] `Mercurio58Controller.php` — `ApplicationController`, 228 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×1
-- [ ] `Mercurio59Controller.php` — `ApplicationController`, 296 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×1
-- [x] `Mercurio65Controller.php` — `ApplicationController`, 223 LOC — **omitido queries**: sin `findFirst`/`inQueryAssoc`/`DbBase` (sigue `ApplicationController`); omitir `whereRaw`×1, `new Model`×3
-- [ ] `Mercurio67Controller.php` — `ApplicationController`, 183 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `Mercurio72Controller.php` — `ApplicationController`, 184 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×1
-- [ ] `Mercurio73Controller.php` — `ApplicationController`, 223 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×1
-- [ ] `Mercurio74Controller.php` — `ApplicationController`, 223 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×1
+`DbBase` txs → `DB::beginTransaction`/`commit`/`rollBack`. Sin `findFirst`/`inQueryAssoc`. Intactos: `whereRaw`, `new Model`, `ApplicationController`.
+
+- [x] `Mercurio01Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio02Controller.php` — txs → `DB::*`; `setParamToView` intacto; omitir `whereRaw`/`new Model`
+- [x] `Mercurio03Controller.php` — `DbBase` constructor sin usos, retirado; omitir `whereRaw`/`new Model`
+- [x] `Mercurio04Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio06Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio09Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio11Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio12Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio13Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio14Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio18Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio26Controller.php` — txs → `DB::*`; omitir `new Model`
+- [x] `Mercurio50Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio51Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio52Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio53Controller.php` — txs → `DB::*`; omitir `new Model`
+- [x] `Mercurio55Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio56Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio57Controller.php` — txs → `DB::*`; omitir `new Model`
+- [x] `Mercurio58Controller.php` — txs → `DB::*`; omitir `new Model`
+- [x] `Mercurio59Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio65Controller.php` — txs `$this->db` nulo → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio67Controller.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `Mercurio72Controller.php` — txs → `DB::*`; omitir `new Model`
+- [x] `Mercurio73Controller.php` — txs → `DB::*`; omitir `new Model`
+- [x] `Mercurio74Controller.php` — txs → `DB::*`; omitir `new Model`
 
 ## Cajas — Reportes / consultas / auditoría
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
 use App\Models\Mercurio56;
 use App\Services\Utils\GeneralService;
@@ -18,7 +18,6 @@ class Mercurio56Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -26,7 +25,6 @@ class Mercurio56Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session()->has('user') ? session('user') : null;
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
@@ -120,7 +118,7 @@ class Mercurio56Controller extends ApplicationController
             $this->setResponse('ajax');
             $codinf = $request->input('codinf');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio56 = Mercurio56::where('codinf', $codinf)->first();
 
             if ($mercurio56) {
@@ -137,12 +135,12 @@ class Mercurio56Controller extends ApplicationController
                 throw new DebugException('El registro a borrar no existe.');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Borrado Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede Borrar el Registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
@@ -159,7 +157,7 @@ class Mercurio56Controller extends ApplicationController
             $nota = $request->input('nota');
             $estado = $request->input('estado');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio56 = Mercurio56::firstOrNew(['codinf' => $codinf]);
 
             $mercurio56->email = $email;
@@ -192,16 +190,16 @@ class Mercurio56Controller extends ApplicationController
 
             if (! $mercurio56->save()) {
                 parent::setLogger($mercurio56->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 throw new DebugException('Error al guardar el registro');
             }
 
-            $this->db->commit();
+            DB::commit();
             $response = parent::successFunc('Creacion Con Exito');
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
 
             return $this->renderObject($response, false);

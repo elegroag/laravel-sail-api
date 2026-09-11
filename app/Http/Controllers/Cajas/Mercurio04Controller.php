@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
+use Illuminate\Support\Facades\DB;
 use App\Models\Gener02;
 use App\Models\Mercurio04;
 use App\Models\Mercurio05;
@@ -24,7 +24,6 @@ class Mercurio04Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected ?DbBase $db = null;
 
     protected ?array $user = null;
 
@@ -32,7 +31,6 @@ class Mercurio04Controller extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user')  ?? null;
         $this->tipfun = session('tipfun') ?? null;
     }
@@ -157,20 +155,20 @@ class Mercurio04Controller extends ApplicationController
 
             return $this->renderObject($mercurio04->toArray(), false);
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
         }
     }
 
     public function borrar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $this->setResponse('ajax');
                 $codofi = $request->input('codofi');
 
                 Mercurio04::whereRaw("codofi = '$codofi'")->delete();
-                $this->db->commit();
+                DB::commit();
                 $response = [
                     'success' => true,
                     'msj' => 'Borrado Con Exito'
@@ -178,7 +176,7 @@ class Mercurio04Controller extends ApplicationController
 
                 return $this->renderObject($response);
             } catch (DebugException $e) {
-                $this->db->rollback();
+                DB::rollBack();
             }
         } catch (DebugException $e) {
             $response = [
@@ -191,7 +189,7 @@ class Mercurio04Controller extends ApplicationController
 
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             try {
                 $this->setResponse('ajax');
@@ -206,9 +204,9 @@ class Mercurio04Controller extends ApplicationController
                 $mercurio04->setPrincipal($principal);
                 $mercurio04->setEstado($estado);
                 if (! $mercurio04->save()) {
-                    $this->db->rollback();
+                    DB::rollBack();
                 }
-                $this->db->commit();
+                DB::commit();
                 $response = [
                     'success' => true,
                     'msj' => 'Creacion Con Exito'
@@ -216,7 +214,7 @@ class Mercurio04Controller extends ApplicationController
 
                 return $this->renderObject($response);
             } catch (DebugException $e) {
-                $this->db->rollback();
+                DB::rollBack();
             }
         } catch (DebugException $e) {
             $response = [
@@ -319,15 +317,15 @@ class Mercurio04Controller extends ApplicationController
             $codofi = $request->input('codofi');
             $codciu = $request->input('codciu');
 
-            $this->db->begin();
+            DB::beginTransaction();
             $mercurio05 = new Mercurio05;
 
             $mercurio05->setCodofi($codofi);
             $mercurio05->setCodciu($codciu);
             if (! $mercurio05->save()) {
-                $this->db->rollback();
+                DB::rollBack();
             }
-            $this->db->commit();
+            DB::commit();
             $response = [
                 'success' => true,
                 'msj' => 'Movimiento Realizado Con Exito'
@@ -355,7 +353,7 @@ class Mercurio04Controller extends ApplicationController
                 $codofi = $request->input('codofi');
                 $codciu = $request->input('codciu');
 
-                $this->db->begin();
+                DB::beginTransaction();
                 $mercurio05 = Mercurio05::whereRaw("codofi='$codofi' and codciu = '$codciu'")->first();
                 if ($mercurio05 == false) {
                     $mercurio05 = new Mercurio05;
@@ -363,7 +361,7 @@ class Mercurio04Controller extends ApplicationController
 
                 return $this->renderObject($mercurio05->toArray());
             } catch (DebugException $e) {
-                $this->db->rollback();
+                DB::rollBack();
             }
         } catch (DebugException $e) {
 
@@ -382,9 +380,9 @@ class Mercurio04Controller extends ApplicationController
                 $codofi = $request->input('codofi');
                 $codciu = $request->input('codciu');
 
-                $this->db->begin();
+                DB::beginTransaction();
                 Mercurio05::whereRaw("codofi='$codofi' and codciu='$codciu'")->delete();
-                $this->db->commit();
+                DB::commit();
                 $response = 'Movimiento Realizado Con Exito';
 
                 return $this->renderObject([
@@ -392,7 +390,7 @@ class Mercurio04Controller extends ApplicationController
                     'msj' => 'Movimiento Realizado Con Exito'
                 ]);
             } catch (DebugException $e) {
-                $this->db->rollback();
+                DB::rollBack();
             }
         } catch (DebugException $e) {
             $response = [
@@ -467,7 +465,7 @@ class Mercurio04Controller extends ApplicationController
             $codofi = $request->input('codofi');
             $tipopc = $request->input('tipopc');
             $usuario = $request->input('usuario');
-            $this->db->begin();
+            DB::beginTransaction();
 
             $mercurio08 = Mercurio08::whereRaw("codofi='{$codofi}' and tipopc='{$tipopc}' and usuario='{$usuario}'")->first();
             if ($mercurio08 == false) {
@@ -485,13 +483,13 @@ class Mercurio04Controller extends ApplicationController
                     'orden' => $mercurio08->orden + 1
                 ]);
             }
-            $this->db->commit();
+            DB::commit();
             $response = [
                 'success' => true,
                 'msj' => 'Movimiento Realizado Con Exito'
             ];
         } catch (DebugException $e) {
-            $this->db->rollback();
+            DB::rollBack();
             $response = [
                 'success' => false,
                 'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
@@ -514,15 +512,15 @@ class Mercurio04Controller extends ApplicationController
                 $tipopc = $request->input('tipopc');
                 $usuario = $request->input('usuario');
 
-                $this->db->begin();
+                DB::beginTransaction();
                 Mercurio08::whereRaw("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'")->delete();
-                $this->db->commit();
+                DB::commit();
                 $response = [
                     'success' => true,
                     'msj' => 'Movimiento Realizado Con Exito'
                 ];
             } catch (DebugException $e) {
-                $this->db->rollback();
+                DB::rollBack();
                 $response = [
                     'success' => false,
                     'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()

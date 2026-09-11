@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cajas;
 
+use Illuminate\Support\Facades\DB;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Mercurio65;
@@ -16,7 +17,6 @@ class Mercurio65Controller extends ApplicationController
 
     protected $cantidad_pagina = 10;
 
-    protected $db;
 
     protected $user;
 
@@ -140,7 +140,7 @@ class Mercurio65Controller extends ApplicationController
                 'log' => 'nullable|numeric',
             ]);
 
-            $response = $this->db->begin();
+            $response = DB::beginTransaction();
 
             // Buscar o crear un nuevo registro
             $mercurio65 = Mercurio65::firstOrNew(['codsed' => $request->input('codsed')]);
@@ -161,10 +161,10 @@ class Mercurio65Controller extends ApplicationController
 
             if (! $mercurio65->save()) {
                 parent::setLogger($mercurio65->getMessages());
-                $this->db->rollback();
+                DB::rollBack();
                 $response = parent::errorFunc('Error al guardar los datos');
             } else {
-                $this->db->commit();
+                DB::commit();
                 $response = parent::successFunc('Datos guardados correctamente');
             }
 
@@ -174,9 +174,7 @@ class Mercurio65Controller extends ApplicationController
 
             return $this->renderObject($response, false);
         } catch (\Exception $e) {
-            if (isset($this->db)) {
-                $this->db->rollback();
-            }
+            DB::rollBack();
             parent::setLogger($e->getMessage());
             $response = parent::errorFunc('Error al procesar la solicitud: ' . $e->getMessage());
 
