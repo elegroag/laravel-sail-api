@@ -350,32 +350,40 @@ html {
 }
 
 /* Delay para animación escalonada */
-.cards-grid > *:nth-child(1) .company-affiliation-card {
+.cards-grid>*:nth-child(1) .company-affiliation-card {
     animation-delay: 0.1s;
 }
-.cards-grid > *:nth-child(2) .company-affiliation-card {
+
+.cards-grid>*:nth-child(2) .company-affiliation-card {
     animation-delay: 0.2s;
 }
-.cards-grid > *:nth-child(3) .company-affiliation-card {
+
+.cards-grid>*:nth-child(3) .company-affiliation-card {
     animation-delay: 0.3s;
 }
-.cards-grid > *:nth-child(4) .company-affiliation-card {
+
+.cards-grid>*:nth-child(4) .company-affiliation-card {
     animation-delay: 0.4s;
 }
-.cards-grid > *:nth-child(5) .company-affiliation-card {
+
+.cards-grid>*:nth-child(5) .company-affiliation-card {
     animation-delay: 0.5s;
 }
-.cards-grid > *:nth-child(6) .company-affiliation-card {
+
+.cards-grid>*:nth-child(6) .company-affiliation-card {
     animation-delay: 0.6s;
 }
+
 .header-section {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
     position: relative;
 }
+
 .profile-icon {
-    background-color: #8c8f5f; /* Color verde/marrón similar al de la imagen */
+    background-color: #8c8f5f;
+    /* Color verde/marrón similar al de la imagen */
     border-radius: 10px;
     width: 60px;
     height: 60px;
@@ -387,15 +395,18 @@ html {
     color: white;
     position: relative;
 }
+
 .profile-icon::before {
     content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="%23b8c3d1" class="bi bi-person-fill" viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>');
     position: absolute;
     top: -5px;
     right: -5px;
-    background-color: white; /* Simula el círculo azul */
+    background-color: white;
+    /* Simula el círculo azul */
     border-radius: 50%;
     padding: 3px;
 }
+
 .company-icon {
     width: 50px;
     height: 50px;
@@ -404,30 +415,37 @@ html {
     background-size: contain;
     background-repeat: no-repeat;
 }
+
 .percentage {
     margin-left: auto;
     font-size: 1.2rem;
-    color: #b57a7a; /* Color rojo/marrón similar */
+    color: #b57a7a;
+    /* Color rojo/marrón similar */
 }
+
 .minus-icon {
     margin-right: 5px;
     font-size: 1.5rem;
     color: #b57a7a;
 }
+
 .card-title {
     font-size: 0.87rem;
     font-weight: bold;
     color: #444;
     margin-bottom: 25px;
 }
+
 .status-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
     margin-bottom: 30px;
 }
+
 .status-item {
-    background-color: #f7f1eb; /* Fondo claro para los ítems */
+    background-color: #f7f1eb;
+    /* Fondo claro para los ítems */
     border-radius: 10px;
     padding: 8px;
     display: flex;
@@ -440,38 +458,48 @@ html {
     flex-direction: row;
     align-items: center;
 }
+
 .status-label {
     font-size: 0.85rem;
     color: #444;
     display: flex;
 }
+
 .status-value {
     font-size: 0.85rem;
     color: #222;
 }
+
 .status-value.approved {
-    color: #8c8f5f; /* Color verde/marrón para Aprobados */
+    color: #8c8f5f;
+    /* Color verde/marrón para Aprobados */
 }
+
 .divider {
     border-top: 1px solid #eee;
     margin: 5px 0;
 }
+
 .temporary-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 10px;
 }
+
 .temporary-label {
     font-size: 0.88rem;
     font-weight: bold;
     color: #333;
 }
+
 .temporary-value {
     font-size: 1.1rem;
     font-weight: bold;
-    color: #5b7da0; /* Color azul similar al de la imagen */
+    color: #5b7da0;
+    /* Color azul similar al de la imagen */
 }
+
 .progress-bar-container {
     width: 100%;
     height: 8px;
@@ -480,10 +508,13 @@ html {
     overflow: hidden;
     margin-top: 10px;
 }
+
 .progress-bar {
     height: 100%;
-    background: linear-gradient(to right, #7b8e9f, #a7b777); /* Gradiente azul a verde */
-    width: 70%; /* Ajusta según el porcentaje deseado */
+    background: linear-gradient(to right, #7b8e9f, #a7b777);
+    /* Gradiente azul a verde */
+    width: 70%;
+    /* Ajusta según el porcentaje deseado */
     border-radius: 4px;
 }
 
@@ -513,19 +544,23 @@ html {
 }
 
 /* Delay para animación escalonada en totales */
-.totales-grid > .total-affiliations-card:nth-child(1) {
+.totales-grid>.total-affiliations-card:nth-child(1) {
     animation-delay: 0.1s;
 }
-.totales-grid > .total-affiliations-card:nth-child(2) {
+
+.totales-grid>.total-affiliations-card:nth-child(2) {
     animation-delay: 0.15s;
 }
-.totales-grid > .total-affiliations-card:nth-child(3) {
+
+.totales-grid>.total-affiliations-card:nth-child(3) {
     animation-delay: 0.2s;
 }
-.totales-grid > .total-affiliations-card:nth-child(4) {
+
+.totales-grid>.total-affiliations-card:nth-child(4) {
     animation-delay: 0.25s;
 }
-.totales-grid > .total-affiliations-card:nth-child(5) {
+
+.totales-grid>.total-affiliations-card:nth-child(5) {
     animation-delay: 0.3s;
 }
 
@@ -701,13 +736,18 @@ html {
     position: relative;
     width: 100%;
     max-width: 100%;
-    height: 350px; /* altura base */
-    overflow: hidden; /* evita desbordes */
+    height: 350px;
+    /* altura base */
+    overflow: hidden;
+    /* evita desbordes */
 }
+
 .chart-canvas {
-    display: block; /* corrige espacios y respeta contenedor */
+    display: block;
+    /* corrige espacios y respeta contenedor */
     width: 100% !important;
-    height: 100% !important; /* ocupa el alto del contenedor */
+    height: 100% !important;
+    /* ocupa el alto del contenedor */
 }
 
 /* Alturas responsivas */
@@ -716,11 +756,13 @@ html {
         height: 300px;
     }
 }
+
 @media (max-width: 991.98px) {
     .card .card-body .chart {
         height: 280px;
     }
 }
+
 @media (max-width: 575.98px) {
     .card .card-body .chart {
         height: 240px;
@@ -738,7 +780,8 @@ html {
 
 /* Contenedor de totales */
 .totales-content {
-    display: contents; /* Permite que los hijos participen en el grid del padre */
+    display: contents;
+    /* Permite que los hijos participen en el grid del padre */
 }
 
 /* Galería principal (Mercurio26) */
@@ -793,6 +836,7 @@ html {
         opacity: 0;
         transform: translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -902,7 +946,7 @@ html {
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--shadow-md);
-    background: #fff;
+    background: #dedede;
 }
 
 .principal-gallery-carousel .carousel-inner,
@@ -917,9 +961,9 @@ html {
     justify-content: center;
     height: 100%;
     min-height: 380px;
-    padding: 1rem;
+    padding: 0.1rem;
     cursor: pointer;
-    background: linear-gradient(180deg, #f8f9fa 0%, #eef2f7 100%);
+    background: #dedede;
     transition: opacity var(--transition-fast);
 }
 
@@ -931,9 +975,8 @@ html {
     display: block;
     width: 100%;
     max-width: 100%;
-    max-height: 360px;
+    max-height: 370px;
     object-fit: contain;
-    border-radius: 8px;
 }
 
 .principal-gallery-control {
@@ -995,6 +1038,7 @@ html {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1006,6 +1050,7 @@ html {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }

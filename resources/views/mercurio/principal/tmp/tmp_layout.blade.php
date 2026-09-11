@@ -43,8 +43,8 @@
                     <i class="fas fa-box-open"></i>
                 </div>
                 <div class="section-title-wrapper">
-                    <h2 class="section-title">Productos y Servicios</h2>
-                    <p class="section-subtitle">Productos y servicios adicionales de la CAJA de Compensación del Caquetá</p>
+                    <h2 class="section-title">Servicios en Línea</h2>
+                    <p class="section-subtitle">Servicios adicionales de la CAJA de Compensación del Caquetá</p>
                 </div>
             </div>
             <div class="section-content">
@@ -65,7 +65,7 @@
                     <i class="fas fa-chart-pie"></i>
                 </div>
                 <div class="section-title-wrapper">
-                    <h2 class="section-title">Resumen General</h2>
+                    <h2 class="section-title">Resumen General Afiliaciones</h2>
                     <p class="section-subtitle">Vista general del estado de todas las solicitudes</p>
                 </div>
             </div>
@@ -83,7 +83,7 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="section-title-wrapper">
-                    <h2 class="section-title">Movimientos</h2>
+                    <h2 class="section-title">Movimientos Afiliaciones</h2>
                     <p class="section-subtitle">Gestiona y monitorea todas las solicitudes de afiliación en tiempo real</p>
                 </div>
             </div>
