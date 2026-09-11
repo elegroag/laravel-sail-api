@@ -130,23 +130,16 @@ class IndependienteServices
         $mercurio41->setFecest($today->format('Y-m-d'));
         $mercurio41->save();
 
-        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
-        $mercurio10 = new Mercurio10;
-        $mercurio10->setTipopc($this->tipopc);
-        $mercurio10->setNumero($id);
-        $mercurio10->setItem($item);
-        $mercurio10->setEstado('X');
-        $mercurio10->setNota($nota);
-        $mercurio10->setCodest($codest);
-        $mercurio10->setFecsis($today->format('Y-m-d'));
-
-        if (! $mercurio10->save()) {
-            $msj = '';
-            foreach ($mercurio10->getMessages() as $key => $mess) {
-                $msj .= $mess->getMessage().'<br/>';
-            }
-            throw new DebugException('Error '.$msj, 501);
-        }
+        $item = (int) Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
+        $mercurio10 = Mercurio10::create([
+            'tipopc' => $this->tipopc,
+            'numero' => $id,
+            'item' => $item,
+            'estado' => 'X',
+            'nota' => $nota,
+            'codest' => $codest,
+            'fecsis' => $today->format('Y-m-d'),
+        ]);
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 
@@ -168,24 +161,17 @@ class IndependienteServices
         $mercurio41->setFecest($fecest);
         $mercurio41->save();
 
-        $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
-        $mercurio10 = new Mercurio10;
-        $mercurio10->setTipopc($this->tipopc);
-        $mercurio10->setNumero($id);
-        $mercurio10->setItem($item);
-        $mercurio10->setEstado('D');
-        $mercurio10->setNota($nota);
-        $mercurio10->setCodest($codest);
-        $mercurio10->setFecsis($today->format('Y-m-d'));
-
-        if (! $mercurio10->save()) {
-            $msj = '';
-            foreach ($mercurio10->getMessages() as $key => $message) {
-                $msj .= $message.'<br/>';
-            }
-            throw new Exception('Error '.$msj, 501);
-        }
-        Mercurio10::whereRaw("item='{$item}' AND numero='{$id}' AND tipopc='{$this->tipopc}'")->update(['campos_corregir' => $campos_corregir]);
+        $item = (int) Mercurio10::where('tipopc', $this->tipopc)->where('numero', $id)->max('item') + 1;
+        $mercurio10 = Mercurio10::create([
+            'tipopc' => $this->tipopc,
+            'numero' => $id,
+            'item' => $item,
+            'estado' => 'D',
+            'nota' => $nota,
+            'codest' => $codest,
+            'fecsis' => $today->format('Y-m-d'),
+            'campos_corregir' => $campos_corregir,
+        ]);
 
         Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
 

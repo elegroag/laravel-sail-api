@@ -145,30 +145,30 @@ Orden recomendado:
 - [x] `TrabajadorService.php` — constructor DbBase muerto retirado
 - [x] `Entidades/Concerns/PaginatesSolicitudQueries.php` — solo `DB::select`/`selectOne`; helpers `selectAssoc`/`selectOneAssoc`
 
-### Services/CajaServices (12 pendientes writes + queries hechas)
+### Services/CajaServices — cerrado
 
-**Capa A (queries) — hecha, sin commit.** `whereRaw` Eloquent omitido.
+**Capa A (queries) — hecha (`d235d919`).** `whereRaw` Eloquent omitido.
 
 - [x] `NotificacionService.php` — `DbBase`/`inQueryAssoc` → Eloquent `where`/`orderByDesc`
-- [x] `CertificadosServices.php` — `findFirst` → `Mercurio01::first()` (queda `new Mercurio10` en rechazar/devolver)
-- [x] `Mercurio13Services.php` — `find($query)` → `Mercurio13::whereRaw($query)->get()` (mismo patrón que el resto)
+- [x] `CertificadosServices.php` — `findFirst` → `Mercurio01::first()`
+- [x] `Mercurio13Services.php` — `find($query)` → `Mercurio13::whereRaw($query)->get()`
 - [x] `Mercurio14Services.php` — `find($query)` → `Mercurio14::whereRaw($query)->get()`
 - [x] `UsuarioServices.php` — **omitido**: solo `whereRaw` Eloquent
 
-**Capa B (writes `new Mercurio10` en rechazar/devolver) — pendiente.** Mismo patrón en 12 archivos: setters + `save()`. No es query; análogo a no tocar `procesar()` en Aprueba.
+**Capa B (writes `Mercurio10::create` en rechazar/devolver) — hecha.** 12 archivos: setters + `save()` → `create()`. `campos_corregir` va en el insert de devolver. `max(item)` con `where` bindings.
 
-- [ ] `BeneficiarioServices.php`
-- [ ] `CertificadosServices.php`
-- [ ] `ConyugeServices.php`
-- [ ] `EmpresaServices.php`
-- [ ] `FacultativoServices.php`
-- [ ] `IndependienteServices.php`
-- [ ] `MadresComuniServices.php`
-- [ ] `PensionadoServices.php`
-- [ ] `ServicioDomesticoServices.php`
-- [ ] `TrabajadorServices.php`
-- [ ] `UpDatosEmpresaServices.php`
-- [ ] `UpDatosTrabajadorService.php`
+- [x] `BeneficiarioServices.php`
+- [x] `CertificadosServices.php`
+- [x] `ConyugeServices.php`
+- [x] `EmpresaServices.php`
+- [x] `FacultativoServices.php`
+- [x] `IndependienteServices.php`
+- [x] `MadresComuniServices.php`
+- [x] `PensionadoServices.php`
+- [x] `ServicioDomesticoServices.php`
+- [x] `TrabajadorServices.php`
+- [x] `UpDatosEmpresaServices.php`
+- [x] `UpDatosTrabajadorService.php`
 
 ### Services/Cajas (2 pendientes + 1 omitido)
 
