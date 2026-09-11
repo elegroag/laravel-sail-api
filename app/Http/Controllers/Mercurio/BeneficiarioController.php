@@ -7,7 +7,6 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -40,7 +39,6 @@ class BeneficiarioController extends ApplicationController
 
     protected string $tipopc = '4';
 
-    protected DbBase $db;
 
     protected ?array $user;
 
@@ -50,7 +48,6 @@ class BeneficiarioController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -192,7 +189,7 @@ class BeneficiarioController extends ApplicationController
 
     public function enviarCaja(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $beneficiarioService = new BeneficiarioService;
@@ -203,9 +200,9 @@ class BeneficiarioController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -840,7 +837,7 @@ class BeneficiarioController extends ApplicationController
 
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $benefiService = new BeneficiarioService;
             $id = $request->input('id');
@@ -873,11 +870,11 @@ class BeneficiarioController extends ApplicationController
                 'data' => $solicitud->getArray(),
             ];
 
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }

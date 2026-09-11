@@ -9,7 +9,6 @@ use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsFacultativo;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -27,6 +26,7 @@ use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\SenderValidationCaja;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FacultativoController extends ApplicationController
 {
@@ -48,7 +48,6 @@ class FacultativoController extends ApplicationController
      */
     protected $asignarFuncionario;
 
-    protected $db;
 
     protected $user;
 
@@ -56,7 +55,6 @@ class FacultativoController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -124,7 +122,7 @@ class FacultativoController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
 
         try {
             $facultativoService = new FacultativoService;
@@ -157,9 +155,9 @@ class FacultativoController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $facultativo->toArray(),
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }

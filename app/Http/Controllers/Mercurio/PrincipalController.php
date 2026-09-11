@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\SessionCookies;
 use App\Library\Auth\SessionMercurio;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
@@ -14,6 +13,7 @@ use App\Models\Mercurio26;
 use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
+use App\Models\Mercurio15;
 use App\Models\Mercurio41;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Entidades\EmpresaService;
@@ -25,10 +25,10 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class PrincipalController extends ApplicationController
 {
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -36,7 +36,6 @@ class PrincipalController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -386,7 +385,7 @@ class PrincipalController extends ApplicationController
     public function listaAdress()
     {
         try {
-            $adress = $this->db->inQueryAssoc('SELECT * FROM mercurio15 WHERE 1=1');
+            $adress = Mercurio15::all()->toArray();
             $salida = [
                 'success' => true,
                 'data' => $adress,
@@ -708,10 +707,10 @@ class PrincipalController extends ApplicationController
                         throw new DebugException('El identificador de la empresa no es correcto', 404);
                     }
                     if ($token->id == '' || is_null($token->id)) {
-                        $solicitud = (new Mercurio07)->findFirst(" documento='{$token->documento}' and coddoc='{$token->coddoc}' and tipo='{$token->tipo}'");
+                        $solicitud = Mercurio07::where('documento', $token->documento)->where('coddoc', $token->coddoc)->where('tipo', $token->tipo)->first();
                         $url = 'mercurio/empresa/index';
                     } else {
-                        $solicitud = (new Mercurio30)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
+                        $solicitud = Mercurio30::where('id', $token->id)->where('documento', $token->documento)->where('coddoc', $token->coddoc)->first();
                         $url = "mercurio/empresa/index#proceso/{$token->id}";
                     }
                     break;
@@ -719,26 +718,26 @@ class PrincipalController extends ApplicationController
                     if ($token->id == '' || $token->documento == '' || $token->tipo == '' || $token->coddoc == '') {
                         throw new DebugException('El identificador de la empresa no es correcto', 404);
                     }
-                    $solicitud = (new Mercurio41)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
+                    $solicitud = Mercurio41::where('id', $token->id)->where('documento', $token->documento)->where('coddoc', $token->coddoc)->first();
                     $url = "mercurio/independiente/index#proceso/{$token->id}";
                     break;
                 case 'O':
                     if ($token->id == '' || $token->documento == '' || $token->tipo == '' || $token->coddoc == '') {
                         throw new DebugException('El identificador de la empresa no es correcto', 404);
                     }
-                    $solicitud = (new Mercurio38)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
+                    $solicitud = Mercurio38::where('id', $token->id)->where('documento', $token->documento)->where('coddoc', $token->coddoc)->first();
                     $url = "mercurio/pensionado/index#proceso/{$token->id}";
                     break;
                 case 'F':
                     if ($token->id == '' || $token->documento == '' || $token->tipo == '' || $token->coddoc == '') {
                         throw new DebugException('El identificador de la empresa no es correcto', 404);
                     }
-                    $solicitud = (new Mercurio36)->findFirst(" id='{$token->id}' and documento='{$token->documento}' and coddoc='{$token->coddoc}'");
+                    $solicitud = Mercurio36::where('id', $token->id)->where('documento', $token->documento)->where('coddoc', $token->coddoc)->first();
                     $url = "mercurio/facultativo/index#proceso/{$token->id}";
                     break;
                 default:
                     // Ingreso usuario particular
-                    $solicitud = (new Mercurio07)->findFirst(" documento='{$token->documento}' and coddoc='{$token->coddoc}' and tipo='{$token->tipo}'");
+                    $solicitud = Mercurio07::where('documento', $token->documento)->where('coddoc', $token->coddoc)->where('tipo', $token->tipo)->first();
                     $url = 'mercurio/principal/index';
                     break;
             }
@@ -837,7 +836,7 @@ class PrincipalController extends ApplicationController
 
     public function cambioClave(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $clave = $request->input('clave');
             $clacon = $request->input('clacon');
@@ -864,9 +863,9 @@ class PrincipalController extends ApplicationController
                 'msj' => 'Proceso se ha completado con éxito',
                 'success' => true,
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e);
         }

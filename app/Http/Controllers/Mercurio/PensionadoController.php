@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsPensionado;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -28,6 +27,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class PensionadoController extends ApplicationController
 {
@@ -56,7 +56,6 @@ class PensionadoController extends ApplicationController
 
     protected $tipopc = '9';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -64,7 +63,6 @@ class PensionadoController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -133,7 +131,7 @@ class PensionadoController extends ApplicationController
      */
     public function guardar(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $pensionadoService = new PensionadoService;
             $asignarFuncionario = new AsignarFuncionario;
@@ -169,7 +167,7 @@ class PensionadoController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $pensionado->getArray(),
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (Exception $e) {
             return $this->handleException($e, $request);
         }
@@ -237,7 +235,7 @@ class PensionadoController extends ApplicationController
     {
         try {
             $cedtra = $request->input('cedrep');
-            $solicitud = (new Mercurio38)->findFirst("documento='{$cedtra}' AND estado IN('A','I')");
+            $solicitud = Mercurio38::where('documento', $cedtra)->whereIn('estado', ['A', 'I'])->first();
 
             $solicitudPrevia = $solicitud ? $solicitud->getArray() : false;
 
@@ -323,7 +321,7 @@ class PensionadoController extends ApplicationController
             ]);
 
             $mercurio37 = $guardarArchivoService->main();
-            $mercurio37 = (new Mercurio37)->findFirst("tipopc='{$this->tipopc}' AND numero='{$id}' AND coddoc='{$coddoc}'");
+            $mercurio37 = Mercurio37::where('tipopc', $this->tipopc)->where('numero', $id)->where('coddoc', $coddoc)->first();
 
             if (! $mercurio37) {
                 throw new Exception('No se pudo encontrar el archivo guardado');
@@ -346,7 +344,7 @@ class PensionadoController extends ApplicationController
      */
     public function enviarCaja(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
 
@@ -358,7 +356,7 @@ class PensionadoController extends ApplicationController
             $pensionadoService = new PensionadoService;
             $pensionadoService->enviarCaja(new SenderValidationCaja, $id, $usuario);
 
-            $this->db->commit();
+            DB::commit();
 
             $response = [
                 'success' => true,
@@ -366,7 +364,7 @@ class PensionadoController extends ApplicationController
                 'comprobante_url' => url("/mercurio/pensionado/comprobante/{$id}"),
             ];
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }

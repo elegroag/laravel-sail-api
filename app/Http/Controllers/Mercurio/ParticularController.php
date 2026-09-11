@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Mercurio;
 
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio30;
 use App\Models\Mercurio36;
 use App\Models\Mercurio38;
@@ -13,7 +12,6 @@ use App\Models\Mercurio41;
 
 class ParticularController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -21,7 +19,6 @@ class ParticularController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user');
         $this->tipo = session('tipo');
     }

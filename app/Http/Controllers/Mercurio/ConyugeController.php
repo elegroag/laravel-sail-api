@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsConyuge;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -37,7 +36,6 @@ class ConyugeController extends ApplicationController
 
     protected string $tipopc = '3';
 
-    protected DbBase $db;
 
     protected ?array $user;
 
@@ -45,7 +43,6 @@ class ConyugeController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -392,7 +389,7 @@ class ConyugeController extends ApplicationController
 
     public function guardar(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
 
             $conyugeService = new ConyugeService;
@@ -424,9 +421,9 @@ class ConyugeController extends ApplicationController
                 'data' => $solicitud->getArray(),
             ];
 
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -473,7 +470,7 @@ class ConyugeController extends ApplicationController
 
     public function enviarCaja(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $conygueService = new ConyugeService;
@@ -484,9 +481,9 @@ class ConyugeController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -496,7 +493,7 @@ class ConyugeController extends ApplicationController
 
     public function borrar(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $documento = $this->user['documento'];
             $id = $request->input('id');
@@ -509,9 +506,9 @@ class ConyugeController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }

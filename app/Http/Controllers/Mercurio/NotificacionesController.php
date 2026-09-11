@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Services\Entidades\NotificacionService;
@@ -16,7 +15,6 @@ use Illuminate\Http\Response;
 
 class NotificacionesController extends ApplicationController
 {
-    protected ?DbBase $db = null;
 
     protected ?array $user = null;
 
@@ -24,7 +22,6 @@ class NotificacionesController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }

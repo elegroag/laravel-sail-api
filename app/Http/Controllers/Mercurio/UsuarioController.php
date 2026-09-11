@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\SessionCookies;
 use App\Library\Auth\SessionMercurio;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -16,7 +15,6 @@ use Illuminate\Http\Request;
 
 class UsuarioController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -24,7 +22,6 @@ class UsuarioController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }

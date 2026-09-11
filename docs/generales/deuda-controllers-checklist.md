@@ -106,25 +106,25 @@ Orden sugerido (recomendación, no arrancar):
 - [x] `MenuPermissionController.php` — **omitido**: Eloquent / `Controller` Laravel
 - [x] `NotificacionesController.php` — `findFirst`/`count` → `Notificaciones` Eloquent; `DbBase` retirado; `setParamToView` intacto
 
-## Mercurio — Auth / principal / usuario / notificaciones
+## Mercurio — Auth / principal / usuario / notificaciones — cerrado
 
-- [ ] `AuthController.php` — `Controller`, 1034 LOC — `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×1
-- [ ] `PrincipalController.php` — `ApplicationController`, 877 LOC — `findFirst`×6, `inQueryAssoc`×1, `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×2, `new Model`×6
-- [ ] `UsuarioController.php` — `ApplicationController`, 219 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×3
-- [ ] `NotificacionesController.php` — `ApplicationController`, 217 LOC — `DbBase`×3/`rawConnect`×1
+- [x] `AuthController.php` — txs → `DB::*`; `DbBase` retirado; omitir `whereRaw`
+- [x] `PrincipalController.php` — `findFirst` → Eloquent; `inQueryAssoc` → `Mercurio15::all()`; txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `UsuarioController.php` — `DbBase` constructor sin usos, retirado; omitir `new Model`
+- [x] `NotificacionesController.php` — `DbBase` constructor sin usos, retirado
 
-## Mercurio — Afiliación
+## Mercurio — Afiliación — cerrado
 
-- [ ] `EmpresaController.php` — `ApplicationController`, 661 LOC — `findFirst`×1, `DbBase`×3/`rawConnect`×1; omitir `new Model`×1
-- [ ] `TrabajadorController.php` — `ApplicationController`, 748 LOC — `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×4
-- [ ] `ConyugeController.php` — `ApplicationController`, 908 LOC — `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×3
-- [ ] `BeneficiarioController.php` — `ApplicationController`, 1147 LOC — `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×2, `new Model`×5
-- [ ] `IndependienteController.php` — `ApplicationController`, 777 LOC — `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×3
-- [ ] `FacultativoController.php` — `ApplicationController`, 738 LOC — `DbBase`×2/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×2
-- [ ] `PensionadoController.php` — `ApplicationController`, 758 LOC — `findFirst`×2, `DbBase`×3/`rawConnect`×1; omitir `whereRaw`×1, `new Model`×4
-- [ ] `DomesticoController.php` — `ApplicationController`, 526 LOC — `DbBase`×2/`rawConnect`×1; `renderText`×2; omitir `new Model`×6
-- [ ] `ComunitariaController.php` — `ApplicationController`, 524 LOC — `DbBase`×2/`rawConnect`×1; `renderText`×1; omitir `new Model`×5
-- [ ] `ParticularController.php` — `ApplicationController`, 57 LOC — `DbBase`×2/`rawConnect`×1
+- [x] `EmpresaController.php` — `Mercurio30::where()->first()`; txs → `DB::*`; omitir `new Model`
+- [x] `TrabajadorController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `ConyugeController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `BeneficiarioController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `IndependienteController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `FacultativoController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `PensionadoController.php` — `Mercurio38`/`Mercurio37` Eloquent; txs → `DB::*`; omitir `whereRaw`/`new Model`
+- [x] `DomesticoController.php` — `DbBase` constructor sin usos, retirado; `renderText` intacto; omitir `new Model`
+- [x] `ComunitariaController.php` — `DbBase` constructor sin usos, retirado; `renderText` intacto; omitir `new Model`
+- [x] `ParticularController.php` — `DbBase` constructor sin usos, retirado
 
 ## Mercurio — Consultas / movimientos / certificados / firmas / productos / actualiza
 

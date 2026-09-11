@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -27,12 +26,12 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TrabajadorController extends ApplicationController
 {
     use RendersSolicitudesGrid;
 
-    protected DbBase $db;
 
     protected ?array $user;
 
@@ -42,7 +41,6 @@ class TrabajadorController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -477,7 +475,7 @@ class TrabajadorController extends ApplicationController
      */
     public function guardar(Request $request): JsonResponse
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $trabajadorService = new TrabajadorService;
             $clave_certificado = $request->input('clave');
@@ -511,11 +509,11 @@ class TrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $solicitud->toArray(),
             ];
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }

@@ -8,7 +8,6 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsIndependiente;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -29,6 +28,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class IndependienteController extends ApplicationController
 {
@@ -50,7 +50,6 @@ class IndependienteController extends ApplicationController
 
     protected $tipopc = '13';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -58,7 +57,6 @@ class IndependienteController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -138,7 +136,7 @@ class IndependienteController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $independienteService = new IndependienteService;
             $id = $request->input('id');
@@ -168,11 +166,11 @@ class IndependienteController extends ApplicationController
                 'data' => $independiente->toArray(),
             ];
 
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }

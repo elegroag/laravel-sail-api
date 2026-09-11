@@ -7,7 +7,6 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -25,12 +24,12 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class EmpresaController extends ApplicationController
 {
     use RendersSolicitudesGrid;
 
-    protected DbBase $db;
 
     protected ?array $user;
 
@@ -40,7 +39,6 @@ class EmpresaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -112,7 +110,7 @@ class EmpresaController extends ApplicationController
     public function guardar(Request $request): JsonResponse
     {
         try {
-            $this->db->begin();
+            DB::beginTransaction();
             $service = new EmpresaService;
             $id = $request->input('id');
             $clave_certificado = $request->input('clave');
@@ -145,11 +143,11 @@ class EmpresaController extends ApplicationController
                 'data' => $empresa->toArray(),
             ];
 
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -426,7 +424,7 @@ class EmpresaController extends ApplicationController
             $documento = $this->user['documento'] ?? '';
             $coddoc = $this->user['coddoc'] ?? '';
 
-            $solicitud = (new Mercurio30)->findFirst(" id='{$id}' AND documento='{$documento}' AND coddoc='{$coddoc}'");
+            $solicitud = Mercurio30::where('id', $id)->where('documento', $documento)->where('coddoc', $coddoc)->first();
             if ($solicitud == false) {
                 throw new DebugException('Error la solicitud no está disponible para acceder.', 404);
             }
@@ -483,7 +481,7 @@ class EmpresaController extends ApplicationController
     public function borrar(Request $request)
     {
         try {
-            $this->db->begin();
+            DB::beginTransaction();
             $documento = $this->user['documento'] ?? '';
             $coddoc = $this->user['coddoc'] ?? '';
 
@@ -499,7 +497,7 @@ class EmpresaController extends ApplicationController
                 ->where('coddoc', $coddoc)
                 ->delete();
 
-            $this->db->commit();
+            DB::commit();
             $salida = [
                 'success' => true,
                 'msj' => 'Ok',
@@ -507,7 +505,7 @@ class EmpresaController extends ApplicationController
 
             return response()->json($salida);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }

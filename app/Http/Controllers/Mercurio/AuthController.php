@@ -6,7 +6,6 @@ use App\Exceptions\AuthException;
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Controller;
 use App\Library\Auth\SessionCookies;
-use App\Models\Adapter\DbBase;
 use App\Models\Banner;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -33,6 +32,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -40,13 +40,11 @@ use Inertia\Response;
 
 class AuthController extends Controller
 {
-    private DbBase $db;
 
     private SignupService $signupService;
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->signupService = new SignupService;
     }
 
@@ -90,7 +88,7 @@ class AuthController extends Controller
      */
     public function registerEmpresaAction(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'rep_nombre' => 'required|string|min:5',
@@ -121,7 +119,7 @@ class AuthController extends Controller
             ]);
 
             $response = $this->performRegister($data, 'E');
-            $this->db->commit();
+            DB::commit();
 
             // Usar los datos de la respuesta (documento del representante, no NIT)
             return redirect()->route('verify.show', [
@@ -131,15 +129,15 @@ class AuthController extends Controller
                 'option_request' => 'register',
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => 'Error del servidor '.$e->getMessage()])->withInput();
         }
@@ -154,7 +152,7 @@ class AuthController extends Controller
      */
     public function registerTrabajadorAction(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'coddoc' => 'required|string|min:1',
@@ -173,7 +171,7 @@ class AuthController extends Controller
             $data['calemp'] = null;
 
             $response = $this->performRegister($data, 'T');
-            $this->db->commit();
+            DB::commit();
 
             return redirect()->route('verify.show', [
                 'tipo' => $response['tipo'],
@@ -182,15 +180,15 @@ class AuthController extends Controller
                 'option_request' => 'register',
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
@@ -205,7 +203,7 @@ class AuthController extends Controller
      */
     public function registerParticularAction(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'coddoc' => 'required|string|min:1',
@@ -221,7 +219,7 @@ class AuthController extends Controller
             $data['calemp'] = null;
 
             $response = $this->performRegister($data, 'P');
-            $this->db->commit();
+            DB::commit();
 
             return redirect()->route('verify.show', [
                 'tipo' => $response['tipo'],
@@ -230,15 +228,15 @@ class AuthController extends Controller
                 'option_request' => 'register',
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
@@ -253,7 +251,7 @@ class AuthController extends Controller
      */
     public function registerIndependienteAction(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'coddoc' => 'required|string|min:1',
@@ -270,7 +268,7 @@ class AuthController extends Controller
             $data['calemp'] = 'I';
 
             $response = $this->performRegister($data, 'I');
-            $this->db->commit();
+            DB::commit();
 
             return redirect()->route('verify.show', [
                 'tipo' => $response['tipo'],
@@ -279,15 +277,15 @@ class AuthController extends Controller
                 'option_request' => 'register',
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
@@ -302,7 +300,7 @@ class AuthController extends Controller
      */
     public function registerPensionadoAction(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'coddoc' => 'required|string|min:1',
@@ -319,7 +317,7 @@ class AuthController extends Controller
             $data['calemp'] = 'O';
 
             $response = $this->performRegister($data, 'O');
-            $this->db->commit();
+            DB::commit();
 
             return redirect()->route('verify.show', [
                 'tipo' => $response['tipo'],
@@ -328,15 +326,15 @@ class AuthController extends Controller
                 'option_request' => 'register',
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
@@ -351,7 +349,7 @@ class AuthController extends Controller
      */
     public function registerFacultativoAction(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'coddoc' => 'required|string|min:1',
@@ -368,7 +366,7 @@ class AuthController extends Controller
             $data['calemp'] = 'F';
 
             $response = $this->performRegister($data, 'F');
-            $this->db->commit();
+            DB::commit();
 
             return redirect()->route('verify.show', [
                 'tipo' => $response['tipo'],
@@ -377,15 +375,15 @@ class AuthController extends Controller
                 'option_request' => 'register',
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
@@ -400,7 +398,7 @@ class AuthController extends Controller
      */
     public function registerDomesticoAction(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $request->validate([
                 'coddoc' => 'required|string|min:1',
@@ -418,7 +416,7 @@ class AuthController extends Controller
             $data['calemp'] = 'S'; // Para domésticos
 
             $response = $this->performRegister($data, 'S');
-            $this->db->commit();
+            DB::commit();
 
             return redirect()->route('verify.show', [
                 'tipo' => $response['tipo'],
@@ -427,15 +425,15 @@ class AuthController extends Controller
                 'option_request' => 'register',
             ])->with('success', $response['msj']);
         } catch (ValidationException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors($e->errors())->withInput();
         } catch (DebugException $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => $e->getMessage()])->withInput();
         } catch (Exception $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return back()->withErrors(['general' => 'Error del servidor'])->withInput();
         }
