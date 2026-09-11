@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Models\Gener02;
 use App\Http\Controllers\Adapter\ApplicationController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use UserReportExcel;
 
 class ReportesController extends ApplicationController
@@ -422,303 +423,375 @@ class ReportesController extends ApplicationController
             'razsoc' => 'CAJA DE COMPENSACIÓN FAMILIAR DEL CAQUETÁ',
             'nit' => '891.190.047-2',
         ]);
-        $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-        $msat02 = $this->Sat02->find("numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '1'  )", 'order: numtraccf  ASC ');
+        $msat02 = DB::table('sat02')
+            ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                $q->select('numtraccf')
+                    ->from('empresa.sat20 as sat20')
+                    ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                    ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                    ->where('tiptra', '1');
+            })
+            ->orderBy('numtraccf')
+            ->get();
         foreach ($msat02 as $sat02) {
-            $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat02->getNumtraccf()}'   ");
-            $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-            $report->put('fecha', trim($sat20->getFecha()));
-            $report->put('hora', trim($sat20->getHora()));
-            $report->put('usuario', $sat20->getUsuario() . ' ' . trim($mgener02->getNombre()));
-            $report->put('numtraccf', trim($sat20->getNumtraccf()));
-            $report->put('numtrasat', trim($sat02->getNumtrasat()));
-            $report->put('tipper', trim($sat02->getTipper()));
-            $report->put('tipemp', trim($sat02->getTipemp()));
-            $report->put('tipdoc', trim($sat02->getTipdocemp()));
-            $report->put('numdocemp', trim($sat02->getNumdocemp()));
-            $report->put('serialsat', trim($sat02->getSersat()));
-            $report->put('priape', trim($sat02->getPriape()));
-            $report->put('segape', trim($sat02->getSegape()));
-            $report->put('prinom', trim($sat02->getPrinom()));
-            $report->put('segnom', trim($sat02->getSegnom()));
-            $report->put('fecsol', trim($sat02->getFecsol()));
-            $report->put('fecafi', trim($sat02->getFecafi()));
-            $report->put('razsoc', trim($sat02->getRazsoc()));
-            $report->put('matmer', trim($sat02->getMatmer()));
-            $report->put('coddep', trim($sat02->getCoddep()));
-            $report->put('codmun', trim($sat02->getCodmun()));
-            $report->put('direccion', trim($sat02->getDireccion()));
-            $report->put('email', trim($sat02->getEmail()));
-            $report->put('tipdocrep', trim($sat02->getTipdocrep()));
-            $report->put('numdocrep', trim($sat02->getNumdocrep()));
-            $report->put('prinom2', trim($sat02->getPrinom2()));
-            $report->put('segnom2', trim($sat02->getSegnom2()));
-            $report->put('priape2', trim($sat02->getPriape2()));
-            $report->put('segape2', trim($sat02->getSegape2()));
-            $report->put('autmandat', trim($sat02->getAutmandat()));
-            $report->put('autenvnot', trim($sat02->getAutenvnot()));
-            $report->put('noafissfant', trim($sat02->getNoafissfant()));
-            $report->put('rsultado', trim($sat02->getResultado()));
-            $report->put('mensaje', trim($sat02->getMensaje()));
-            $report->put('codigo', trim($sat02->getCodigo()));
+            $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat02->numtraccf)->first();
+            $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+            $report->put('fecha', trim($sat20->fecha));
+            $report->put('hora', trim($sat20->hora));
+            $report->put('usuario', $sat20->usuario . ' ' . trim($mgener02->getNombre()));
+            $report->put('numtraccf', trim($sat20->numtraccf));
+            $report->put('numtrasat', trim($sat02->numtrasat));
+            $report->put('tipper', trim($sat02->tipper));
+            $report->put('tipemp', trim($sat02->tipemp));
+            $report->put('tipdoc', trim($sat02->tipdocemp));
+            $report->put('numdocemp', trim($sat02->numdocemp));
+            $report->put('serialsat', trim($sat02->sersat));
+            $report->put('priape', trim($sat02->priape));
+            $report->put('segape', trim($sat02->segape));
+            $report->put('prinom', trim($sat02->prinom));
+            $report->put('segnom', trim($sat02->segnom));
+            $report->put('fecsol', trim($sat02->fecsol));
+            $report->put('fecafi', trim($sat02->fecafi));
+            $report->put('razsoc', trim($sat02->razsoc));
+            $report->put('matmer', trim($sat02->matmer));
+            $report->put('coddep', trim($sat02->coddep));
+            $report->put('codmun', trim($sat02->codmun));
+            $report->put('direccion', trim($sat02->direccion));
+            $report->put('email', trim($sat02->email));
+            $report->put('tipdocrep', trim($sat02->tipdocrep));
+            $report->put('numdocrep', trim($sat02->numdocrep));
+            $report->put('prinom2', trim($sat02->prinom2));
+            $report->put('segnom2', trim($sat02->segnom2));
+            $report->put('priape2', trim($sat02->priape2));
+            $report->put('segape2', trim($sat02->segape2));
+            $report->put('autmandat', trim($sat02->autmandat));
+            $report->put('autenvnot', trim($sat02->autenvnot));
+            $report->put('noafissfant', trim($sat02->noafissfant));
+            $report->put('rsultado', trim($sat02->resultado));
+            $report->put('mensaje', trim($sat02->mensaje));
+            $report->put('codigo', trim($sat02->codigo));
             $report->outPutToReport();
         }
         if ($mtipnov == '2' || $mtipnov == '') {
             $report->startReport('EMPLEADOR SEGUNDA VEZ', $title2, $_fields2);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat03 = $this->Sat03->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '2'  )", 'order: numtraccf  ASC ');
+            $msat03 = DB::table('sat03')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '2');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat03 as $sat03) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat03->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('numtrasat', trim($sat03->getNumtrasat()));
-                $report->put('tipper', trim($sat03->getTipper()));
-                $report->put('tipemp', trim($sat03->getTipemp()));
-                $report->put('tipdoc', trim($sat03->getTipdocemp()));
-                $report->put('numdocemp', trim($sat03->getNumdocemp()));
-                $report->put('serialsat', trim($sat03->getSersat()));
-                $report->put('priape', trim($sat03->getPriape()));
-                $report->put('segape', trim($sat03->getSegape()));
-                $report->put('prinom', trim($sat03->getPrinom()));
-                $report->put('segnom', trim($sat03->getSegnom()));
-                $report->put('fecsol', trim($sat03->getFecsol()));
-                $report->put('fecafi', trim($sat03->getFecafi()));
-                $report->put('razsoc', trim($sat03->getRazsoc()));
-                $report->put('matmer', trim($sat03->getMatmer()));
-                $report->put('coddep', trim($sat03->getCoddep()));
-                $report->put('codmun', trim($sat03->getCodmun()));
-                $report->put('direccion', trim($sat03->getDireccion()));
-                $report->put('email', trim($sat03->getEmail()));
-                $report->put('tipdocrep', trim($sat03->getTipdocrep()));
-                $report->put('numdocrep', trim($sat03->getNumdocrep()));
-                $report->put('priape2', trim($sat03->getPriape2()));
-                $report->put('segape2', trim($sat03->getSegape2()));
-                $report->put('prinom2', trim($sat03->getPrinom2()));
-                $report->put('segnom2', trim($sat03->getSegnom2()));
-                $report->put('codcaj', trim($sat03->getCodcaj()));
-                $report->put('pazsal', trim($sat03->getPazsal()));
-                $report->put('fecpazsal', trim($sat03->getFecpazsal()));
-                $report->put('autmandat', trim($sat03->getAutmandat()));
-                $report->put('autenvnot', trim($sat03->getAutenvnot()));
-                $report->put('rsultado', trim($sat03->getResultado()));
-                $report->put('mensaje', trim($sat03->getMensaje()));
-                $report->put('codigo', trim($sat03->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat03->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('numtrasat', trim($sat03->numtrasat));
+                $report->put('tipper', trim($sat03->tipper));
+                $report->put('tipemp', trim($sat03->tipemp));
+                $report->put('tipdoc', trim($sat03->tipdocemp));
+                $report->put('numdocemp', trim($sat03->numdocemp));
+                $report->put('serialsat', trim($sat03->sersat));
+                $report->put('priape', trim($sat03->priape));
+                $report->put('segape', trim($sat03->segape));
+                $report->put('prinom', trim($sat03->prinom));
+                $report->put('segnom', trim($sat03->segnom));
+                $report->put('fecsol', trim($sat03->fecsol));
+                $report->put('fecafi', trim($sat03->fecafi));
+                $report->put('razsoc', trim($sat03->razsoc));
+                $report->put('matmer', trim($sat03->matmer));
+                $report->put('coddep', trim($sat03->coddep));
+                $report->put('codmun', trim($sat03->codmun));
+                $report->put('direccion', trim($sat03->direccion));
+                $report->put('email', trim($sat03->email));
+                $report->put('tipdocrep', trim($sat03->tipdocrep));
+                $report->put('numdocrep', trim($sat03->numdocrep));
+                $report->put('priape2', trim($sat03->priape2));
+                $report->put('segape2', trim($sat03->segape2));
+                $report->put('prinom2', trim($sat03->prinom2));
+                $report->put('segnom2', trim($sat03->segnom2));
+                $report->put('codcaj', trim($sat03->codcaj));
+                $report->put('pazsal', trim($sat03->pazsal));
+                $report->put('fecpazsal', trim($sat03->fecpazsal));
+                $report->put('autmandat', trim($sat03->autmandat));
+                $report->put('autenvnot', trim($sat03->autenvnot));
+                $report->put('rsultado', trim($sat03->resultado));
+                $report->put('mensaje', trim($sat03->mensaje));
+                $report->put('codigo', trim($sat03->codigo));
                 $report->outPutToReport();
             }
         }
         if ($mtipnov == '5' || $mtipnov == '') {
             $report->startReport('DESAFILIACION EMPLEADOR', $title3, $_fields3);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat06 = $this->Sat06->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '3'  )", 'order: numtraccf  ASC  ');
+            $msat06 = DB::table('sat06')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '3');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat06 as $sat06) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat06->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('numtrasat', trim($sat06->getNumtrasat()));
-                $report->put('tipdoc', trim($sat06->getTipdocemp()));
-                $report->put('numdocemp', trim($sat06->getNumdocemp()));
-                $report->put('serialsat', trim($sat06->getSersat()));
-                $report->put('fecsol', trim($sat06->getFecsol()));
-                $report->put('fecdes', trim($sat06->getFecdes()));
-                $report->put('coddep', trim($sat06->getCoddep()));
-                $report->put('pazsal', trim($sat06->getPazsal()));
-                $report->put('autmandat', trim($sat06->getAutmandat()));
-                $report->put('autenvnot', trim($sat06->getAutenvnot()));
-                $report->put('rsultado', trim($sat06->getResultado()));
-                $report->put('mensaje', trim($sat06->getMensaje()));
-                $report->put('codigo', trim($sat06->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat06->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('numtrasat', trim($sat06->numtrasat));
+                $report->put('tipdoc', trim($sat06->tipdocemp));
+                $report->put('numdocemp', trim($sat06->numdocemp));
+                $report->put('serialsat', trim($sat06->sersat));
+                $report->put('fecsol', trim($sat06->fecsol));
+                $report->put('fecdes', trim($sat06->fecdes));
+                $report->put('coddep', trim($sat06->coddep));
+                $report->put('pazsal', trim($sat06->pazsal));
+                $report->put('autmandat', trim($sat06->autmandat));
+                $report->put('autenvnot', trim($sat06->autenvnot));
+                $report->put('rsultado', trim($sat06->resultado));
+                $report->put('mensaje', trim($sat06->mensaje));
+                $report->put('codigo', trim($sat06->codigo));
                 $report->outPutToReport();
             }
         }
         if ($mtipnov == '7' || $mtipnov == '') {
             $report->startReport('CAUSA GRAVE', $title4, $_fields4);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat08 = $this->Sat08->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '4'  )", 'order: numtraccf  ASC  ');
+            $msat08 = DB::table('sat08')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '4');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat08 as $sat08) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat08->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('tipdoc', trim($sat08->getTipdocemp()));
-                $report->put('numdocemp', trim($sat08->getNumdocemp()));
-                $report->put('serialsat', trim($sat08->getSersat()));
-                $report->put('fecper', trim($sat08->getFecper()));
-                $report->put('razsoc', trim($sat08->getRazsoc()));
-                $report->put('coddep', trim($sat08->getCoddep()));
-                $report->put('causa', trim($sat08->getCausa()));
-                $report->put('estado', trim($sat08->getEstado()));
-                $report->put('rsultado', trim($sat08->getResultado()));
-                $report->put('mensaje', trim($sat08->getMensaje()));
-                $report->put('codigo', trim($sat08->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat08->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('tipdoc', trim($sat08->tipdocemp));
+                $report->put('numdocemp', trim($sat08->numdocemp));
+                $report->put('serialsat', trim($sat08->sersat));
+                $report->put('fecper', trim($sat08->fecper));
+                $report->put('razsoc', trim($sat08->razsoc));
+                $report->put('coddep', trim($sat08->coddep));
+                $report->put('causa', trim($sat08->causa));
+                $report->put('estado', trim($sat08->estado));
+                $report->put('rsultado', trim($sat08->resultado));
+                $report->put('mensaje', trim($sat08->mensaje));
+                $report->put('codigo', trim($sat08->codigo));
                 $report->outPutToReport();
             }
         }
         if ($mtipnov == '8' || $mtipnov == '') {
             $report->startReport('INICIO LABORAL', $title5, $_fields5);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat09 = $this->Sat09->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '5'  )", 'order: numtraccf  ASC ');
+            $msat09 = DB::table('sat09')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '5');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat09 as $sat09) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat09->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('numtrasat', trim($sat09->getNumtrasat()));
-                $report->put('tipdoc', trim($sat09->getTipdocemp()));
-                $report->put('numdocemp', trim($sat09->getNumdocemp()));
-                $report->put('serialsat', trim($sat09->getSersat()));
-                $report->put('tipini', trim($sat09->getTipini()));
-                $report->put('fecini', trim($sat09->getFecini()));
-                $report->put('tipdoctra', trim($sat09->getTipdoctra()));
-                $report->put('numdoctra', trim($sat09->getNumdoctra()));
-                $report->put('prinom', trim($sat09->getPrinom()));
-                $report->put('segnom', trim($sat09->getSegnom()));
-                $report->put('priape', trim($sat09->getPriape()));
-                $report->put('segape', trim($sat09->getSegape()));
-                $report->put('sexo', trim($sat09->getSexo()));
-                $report->put('fecnac', trim($sat09->getFecnac()));
-                $report->put('coddep', trim($sat09->getCoddep()));
-                $report->put('codmun', trim($sat09->getCodmun()));
-                $report->put('direccion', trim($sat09->getDireccion()));
-                $report->put('telefono', trim($sat09->getTelefono()));
-                $report->put('email', trim($sat09->getEmail()));
-                $report->put('salario', trim($sat09->getSalario()));
-                $report->put('tipsal', trim($sat09->getTipsal()));
-                $report->put('hortra', trim($sat09->getHortra()));
-                $report->put('autmandat', trim($sat09->getAutmandat()));
-                $report->put('autenvnot', trim($sat09->getAutenvnot()));
-                $report->put('rsultado', trim($sat09->getResultado()));
-                $report->put('mensaje', trim($sat09->getMensaje()));
-                $report->put('codigo', trim($sat09->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat09->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('numtrasat', trim($sat09->numtrasat));
+                $report->put('tipdoc', trim($sat09->tipdocemp));
+                $report->put('numdocemp', trim($sat09->numdocemp));
+                $report->put('serialsat', trim($sat09->sersat));
+                $report->put('tipini', trim($sat09->tipini));
+                $report->put('fecini', trim($sat09->fecini));
+                $report->put('tipdoctra', trim($sat09->tipdoctra));
+                $report->put('numdoctra', trim($sat09->numdoctra));
+                $report->put('prinom', trim($sat09->prinom));
+                $report->put('segnom', trim($sat09->segnom));
+                $report->put('priape', trim($sat09->priape));
+                $report->put('segape', trim($sat09->segape));
+                $report->put('sexo', trim($sat09->sexo));
+                $report->put('fecnac', trim($sat09->fecnac));
+                $report->put('coddep', trim($sat09->coddep));
+                $report->put('codmun', trim($sat09->codmun));
+                $report->put('direccion', trim($sat09->direccion));
+                $report->put('telefono', trim($sat09->telefono));
+                $report->put('email', trim($sat09->email));
+                $report->put('salario', trim($sat09->salario));
+                $report->put('tipsal', trim($sat09->tipsal));
+                $report->put('hortra', trim($sat09->hortra));
+                $report->put('autmandat', trim($sat09->autmandat));
+                $report->put('autenvnot', trim($sat09->autenvnot));
+                $report->put('rsultado', trim($sat09->resultado));
+                $report->put('mensaje', trim($sat09->mensaje));
+                $report->put('codigo', trim($sat09->codigo));
                 $report->outPutToReport();
             }
         }
         if ($mtipnov == '9' || $mtipnov == '') {
             $report->startReport('TERMINACION LABORAL', $title6, $_fields6);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat10 = $this->Sat10->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '6'  )", 'order: numtraccf  ASC ');
+            $msat10 = DB::table('sat10')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '6');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat10 as $sat10) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat10->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('numtrasat', trim($sat10->getNumtrasat()));
-                $report->put('tipdoc', trim($sat10->getTipdocemp()));
-                $report->put('numdocemp', trim($sat10->getNumdocemp()));
-                $report->put('serialsat', trim($sat10->getSersat()));
-                $report->put('tipter', trim($sat10->getTipter()));
-                $report->put('fecter', trim($sat10->getFecter()));
-                $report->put('tipdoctra', trim($sat10->getTipdoctra()));
-                $report->put('numdoctra', trim($sat10->getNumdoctra()));
-                $report->put('prinom', trim($sat10->getPrinom()));
-                $report->put('priape', trim($sat10->getPriape()));
-                $report->put('autmandat', trim($sat10->getAutmandat()));
-                $report->put('autenvnot', trim($sat10->getAutenvnot()));
-                $report->put('rsultado', trim($sat10->getResultado()));
-                $report->put('mensaje', trim($sat10->getMensaje()));
-                $report->put('codigo', trim($sat10->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat10->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('numtrasat', trim($sat10->numtrasat));
+                $report->put('tipdoc', trim($sat10->tipdocemp));
+                $report->put('numdocemp', trim($sat10->numdocemp));
+                $report->put('serialsat', trim($sat10->sersat));
+                $report->put('tipter', trim($sat10->tipter));
+                $report->put('fecter', trim($sat10->fecter));
+                $report->put('tipdoctra', trim($sat10->tipdoctra));
+                $report->put('numdoctra', trim($sat10->numdoctra));
+                $report->put('prinom', trim($sat10->prinom));
+                $report->put('priape', trim($sat10->priape));
+                $report->put('autmandat', trim($sat10->autmandat));
+                $report->put('autenvnot', trim($sat10->autenvnot));
+                $report->put('rsultado', trim($sat10->resultado));
+                $report->put('mensaje', trim($sat10->mensaje));
+                $report->put('codigo', trim($sat10->codigo));
                 $report->outPutToReport();
             }
         }
         if ($mtipnov == '10' || $mtipnov == '') {
             $report->startReport('SUSPENCION TEMPORAL CT', $title7, $_fields7);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat11 = $this->Sat11->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '7'  )", 'order: numtraccf  ASC ');
+            $msat11 = DB::table('sat11')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '7');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat11 as $sat11) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat11->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('numtrasat', trim($sat11->getNumtrasat()));
-                $report->put('tipdoc', trim($sat11->getTipdocemp()));
-                $report->put('numdocemp', trim($sat11->getNumdocemp()));
-                $report->put('serialsat', trim($sat11->getSersat()));
-                $report->put('fecini', trim($sat11->getFecini()));
-                $report->put('tipdoctra', trim($sat11->getTipdoctra()));
-                $report->put('numdoctra', trim($sat11->getNumdoctra()));
-                $report->put('prinom', trim($sat11->getPrinom()));
-                $report->put('priape', trim($sat11->getPriape()));
-                $report->put('fecfin', trim($sat11->getFecfin()));
-                $report->put('indnov', trim($sat11->getIndnov()));
-                $report->put('autmandat', trim($sat11->getAutmandat()));
-                $report->put('autenvnot', trim($sat11->getAutenvnot()));
-                $report->put('rsultado', trim($sat11->getResultado()));
-                $report->put('mensaje', trim($sat11->getMensaje()));
-                $report->put('codigo', trim($sat11->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat11->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('numtrasat', trim($sat11->numtrasat));
+                $report->put('tipdoc', trim($sat11->tipdocemp));
+                $report->put('numdocemp', trim($sat11->numdocemp));
+                $report->put('serialsat', trim($sat11->sersat));
+                $report->put('fecini', trim($sat11->fecini));
+                $report->put('tipdoctra', trim($sat11->tipdoctra));
+                $report->put('numdoctra', trim($sat11->numdoctra));
+                $report->put('prinom', trim($sat11->prinom));
+                $report->put('priape', trim($sat11->priape));
+                $report->put('fecfin', trim($sat11->fecfin));
+                $report->put('indnov', trim($sat11->indnov));
+                $report->put('autmandat', trim($sat11->autmandat));
+                $report->put('autenvnot', trim($sat11->autenvnot));
+                $report->put('rsultado', trim($sat11->resultado));
+                $report->put('mensaje', trim($sat11->mensaje));
+                $report->put('codigo', trim($sat11->codigo));
                 $report->outPutToReport();
             }
         }
         if ($mtipnov == '11' || $mtipnov == '') {
             $report->startReport('LICENCIAS', $title8, $_fields8);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat12 = $this->Sat12->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '8'  )", 'order: numtraccf  ASC ');
+            $msat12 = DB::table('sat12')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '8');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat12 as $sat12) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat12->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('numtrasat', trim($sat12->getNumtrasat()));
-                $report->put('tipdoc', trim($sat12->getTipdocemp()));
-                $report->put('numdocemp', trim($sat12->getNumdocemp()));
-                $report->put('serialsat', trim($sat12->getSersat()));
-                $report->put('tiplin', trim($sat12->getTiplin()));
-                $report->put('fecini', trim($sat12->getFecini()));
-                $report->put('fecfin', trim($sat12->getFecfin()));
-                $report->put('tipdoctra', trim($sat12->getTipdoctra()));
-                $report->put('numdoctra', trim($sat12->getNumdoctra()));
-                $report->put('prinom', trim($sat12->getPrinom()));
-                $report->put('priape', trim($sat12->getPriape()));
-                $report->put('indnov', trim($sat12->getIndnov()));
-                $report->put('autmandat', trim($sat12->getAutmandat()));
-                $report->put('autenvnot', trim($sat12->getAutenvnot()));
-                $report->put('rsultado', trim($sat12->getResultado()));
-                $report->put('mensaje', trim($sat12->getMensaje()));
-                $report->put('codigo', trim($sat12->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat12->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('numtrasat', trim($sat12->numtrasat));
+                $report->put('tipdoc', trim($sat12->tipdocemp));
+                $report->put('numdocemp', trim($sat12->numdocemp));
+                $report->put('serialsat', trim($sat12->sersat));
+                $report->put('tiplin', trim($sat12->tiplin));
+                $report->put('fecini', trim($sat12->fecini));
+                $report->put('fecfin', trim($sat12->fecfin));
+                $report->put('tipdoctra', trim($sat12->tipdoctra));
+                $report->put('numdoctra', trim($sat12->numdoctra));
+                $report->put('prinom', trim($sat12->prinom));
+                $report->put('priape', trim($sat12->priape));
+                $report->put('indnov', trim($sat12->indnov));
+                $report->put('autmandat', trim($sat12->autmandat));
+                $report->put('autenvnot', trim($sat12->autenvnot));
+                $report->put('rsultado', trim($sat12->resultado));
+                $report->put('mensaje', trim($sat12->mensaje));
+                $report->put('codigo', trim($sat12->codigo));
                 $report->outPutToReport();
             }
         }
         if ($mtipnov == '12' || $mtipnov == '') {
             $report->startReport('MODIFICACION SALARIO', $title9, $_fields9);
-            $conditions = "fecha >= '" . $fecini->format('Y-m-d') . "' AND fecha <= '" . $fecfin->format('Y-m-d') . "'";
-            $msat13 = $this->Sat13->find(" numtraccf IN (SELECT numtraccf FROM empresa.sat20 as sat20  WHERE  $conditions AND tiptra = '9'  )", 'order: numtraccf  ASC ');
+            $msat13 = DB::table('sat13')
+                ->whereIn('numtraccf', function ($q) use ($fecini, $fecfin) {
+                    $q->select('numtraccf')
+                        ->from('empresa.sat20 as sat20')
+                        ->where('fecha', '>=', $fecini->format('Y-m-d'))
+                        ->where('fecha', '<=', $fecfin->format('Y-m-d'))
+                        ->where('tiptra', '9');
+                })
+                ->orderBy('numtraccf')
+                ->get();
             foreach ($msat13 as $sat13) {
-                $sat20 = $this->Sat20->findFirst("numtraccf = '{$sat13->getNumtraccf()}' ");
-                $mgener02 = Gener02::where('usuario', $sat20->getUsuario())->first();
-                $report->put('fecha', trim($sat20->getFecha()));
-                $report->put('hora', trim($sat20->getHora()));
-                $report->put('usuario', trim($sat20->getUsuario() . ' ' . $mgener02->getNombre()));
-                $report->put('numtraccf', trim($sat20->getNumtraccf()));
-                $report->put('numtrasat', trim($sat13->getNumtrasat()));
-                $report->put('tipdoc', trim($sat13->getTipdocemp()));
-                $report->put('numdocemp', trim($sat13->getNumdocemp()));
-                $report->put('serialsat', trim($sat13->getSersat()));
-                $report->put('fecmod', trim($sat13->getFecmod()));
-                $report->put('tipdoctra', trim($sat13->getTipdoctra()));
-                $report->put('numdoctra', trim($sat13->getNumdoctra()));
-                $report->put('priape', trim($sat13->getPriape()));
-                $report->put('prinom', trim($sat13->getPrinom()));
-                $report->put('salario', trim($sat13->getSalario()));
-                $report->put('tipsal', trim($sat13->getTipsal()));
-                $report->put('autmandat', trim($sat13->getAutmandat()));
-                $report->put('autenvnot', trim($sat13->getAutenvnot()));
-                $report->put('rsultado', trim($sat13->getResultado()));
-                $report->put('mensaje', trim($sat13->getMensaje()));
-                $report->put('codigo', trim($sat13->getCodigo()));
+                $sat20 = DB::table('empresa.sat20')->where('numtraccf', $sat13->numtraccf)->first();
+                $mgener02 = Gener02::where('usuario', $sat20->usuario)->first();
+                $report->put('fecha', trim($sat20->fecha));
+                $report->put('hora', trim($sat20->hora));
+                $report->put('usuario', trim($sat20->usuario . ' ' . $mgener02->getNombre()));
+                $report->put('numtraccf', trim($sat20->numtraccf));
+                $report->put('numtrasat', trim($sat13->numtrasat));
+                $report->put('tipdoc', trim($sat13->tipdocemp));
+                $report->put('numdocemp', trim($sat13->numdocemp));
+                $report->put('serialsat', trim($sat13->sersat));
+                $report->put('fecmod', trim($sat13->fecmod));
+                $report->put('tipdoctra', trim($sat13->tipdoctra));
+                $report->put('numdoctra', trim($sat13->numdoctra));
+                $report->put('priape', trim($sat13->priape));
+                $report->put('prinom', trim($sat13->prinom));
+                $report->put('salario', trim($sat13->salario));
+                $report->put('tipsal', trim($sat13->tipsal));
+                $report->put('autmandat', trim($sat13->autmandat));
+                $report->put('autenvnot', trim($sat13->autenvnot));
+                $report->put('rsultado', trim($sat13->resultado));
+                $report->put('mensaje', trim($sat13->mensaje));
+                $report->put('codigo', trim($sat13->codigo));
                 $report->outPutToReport();
             }
         }

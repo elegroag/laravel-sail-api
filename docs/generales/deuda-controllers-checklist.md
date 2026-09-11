@@ -79,14 +79,14 @@ Orden sugerido (recomendación, no arrancar):
 - [x] `Mercurio73Controller.php` — txs → `DB::*`; omitir `new Model`
 - [x] `Mercurio74Controller.php` — txs → `DB::*`; omitir `new Model`
 
-## Cajas — Reportes / consultas / auditoría — parcial
+## Cajas — Reportes / consultas / auditoría — cerrado
 
 - [x] `AuditoriaController.php` — `DbBase` constructor sin usos, retirado
 - [x] `ConsultaController.php` — `DbBase` constructor sin usos, retirado; omitir `whereRaw`/`new Model`
 - [x] `ConsultaDocumentoSolicitudController.php` — **omitido queries**
 - [x] `InformeSolicitudController.php` — **omitido queries**
 - [x] `ReasignaController.php` — txs → `DB::*`; omitir `whereRaw`/`new Model`
-- [ ] `ReportesController.php` — `DbBase` retirado; `Gener02::where()->first()` ×9. **Pendiente:** `$this->Sat20->findFirst` ×9 y `$this->SatNN->find` (no hay modelos `Sat02`/`Sat20`/etc.)
+- [x] `ReportesController.php` — `novedadesSubsidio`: SAT `find`/`findFirst` → `DB::table` (`sat02`–`sat13`, `empresa.sat20`); getters → columnas; `Gener02` Eloquent intacto. Sin modelos SAT nuevos.
 - [x] `ReportesolController.php` — `DbBase` constructor sin usos, retirado
 - [x] `ReporteOportunidadAfiliacionController.php` — `DbBase` constructor sin usos, retirado
 - [x] `ReporteComprasServiciosController.php` — **omitido queries**
