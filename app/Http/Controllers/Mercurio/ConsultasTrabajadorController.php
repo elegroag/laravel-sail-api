@@ -6,7 +6,6 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsConyuge;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio31;
 use App\Models\Mercurio32;
 use App\Models\Mercurio33;
@@ -23,7 +22,6 @@ use Illuminate\Support\Facades\DB;
 
 class ConsultasTrabajadorController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -31,7 +29,6 @@ class ConsultasTrabajadorController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }

@@ -6,7 +6,6 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
@@ -28,6 +27,7 @@ use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Http\Request;
 use TCPDF;
+use Illuminate\Support\Facades\DB;
 
 class ActualizaTrabajadorController extends ApplicationController
 {
@@ -35,7 +35,6 @@ class ActualizaTrabajadorController extends ApplicationController
 
     protected string $tipopc = '14';
 
-    protected ?DbBase $db;
 
     protected ?array $user;
 
@@ -43,7 +42,6 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -226,25 +224,30 @@ class ActualizaTrabajadorController extends ApplicationController
     {
         $documento = $this->user['documento'];
         if (empty($estado)) {
-            $mercurio47 = $this->db->inQueryAssoc("SELECT * FROM mercurio47 WHERE documento='{$documento}' AND estado IN('T','D','P','A','X') ORDER BY id, estado DESC");
+            $mercurio47 = Mercurio47::where('documento', $documento)
+                ->whereIn('estado', ['T', 'D', 'P', 'A', 'X'])
+                ->orderBy('id')
+                ->orderByDesc('estado')
+                ->get()
+                ->toArray();
         } else {
-            $mercurio47 = $this->db->inQueryAssoc("SELECT * FROM mercurio47 WHERE documento='{$documento}' AND estado='{$estado}' ORDER BY id DESC");
+            $mercurio47 = Mercurio47::where('documento', $documento)
+                ->where('estado', $estado)
+                ->orderByDesc('id')
+                ->get()
+                ->toArray();
         }
 
         foreach ($mercurio47 as $ai => $row) {
-            $rqs = $this->db->fetchOne("SELECT count(mercurio10.numero) as cantidad
-                FROM mercurio10
-                LEFT JOIN mercurio47 ON mercurio47.id = mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio47.id ='{$row['id']}'
-            ");
+            $rqs = [
+                'cantidad' => Mercurio10::where('tipopc', $this->tipopc)->where('numero', $row['id'])->count(),
+            ];
 
-            $trayecto = $this->db->fetchOne("SELECT max(mercurio10.item), mercurio10.*
-                FROM mercurio10
-                LEFT JOIN mercurio47 ON mercurio47.id=mercurio10.numero
-                WHERE mercurio10.tipopc='{$this->tipopc}' AND
-                mercurio47.id ='{$row['id']}' LIMIT 1
-            ");
+            $trayectoRow = Mercurio10::where('tipopc', $this->tipopc)
+                ->where('numero', $row['id'])
+                ->orderByDesc('item')
+                ->first();
+            $trayecto = $trayectoRow ? $trayectoRow->toArray() : [];
 
             $mercurio47[$ai] = $row;
             $mercurio47[$ai]['cantidad_eventos'] = $rqs['cantidad'];
@@ -308,7 +311,7 @@ class ActualizaTrabajadorController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $datosTrabajadorService = new DatosTrabajadorService;
             $asignarFuncionario = new AsignarFuncionario;
@@ -377,11 +380,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'data' => $solicitud->toArray(),
             ];
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -389,7 +392,7 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function borrar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $solicitud = Mercurio47::where('id', $id)->first();
@@ -402,11 +405,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El registro se borro con éxito del sistema.',
             ];
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e);
         }
@@ -414,7 +417,7 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function editarSolicitud(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         $logger = new Logger;
         $id_log = $logger->registrarLog(false, 'actualización datos basicos', '');
         try {
@@ -424,19 +427,24 @@ class ActualizaTrabajadorController extends ApplicationController
             $documento = $this->user['documento'];
             $tipo = $this->tipo;
 
-            $solicitud = $this->db->fetchOne("SELECT * FROM mercurio47 WHERE id='{$id}' and documento='{$documento}'");
+            $solicitudRow = Mercurio47::where('id', $id)->where('documento', $documento)->first();
+            $solicitud = $solicitudRow ? $solicitudRow->toArray() : null;
             if (! $solicitud) {
                 throw new DebugException('Error la solicitud no es correcta para continuar.', 501);
             }
 
-            $campos = $this->db->inQueryAssoc("SELECT * FROM mercurio28 WHERE tipo='{$tipo}'");
+            $campos = Mercurio28::where('tipo', $tipo)->get()->toArray();
             foreach ($campos as $mercurio28) {
                 $valor = $request->input($mercurio28['campo']);
                 if (empty($valor)) {
                     continue;
                 }
 
-                $mercurio33 = $this->db->fetchOne("SELECT * FROM mercurio33 WHERE documento = '{$documento}' and actualizacion = '{$id}' and campo = '{$mercurio28['campo']}'");
+                $mercurio33Row = Mercurio33::where('documento', $documento)
+                    ->where('actualizacion', $id)
+                    ->where('campo', $mercurio28['campo'])
+                    ->first();
+                $mercurio33 = $mercurio33Row ? $mercurio33Row->toArray() : null;
                 if ($mercurio33) {
 
                     Mercurio33::where('id', $mercurio33['id'])
@@ -466,11 +474,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'id' => $id,
             ];
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e);
         }
@@ -552,7 +560,7 @@ class ActualizaTrabajadorController extends ApplicationController
 
     public function borrarArchivo(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $numero = $request->input('id');
             $coddoc = $request->input('coddoc');
@@ -572,9 +580,9 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El archivo se borro de forma correcta',
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -589,7 +597,7 @@ class ActualizaTrabajadorController extends ApplicationController
      */
     public function guardarArchivo(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $coddoc = $request->input('coddoc');
@@ -607,9 +615,9 @@ class ActualizaTrabajadorController extends ApplicationController
                 'msj' => 'Ok archivo procesado',
                 'data' => $mercurio37->getArray(),
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -624,7 +632,7 @@ class ActualizaTrabajadorController extends ApplicationController
      */
     public function enviarCaja(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $datosService = new DatosTrabajadorService;
@@ -637,11 +645,11 @@ class ActualizaTrabajadorController extends ApplicationController
                 'success' => true,
                 'msj' => 'El envio de la solicitud se ha completado con éxito',
             ];
-            $this->db->commit();
+            DB::commit();
 
             return response()->json($salida);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -675,7 +683,7 @@ class ActualizaTrabajadorController extends ApplicationController
         if (! $mercurio47) {
         } else {
             $campos = new \stdClass;
-            $mercurio33 = $this->db->inQueryAssoc("SELECT * FROM mercurio33 WHERE actualizacion='{$id}'");
+            $mercurio33 = Mercurio33::where('actualizacion', $id)->get()->toArray();
             foreach ($mercurio33 as $ai => $row) {
                 $campos->$row['campo'] = $row['valor'];
             }

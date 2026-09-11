@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio07;
 use App\Models\Mercurio16;
@@ -12,10 +11,10 @@ use App\Services\PreparaFormularios\CifrarDocumento;
 use App\Services\PreparaFormularios\GestionFirmas;
 use App\Services\Utils\SenderEmail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FirmasController extends ApplicationController
 {
-    protected DbBase $db;
 
     protected ?array $user;
 
@@ -23,7 +22,6 @@ class FirmasController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -62,7 +60,7 @@ class FirmasController extends ApplicationController
      */
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $user = $this->user ?? [];
             $documento = $user['documento'] ?? null;
@@ -92,7 +90,7 @@ class FirmasController extends ApplicationController
             $gestionFirmas->generarClaves($clave);
 
             $salida = ['success' => true, 'msj' => 'Imagen guardada correctamente.'];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
             return $this->handleException($e, $request);
         }
@@ -137,7 +135,7 @@ class FirmasController extends ApplicationController
      */
     public function validaFirma(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $user = $this->user ?? [];
             $coddoc = $user['coddoc'] ?? null;
@@ -177,9 +175,9 @@ class FirmasController extends ApplicationController
                     ? 'El documento es válido, se ha comprobado la autenticidad del contenido del documento.'
                     : 'El documento no es válido, el documento se ha modificado y no es auténtico.',
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
             return $this->handleException($e, $request);
         }
 
@@ -259,7 +257,7 @@ class FirmasController extends ApplicationController
             'password' => $passwordNumerico,
         ])->render();
 
-        $emailCaja = (new Mercurio01)->findFirst();
+        $emailCaja = Mercurio01::first();
 
         $senderEmail = new SenderEmail;
         $senderEmail->setters(

@@ -126,17 +126,17 @@ Orden sugerido (recomendación, no arrancar):
 - [x] `ComunitariaController.php` — `DbBase` constructor sin usos, retirado; `renderText` intacto; omitir `new Model`
 - [x] `ParticularController.php` — `DbBase` constructor sin usos, retirado
 
-## Mercurio — Consultas / movimientos / certificados / firmas / productos / actualiza
+## Mercurio — Consultas / movimientos / certificados / firmas / productos / actualiza — cerrado
 
-- [ ] `ConsultasEmpresaController.php` — `ApplicationController`, 1029 LOC — `DbBase`×2/`rawConnect`×1; `renderText`×1; omitir `new Model`×6
-- [ ] `ConsultasTrabajadorController.php` — `ApplicationController`, 507 LOC — `DbBase`×2/`rawConnect`×1
-- [ ] `MovimientosController.php` — `ApplicationController`, 219 LOC — `DbBase`×2/`rawConnect`×1
-- [ ] `CertificadosController.php` — `ApplicationController`, 287 LOC — `DbBase`×2/`rawConnect`×1; omitir `new Model`×2
-- [ ] `FirmasController.php` — `ApplicationController`, 277 LOC — `findFirst`×1, `DbBase`×3/`rawConnect`×1; omitir `new Model`×1
-- [ ] `ProductosController.php` — `ApplicationController`, 243 LOC — `DbBase`×3/`rawConnect`×1
-- [ ] `ActualizaEmpresaController.php` — `ApplicationController`, 636 LOC — `DbBase`×2/`rawConnect`×1; `clp`×2; omitir `new Model`×4
-- [ ] `ActualizaTrabajadorController.php` — `ApplicationController`, 908 LOC — `inQueryAssoc`×4, `DbBase`×3/`rawConnect`×1; omitir `new Model`×3
-- [x] `DocumentosController.php` — `Controller`, 132 LOC — **omitido**: Eloquent / `Controller` Laravel, sin APIs Kumbia de query
+- [x] `ConsultasEmpresaController.php` — `DbBase` constructor sin usos, retirado; `input('cedtra')` sin filtros Kumbia; `renderText` intacto; omitir `new Model`
+- [x] `ConsultasTrabajadorController.php` — `DbBase` constructor sin usos, retirado
+- [x] `MovimientosController.php` — `DbBase` constructor sin usos, retirado
+- [x] `CertificadosController.php` — txs → `DB::*`; omitir `new Model`
+- [x] `FirmasController.php` — `Mercurio01::first()`; txs → `DB::*`; omitir `new Model`
+- [x] `ProductosController.php` — `DbBase` constructor sin usos, retirado
+- [x] `ActualizaEmpresaController.php` — `fetchOne` → `Mercurio10` Eloquent; txs → `DB::*`; `clp` intacto; omitir `new Model`
+- [x] `ActualizaTrabajadorController.php` — `inQueryAssoc`/`fetchOne` → `Mercurio47`/`10`/`28`/`33` Eloquent; txs → `DB::*`; omitir `new Model`
+- [x] `DocumentosController.php` — **omitido**: Eloquent / `Controller` Laravel
 
 ## Mercurio — Ecommerce
 

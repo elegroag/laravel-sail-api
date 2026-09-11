@@ -7,7 +7,6 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Collections\ParamsBeneficiario;
 use App\Library\Collections\ParamsConyuge;
 use App\Library\Collections\ParamsTrabajador;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio10;
 use App\Models\Mercurio14;
@@ -33,7 +32,6 @@ use Illuminate\Http\Request;
 
 class ConsultasEmpresaController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -41,7 +39,6 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -567,7 +564,7 @@ class ConsultasEmpresaController extends ApplicationController
 
     public function actualizaDatosBasicos(Request $request)
     {
-        $cedtra = $request->input('cedtra', 'addslaches', 'alpha', 'extraspaces', 'striptags');
+        $cedtra = $request->input('cedtra');
         $modelos = ['mercurio08', 'mercurio10', 'mercurio20', 'mercurio33', 'mercurio37'];
         // $Transaccion = parent::startTrans($modelos);
         // $response = parent::startFunc();

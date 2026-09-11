@@ -6,11 +6,11 @@ use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Http\Controllers\Mercurio\Concerns\RendersSolicitudesGrid;
 use App\Library\Collections\ParamsEmpresa;
-use App\Models\Adapter\DbBase;
 use App\Models\FormularioDinamico;
 use App\Models\Gener09;
 use App\Models\Gener18;
 use App\Models\Mercurio01;
+use App\Models\Mercurio10;
 use App\Models\Mercurio12;
 use App\Models\Mercurio14;
 use App\Models\Mercurio28;
@@ -28,6 +28,7 @@ use App\Services\Utils\GuardarArchivoService;
 use App\Services\Utils\Logger;
 use App\Services\Utils\SenderValidationCaja;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ActualizaEmpresaController extends ApplicationController
 {
@@ -35,7 +36,6 @@ class ActualizaEmpresaController extends ApplicationController
 
     protected $tipopc = '5';
 
-    protected $db;
 
     protected $user;
 
@@ -43,7 +43,6 @@ class ActualizaEmpresaController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -71,7 +70,7 @@ class ActualizaEmpresaController extends ApplicationController
 
     public function guardar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $actualizaEmpresaService = new ActualizaEmpresaService;
             $clave_certificado = $request->input('clave');
@@ -189,9 +188,9 @@ class ActualizaEmpresaController extends ApplicationController
                 'msj' => 'Registro completado con éxito',
                 'data' => $data,
             ];
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -345,9 +344,11 @@ class ActualizaEmpresaController extends ApplicationController
         $archivos = [];
         $mercurio14 = Mercurio14::where('tipopc', $this->tipopc)->get();
 
-        $mercurio10 = $this->db->fetchOne("SELECT item, estado, campos_corregir
-        FROM mercurio10
-        WHERE numero='{$mercurio47->getId()}' AND tipopc='{$this->tipopc}' ORDER BY item DESC LIMIT 1");
+        $row10 = Mercurio10::where('numero', $mercurio47->getId())
+            ->where('tipopc', $this->tipopc)
+            ->orderByDesc('item')
+            ->first(['item', 'estado', 'campos_corregir']);
+        $mercurio10 = $row10 ? $row10->toArray() : null;
 
         $corregir = false;
         if ($mercurio10) {

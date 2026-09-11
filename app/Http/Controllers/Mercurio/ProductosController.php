@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\AfiliadoHabil;
 use App\Models\PinesAfiliado;
 use App\Models\ServiciosCupos;
@@ -12,13 +11,11 @@ use Illuminate\Http\Request;
 
 class ProductosController extends ApplicationController
 {
-    protected DbBase $db;
     protected ?array $user;
     protected ?string $tipo;
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Mercurio;
 
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio01;
 use App\Models\Mercurio02;
 use App\Models\Mercurio07;
@@ -15,7 +14,6 @@ use Illuminate\Http\Request;
 
 class MovimientosController extends ApplicationController
 {
-    protected $db;
 
     protected $user;
 
@@ -23,7 +21,6 @@ class MovimientosController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }

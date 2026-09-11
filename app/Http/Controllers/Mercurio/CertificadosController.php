@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Adapter\DbBase;
 use App\Models\Mercurio10;
 use App\Models\Mercurio45;
 use App\Services\Api\ApiSubsidio;
@@ -14,12 +13,12 @@ use App\Services\Utils\UploadFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class CertificadosController extends ApplicationController
 {
     protected $tipopc = '8';
 
-    protected $db;
 
     protected $user;
 
@@ -27,7 +26,6 @@ class CertificadosController extends ApplicationController
 
     public function __construct()
     {
-        $this->db = DbBase::rawConnect();
         $this->user = session('user') ?? null;
         $this->tipo = session('tipo') ?? null;
     }
@@ -96,7 +94,7 @@ class CertificadosController extends ApplicationController
     public function guardar(Request $request)
     {
         $message = '';
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = $request->input('id');
             $documento = $this->user['documento'];
@@ -119,7 +117,7 @@ class CertificadosController extends ApplicationController
                     'msj' => 'Ya tiene un certificado presentando, por favor espere a su aprobacion',
                 ];
 
-                $this->db->rollBack();
+                DB::rollBack();
 
                 return response()->json($response);
             }
@@ -204,9 +202,9 @@ class CertificadosController extends ApplicationController
                 'msj' => $message,
             ];
 
-            $this->db->commit();
+            DB::commit();
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
@@ -216,7 +214,7 @@ class CertificadosController extends ApplicationController
 
     public function borrar(Request $request)
     {
-        $this->db->begin();
+        DB::beginTransaction();
         try {
             $id = (int) $request->input('id');
             $documento = $this->user['documento'] ?? null;
@@ -247,14 +245,14 @@ class CertificadosController extends ApplicationController
 
             $this->eliminarArchivoCertificado($archivo);
 
-            $this->db->commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'msj' => 'La solicitud de certificado fue eliminada correctamente',
             ]);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
+            DB::rollBack();
 
             return $this->handleException($e, $request);
         }
