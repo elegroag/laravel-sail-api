@@ -7,6 +7,7 @@ import store from './store.js';
 import { mostrarLoader, ocultarLoader, escapeHtml, obtenerCodben, obtenerTipoBeneficiario } from './utils.js';
 import { actualizarPanelBeneficiario, limpiarSeleccionServicio } from './panelCompra.js';
 import { cargarServicios } from './serviciosRender.js';
+import { esVistaMovil } from './vistaMovil.js';
 
 export function identificarTrabajador() {
     var cedtra = $('#hid_documento').val();
@@ -98,4 +99,23 @@ export function seleccionarBeneficiario(codben, benData) {
     $('.beneficiario-card[data-codben="' + codben + '"]').addClass('beneficiario-card--selected');
     actualizarPanelBeneficiario();
     limpiarSeleccionServicio();
+    scrollAServiciosActivosEnMovil();
+}
+
+/**
+ * En viewport movil, lleva el foco visual a la seccion de servicios activos.
+ */
+function scrollAServiciosActivosEnMovil() {
+    if (!esVistaMovil()) {
+        return;
+    }
+
+    var seccion = document.getElementById('seccion_servicios_activos');
+    if (!seccion || typeof seccion.scrollIntoView !== 'function') {
+        return;
+    }
+
+    window.setTimeout(function () {
+        seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
 }

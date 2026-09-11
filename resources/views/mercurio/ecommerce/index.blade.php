@@ -63,7 +63,7 @@
 
                 <div class="servicios-catalog__main">
                     <div class="servicios-catalog__content">
-                        <section class="servicios-catalog__section">
+                        <section id="seccion_servicios_activos" class="servicios-catalog__section">
                             <h2 class="servicios-catalog__section-title">
                                 <i class="fas fa-store"></i> Servicios activos
                             </h2>

@@ -54,7 +54,7 @@ class EcommerceController extends ApplicationController
      */
     public function index()
     {
-        if (config('app.app_mode') === 'production') {
+        if (config('app.app_mode') === 'debugger') {
             set_flashdata('notify', [
                 'msj' => 'Estamos trabajando para habilitar muy pronto el catálogo de servicios. Agradecemos tu comprensión.',
                 'code' => 503,

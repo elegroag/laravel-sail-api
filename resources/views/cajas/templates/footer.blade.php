@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col pl-5">
             <div class="copyright pt-0">
-                &copy; 2019 <a href="#" class="ml-1" target="_blank">Sistemas y Soluciones Integradas</a>
+                &copy; 2019 <a href="#" class="ml-1" target="_blank">Caja de Compensación Familiar del Caquetá</a>
                 @php
                 $db = DbBase::rawConnect();
                 $xquery = $db->fetchOne("SELECT DATABASE() AS database_name");

@@ -19,7 +19,7 @@ $rutaImg = "http://186.119.116.228:8091/Mercurio/public/img/Mercurio/logob.png";
 
                                                     <img style='display:block;border:none' src='{{ $rutaImg }}'
                                                         width='30%' height='' title='Sistemas Y Solucuiones Integradas'
-                                                        alt='Sistemas y Soluciones Integradas' class='CToWUd'>
+                                                        alt='Caja de Compensación Familiar del Caquetá' class='CToWUd'>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -77,7 +77,7 @@ $rutaImg = "http://186.119.116.228:8091/Mercurio/public/img/Mercurio/logob.png";
                                                 <tr>
                                                     <td height='50' valign='middle' align='left'
                                                         style='font-family:Helvetica,Arial;font-size:11px;color:#8e8e8e'>
-                                                        Mercurio - Sistemas y Soluciones Integradas S.A.S - 2019</td>
+                                                        COMFACA - Caja de Compensación Familiar de Caquetá - 2019</td>
                                             </tbody>
                                         </table>
                                     </div>

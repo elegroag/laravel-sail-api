@@ -500,6 +500,10 @@ label.is-invalid {
     margin-bottom: 0.85rem;
 }
 
+#seccion_servicios_activos {
+    scroll-margin-top: 1rem;
+}
+
 .servicios-catalog__main {
     display: grid;
     gap: 1.25rem;
@@ -682,11 +686,28 @@ label.is-invalid {
     transform: translateY(-1px);
 }
 
-.beneficiario-card--selected,
 .servicio-card--selected {
     border-color: #0d6efd;
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.16);
     background: linear-gradient(145deg, #eef5ff 0%, #ffffff 100%);
+}
+
+.beneficiario-card--selected {
+    border-color: #65a30d;
+    border-width: 2px;
+    box-shadow:
+        0 0 0 4px rgba(132, 204, 22, 0.4),
+        0 10px 24px rgba(101, 163, 13, 0.25);
+    background: linear-gradient(145deg, #ecfccb 0%, #f7fee7 55%, #ffffff 100%);
+    transform: translateY(-1px);
+}
+
+.beneficiario-card--selected .beneficiario-card__tipo {
+    color: #4d7c0f;
+}
+
+.beneficiario-card--selected .beneficiario-card__nombre {
+    color: #365314;
 }
 
 .beneficiario-card__tipo {

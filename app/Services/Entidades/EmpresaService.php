@@ -294,7 +294,7 @@ class EmpresaService
         $empresa = $this->findById($id);
         if ($empresa != false) {
             $empresa->fill($data);
-            $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
+            $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
             $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
             $empresa->tipo = $this->tipo;
             $empresa->coddoc = $this->user['coddoc'];
@@ -320,7 +320,7 @@ class EmpresaService
     {
         $empresa = new Mercurio30;
         $empresa->fill($data);
-        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
+        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = session('tipo');
         $empresa->coddoc = $this->user['coddoc'];
@@ -342,7 +342,7 @@ class EmpresaService
     public function createByFormData(array $data): Mercurio30
     {
         $empresa = new Mercurio30($data);
-        $empresa->repleg = $data['priape'].' '.$data['segape'].' '.$data['prinom'].' '.$data['segnom'];
+        $empresa->repleg = $data['priape'] . ' ' . $data['segape'] . ' ' . $data['prinom'] . ' ' . $data['segnom'];
         $empresa->usuario = (new AsignarFuncionario)->asignar($this->tipopc, $this->user['codciu']);
         $empresa->tipo = $this->tipo;
         $empresa->coddoc = $this->user['coddoc'];
@@ -598,7 +598,7 @@ class EmpresaService
                 [
                     'name' => 'Consulta de nominas',
                     'url' => 'subsidioemp/consulta_nomina_view',
-                    'imagen' => 'consulta_aportes.jpg',
+                    'imagen' => 'consulta_nominas.jpg',
                 ],
             ],
         ];
