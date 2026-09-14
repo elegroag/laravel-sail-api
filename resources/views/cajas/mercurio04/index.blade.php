@@ -55,27 +55,27 @@
         <form id="form" class="validation_form" autocomplete="off" novalidate>
             <div class="form-group">
                 <label for="codofi" class="form-control-label">Oficina</label>
-                <input type="text" id="codofi" class="form-control" placeholder="Oficina">
+                <input type="text" id="codofi" name="codofi" class="form-control" placeholder="Oficina" value="<%= typeof codofi !== 'undefined' ? codofi : '' %>">
             </div>
             <div class="form-group">
                 <label for="detalle" class="form-control-label">Detalle</label>
-                <input type="text" id="detalle" class="form-control" placeholder="Detalle">
+                <input type="text" id="detalle" name="detalle" class="form-control" placeholder="Detalle" value="<%= typeof detalle !== 'undefined' ? detalle : '' %>">
             </div>
             <div class="form-group">
                 <label for="principal" class="form-control-label">Principal</label>
-                <select id="principal" class="form-control">
+                <select id="principal" name="principal" class="form-control">
                     <option value="">Seleccione</option>
-                    @foreach ($principal as $item)
-                        <option value="{{ $item }}">{{ $item }}</option>
+                    @foreach ($principal as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="form-group">
                 <label for="estado" class="form-control-label">Estado</label>
-                <select id="estado" class="form-control">
+                <select id="estado" name="estado" class="form-control">
                     <option value="">Seleccione</option>
-                    @foreach ($estados as $item)
-                        <option value="{{ $item }}">{{ $item }}</option>
+                    @foreach ($estados as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>

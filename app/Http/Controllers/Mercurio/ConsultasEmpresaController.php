@@ -314,7 +314,7 @@ class ConsultasEmpresaController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 
@@ -757,7 +757,7 @@ class ConsultasEmpresaController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 

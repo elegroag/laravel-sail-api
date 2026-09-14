@@ -64,10 +64,10 @@ class ConsultaController extends ApplicationController
             ->map(function ($item) use ($generalService) {
                 $item = $item->toArray();
                 $out = $generalService->consultaTipopc(
-                    $item['tipopc'],
+                    (string) $item['tipopc'],
                     'count',
                     '',
-                    $item['usuario'],
+                    (string) $item['usuario'],
                     ['estado' => 'P']
                 );
                 $item['cantidad'] = $out['count'];
@@ -327,7 +327,7 @@ class ConsultaController extends ApplicationController
                 $row = [$mgener02->getNombre()];
                 foreach ($mercurio09 as $mmercurio09) {
                     $condi = ['estado' => 'P'];
-                    $result = $generalService->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
+                    $result = $generalService->consultaTipopc((string) $mmercurio09->getTipopc(), 'count', '', (string) $mgener02->getUsuario(), $condi);
                     $row[] = $result['count'];
                 }
                 yield $row;
@@ -368,7 +368,7 @@ class ConsultaController extends ApplicationController
                     // Conteo por estado
                     foreach ($estados as $key => $label) {
                         $condi = "estado='$key' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-                        $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
+                        $result = $consultasOldServices->consultaTipopc((string) $mmercurio09->getTipopc(), 'count', '', (string) $mgener02->getUsuario(), $condi);
                         $count = $result['count'];
                         $row[] = $count;
                         $total_estado += $count;
@@ -379,7 +379,7 @@ class ConsultaController extends ApplicationController
 
                     // Vencidos según lógica original de este método
                     $condi = "estado<>'T' and mercurio20.fecha>='$fecini' and mercurio20.fecha<='$fecfin'";
-                    $result = $consultasOldServices->consultaTipopc($mmercurio09->getTipopc(), 'count', null, $mgener02->getUsuario(), $condi);
+                    $result = $consultasOldServices->consultaTipopc((string) $mmercurio09->getTipopc(), 'count', '', (string) $mgener02->getUsuario(), $condi);
                     $mercurio = $result['all'];
                     $total_vencido = 0;
                     foreach ($mercurio as $mmercurio) {
@@ -429,7 +429,7 @@ class ConsultaController extends ApplicationController
                 $item = $item->toArray();
 
                 $condi_aprobado = "estado='A' and fecsol>='{$fecini}'";
-                $result_aprobado = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_aprobado);
+                $result_aprobado = $generalService->consultaTipopc((string) $item['tipopc'], 'count', '', (string) $item['usuario'], $condi_aprobado);
                 $item['estado_aprobado'] = $result_aprobado['count'];
                 $mercurio_aprobado = $result_aprobado['all'];
 
@@ -442,7 +442,7 @@ class ConsultaController extends ApplicationController
                 }
 
                 $condi_rechazo = "estado='R' and fecsol>='{$fecini}'";
-                $result_rechazo = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_rechazo);
+                $result_rechazo = $generalService->consultaTipopc((string) $item['tipopc'], 'count', '', (string) $item['usuario'], $condi_rechazo);
                 $item['estado_rechazo'] = $result_rechazo['count'];
                 $mercurio_rechazo = $result_rechazo['all'];
 
@@ -454,7 +454,7 @@ class ConsultaController extends ApplicationController
                 }
 
                 $condi_pendiente = "estado='P' and fecsol>='{$fecini}'";
-                $result_pendiente = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_pendiente);
+                $result_pendiente = $generalService->consultaTipopc((string) $item['tipopc'], 'count', '', (string) $item['usuario'], $condi_pendiente);
                 $item['estado_pendiente'] = $result_pendiente['count'];
                 $mercurio_pendiente = $result_pendiente['all'];
                 foreach ($mercurio_pendiente as $mmercurio) {
@@ -465,7 +465,7 @@ class ConsultaController extends ApplicationController
                 }
 
                 $condi_devuelto = "estado='D' and fecsol>='{$fecini}'";
-                $result_devuelto = $generalService->consultaTipopc($item['tipopc'], 'count', null, $item['usuario'], $condi_devuelto);
+                $result_devuelto = $generalService->consultaTipopc((string) $item['tipopc'], 'count', '', (string) $item['usuario'], $condi_devuelto);
                 $item['estado_devuelto'] = $result_devuelto['count'];
                 $mercurio_devuelto = $result_devuelto['all'];
 

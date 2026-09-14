@@ -59,7 +59,7 @@ class EmpresaController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 
@@ -601,7 +601,7 @@ class EmpresaController extends ApplicationController
                     'code' => 401,
                 ]);
 
-                return redirect()->route('principal/index');
+                return redirect()->route('principal.index');
             }
 
             $ps = new ApiSubsidio;
@@ -652,7 +652,7 @@ class EmpresaController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 }

@@ -172,7 +172,7 @@ class ComunitariaController extends ApplicationController
                 'code' => 501,
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 

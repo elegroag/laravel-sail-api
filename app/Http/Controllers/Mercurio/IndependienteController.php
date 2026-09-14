@@ -84,7 +84,7 @@ class IndependienteController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 
@@ -760,7 +760,7 @@ class IndependienteController extends ApplicationController
                 ]);
             }
 
-            return redirect('principal.index');
+            return redirect()->route('principal.index');
         } catch (\Throwable $e) {
             $excep = $this->captureException($e);
             set_flashdata('error', [
@@ -768,7 +768,7 @@ class IndependienteController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 }

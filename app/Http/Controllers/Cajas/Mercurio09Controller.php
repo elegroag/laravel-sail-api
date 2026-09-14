@@ -146,14 +146,16 @@ class Mercurio09Controller extends ApplicationController
             $detalle = $request->input('detalle');
             $dias = $request->input('dias');
 
-            DB::beginTransaction();
-            $mercurio09 = Mercurio09::where('tipopc', $tipopc)->first();
-
-            if (! $mercurio09) {
-                $mercurio09 = new Mercurio09;
-                $mercurio09->setTipopc($tipopc);
+            if ($tipopc === null || $tipopc === '') {
+                return $this->renderObject([
+                    'flag' => false,
+                    'msg' => 'El campo tipopc es obligatorio',
+                ], false);
             }
 
+            DB::beginTransaction();
+            $mercurio09 = Mercurio09::firstOrNew(['tipopc' => $tipopc]);
+            $mercurio09->setTipopc($tipopc);
             $mercurio09->setDetalle($detalle);
             $mercurio09->setDias($dias);
 
@@ -163,14 +165,25 @@ class Mercurio09Controller extends ApplicationController
             }
 
             DB::commit();
-            $response = 'Creacion Con Exito';
 
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'flag' => true,
+                'msg' => 'Operación realizada con éxito',
+            ], false);
         } catch (DebugException $e) {
             DB::rollBack();
-            $response = 'No se puede guardar/editar el Registro: ' . $e->getMessage();
 
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'flag' => false,
+                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+            ], false);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->renderObject([
+                'flag' => false,
+                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+            ], false);
         }
     }
 
@@ -180,17 +193,27 @@ class Mercurio09Controller extends ApplicationController
             $this->setResponse('ajax');
             $tipopc = $request->input('tipopc');
 
-            $response = 'Validacion Exitosa';
+            $response = [
+                'flag' => true,
+                'msg' => 'Validacion Exitosa',
+                'msj' => 'Validacion Exitosa',
+            ];
             $l = Mercurio09::where('tipopc', $tipopc)->count();
             if ($l > 0) {
-                $response = 'El Registro ya se encuentra Digitado';
+                $response = [
+                    'flag' => false,
+                    'msg' => 'El Registro ya se encuentra Digitado',
+                    'msj' => 'El Registro ya se encuentra Digitado',
+                ];
             }
 
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
-            $response = 'No se pudo validar la informacion';
-
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'flag' => false,
+                'msg' => 'No se pudo validar la informacion',
+                'msj' => 'No se pudo validar la informacion',
+            ], false);
         }
     }
 

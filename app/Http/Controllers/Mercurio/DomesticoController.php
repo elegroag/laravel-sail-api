@@ -175,7 +175,7 @@ class DomesticoController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 

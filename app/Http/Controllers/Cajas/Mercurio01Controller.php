@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
+use App\Services\Cajas\Mercurio01Service;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
@@ -94,40 +93,15 @@ class Mercurio01Controller extends ApplicationController
 
     public function guardar(Request $request)
     {
-        try {
-            $this->setResponse('ajax');
-            $codapl = $request->input('codapl');
-            $email = $request->input('email');
-            $clave = $request->input('clave');
-            $path = $request->input('path');
-            $ftpserver = $request->input('ftpserver');
-            $pathserver = $request->input('pathserver');
-            $userserver = $request->input('userserver');
-            $passserver = $request->input('passserver');
+        $this->setResponse('ajax');
+        $result = (new Mercurio01Service)->guardar($request);
 
-            $response = DB::beginTransaction();
-            $mercurio01 = new Mercurio01;
-
-            $mercurio01->setCodapl($codapl);
-            $mercurio01->setEmail($email);
-            $mercurio01->setClave($clave);
-            $mercurio01->setPath($path);
-            $mercurio01->setFtpserver($ftpserver);
-            $mercurio01->setPathserver($pathserver);
-            $mercurio01->setUserserver($userserver);
-            $mercurio01->setPassserver($passserver);
-
-            if (! $mercurio01->save()) {
-                DB::rollBack();
-            }
-            DB::commit();
-            $response = 'Creacion Con Exito';
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            $response = 'No se puede guardar/editar el Registro';
-            return $this->renderObject($response, false);
-        }
+        return $this->renderObject([
+            'success' => $result['flag'],
+            'flag' => $result['flag'],
+            'msj' => $result['msj'],
+            'msg' => $result['msg'],
+        ], false);
     }
 
     public function borrarFiltro(Request $request)

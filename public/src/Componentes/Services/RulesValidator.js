@@ -52,7 +52,7 @@ const RulesValidator = (rules = [], attr = {}) => {
                 });
             }
 
-            if (!err && _.isUndefined(maxlength) && !_.isUndefined(minlength)) {
+            if (!err && (!_.isUndefined(maxlength) || !_.isUndefined(minlength))) {
                 err = Testeo.max({
                     attr: attr[item],
                     target: item,

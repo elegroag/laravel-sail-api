@@ -68,24 +68,17 @@ class ConyugeController extends ApplicationController
                 );
 
                 $empresa = $procesadorComando->toArray();
-                if (! isset($empresa['data'])) {
-                    set_flashdata('error', [
-                        'msj' => 'Error al acceder al servicio de consulta de empresa.',
+                if (! isset($empresa['data']) || empty($empresa['data'])) {
+                    set_flashnow('notify', [
+                        'msj' => 'No se encontró información de la empresa en el sistema de subsidio. Puede continuar, pero debe afiliar trabajadores antes de registrar cónyuges.',
                         'code' => 401,
                     ]);
-
-                    return redirect()->route('principal/index');
-                    exit;
-                }
-
-                if ($empresa['data']['estado'] === 'I') {
-                    set_flashdata('error', [
-                        'msj' => 'La empresa ya no está activa para realizar afiliación de beneficiarios.',
+                    $empresa = null;
+                } elseif (($empresa['data']['estado'] ?? null) === 'I') {
+                    set_flashnow('notify', [
+                        'msj' => 'La empresa está inactiva en subsidio. Puede consultar la vista, pero no debería registrar nuevas afiliaciones de cónyuges hasta reactivar la empresa.',
                         'code' => 401,
                     ]);
-
-                    return redirect()->route('principal/index');
-                    exit;
                 }
             }
 
@@ -102,7 +95,7 @@ class ConyugeController extends ApplicationController
                 'code' => 501,
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 

@@ -55,7 +55,7 @@
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow" style="min-width: 22rem;">
                     <div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
                         <h6 class="mb-0 fw-bold">Notificaciones</h6>
-                        <span class="badge bg-primary rounded-pill" id="badgeNumNotificacionesMercurio">0 nuevas</span>
+                        <span class="badge bg-primary rounded-pill d-none" id="badgeNumNotificacionesMercurio">0 nuevas</span>
                     </div>
                     <div id="notificationListMercurio" class="notification-list" style="max-height: 300px; overflow-y: auto;">
                         <div class="px-3 py-3 text-muted small text-center">Cargando...</div>
@@ -142,9 +142,11 @@
 <script>
 (function () {
     const refreshUrl = @json(route('mercurio.notificaciones.refresh'));
+    const marcarLeidasUrl = @json(route('mercurio.notificaciones.marcar_leidas'));
     const $list = $('#notificationListMercurio');
     const $badgeRound = $('#badgeNotificacionesMercurio');
     const $badgeNum = $('#badgeNumNotificacionesMercurio');
+    const $dropdown = $('#nav-notification-mercurio');
 
     function escapeHtml(value) {
         return String(value || '')
@@ -153,6 +155,17 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+
+    function updateBadges(badgenum) {
+        const count = Number(badgenum || 0);
+        if (count > 0) {
+            $badgeNum.text(count + ' nuevas').removeClass('d-none');
+            $badgeRound.text(count).removeClass('d-none');
+        } else {
+            $badgeNum.text('0 nuevas').addClass('d-none');
+            $badgeRound.addClass('d-none');
+        }
     }
 
     function renderItem(item) {
@@ -201,20 +214,32 @@
                 $list.html(data.map(renderItem).join(''));
             }
 
-            $badgeNum.text(badgenum + ' nuevas');
-            if (badgenum > 0) {
-                $badgeRound.text(badgenum).removeClass('d-none');
-            } else {
-                $badgeRound.addClass('d-none');
-            }
+            updateBadges(badgenum);
         }).fail(function () {
             $list.html('<div class="px-3 py-3 text-muted small text-center">Error al consultar notificaciones.</div>');
+        });
+    }
+
+    function marcarLeidasYRefrescar() {
+        $.ajax({
+            url: marcarLeidasUrl,
+            type: 'POST',
+            dataType: 'json',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+        }).always(function () {
+            refreshNotificacionesMercurio();
         });
     }
 
     $(function () {
         refreshNotificacionesMercurio();
         setInterval(refreshNotificacionesMercurio, 60000);
+
+        $dropdown.on('show.bs.dropdown', function () {
+            marcarLeidasYRefrescar();
+        });
     });
 })();
 </script>

@@ -89,7 +89,7 @@ class PensionadoController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 
@@ -738,7 +738,7 @@ class PensionadoController extends ApplicationController
                     'code' => 200,
                 ]);
 
-                return redirect('principal/index');
+                return redirect()->route('principal.index');
             }
 
             throw new DebugException('No se pudo inicializar la administración de la cuenta', 301);
@@ -749,7 +749,7 @@ class PensionadoController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 }

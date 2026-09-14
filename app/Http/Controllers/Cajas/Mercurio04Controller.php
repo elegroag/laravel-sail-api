@@ -189,39 +189,60 @@ class Mercurio04Controller extends ApplicationController
 
     public function guardar(Request $request)
     {
-        DB::beginTransaction();
         try {
-            try {
-                $this->setResponse('ajax');
-                $codofi = $request->input('codofi');
-                $detalle = $request->input('detalle');
-                $principal = $request->input('principal');
-                $estado = $request->input('estado');
-                $mercurio04 = new Mercurio04;
+            $this->setResponse('ajax');
+            $codofi = $request->input('codofi');
+            $detalle = $request->input('detalle');
+            $principal = $request->input('principal');
+            $estado = $request->input('estado');
 
-                $mercurio04->setCodofi($codofi);
-                $mercurio04->setDetalle($detalle);
-                $mercurio04->setPrincipal($principal);
-                $mercurio04->setEstado($estado);
-                if (! $mercurio04->save()) {
-                    DB::rollBack();
-                }
-                DB::commit();
-                $response = [
-                    'success' => true,
-                    'msj' => 'Creacion Con Exito'
-                ];
-
-                return $this->renderObject($response);
-            } catch (DebugException $e) {
-                DB::rollBack();
+            if ($codofi === null || $codofi === '') {
+                return $this->renderObject([
+                    'flag' => false,
+                    'success' => false,
+                    'msg' => 'El campo codofi es obligatorio',
+                    'msj' => 'El campo codofi es obligatorio',
+                ]);
             }
+
+            DB::beginTransaction();
+            $mercurio04 = Mercurio04::firstOrNew(['codofi' => $codofi]);
+            $mercurio04->setCodofi($codofi);
+            $mercurio04->setDetalle($detalle);
+            $mercurio04->setPrincipal($principal);
+            $mercurio04->setEstado($estado);
+
+            if (! $mercurio04->save()) {
+                DB::rollBack();
+                throw new DebugException('Error al guardar el registro');
+            }
+
+            DB::commit();
+
+            return $this->renderObject([
+                'flag' => true,
+                'success' => true,
+                'msg' => 'Operación realizada con éxito',
+                'msj' => 'Operación realizada con éxito',
+            ]);
         } catch (DebugException $e) {
-            $response = [
+            DB::rollBack();
+
+            return $this->renderObject([
+                'flag' => false,
                 'success' => false,
-                'msj' => 'No se puede guardar/editar el Registro ' . $e->getMessage()
-            ];
-            return $this->renderObject($response);
+                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+                'msj' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->renderObject([
+                'flag' => false,
+                'success' => false,
+                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+                'msj' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+            ]);
         }
     }
 

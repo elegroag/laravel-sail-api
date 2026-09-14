@@ -74,7 +74,7 @@ class FacultativoController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 
@@ -720,7 +720,7 @@ class FacultativoController extends ApplicationController
                     'code' => 200,
                 ]);
 
-                return redirect('principal.index');
+                return redirect()->route('principal.index');
             }
         } catch (\Throwable $e) {
             $exception = $this->captureException($e, request());
@@ -729,7 +729,7 @@ class FacultativoController extends ApplicationController
                 'code' => $e->getCode(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 }

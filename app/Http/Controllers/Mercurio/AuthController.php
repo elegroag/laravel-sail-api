@@ -518,27 +518,7 @@ class AuthController extends Controller
                     throw new DebugException($message);
                 }
 
-                // Redirección según tipo
-                switch ($request->input('tipo')) {
-                    case 'T':
-                        $url = 'mercurio/principal/index';
-                        break;
-                    case 'E':
-                        $url = 'mercurio/empresa/index';
-                        break;
-                    case 'I':
-                        $url = 'mercurio/independiente/index';
-                        break;
-                    case 'O':
-                        $url = 'mercurio/pensionado/index';
-                        break;
-                    case 'F':
-                        $url = 'mercurio/facultativo/index';
-                        break;
-                    default:
-                        $url = 'mercurio/principal/index';
-                        break;
-                }
+                $url = $this->resolvePostLoginUrl((string) $request->input('tipo'));
 
                 return Inertia::location(url($url));
             } catch (ValidationException $e) {
@@ -553,6 +533,26 @@ class AuthController extends Controller
                 'tracer' => $e->render($request),
             ]);
         }
+    }
+
+    /**
+     * Destino post-login según tipo de usuario y estado en Subsidio.
+     * Empleador activo (estado_afiliado = A) va a principal; si no, a registro de empresa.
+     */
+    private function resolvePostLoginUrl(string $tipo): string
+    {
+        $estadoAfiliado = session('estado_afiliado');
+
+        return match ($tipo) {
+            'T' => 'mercurio/principal/index',
+            'E' => ($estadoAfiliado === 'A')
+                ? 'mercurio/principal/index'
+                : 'mercurio/empresa/index',
+            'I' => 'mercurio/independiente/index',
+            'O' => 'mercurio/pensionado/index',
+            'F' => 'mercurio/facultativo/index',
+            default => 'mercurio/principal/index',
+        };
     }
 
     /**
@@ -794,26 +794,7 @@ class AuthController extends Controller
         ]);
 
         $tipo = $request->input('tipo');
-        switch ($tipo) {
-            case 'T':
-                $url = 'mercurio/principal/index';
-                break;
-            case 'E':
-                $url = 'mercurio/empresa/index';
-                break;
-            case 'I':
-                $url = 'mercurio/independiente/index';
-                break;
-            case 'O':
-                $url = 'mercurio/pensionado/index';
-                break;
-            case 'F':
-                $url = 'mercurio/facultativo/index';
-                break;
-            default:
-                $url = 'mercurio/principal/index';
-                break;
-        }
+        $url = $this->resolvePostLoginUrl((string) $tipo);
 
         return Inertia::location(url($url));
     }

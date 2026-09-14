@@ -173,11 +173,18 @@ class VerifyAuthService
 
             $out = $ps->toArray();
 
+            $afiliado = null;
             $isSuccess = $out['success'] ?? null;
             if ($isSuccess) {
                 $afiliado = $out['data'] ?? null;
             }
-            $estadoAfiliado = ($afiliado) ? $afiliado['estado'] : 'I';
+            $estadoAfiliado = ($afiliado) ? ($afiliado['estado'] ?? 'I') : 'I';
+            if ($tipo === 'E') {
+                $estadoAfiliado = ($estadoAfiliado != 'I') ? 'A' : 'I';
+                if ($estadoAfiliado === 'A') {
+                    $url = '/mercurio/principal/index';
+                }
+            }
 
             if (! SessionCookies::authenticate(
                 new SessionMercurio(),

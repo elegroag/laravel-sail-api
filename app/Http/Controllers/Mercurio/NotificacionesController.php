@@ -87,6 +87,34 @@ class NotificacionesController extends ApplicationController
         return response()->json($salida);
     }
 
+    /**
+     * Marca como leídas las notificaciones pendientes del usuario (navbar).
+     */
+    public function marcarLeidas()
+    {
+        try {
+            $documento = $this->user['documento'] ?? null;
+            if (! $documento) {
+                throw new DebugException('Sesión de usuario no válida', 401);
+            }
+
+            $notificacionService = new NotificacionService;
+            $actualizadas = $notificacionService->marcarPendientesLeidasMercurio($documento);
+            $pendientes = $notificacionService->countPendientesMercurio($documento);
+
+            $salida = [
+                'success' => true,
+                'msj' => 'Notificaciones marcadas como leídas',
+                'actualizadas' => $actualizadas,
+                'badgenum' => $pendientes,
+            ];
+        } catch (Exception $e) {
+            return $this->handleException($e, request());
+        }
+
+        return response()->json($salida);
+    }
+
     public function procesarNotificacion(Request $request, Response $response)
     {
         try {

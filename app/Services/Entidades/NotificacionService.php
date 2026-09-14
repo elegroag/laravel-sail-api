@@ -62,6 +62,16 @@ class NotificacionService
             ->count();
     }
 
+    /**
+     * Marca como leídas (L) las notificaciones pendientes del afiliado Mercurio.
+     */
+    public function marcarPendientesLeidasMercurio(string|int $documento): int
+    {
+        return Notificaciones::where('user', (string) $documento)
+            ->where('estado', 'P')
+            ->update(['estado' => 'L']);
+    }
+
     public function createNotificacion($data)
     {
         $notificacion = new Notificaciones([

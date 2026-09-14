@@ -80,7 +80,7 @@ class BeneficiarioController extends ApplicationController
                         'code' => 401,
                     ]);
 
-                    return redirect('principal/index');
+                    return redirect()->route('principal.index');
                 }
 
                 if ($empresa['data']['estado'] === 'I') {
@@ -89,7 +89,7 @@ class BeneficiarioController extends ApplicationController
                         'code' => 401,
                     ]);
 
-                    return redirect('principal/index');
+                    return redirect()->route('principal.index');
                 }
             }
 
@@ -106,7 +106,7 @@ class BeneficiarioController extends ApplicationController
                 'code' => $e->getMessage(),
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 

@@ -51,6 +51,45 @@ const validaPkOpcion = (e) => {
     });
 };
 
+const renderOpcionesModal = (codofi, data, modalOpciones) => {
+    modalOpciones.show();
+    const tpl = _.template(document.getElementById('tmp_opciones').innerHTML);
+    $('#captureOpcionesbody').html(
+        tpl({
+            _collection: data || [],
+            codofi: codofi,
+        }),
+    );
+
+    $('#form_opcion :input').each(function () {
+        if (this.type !== 'button') {
+            $(this).val('');
+            $(this).attr('disabled', false);
+        }
+    });
+    $('#usuario_opt, #tipopc_opt').select2({
+        dropdownParent: $('#captureOpciones'),
+    });
+    validatorOpcion();
+};
+
+const cargarOpciones = (codofi, modalOpciones, onSuccess) => {
+    window.App.trigger('syncro', {
+        url: window.App.url(window.ServerController + '/opcion_view'),
+        data: { codofi },
+        callback: (response) => {
+            if (!response || response.success === false) {
+                return Messages.display(response?.msj || 'No se pudieron cargar las opciones', 'error');
+            }
+            renderOpcionesModal(codofi, response.data, modalOpciones);
+            if (typeof onSuccess === 'function') onSuccess(response);
+        },
+        error: (xhr) => {
+            Messages.display('Error al cargar opciones: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
+        },
+    });
+};
+
 $(function () {
     window.App.initialize();
     EventsPagination();
@@ -174,38 +213,7 @@ $(function () {
     $(document).on('click', "[data-toggle='opcion-view']", (e) => {
         e.preventDefault();
         const codofi = $(e.currentTarget).data('cid');
-        window.App.trigger('syncro', {
-            url: window.App.url(window.ServerController + '/opcion_view'),
-            data: {
-                codofi,
-            },
-            callback: (response) => {
-                if (response) {
-                    modalOpciones.show();
-                    const tpl = _.template(document.getElementById('tmp_opciones').innerHTML);
-                    $('#captureOpcionesbody').html(
-                        tpl({
-                            _collection: response.data,
-                            codofi: codofi,
-                        }),
-                    );
-
-                    $('#form_opcion :input').each(function () {
-                        if (this.type !== 'button') {
-                            $(this).val('');
-                            $(this).attr('disabled', false);
-                        }
-                    });
-                    $('#usuario_opt, #tipopc_opt').select2({
-                        dropdownParent: $('#captureOpciones'),
-                    });
-                    validatorOpcion();
-                }
-            },
-            error: (xhr) => {
-                Messages.display('Error al cargar opciones: ' + (xhr.responseJSON?.message || xhr.statusText), 'error');
-            },
-        });
+        cargarOpciones(codofi, modalOpciones);
     });
 
     $(document).on('click', "[data-toggle='ciudad-view']", (e) => {
@@ -245,7 +253,7 @@ $(function () {
             callback: (response) => {
                 if (response.success == true) {
                     Messages.display(response.msj, 'success');
-                    modalOpciones.hide();
+                    cargarOpciones(codofi, modalOpciones);
                 } else {
                     Messages.display(response.msj, 'error');
                 }
@@ -346,6 +354,7 @@ $(function () {
             callback: (response) => {
                 if (response.success) {
                     Messages.display(response.msj, 'success');
+                    cargarOpciones(codofi, modalOpciones);
                 } else {
                     Messages.display(response.msj, 'error');
                 }

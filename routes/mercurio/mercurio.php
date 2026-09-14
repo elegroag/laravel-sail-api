@@ -13,6 +13,7 @@ Route::prefix('/mercurio/notificaciones')->group(function () {
         Route::get('/index', [NotificacionesController::class, 'index'])->name('mercurio.notificaciones.index');
         Route::get('/consulta', [NotificacionesController::class, 'consulta'])->name('mercurio.notificaciones.consulta');
         Route::get('/refresh', [NotificacionesController::class, 'refresh'])->name('mercurio.notificaciones.refresh');
+        Route::post('/marcar_leidas', [NotificacionesController::class, 'marcarLeidas'])->name('mercurio.notificaciones.marcar_leidas');
         Route::post('/procesar_notificacion', [NotificacionesController::class, 'procesarNotificacion']);
     });
 });

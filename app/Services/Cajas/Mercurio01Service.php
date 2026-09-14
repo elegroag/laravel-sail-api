@@ -20,7 +20,8 @@ class Mercurio01Service
         try {
             DB::beginTransaction();
 
-            $mercurio01 = Mercurio01::first() ?? new Mercurio01;
+            $codapl = $request->input('codapl');
+            $mercurio01 = Mercurio01::find($codapl) ?? new Mercurio01;
             $mercurio01->fill($request->only([
                 'codapl',
                 'email',
@@ -35,10 +36,19 @@ class Mercurio01Service
 
             DB::commit();
 
-            return ['flag' => true, 'msg' => 'Creación Con Éxito'];
+            return [
+                'flag' => true,
+                'msg' => 'Operación realizada con éxito',
+                'msj' => 'Operación realizada con éxito',
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
-            return ['flag' => false, 'msg' => 'No se puede guardar/editar el Registro: ' . $e->getMessage()];
+
+            return [
+                'flag' => false,
+                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+                'msj' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+            ];
         }
     }
 

@@ -170,12 +170,20 @@ const Testeo = (() => {
     };
 
     const maxSize = (transfer = {}) => {
-        const { attr, target, max = 225, out = false, label = '' } = transfer;
-        if (!_.isUndefined(attr)) {
-            if (attr.toString().length > max) {
-                return showError(target, `El campo ${label} no puede tener ${max} número de caracteres.`, out);
-            }
+        const { attr, target, max = undefined, min = undefined, out = false, label = '' } = transfer;
+        if (_.isUndefined(attr) || attr === null) {
+            return false;
         }
+
+        const len = attr.toString().length;
+        if (!_.isUndefined(min) && len < min) {
+            return showError(target, `El campo ${label} debe tener al menos ${min} caracteres.`, out);
+        }
+        if (!_.isUndefined(max) && len > max) {
+            return showError(target, `El campo ${label} no puede tener más de ${max} caracteres.`, out);
+        }
+
+        return false;
     };
 
     const isDate = (transfer = {}) => {

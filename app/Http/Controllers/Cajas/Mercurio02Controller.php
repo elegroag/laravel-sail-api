@@ -154,14 +154,18 @@ class Mercurio02Controller extends ApplicationController
             }
 
             DB::commit();
-            $response = 'Operación realizada con éxito';
 
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'flag' => true,
+                'msg' => 'Operación realizada con éxito',
+            ], false);
         } catch (DebugException $e) {
             DB::rollBack();
-            $response = 'No se pudo guardar/editar el registro: ' . $e->getMessage();
 
-            return $this->renderObject($response, false);
+            return $this->renderObject([
+                'flag' => false,
+                'msg' => 'No se pudo guardar/editar el registro: '.$e->getMessage(),
+            ], false);
         }
     }
 }

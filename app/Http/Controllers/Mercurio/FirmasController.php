@@ -51,7 +51,7 @@ class FirmasController extends ApplicationController
                 'code' => $salida['code'],
             ]);
 
-            return redirect()->route('principal/index');
+            return redirect()->route('principal.index');
         }
     }
 

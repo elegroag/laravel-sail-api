@@ -58,7 +58,7 @@ class EmpresaModel extends Backbone.Model {
             digver: { required: true, minlength: 1 },
             calemp: { required: true, minlength: 1 },
             cedrep: { required: true, minlength: 6 },
-            repleg: { required: true, minlength: 6 },
+            repleg: { required: true, minlength: 6, maxlength: 80 },
             telefono: { required: true, number: true, rangelength: [7, 10] },
             celular: { required: true, minlength: 10 },
             email: { required: true, email: true },
@@ -79,7 +79,8 @@ class EmpresaModel extends Backbone.Model {
             codact: { required: true },
             tipsoc: { required: true },
             codciu: { required: true },
-            tipdoc: { required: true }
+            tipdoc: { required: true },
+            matmer: { required: false, maxlength: 12 },
         },
         messages: {
             nit: { required: 'Se requiere del campo nit' },
@@ -88,7 +89,10 @@ class EmpresaModel extends Backbone.Model {
             digver: { required: 'Se requiere del campo digito verificación' },
             calemp: { required: 'Se requiere del campo calidad empresa' },
             cedrep: { required: 'Se requiere del campo cedula' },
-            repleg: { required: 'Se requiere del campo nombre' },
+            repleg: {
+                required: 'Se requiere del campo nombre',
+                maxlength: 'El nombre del representante legal no puede exceder 80 caracteres',
+            },
             telefono: { required: 'Se requiere del campo télefono' },
             celular: { required: 'Se requiere del campo celular' },
             email: { required: 'Se requiere del campo email' },
@@ -109,7 +113,8 @@ class EmpresaModel extends Backbone.Model {
             codact: { required: 'Se requiere de la actividad económica' },
             tipsoc: { required: 'Se requiere de tipo sociedad' },
             codciu: { required: 'Se requiere la ciudad' },
-            tipdoc: { required: 'Se requiere de tipo documento empleador' }
+            tipdoc: { required: 'Se requiere de tipo documento empleador' },
+            matmer: { maxlength: 'La matrícula mercantil no puede exceder 12 caracteres' },
         },
     };
 
