@@ -8,6 +8,11 @@ import { aplicarFiltro, EventsPagination } from '../Glob/Glob';
 window.App = $App;
 let validator;
 
+const isSuccessResponse = (response) => response?.flag === true || response?.success === true;
+
+const responseMessage = (response, fallback = 'Operación realizada') =>
+    response?.msg || response?.msj || fallback;
+
 const validatorInit = () => {
     validator = $('#form').validate({
         rules: {
@@ -84,12 +89,12 @@ $(() => {
             },
             callback: (response) => {
                 loading.hide();
-                if (response.success == true) {
-                    Messages.display(response.msj, 'success');
+                if (isSuccessResponse(response)) {
+                    Messages.display(responseMessage(response, 'El registro se completo con éxito.'), 'success');
                     modalCapture.hide();
                     aplicarFiltro();
                 } else {
-                    Messages.display(response.msj, 'error');
+                    Messages.display(responseMessage(response, 'No se pudo guardar el registro'), 'error');
                 }
             },
         });
@@ -119,11 +124,11 @@ $(() => {
                         tipsoc: tipsoc,
                     },
                     callback: (response) => {
-                        if (response.success == true) {
-                            Messages.display(response.msj, 'success');
+                        if (isSuccessResponse(response)) {
+                            Messages.display(responseMessage(response, 'El registro se borro con éxito.'), 'success');
                             aplicarFiltro();
                         } else {
-                            Messages.display(response.msj, 'error');
+                            Messages.display(responseMessage(response, 'No se pudo borrar el registro'), 'error');
                         }
                     },
                 });

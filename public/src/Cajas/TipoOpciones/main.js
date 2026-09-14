@@ -100,10 +100,7 @@ $(() => {
                     const tpl = _.template(document.getElementById('tmp_form').innerHTML);
                     $('#captureModalbody').html(tpl(response.data));
                     validatorInit();
-
-                    $('#tipopc_edit').val(response.data.tipopc || '');
-                    $('#detalle_edit').val(response.data.detalle || '');
-                    $('#dias_edit').val(response.data.dias || '');
+                    $('#tipopc').attr('disabled', true);
                 } else {
                     Messages.display('No se pudieron cargar los datos', 'error');
                 }
@@ -118,12 +115,16 @@ $(() => {
 		e.preventDefault();
 		if (!validator.valid()) return;
 
-		$('#form :input').each(function (elem) {
+		$('#form :input').each(function () {
 			$(this).removeAttr('disabled');
 		});
 		  window.App.trigger('syncro', {
             url: window.App.url(window.ServerController +'/guardar'),
-			data: $('#form').serialize(),
+			data: {
+				tipopc: $('#tipopc').val(),
+				detalle: $('#detalle').val(),
+				dias: $('#dias').val(),
+			},
             callback: (response) => {
                 if (response['flag'] == true) {
                     buscar();

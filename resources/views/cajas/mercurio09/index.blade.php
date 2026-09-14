@@ -76,15 +76,15 @@
         <form id="form" class="validation_form" autocomplete="off" novalidate>
             <div class="form-group">
                 <label for="tipopc" class="form-control-label">Tipo</label>
-                <input type="text" id="tipopc" class="form-control" placeholder="Tipo" value="<%= tipopc %>">
+                <input type="text" id="tipopc" name="tipopc" class="form-control" placeholder="Tipo" value="<%= tipopc %>">
             </div>
             <div class="form-group">
                 <label for="detalle" class="form-control-label">Detalle</label>
-                <input type="text" id="detalle" class="form-control" placeholder="Detalle" value="<%= detalle %>">
+                <input type="text" id="detalle" name="detalle" class="form-control" placeholder="Detalle" value="<%= detalle %>">
             </div>
             <div class="form-group">
                 <label for="dias" class="form-control-label">Dias</label>
-                <input type="number" id="dias" class="form-control" placeholder="Dias" value="<%= dias %>">
+                <input type="number" id="dias" name="dias" class="form-control" placeholder="Dias" value="<%= dias %>">
             </div>
         </form>
     </script>
