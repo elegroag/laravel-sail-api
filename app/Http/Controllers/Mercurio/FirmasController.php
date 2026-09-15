@@ -153,7 +153,7 @@ class FirmasController extends ApplicationController
             $extension = $file->getClientOriginalExtension();
             $name = strtoupper(uniqid('TMP_')) . '_' . time() . '.' . $extension;
 
-            $dir = public_path('temp');
+            $dir = storage_path('temp');
             if (! is_dir($dir)) {
                 @mkdir($dir, 0775, true);
             }
@@ -164,16 +164,31 @@ class FirmasController extends ApplicationController
                 throw new DebugException('No existe firma registrada para el usuario.', 404);
             }
 
-            $pdf = $dir . DIRECTORY_SEPARATOR . $name;
             $cifrarDocumento = new CifrarDocumento;
-            $out = $cifrarDocumento->comprobar($pdf, $mfirma->getKeypublic());
+            $out = $cifrarDocumento->comprobar($name, $mfirma->getKeypublic());
+
+            $hasFirma = (bool) ($out['hasFirma'] ?? false);
+            $isValid = (bool) ($out['isValid'] ?? false);
+            $numFirmas = (int) ($out['numFirmas'] ?? 0);
+
+            if (! $hasFirma) {
+                $msj = 'El documento no posee firma digital.';
+            } elseif ($isValid) {
+                $msj = $numFirmas > 1
+                    ? "El documento posee firma digital ({$numFirmas}) y es válido: se comprobó la autenticidad del contenido."
+                    : 'El documento posee firma digital y es válido: se comprobó la autenticidad del contenido.';
+            } else {
+                $msj = $numFirmas > 1
+                    ? "El documento posee firma digital ({$numFirmas}), pero no es válida para su clave pública o el contenido fue modificado."
+                    : 'El documento posee firma digital, pero no es válida para su clave pública o el contenido fue modificado.';
+            }
 
             $response = [
                 'success' => true,
-                'isValid' => ($out) ? true : false,
-                'msj' => ($out)
-                    ? 'El documento es válido, se ha comprobado la autenticidad del contenido del documento.'
-                    : 'El documento no es válido, el documento se ha modificado y no es auténtico.',
+                'hasFirma' => $hasFirma,
+                'isValid' => $isValid,
+                'numFirmas' => $numFirmas,
+                'msj' => $msj,
             ];
             DB::commit();
         } catch (\Throwable $e) {

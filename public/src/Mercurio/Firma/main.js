@@ -93,11 +93,13 @@ import { $App } from '@/App';
                         formData.append('file', prepareFiles[cid]);
 
                         $App.trigger('upload', {
-                            url: $App.url('valida_firma', 'mercurio/firmas'),
+                            url: $App.url('firmas/valida_firma'),
                             data: formData,
                             callback: (response) => {
                                 if (response.success == true) {
-                                    if (response.isValid == true) {
+                                    if (response.hasFirma == false) {
+                                        $App.trigger('alert:warning', { message: response.msj });
+                                    } else if (response.isValid == true) {
                                         $App.trigger('alert:success', { message: response.msj });
                                     } else {
                                         $App.trigger('alert:warning', { message: response.msj });

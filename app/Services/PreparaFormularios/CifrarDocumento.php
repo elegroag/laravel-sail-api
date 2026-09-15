@@ -135,9 +135,9 @@ class CifrarDocumento
      *
      * @author elegroag <elegroag@ibero.edu.co>
      *
-     * @param  string  $pdf
+     * @param  string  $filename
      * @param  string  $strClavePublica
-     * @return int
+     * @return array{hasFirma: bool, isValid: bool, numFirmas: int}
      */
     public function comprobar($filename, $strClavePublica)
     {
@@ -151,67 +151,59 @@ class CifrarDocumento
 
         $keyClavePublica = null;
         try {
-            // Leer el contenido del archivo PDF
             $contenidoPDF = file_get_contents($this->storagePath . $filename);
             if ($contenidoPDF === false) {
                 throw new DebugException('No se pudo leer el archivo PDF para verificar.', 500);
             }
 
             $len = strlen($contenidoPDF);
-            if ($len < $tamanioFirma) {
-                // Archivo demasiado pequeño para contener firma(s)
-                return 0;
+            if ($len < ($tamanioFirma + $sufijoLen)) {
+                return [
+                    'hasFirma' => false,
+                    'isValid' => false,
+                    'numFirmas' => 0,
+                ];
             }
 
-            // Detectar marcador de cantidad de firmas en los últimos 10 caracteres
             $tail10 = substr($contenidoPDF, -$sufijoLen);
             $tieneMarcador = (strpos($tail10, '#[num:') !== false);
 
-            $numFirmas = 1;
-            $contenidoBase = $contenidoPDF;
-            $bloqueFirmas = '';
-
-            if ($tieneMarcador) {
-                // Estructura esperada: [contenidoBase][firmas...][#[num:NNN]]
-                // Extraer NNN
-                $pos = strpos($tail10, '#[num:');
-                $nnn = substr($tail10, $pos + 6, 3);
-                if (! ctype_digit($nnn) || (int) $nnn <= 0) {
-                    throw new DebugException('Marcador de firmas inválido en el PDF.', 500);
-                }
-                $numFirmas = (int) $nnn;
-
-                $bytesFirmas = $numFirmas * $tamanioFirma;
-                $recorte = $bytesFirmas + $sufijoLen;
-
-                if ($len < $recorte) {
-                    throw new DebugException('El tamaño del PDF no coincide con el bloque de firmas indicado.', 500);
-                }
-
-                // Extraer bloque de firmas y contenido base
-                $bloqueFirmas = substr($contenidoPDF, -$recorte, $bytesFirmas);
-                $contenidoBase = substr($contenidoPDF, 0, -$recorte);
-            } else {
-                // Compatibilidad: documentos antiguos con una firma sin marcador (no esperado por el método cifrar actual)
-                $bloqueFirmas = substr($contenidoPDF, -$tamanioFirma, $tamanioFirma);
-                $contenidoBase = substr($contenidoPDF, 0, -$tamanioFirma);
-                $numFirmas = 1;
+            if (! $tieneMarcador) {
+                return [
+                    'hasFirma' => false,
+                    'isValid' => false,
+                    'numFirmas' => 0,
+                ];
             }
 
-            // Cargar la clave pública del firmante
+            $pos = strpos($tail10, '#[num:');
+            $nnn = substr($tail10, $pos + 6, 3);
+            if (! ctype_digit($nnn) || (int) $nnn <= 0) {
+                throw new DebugException('Marcador de firmas inválido en el PDF.', 500);
+            }
+            $numFirmas = (int) $nnn;
+
+            $bytesFirmas = $numFirmas * $tamanioFirma;
+            $recorte = $bytesFirmas + $sufijoLen;
+
+            if ($len < $recorte) {
+                throw new DebugException('El tamaño del PDF no coincide con el bloque de firmas indicado.', 500);
+            }
+
+            $bloqueFirmas = substr($contenidoPDF, -$recorte, $bytesFirmas);
+            $contenidoBase = substr($contenidoPDF, 0, -$recorte);
+
             $keyClavePublica = openssl_pkey_get_public($strClavePublica);
             if ($keyClavePublica === false) {
                 throw new DebugException('No se pudo cargar la clave pública.', 500);
             }
 
-            // Verificar cada firma de 256 bytes contra el mismo contenido base
-            // Orden en $bloqueFirmas: firma1|firma2|...|firmaN
-            $validaAlguna = 0;
+            $validaAlguna = false;
             for ($i = 0; $i < $numFirmas; $i++) {
                 $offset = $i * $tamanioFirma;
                 $firmaDigital = substr($bloqueFirmas, $offset, $tamanioFirma);
                 if ($firmaDigital === false || strlen($firmaDigital) !== $tamanioFirma) {
-                    continue; // inconsistencia, ignorar este slot
+                    continue;
                 }
 
                 $resultado = openssl_verify($contenidoBase, $firmaDigital, $keyClavePublica, $this->algoritmo);
@@ -220,16 +212,18 @@ class CifrarDocumento
                     throw new DebugException('Error de verificación OpenSSL. ' . ($err ? ('OpenSSL: ' . $err) : ''), 500);
                 }
                 if ($resultado === 1) {
-                    $validaAlguna = 1;
-                    // No rompemos el bucle para permitir consistencia de verificación completa si se desea
+                    $validaAlguna = true;
                 }
             }
 
-            return $validaAlguna; // 1 si alguna firma coincide, 0 si ninguna
+            return [
+                'hasFirma' => true,
+                'isValid' => $validaAlguna,
+                'numFirmas' => $numFirmas,
+            ];
         } catch (\Throwable $e) {
             throw new DebugException('Error comprobando/verificando la firma: ' . $e->getMessage(), 500, $e);
         } finally {
-            // Liberar la referencia de la clave pública (openssl_free_key deprecated en PHP 8+)
             $keyClavePublica = null;
         }
     }
