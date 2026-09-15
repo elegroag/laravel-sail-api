@@ -250,7 +250,7 @@
                                 <div class="col-12">
                                     <div class='form-group' group-for='biodesco' style="display:inline-block;">
                                         <div class="form-check form-check-inline mt-2">
-                                            <label class="form-check-label mt-0 mr-3" for="flexRadioDefault1">
+                                            <label class="form-check-label mt-0 mr-3" for="biodesco1">
                                                 Marcar sí desconoce la ubicación padre/madre biológico?
                                             </label>
                                             <input
@@ -264,7 +264,7 @@
                                                 value="S"
                                                 style="accent-color: #0d6efd; box-shadow: 0 0 8px rgba(13, 110, 253, 0.6); transform: scale(1.3); cursor: pointer;">
                                         </div>
-                                        <label toggle-error="biodesco" id="biodesco-error" class="error" for="biodesco" style="display: none;"></label>
+                                        <label toggle-error="biodesco" id="biodesco-error" class="error" for="biodesco1" style="display: none;"></label>
 
                                     </div>
                                 </div>

@@ -30,7 +30,7 @@ export class FormBeneficiarioView extends FormView {
             'change.select2 #convive': 'changeConvive',
             'change #parent': 'changeParent',
             'change #peretn': 'changePeretn',
-            "click [name='biodesco']": 'changeBiodesco',
+            "change [name='biodesco']": 'changeBiodesco',
             'change #tippag': 'changeTippag',
             'click #btEnviarRadicado': 'enviarRadicado',
             'focusout #cedtra': 'validaTrabajador',
@@ -77,14 +77,16 @@ export class FormBeneficiarioView extends FormView {
             }
 
             if (this.model.get('biodesco') == 'S') {
-                this.form.find('#biodesco').prop('checked', true);
+                this.$el.find('#biodesco1').prop('checked', true);
                 this.$el.find('.s-bio-desco').addClass('d-none');
             } else {
+                this.$el.find('#biodesco1').prop('checked', false);
                 this.$el.find('.s-bio-desco').removeClass('d-none');
             }
 
             if (this.model.get('parent') == '1') this.$el.find('#show_mother').removeClass('d-none');
             this.__hasBiologico(this.model.get('parent') == '1' || this.model.get('parent') == '4');
+            this.applyBiodescoRules();
 
             this.$el.find("[name='biourbana'][value='N']").attr('checked', this.model.get('biourbana') == 'N');
             this.$el.find("[name='biourbana'][value='S']").attr('checked', this.model.get('biourbana') != 'N');
@@ -128,7 +130,7 @@ export class FormBeneficiarioView extends FormView {
 
             setTimeout(() => this.form.valid(), 200);
         } else {
-            this.$el.find("[name='biodesco'][value='N']").attr('checked', 'true');
+            this.$el.find('#biodesco1').prop('checked', false);
             this.$el.find("[name='biourbana'][value='S']").attr('checked', 'true');
             this.$el.find('#peretn').val('7');
             this.$el.find('.show-peretn').addClass('d-none');
@@ -275,7 +277,7 @@ export class FormBeneficiarioView extends FormView {
 
         const entity = this.serializeModel(new BeneficiarioModel());
 
-        entity.set('biodesco', this.$el.find("[name='biodesco']:checked").val());
+        entity.set('biodesco', this.$el.find('#biodesco1').is(':checked') ? 'S' : 'N');
         entity.set('biourbana', this.$el.find("[name='biourbana']:checked").val());
 
         if (entity.isValid() === false) {
@@ -418,6 +420,7 @@ export class FormBeneficiarioView extends FormView {
         if (parent == '1' || parent == '4') {
             this.$el.find('#show_mother').removeClass('d-none');
             this.__hasBiologico(true);
+            this.applyBiodescoRules();
             this.__changeTipHijo(true);
             this.__enableNormal(parent == '1');
             this.__enableCustodia(parent == '4');
@@ -465,34 +468,38 @@ export class FormBeneficiarioView extends FormView {
         }
     }
 
-    changeBiodesco(e) {
-        const biodesco = this.$el.find("[name='biodesco']:checked").val();
-        if (biodesco == 'S') {
+    changeBiodesco() {
+        this.applyBiodescoRules();
+    }
+
+    applyBiodescoRules() {
+        const biodesco = this.$el.find('#biodesco1').is(':checked');
+        const showBiologico = !this.$el.find('.show-biologico').hasClass('d-none');
+
+        if (biodesco) {
             this.$el.find('.s-bio-desco').addClass('d-none');
             BeneficiarioModel.changeRulesProperty([
                 { rule: 'biocodciu', prop: 'required', value: false },
                 { rule: 'biodire', prop: 'required', value: false },
-                { rule: 'biocedu', prop: 'required', value: false },
-                { rule: 'biotipdoc', prop: 'required', value: false },
-                { rule: 'bioprinom', prop: 'required', value: false },
-                { rule: 'biopriape', prop: 'required', value: false },
                 { rule: 'bioemail', prop: 'required', value: false },
                 { rule: 'biophone', prop: 'required', value: false },
             ]);
+
+            this.$el.find('#biodire, #bioemail, #biophone').val('');
+            if (this.#choiceComponents['biocodciu']) {
+                this.#choiceComponents['biocodciu'].removeActiveItems();
+            }
         } else {
             BeneficiarioModel.changeRulesProperty([
-                { rule: 'biocodciu', prop: 'required', value: true },
-                { rule: 'biodire', prop: 'required', value: true },
-                { rule: 'biocedu', prop: 'required', value: true },
-                { rule: 'bioprinom', prop: 'required', value: true },
-                { rule: 'biopriape', prop: 'required', value: true },
-                { rule: 'biotipdoc', prop: 'required', value: true },
+                { rule: 'biocodciu', prop: 'required', value: showBiologico },
+                { rule: 'biodire', prop: 'required', value: showBiologico },
+                { rule: 'bioemail', prop: 'required', value: showBiologico },
+                { rule: 'biophone', prop: 'required', value: showBiologico },
             ]);
 
-            const cedcon = this.$el.find('#cedcon').val();
-            this.$el.find('#biocedu').val(cedcon ? cedcon : '');
-            this.$el.find('#biocedu').trigger('focus');
-            this.$el.find('.s-bio-desco').removeClass('d-none');
+            if (showBiologico) {
+                this.$el.find('.s-bio-desco').removeClass('d-none');
+            }
         }
     }
 

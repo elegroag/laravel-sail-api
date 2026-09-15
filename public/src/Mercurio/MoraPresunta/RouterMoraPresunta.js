@@ -8,24 +8,14 @@ class RouterMoraPresunta extends Backbone.Router {
 			...options,
 			routes: {
 				list: 'renderDefault',
-				'list/:sucursal': 'renderBySucursal',
-				'list/:sucursal/:periodo': 'renderBySucursalPeriodo',
+				'list/:sucursal': 'renderDefault',
+				'list/:sucursal/:periodo': 'renderDefault',
 			},
 		});
 
 		this.App = options.App || window.App;
 		this.currentApp = this.App.startSubApplication(MoraPresuntaApp);
 		this._bindRoutes();
-	}
-
-	async renderBySucursalPeriodo(sucursalId, periodo) {
-		await this.#loadData();
-		this.currentApp.execute(sucursalId, periodo);
-	}
-
-	async renderBySucursal(sucursalId) {
-		await this.#loadData();
-		this.currentApp.execute(sucursalId);
 	}
 
 	async renderDefault() {

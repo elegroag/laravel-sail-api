@@ -322,22 +322,8 @@ class ConsultasEmpresaController extends ApplicationController
     {
         try {
             $nit = $this->user['documento'];
-            $ps = new ApiSubsidio;
-            $ps->send([
-                'servicio' => 'AportesEmpresas',
-                'metodo' => 'mora_presunta_by_nit',
-                'params' => [
-                    'nit' => $nit,
-                ],
-            ]);
 
-            $out = $ps->toArray();
-            if (! $out['success']) {
-                throw new DebugException($out['msj']);
-            }
-            $moras = $out['data']['moras'];
-            $periodos = $out['data']['periodos'];
-
+            // 1) Sucursales activas e inactivas de la empresa
             $ps = new ApiSubsidio;
             $ps->send([
                 'servicio' => 'ComfacaEmpresas',
@@ -351,16 +337,72 @@ class ConsultasEmpresaController extends ApplicationController
             if (! $out['success']) {
                 throw new DebugException($out['msj']);
             }
+            $sucursales = $out['data'] ?? [];
 
-            $sucursales = $out['data'];
+            // 2) Cartera agregada por sucursal/periodo (subsi172 pago=N)
+            $ps = new ApiSubsidio;
+            $ps->send([
+                'servicio' => 'AportesEmpresas',
+                'metodo' => 'cartera_mora_presunta_by_nit',
+                'params' => [
+                    'nit' => $nit,
+                ],
+            ]);
+
+            $out = $ps->toArray();
+            if (! $out['success']) {
+                throw new DebugException($out['msj']);
+            }
+
+            $cartera = $out['data']['cartera'] ?? [];
+            $periodos = $out['data']['periodos'] ?? [];
+            $detalle = $out['data']['detalle'] ?? [];
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'cartera' => $moras,
-                    'periodos' => $periodos,
                     'sucursales' => $sucursales,
+                    'cartera' => $cartera,
+                    'periodos' => $periodos,
+                    'detalle' => $detalle,
                 ],
+            ]);
+        } catch (\Throwable $e) {
+            return $this->handleException($e, request());
+        }
+    }
+
+
+    public function moraPresuntaDetalle(\Illuminate\Http\Request $request)
+    {
+        try {
+            $nit = $this->user['documento'];
+            $codsuc = $request->input('codsuc');
+            $periodo = $request->input('periodo');
+
+            if (! $codsuc || ! $periodo) {
+                throw new DebugException('Sucursal y periodo son requeridos.');
+            }
+
+            $ps = new ApiSubsidio;
+            $ps->send([
+                'servicio' => 'AportesEmpresas',
+                'metodo' => 'detalle_cartera_mora_presunta',
+                'params' => [
+                    'nit' => $nit,
+                    'codsuc' => $codsuc,
+                    'periodo' => $periodo,
+                ],
+            ]);
+
+            $out = $ps->toArray();
+            if (! $out['success']) {
+                throw new DebugException($out['msj']);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $out['data'],
             ]);
         } catch (\Throwable $e) {
             return $this->handleException($e, request());

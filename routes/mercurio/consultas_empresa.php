@@ -24,6 +24,7 @@ Route::middleware(['mercurio.auth'])->group(function () {
         Route::post('/consulta_giro', [ConsultasEmpresaController::class, 'consultaGiro']);
         Route::post('/consulta_trabajadores', [ConsultasEmpresaController::class, 'consultaTrabajadores']);
         Route::post('/mora_presunta', [ConsultasEmpresaController::class, 'moraPresunta']);
+        Route::post('/mora_presunta_detalle', [ConsultasEmpresaController::class, 'moraPresuntaDetalle']);
         Route::post('/certificado_afiliacion', [ConsultasEmpresaController::class, 'certificadoAfiliacion']);
         Route::post('/certificado_para_trabajador', [ConsultasEmpresaController::class, 'certificadoParaTrabajador']);
         Route::post('/consulta_nucleo', [ConsultasEmpresaController::class, 'consultaNucleo']);
