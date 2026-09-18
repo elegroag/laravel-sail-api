@@ -7,6 +7,7 @@ use App\Library\Collections\ParamsEmpresa;
 use App\Models\Gener18;
 use App\Services\Api\ApiPython;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class EmpresasDocuments
@@ -89,16 +90,20 @@ class EmpresasDocuments
             ...$this->empresa->toArray(),
         ];
 
-        $ps = new ApiPython();
-        $ps->send([
+        $payload = [
             'servicio' => 'Python',
             'metodo' => 'genera-consolidado-pdf',
             'params' => [
                 'templates' => $this->params['templates'],
                 'output' => $this->params['output'],
                 'context' => $context,
-            ]
-        ]);
+            ],
+        ];
+
+        Log::info('EmpresasDocuments: payload API PDF', $payload);
+
+        $ps = new ApiPython();
+        $ps->send($payload);
 
         if ($ps->isJson() == false) {
             throw new DebugException("Error el response JSON del service PDF no es valido.");

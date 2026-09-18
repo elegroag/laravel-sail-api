@@ -70,7 +70,6 @@ class CertificadosServices
      */
     public function showTabla($paginate)
     {
-        $mercurio01 = Mercurio01::first();
         $this->table->set_template(Table::TmpGeneral());
 
         $this->table->set_heading(
@@ -99,11 +98,8 @@ class CertificadosServices
                 }
                 $id = $entity->getId();
 
-                $archivoDescarga = $this->nombreArchivoDescarga($entity);
                 $this->table->add_row(
-                    "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>".
-                        "<a data-cid='{$id}' data-toggle='file' class='btn btn-xs btn-success text-white' data-path='{$mercurio01->getPath()}' data-file='{$archivoDescarga}'>".
-                        "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span></a>",
+                    "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>",
                     "<i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span>",
                     $entity->getCedtra().' | '.$entity->getNombre(),
                     $entity->getFecha(),
