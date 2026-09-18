@@ -99,9 +99,10 @@ class CertificadosServices
                 }
                 $id = $entity->getId();
 
+                $archivoDescarga = $this->nombreArchivoDescarga($entity);
                 $this->table->add_row(
                     "<a data-cid='{$id}' data-toggle='info' class='btn btn-xs btn-primary text-white' title='Info'> <i class='fas fa-hand-point-up text-white'></i></a>".
-                        "<a data-cid='{$id}' data-toggle='file' class='btn btn-xs btn-success text-white' data-path='{$mercurio01->getPath()}' data-file='{$entity->getArchivo()}'>".
+                        "<a data-cid='{$id}' data-toggle='file' class='btn btn-xs btn-success text-white' data-path='{$mercurio01->getPath()}' data-file='{$archivoDescarga}'>".
                         "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span></a>",
                     "<i class='fas fa-bell' style='color:{$style}'></i> <span class='text-nowrap'>{$dias_vencidos}</span>",
                     $entity->getCedtra().' | '.$entity->getNombre(),
@@ -284,15 +285,29 @@ class CertificadosServices
     public function adjuntos($mercurio45)
     {
         $path = Mercurio01::first()->getPath();
+        $archivoDescarga = $this->nombreArchivoDescarga($mercurio45);
         $adjuntos = '';
         $adjuntos .= "<div class='col-md-4 mb-2 shw-adjuntos'>";
-        $adjuntos .= "<button class='btn-icon btn-block btn-outline-default' type='button' data-toggle='adjunto' data-path='{$path}' data-file='{$mercurio45->getArchivo()}' >";
+        $adjuntos .= "<button class='btn-icon btn-block btn-outline-default' type='button' data-toggle='adjunto' data-path='{$path}' data-file='{$archivoDescarga}' >";
         $adjuntos .= "<span class='btn-inner--icon'><i class='fas fa-file-download'></i></span>";
         $adjuntos .= "<span class='btn-inner--text'>{$mercurio45->getNomcer()}</span>";
         $adjuntos .= '</button>';
         $adjuntos .= '</div>';
 
         return $adjuntos;
+    }
+
+    /**
+     * Nombre físico esperado en storage/temp para descarga desde Cajas.
+     */
+    private function nombreArchivoDescarga($mercurio45): string
+    {
+        $ruuid = trim((string) ($mercurio45->getRuuid() ?? ''));
+        if ($ruuid !== '') {
+            return $ruuid . '.pdf';
+        }
+
+        return (string) ($mercurio45->getArchivo() ?? '');
     }
 
     /**

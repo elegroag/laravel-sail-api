@@ -20,11 +20,10 @@ use App\Models\Mercurio34;
 use App\Models\Mercurio38;
 use App\Models\Mercurio41;
 use App\Models\Mercurio47;
-use App\Services\SftpTools\SftpClisisu;
-use App\Services\SftpTools\SftpService;
 use App\Services\Utils\GeneralService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PrincipalController extends Controller
 {
@@ -283,38 +282,82 @@ class PrincipalController extends Controller
 
     public function fileExisteGlobal(Request $request)
     {
-        $file = $request->input('file');
-        $id = $request->input('id');
-        $coddoc = $request->input('coddoc');
+        try {
+            $file = $request->input('file');
+            $id = $request->input('id');
+            $coddoc = $request->input('coddoc');
 
-        $archivo = base64_decode($file);
-        $fichero = storage_path('temp/' . $archivo);
-        if (file_exists($fichero)) {
-            return response()->file($fichero, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="' . $file . '"',
+            Log::info('file_existe_global: inicio', [
+                'file_b64' => $file,
+                'id' => $id,
+                'coddoc' => $coddoc,
             ]);
-        } else {
-            $this->buscarArchivoSftp($archivo);
-            if (file_exists($fichero)) {
-                return response()->file($fichero, [
-                    'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'inline; filename="' . $file . '"',
-                ]);
-            } else {
+
+            if (! $file) {
+                Log::warning('file_existe_global: file vacío o ausente');
+
                 return response()->json([
                     'success' => false,
-                    'msj' => 'Archivo no encontrado ' . $archivo,
-                    'path' => $fichero
+                    'msj' => 'Parámetro file requerido',
+                ], 422);
+            }
+
+            $archivo = base64_decode($file, true);
+            if ($archivo === false || $archivo === '') {
+                Log::warning('file_existe_global: base64 inválido', [
+                    'file_b64' => $file,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'msj' => 'Nombre de archivo inválido (base64)',
+                ], 422);
+            }
+
+            $archivo = basename($archivo);
+            $fichero = storage_path('temp/' . $archivo);
+
+            Log::info('file_existe_global: path resuelto', [
+                'archivo' => $archivo,
+                'fichero' => $fichero,
+                'exists' => file_exists($fichero),
+            ]);
+
+            if (file_exists($fichero)) {
+                Log::info('file_existe_global: archivo local encontrado', [
+                    'fichero' => $fichero,
+                    'size' => @filesize($fichero),
+                ]);
+
+                return response()->file($fichero, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $archivo . '"',
                 ]);
             }
-        }
-    }
 
-    function buscarArchivoSftp($filename)
-    {
-        $file = $filename;
-        $sftp = new SftpService(new SftpClisisu());
-        $sftp->download($file, storage_path('temp/' . $file));
+            Log::warning('file_existe_global: archivo no encontrado', [
+                'archivo' => $archivo,
+                'fichero' => $fichero,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'msj' => 'Archivo no encontrado ' . $archivo,
+                'path' => $fichero,
+            ], 404);
+        } catch (\Throwable $e) {
+            Log::error('file_existe_global: excepción', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->only(['file', 'id', 'coddoc']),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'msj' => 'Error al obtener el archivo: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
