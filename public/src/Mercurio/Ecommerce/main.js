@@ -13,7 +13,10 @@
  */
 import store from './store.js';
 import { obtenerCodben } from './utils.js';
-import { limpiarSeleccionServicio } from './panelCompra.js';
+import {
+    limpiarSeleccionServicio,
+    quitarItemCompra,
+} from './panelCompra.js';
 import {
     esVistaMovil,
     restaurarPanelAlSlot,
@@ -39,6 +42,14 @@ function bindHandlers() {
     $('#btn_cancelar_resumen_compra').on('click', function (e) {
         e.preventDefault();
         limpiarSeleccionServicio();
+    });
+
+    $(document).on('click', '.btn-quitar-item', function (e) {
+        e.preventDefault();
+        var codben = $(this).data('codben');
+        if (codben) {
+            quitarItemCompra(String(codben));
+        }
     });
 
     $('#modal_resumen_compra').on('hidden.bs.modal', function () {

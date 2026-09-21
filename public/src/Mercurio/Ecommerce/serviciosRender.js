@@ -7,7 +7,7 @@ import store from './store.js';
 import { escapeHtml, mostrarLoader, ocultarLoader } from './utils.js';
 import { servicioPasaFiltros, poblarFiltroCodser } from './serviciosFiltros.js';
 import { limpiarSeleccionServicio } from './panelCompra.js';
-import { validarTarifa } from './tarifa.js';
+import { validarTarifa, revalidarItemsConServicio } from './tarifa.js';
 
 export function contarServiciosDisponibles(servicios, query, codser) {
     var count = 0;
@@ -88,7 +88,11 @@ export function filtrarServicios() {
     var query = $('#buscar_servicio').val().trim();
     var codser = $('#filtro_codser').val();
 
-    if (store.servicioSeleccionado && !servicioPasaFiltros(store.servicioSeleccionado, query, codser)) {
+    if (
+        store.servicioSeleccionado &&
+        !(store.items && store.items.length > 0) &&
+        !servicioPasaFiltros(store.servicioSeleccionado, query, codser)
+    ) {
         limpiarSeleccionServicio();
     }
 
@@ -135,9 +139,36 @@ export function cargarServicios() {
 }
 
 export function seleccionarServicio(srv) {
-    var codben = $('#hid_codben').val();
+    if (store.revalidandoServicio) {
+        return;
+    }
 
+    var mismoServicio = store.servicioSeleccionado
+        && String(store.servicioSeleccionado.codser) === String(srv.codser)
+        && String(store.servicioSeleccionado.numero) === String(srv.numero);
+
+    if (mismoServicio) {
+        return;
+    }
+
+    var itemsPrevios = (store.items || []).slice();
+    var cardKey = srv.codser + '|' + srv.numero;
+
+    store.servicioSeleccionado = srv;
+    $('.servicio-card').removeClass('servicio-card--selected');
+    $('.servicio-card[data-key="' + cardKey + '"]').addClass('servicio-card--selected');
+    $('#detalle_tarifa').hide();
+    $('#error_tarifa').hide();
+
+    if (itemsPrevios.length > 0) {
+        revalidarItemsConServicio(srv, itemsPrevios);
+        return;
+    }
+
+    var codben = $('#hid_codben').val();
     if (!codben || !store.beneficiarioSeleccionado) {
+        store.servicioSeleccionado = null;
+        $('.servicio-card--selected').removeClass('servicio-card--selected');
         Swal.fire({
             title: 'Atención',
             text: 'Debe seleccionar un beneficiario antes de elegir un servicio.',
@@ -147,14 +178,5 @@ export function seleccionarServicio(srv) {
         return;
     }
 
-    store.servicioSeleccionado = srv;
-    var cardKey = srv.codser + '|' + srv.numero;
-
-    $('.servicio-card').removeClass('servicio-card--selected');
-    $('.servicio-card[data-key="' + cardKey + '"]').addClass('servicio-card--selected');
-
-    $('#detalle_tarifa').hide();
-    $('#error_tarifa').hide();
-
-    validarTarifa(srv.codser, srv.numero);
+    validarTarifa(srv.codser, srv.numero, codben);
 }

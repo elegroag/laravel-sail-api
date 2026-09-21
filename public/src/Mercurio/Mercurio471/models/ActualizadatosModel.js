@@ -54,7 +54,7 @@ class ActualizadatosModel extends Backbone.Model {
             razsoc: { required: true, minlength: 5 },
             sigla: { required: false },
             digver: { required: false, minlength: 1 },
-            calemp: { required: false, minlength: 1 },
+            calemp: { required: false },
             cedrep: { required: true, minlength: 6 },
             repleg: { required: true, minlength: 6 },
             telefono: { required: true, minlength: 7 },

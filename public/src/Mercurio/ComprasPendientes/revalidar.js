@@ -93,6 +93,14 @@ export function verificarPago(precompra) {
 
 function registrarVentaPendiente(precompra, refpago) {
     var cedtra = $('#hid_documento').val() || precompra.documento || '';
+    var items = [];
+    if (Array.isArray(precompra.items) && precompra.items.length) {
+        items = precompra.items.map(function (item) {
+            return { codben: String(item.codben || item) };
+        });
+    } else if (precompra.codben) {
+        items = [{ codben: String(precompra.codben) }];
+    }
 
     $.ajax({
         url: store.routes.guardarVenta,
@@ -105,7 +113,8 @@ function registrarVentaPendiente(precompra, refpago) {
             numero: precompra.numero,
             refpago: refpago,
             nota: precompra.nota || '',
-            codben: precompra.codben || cedtra,
+            codben: items[0] ? items[0].codben : (precompra.codben || cedtra),
+            items: items,
             precompra_id: precompra.id,
         },
     })

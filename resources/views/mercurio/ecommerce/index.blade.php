@@ -136,8 +136,10 @@
                                 </div>
 
                                 <div id="detalle_tarifa" style="display:none;">
-                                    <div class="panel-compra__valor-wrap">
-                                        <span class="panel-compra__valor-label">Valor del servicio</span>
+                                    <div id="lista_items_compra" class="panel-compra__lista-items" style="display:none;"></div>
+
+                                    <div class="panel-compra__valor-wrap panel-compra__valor-wrap--total">
+                                        <span class="panel-compra__valor-label">Total a pagar</span>
                                         <span id="txt_valor" class="panel-compra__valor"></span>
                                         <input type="hidden" id="hid_valor_raw">
                                     </div>
@@ -152,14 +154,9 @@
                                     <input type="hidden" id="txt_tarifa_cupos">
                                     <input type="hidden" id="hid_cupos_mes" value="">
 
-                                    <div class="form-group mt-3">
-                                        <label for="txt_nota" class="form-label">Nota (opcional)</label>
-                                        <textarea id="txt_nota" class="form-control" rows="2" placeholder="Escriba una nota si lo desea..."></textarea>
-                                    </div>
-
                                     <div class="panel-compra__actions mt-3">
                                         <button type="button" id="btn_cancelar_resumen_compra" class="btn panel-compra__btn-cancelar">
-                                            Cancelar
+                                            <i class="fas fa-eraser"></i> Cancelar
                                         </button>
                                         <button type="button" id="btn_procesar_pago" class="btn btn-primary btn-lg panel-compra__btn-pagar">
                                             <i class="fas fa-credit-card"></i> Procesar pago

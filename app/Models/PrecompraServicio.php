@@ -23,6 +23,7 @@ class PrecompraServicio extends Model
         'codser',
         'numero',
         'codben',
+        'items',
         'nota',
         'valor',
         'p_id_customer',
@@ -39,10 +40,37 @@ class PrecompraServicio extends Model
 
     protected $casts = [
         'valor' => 'decimal:2',
+        'items' => 'array',
         'fecha_precompra' => 'datetime',
         'fecha_pago' => 'datetime',
         'fecha_desestimacion' => 'datetime',
     ];
+
+    /**
+     * Lista normalizada de codben (items JSON o codben singular).
+     *
+     * @return list<string>
+     */
+    public function codbenList(): array
+    {
+        $items = $this->items;
+        if (is_array($items) && count($items) > 0) {
+            $list = [];
+            foreach ($items as $item) {
+                $codben = trim((string) (is_array($item) ? ($item['codben'] ?? '') : $item));
+                if ($codben !== '' && ! in_array($codben, $list, true)) {
+                    $list[] = $codben;
+                }
+            }
+            if (count($list) > 0) {
+                return $list;
+            }
+        }
+
+        $codben = trim((string) ($this->codben ?? ''));
+
+        return $codben !== '' ? [$codben] : [];
+    }
 
     public function isPendiente(): bool
     {

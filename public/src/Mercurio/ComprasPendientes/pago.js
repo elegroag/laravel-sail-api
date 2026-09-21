@@ -14,9 +14,47 @@ import {
 } from './utils.js';
 import { nombreServicio } from './datos.js';
 import { cargarDatos } from './carga.js';
+import { itemsDesdePrecompra } from './detalle.js';
+
+function itemsPayloadPrecompra(precompra) {
+    return itemsDesdePrecompra(precompra).map(function (item) {
+        var row = { codben: String(item.codben) };
+        if (item.nombre) {
+            row.nombre = item.nombre;
+        }
+        if (item.valser !== null && item.valser !== undefined) {
+            row.valser = item.valser;
+        }
+        return row;
+    });
+}
+
+function requestValidarTarifa(cedtra, precompra, codben) {
+    return new Promise(function (resolve) {
+        $.ajax({
+            url: store.routes.validarTarifa,
+            method: 'POST',
+            dataType: 'JSON',
+            cache: false,
+            data: {
+                cedtra: cedtra,
+                codser: precompra.codser,
+                numero: precompra.numero,
+                codben: codben,
+            },
+        })
+            .done(function (response) {
+                resolve(response || { success: false });
+            })
+            .fail(function () {
+                resolve({ success: false, message: 'Error de conexión al validar tarifa' });
+            });
+    });
+}
 
 export function retomarPago(precompra) {
     var cedtra = $('#hid_documento').val();
+    var items = itemsPayloadPrecompra(precompra);
 
     if (!esCheckoutV2() && typeof ePayco === 'undefined') {
         Swal.fire({
@@ -38,6 +76,10 @@ export function retomarPago(precompra) {
         return;
     }
 
+    if (!items.length) {
+        items = [{ codben: String(precompra.codben || cedtra) }];
+    }
+
     Swal.fire({
         title: 'Validando tarifa...',
         text: 'Consultando la disponibilidad y el valor vigente del servicio.',
@@ -46,25 +88,24 @@ export function retomarPago(precompra) {
         allowOutsideClick: false,
     });
 
-    $.ajax({
-        url: store.routes.validarTarifa,
-        method: 'POST',
-        dataType: 'JSON',
-        cache: false,
-        data: {
-            cedtra: cedtra,
-            codser: precompra.codser,
-            numero: precompra.numero,
-            codben: precompra.codben || cedtra,
-        },
-    })
-        .done(function (response) {
-            if (!response.success) {
+    var pendientes = items.slice();
+    var total = 0;
+    var cuposMes = null;
+    var fallidos = [];
+
+    function siguiente() {
+        if (pendientes.length === 0) {
+            if (fallidos.length) {
                 Swal.fire({
                     title: 'Servicio no disponible',
                     html:
-                        '<p>' +
-                        escapeHtml(response.message || 'No se pudo validar la tarifa del servicio.') +
+                        '<p>Algunos beneficiarios no cumplen con la validación vigente:</p>' +
+                        '<p style="text-align:left">' +
+                        fallidos
+                            .map(function (f) {
+                                return '• ' + escapeHtml(f.codben) + ': ' + escapeHtml(f.motivo);
+                            })
+                            .join('<br>') +
                         '</p>' +
                         '<p class="text-muted mb-0">Puede desestimar esta compra si ya no desea continuar.</p>',
                     icon: 'warning',
@@ -73,10 +114,7 @@ export function retomarPago(precompra) {
                 return;
             }
 
-            var data = response.data || {};
-            var valor = data.valser;
-
-            if (!valor || parseFloat(valor) <= 0) {
+            if (!total || total <= 0) {
                 Swal.fire({
                     title: 'Atención',
                     text: 'No se pudo obtener el valor vigente del servicio.',
@@ -86,16 +124,11 @@ export function retomarPago(precompra) {
                 return;
             }
 
-            var cuposMes = null;
-            if (data.cupos_mes !== undefined && data.cupos_mes !== null && data.cupos_mes !== '') {
-                cuposMes = parseInt(data.cupos_mes, 10) || 0;
-            }
-
-            if (cuposMes === 0) {
+            if (cuposMes === 0 || (cuposMes !== null && items.length > cuposMes)) {
                 Swal.fire({
                     title: 'Sin cupos disponibles',
                     html:
-                        '<p>No hay cupos disponibles para este servicio en el mes actual.</p>' +
+                        '<p>No hay cupos suficientes para esta compra en el mes actual.</p>' +
                         '<p class="text-muted mb-0">Puede desestimar esta compra si ya no desea continuar.</p>',
                     icon: 'warning',
                     confirmButtonText: 'Entendido',
@@ -104,19 +137,37 @@ export function retomarPago(precompra) {
             }
 
             Swal.close();
-            abrirCheckout(precompra, valor);
-        })
-        .fail(function () {
-            Swal.fire({
-                title: 'Error de conexión',
-                text: 'No se pudo validar la tarifa del servicio. Intente nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Entendido',
-            });
+            abrirCheckout(precompra, total, items);
+            return;
+        }
+
+        var item = pendientes.shift();
+        requestValidarTarifa(cedtra, precompra, item.codben).then(function (response) {
+            if (!response.success) {
+                fallidos.push({
+                    codben: item.codben,
+                    motivo: response.message || 'No cumple requisitos',
+                });
+                siguiente();
+                return;
+            }
+
+            var data = response.data || {};
+            var valser = parseFloat(data.valser) || 0;
+            total += valser;
+
+            if (data.cupos_mes !== undefined && data.cupos_mes !== null && data.cupos_mes !== '') {
+                cuposMes = parseInt(data.cupos_mes, 10) || 0;
+            }
+
+            siguiente();
         });
+    }
+
+    siguiente();
 }
 
-function abrirCheckout(precompra, valor) {
+function abrirCheckout(precompra, valor, items) {
     var cedtra = $('#hid_documento').val();
     var servicioNombre = sanitizarTexto(nombreServicio(precompra)) || 'Compra de servicio';
     var nombre = sanitizarTexto(
@@ -127,24 +178,27 @@ function abrirCheckout(precompra, valor) {
             ? store.trabajadorData.email.trim()
             : 'sin@email.com';
     var invoice = 'ORD' + Date.now();
+    var itemsPayload = items || itemsPayloadPrecompra(precompra);
+    var codbenPrimero = itemsPayload[0] ? itemsPayload[0].codben : (precompra.codben || cedtra);
 
     sessionStorage.setItem('epayco_cedtra', cedtra);
     sessionStorage.setItem('epayco_codser', String(precompra.codser));
     sessionStorage.setItem('epayco_numero', String(precompra.numero));
     sessionStorage.setItem('epayco_nota', precompra.nota || '');
-    sessionStorage.setItem('epayco_codben', precompra.codben || cedtra);
+    sessionStorage.setItem('epayco_codben', codbenPrimero);
+    sessionStorage.setItem('epayco_items', JSON.stringify(itemsPayload));
     sessionStorage.setItem('epayco_precompra_id', String(precompra.id));
     sessionStorage.setItem('epayco_p_id_customer', String(precompra.p_id_customer));
 
     if (esCheckoutV2()) {
-        abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra);
+        abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra, itemsPayload);
         return;
     }
 
-    abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra, invoice);
+    abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra, invoice, itemsPayload);
 }
 
-function abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra, invoice) {
+function abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra, invoice, itemsPayload) {
     $.ajax({
         url: store.routes.crearSesionEpayco,
         method: 'POST',
@@ -154,7 +208,8 @@ function abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra
             cedtra: cedtra,
             codser: precompra.codser,
             numero: precompra.numero,
-            codben: precompra.codben || cedtra,
+            codben: itemsPayload[0] ? itemsPayload[0].codben : (precompra.codben || cedtra),
+            items: itemsPayload,
             nota: precompra.nota || '',
             valor: valor,
             nombre_servicio: servicioNombre,
@@ -227,7 +282,7 @@ function abrirCheckoutV1(precompra, valor, servicioNombre, nombre, email, cedtra
         });
 }
 
-function abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra) {
+function abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra, itemsPayload) {
     asegurarSdkCheckoutV2(function (errSdk) {
         if (errSdk) {
             Swal.fire({
@@ -248,7 +303,8 @@ function abrirCheckoutV2(precompra, valor, servicioNombre, nombre, email, cedtra
                 cedtra: cedtra,
                 codser: precompra.codser,
                 numero: precompra.numero,
-                codben: precompra.codben || cedtra,
+                codben: itemsPayload[0] ? itemsPayload[0].codben : (precompra.codben || cedtra),
+                items: itemsPayload,
                 nota: precompra.nota || '',
                 valor: valor,
                 nombre_servicio: servicioNombre,

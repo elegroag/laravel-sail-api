@@ -7,6 +7,7 @@
 import store from './store.js';
 import { sanitizarTexto } from './utils.js';
 import { obtenerCuposMes, mostrarAlertaCuposMesCero } from './cupos.js';
+import { itemsPayload, totalItems } from './panelCompra.js';
 import {
     configurarCheckoutV1,
     esCheckoutV2,
@@ -20,7 +21,20 @@ export function procesarPago(event) {
     var target = $(event.currentTarget);
     target.attr('disabled', true);
 
-    var valor = $('#hid_valor_raw').val();
+    var items = itemsPayload();
+    if (!items.length) {
+        Swal.fire({
+            title: 'Atencion',
+            text: 'Debe agregar al menos un beneficiario al resumen',
+            icon: 'warning',
+            showConfirmButton: false,
+            timer: 3000
+        });
+        target.removeAttr('disabled');
+        return;
+    }
+
+    var valor = String(totalItems() || $('#hid_valor_raw').val() || '');
     if (!valor || parseFloat(valor) <= 0) {
         Swal.fire({
             title: 'Atencion',
@@ -40,6 +54,17 @@ export function procesarPago(event) {
 
     if (cuposMes === 0) {
         mostrarAlertaCuposMesCero();
+        target.removeAttr('disabled');
+        return;
+    }
+
+    if (cuposMes !== null && items.length > cuposMes) {
+        Swal.fire({
+            title: 'Atencion',
+            text: 'No hay cupos suficientes para ' + items.length + ' beneficiarios.',
+            icon: 'warning',
+            confirmButtonText: 'Entendido',
+        });
         target.removeAttr('disabled');
         return;
     }
@@ -70,8 +95,9 @@ export function procesarPago(event) {
         documento: documento,
         codser: $('#hid_codser').val(),
         numero: $('#hid_numero').val(),
-        codben: $('#hid_codben').val() || documento,
-        nota: $('#txt_nota').val() || '',
+        codben: items[0].codben,
+        items: items,
+        nota: '',
         valor: valor,
         servicioNombre: servicioNombre,
         nombre: nombre,
@@ -97,6 +123,7 @@ export function procesarPago(event) {
     sessionStorage.setItem('epayco_numero', ctx.numero);
     sessionStorage.setItem('epayco_nota', ctx.nota);
     sessionStorage.setItem('epayco_codben', ctx.codben);
+    sessionStorage.setItem('epayco_items', JSON.stringify(items));
     sessionStorage.setItem('epayco_p_id_customer', ctx.epayco);
 
     if (esCheckoutV2()) {
@@ -138,6 +165,7 @@ export function procesarPago(event) {
             codser: ctx.codser,
             numero: ctx.numero,
             codben: ctx.codben,
+            items: items,
             nota: ctx.nota,
             valor: valor,
             epayco: ctx.epayco,

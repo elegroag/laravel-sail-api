@@ -24,6 +24,7 @@ import { cargarDatos } from './carga.js';
 import { retomarPago } from './pago.js';
 import { verificarPago } from './revalidar.js';
 import { abrirModalDesestimar, confirmarDesestimar } from './desestimar.js';
+import { abrirDetallePrecompra } from './detalle.js';
 
 function bindHandlers() {
     var modalEl = document.getElementById('modal_desestimar');
@@ -31,8 +32,20 @@ function bindHandlers() {
         store.modalDesestimar = new bootstrap.Modal(modalEl);
     }
 
+    var modalDetalle = document.getElementById('modal_detalle_compra');
+    if (modalDetalle && typeof bootstrap !== 'undefined') {
+        store.modalDetalleCompra = new bootstrap.Modal(modalDetalle);
+    }
+
     $(document).on('click', '#btn_reintentar', function () {
         cargarDatos();
+    });
+
+    $(document).on('click', '.btn-detalle-compra', function () {
+        var precompra = buscarPrecompra($(this).data('id'));
+        if (precompra) {
+            abrirDetallePrecompra(precompra);
+        }
     });
 
     $(document).on('click', '.btn-verificar-pago', function () {

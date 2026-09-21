@@ -31,7 +31,7 @@ class ApiSubsidio extends ApiAbstract
             ]);
         } else {
             if (is_null($params) == false) {
-                $metodo .= '/'.$params;
+                $metodo .= '/' . $params;
             }
             $params = [
                 '_user' => 2,
@@ -76,9 +76,9 @@ class ApiSubsidio extends ApiAbstract
     public function setCurlCommand(string $hostConnection, string $url, array $params, BasicAuth $basicAuth)
     {
         $token = $basicAuth->authenticate();
-        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"".
-            " -H 'Content-Type: application/json' ".
-            " -H 'Authorization: Basic {$token}'".
-            ' -d "'.json_encode($params).'" "';
+        $this->lineaComando = "curl -X POST {$hostConnection}/{$url} \"" .
+            " -H 'Content-Type: application/json' " .
+            " -H 'Authorization: Basic {$token}'" .
+            ' -d "' . json_encode($params) . '" "';
     }
 }

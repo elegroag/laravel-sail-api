@@ -10,6 +10,7 @@ const store = {
     serviciosData: [],
     precompraSeleccionada: null,
     modalDesestimar: null,
+    modalDetalleCompra: null,
     routes: {},
 };
 

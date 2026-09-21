@@ -4,10 +4,11 @@
  * Depende de globales del layout: $ (jQuery).
  */
 import store from './store.js';
-import { mostrarLoader, ocultarLoader, escapeHtml, obtenerCodben, obtenerTipoBeneficiario } from './utils.js';
+import { mostrarLoader, ocultarLoader, escapeHtml, obtenerCodben, obtenerTipoBeneficiario, mostrarNoty } from './utils.js';
 import { actualizarPanelBeneficiario, limpiarSeleccionServicio } from './panelCompra.js';
 import { cargarServicios } from './serviciosRender.js';
 import { esVistaMovil } from './vistaMovil.js';
+import { validarTarifa } from './tarifa.js';
 
 export function identificarTrabajador() {
     var cedtra = $('#hid_documento').val();
@@ -89,7 +90,17 @@ export function seleccionarBeneficiario(codben, benData) {
         store.beneficiarioSeleccionado = null;
         $('#hid_codben').val('');
         $('.beneficiario-card--selected').removeClass('beneficiario-card--selected');
-        limpiarSeleccionServicio();
+        if (!store.items || store.items.length === 0) {
+            limpiarSeleccionServicio();
+        }
+        return;
+    }
+
+    var enCarrito = (store.items || []).some(function (item) {
+        return String(item.codben) === String(codben);
+    });
+    if (enCarrito) {
+        mostrarNoty('warning', 'Este beneficiario ya está en el resumen de compra.');
         return;
     }
 
@@ -98,6 +109,13 @@ export function seleccionarBeneficiario(codben, benData) {
     $('.beneficiario-card').removeClass('beneficiario-card--selected');
     $('.beneficiario-card[data-codben="' + codben + '"]').addClass('beneficiario-card--selected');
     actualizarPanelBeneficiario();
+
+    // Con servicio e ítems ya en el carrito, revalidar y agregar al resumen.
+    if (store.servicioSeleccionado && store.items && store.items.length > 0) {
+        validarTarifa(store.servicioSeleccionado.codser, store.servicioSeleccionado.numero, codben);
+        return;
+    }
+
     limpiarSeleccionServicio();
     scrollAServiciosActivosEnMovil();
 }

@@ -6,6 +6,7 @@
 import store from './store.js';
 import { escapeHtml, formatearValor } from './utils.js';
 import { nombreServicio } from './datos.js';
+import { itemsDesdePrecompra } from './detalle.js';
 
 function buildFila(label, valor) {
     return '<div class="compra-card__row">' +
@@ -14,12 +15,23 @@ function buildFila(label, valor) {
         '</div>';
 }
 
+function resumenBeneficiarios(precompra) {
+    var items = itemsDesdePrecompra(precompra);
+    if (!items.length) {
+        return escapeHtml(precompra.codben || '-');
+    }
+    if (items.length === 1) {
+        var unico = items[0];
+        return escapeHtml(unico.nombre || unico.codben);
+    }
+    return escapeHtml(String(items.length) + ' beneficiarios');
+}
+
 function buildCardPendiente(precompra) {
     var servicio = escapeHtml(nombreServicio(precompra));
-    var beneficiario = escapeHtml(precompra.codben || '-');
     var fecha = escapeHtml(precompra.fecha_precompra || '-');
     var valor = precompra.valor !== null && precompra.valor !== '' ? formatearValor(precompra.valor) : '-';
-    var nota = precompra.nota || '';
+    var items = itemsDesdePrecompra(precompra);
 
     var html = '<article class="compra-card" data-precompra-id="' + escapeHtml(String(precompra.id)) + '">';
     html += '<div class="compra-card__header">';
@@ -29,22 +41,23 @@ function buildCardPendiente(precompra) {
     html += '<h3 class="compra-card__servicio">' + servicio + '</h3>';
     html += '<div class="compra-card__body">';
     html += buildFila('Fecha', fecha);
-    html += buildFila('Beneficiario', beneficiario);
+    html += buildFila('Beneficiarios', resumenBeneficiarios(precompra));
+    if (items.length > 1) {
+        html += buildFila('Documentos', escapeHtml(items.map(function (i) { return i.codben; }).join(', ')));
+    }
 
     if (precompra.ref_payco) {
         html += buildFila('Ref. ePayco', escapeHtml(String(precompra.ref_payco)));
     }
 
-    if (nota && nota.trim() !== '') {
-        html += buildFila('Nota', escapeHtml(nota));
-    }
-
     html += '</div>';
     html += '<div class="compra-card__footer">';
-    html += '<span class="compra-card__valor-label">Valor</span>';
+    html += '<span class="compra-card__valor-label">Total a pagar</span>';
     html += '<span class="compra-card__valor">' + valor + '</span>';
     html += '</div>';
     html += '<div class="d-flex flex-wrap gap-2 mt-3">';
+    html += '<button type="button" class="btn btn-outline-secondary btn-sm flex-fill btn-detalle-compra" data-id="' + escapeHtml(String(precompra.id)) + '">' +
+        '<i class="fas fa-list me-1"></i> Ver detalle</button>';
     if (precompra.ref_payco) {
         html += '<button type="button" class="btn btn-success btn-sm flex-fill btn-verificar-pago" data-id="' + escapeHtml(String(precompra.id)) + '">' +
             '<i class="fas fa-sync-alt me-1"></i> Verificar pago</button>';

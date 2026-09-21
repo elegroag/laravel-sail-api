@@ -671,6 +671,7 @@ label.is-invalid {
     gap: 0.45rem;
     min-height: 0;
     padding: 0.95rem 1rem;
+    position: relative;
     text-align: left;
     transition:
         border-color 0.2s ease,
@@ -700,6 +701,141 @@ label.is-invalid {
         0 10px 24px rgba(101, 163, 13, 0.25);
     background: linear-gradient(145deg, #ecfccb 0%, #f7fee7 55%, #ffffff 100%);
     transform: translateY(-1px);
+}
+
+.beneficiario-card--en-carrito {
+    opacity: 0.72;
+    border-style: dashed;
+    position: relative;
+}
+
+.beneficiario-card--en-carrito::after {
+    content: 'En compra';
+    position: absolute;
+    top: 0.35rem;
+    right: 0.45rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #2dce89;
+}
+
+.servicios--bloqueados {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.panel-compra__lista-items {
+    margin-bottom: 0.85rem;
+}
+
+.panel-compra__items-head {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+}
+
+.panel-compra__items-title {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.panel-compra__items-count {
+    background: #e2e8f0;
+    border-radius: 999px;
+    color: #334155;
+    font-size: 0.72rem;
+    font-weight: 700;
+    min-width: 1.4rem;
+    padding: 0.1rem 0.45rem;
+    text-align: center;
+}
+
+.panel-compra__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.panel-compra__item {
+    align-items: flex-start;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    padding: 0.65rem 0.75rem;
+}
+
+.panel-compra__item-info {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.panel-compra__item-nombre {
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.panel-compra__item-doc {
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+.panel-compra__item-valor-wrap {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.25rem;
+}
+
+.panel-compra__item-valor {
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.panel-compra__item-quitar {
+    color: #dc2626;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 1.5rem;
+    padding: 0;
+}
+
+.panel-compra__item-quitar:hover,
+.panel-compra__item-quitar:focus {
+    color: #b91c1c;
+}
+
+.panel-compra__valor-wrap--total {
+    background: linear-gradient(145deg, #eff6ff 0%, #f8fafc 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    margin-top: 0.15rem;
+    padding: 0.75rem 0.85rem;
+}
+
+.panel-compra__valor-wrap--total .panel-compra__valor-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.panel-compra__valor-wrap--total .panel-compra__valor {
+    font-size: 1.35rem;
 }
 
 .beneficiario-card--selected .beneficiario-card__tipo {
@@ -948,22 +1084,21 @@ label.is-invalid {
     width: 100%;
 }
 
+.panel-compra__btn-cancelar,
+.panel-compra__btn-pagar {
+    width: 100%;
+}
+
 @media (min-width: 992px) {
     .panel-compra__actions {
-        flex-direction: row;
+        flex-direction: column;
         align-items: stretch;
     }
 
-    .panel-compra__btn-cancelar {
-        flex: 0 1 38%;
-        width: auto;
-        min-width: 0;
-    }
-
+    .panel-compra__btn-cancelar,
     .panel-compra__btn-pagar {
-        flex: 1 1 62%;
-        width: auto;
-        min-width: 0;
+        flex: none;
+        width: 100%;
     }
 }
 
@@ -1017,21 +1152,17 @@ label.is-invalid {
     }
 
     #modal_resumen_compra .panel-compra__actions {
-        flex-direction: row;
+        flex-direction: column;
         align-items: stretch;
     }
 
-    #modal_resumen_compra .panel-compra__btn-cancelar {
+    #modal_resumen_compra .panel-compra__btn-cancelar,
+    #modal_resumen_compra .panel-compra__btn-pagar {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex: 1 1 0;
-        min-width: 0;
-    }
-
-    #modal_resumen_compra .panel-compra__btn-pagar {
-        flex: 1 1 0;
-        width: auto;
+        flex: none;
+        width: 100%;
         min-width: 0;
     }
 }
@@ -1335,6 +1466,99 @@ label.is-invalid {
     color: var(--bs-success, #2dce89);
     font-size: 1.1rem;
     font-weight: 700;
+}
+
+.compra-detalle__section {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.compra-detalle__row {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+}
+
+.compra-detalle__label {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.compra-detalle__value {
+    color: #0f172a;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: right;
+}
+
+.compra-detalle__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.compra-detalle__item {
+    align-items: flex-start;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    padding: 0.65rem 0.75rem;
+}
+
+.compra-detalle__item-info {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.compra-detalle__item-nombre {
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.compra-detalle__item-doc {
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+.compra-detalle__item-valor {
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.compra-detalle__total {
+    align-items: center;
+    background: linear-gradient(145deg, #eff6ff 0%, #f8fafc 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0.85rem;
+}
+
+.compra-detalle__total span {
+    color: #334155;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.compra-detalle__total strong {
+    color: #0f172a;
+    font-size: 1.25rem;
 }
 
 .compras-paginador {

@@ -231,7 +231,9 @@ class EcommerceController extends ApplicationController
             $resultado = $this->api->toArray();
 
             if (! ($resultado['flag'] ?? false)) {
-                $msg = $resultado['message'] ?? 'Error al validar tarifa';
+                $msg = $resultado['msg']
+                    ?? $resultado['message']
+                    ?? 'Error al validar tarifa';
 
                 return response()->json([
                     'success' => false,
@@ -269,18 +271,22 @@ class EcommerceController extends ApplicationController
                 'codser' => 'required|string|max:20',
                 'numero' => 'required|integer|min:1',
                 'codben' => 'nullable|string|max:20',
+                'items' => 'nullable|array|min:1',
+                'items.*.codben' => 'required_with:items|string|max:20',
                 'nota' => 'nullable|string',
                 'valor' => 'nullable|numeric|min:0',
                 'epayco' => 'required|string|max:80',
             ]);
 
             $cuenta = $this->epaycoCuentaResolver->findByPIdCustomer($data['epayco']);
+            $items = $this->normalizarItemsPrecompra($data);
 
             $precompra = PrecompraServicio::create([
                 'documento' => $data['cedtra'],
                 'codser' => $data['codser'],
                 'numero' => $data['numero'],
-                'codben' => ! empty($data['codben']) ? $data['codben'] : $data['cedtra'],
+                'codben' => $items[0]['codben'],
+                'items' => $items,
                 'nota' => $data['nota'] ?? '',
                 'valor' => $data['valor'] ?? null,
                 'p_id_customer' => $cuenta->p_id_customer,
@@ -335,6 +341,8 @@ class EcommerceController extends ApplicationController
                 'codser' => 'required|string|max:20',
                 'numero' => 'required|integer|min:1',
                 'codben' => 'nullable|string|max:20',
+                'items' => 'nullable|array|min:1',
+                'items.*.codben' => 'required_with:items|string|max:20',
                 'nota' => 'nullable|string',
                 'valor' => 'required|numeric|min:1',
                 'nombre_servicio' => 'nullable|string|max:150',
@@ -343,6 +351,8 @@ class EcommerceController extends ApplicationController
                 'precompra_id' => 'nullable|integer',
                 'epayco' => 'nullable|string|max:80',
             ]);
+
+            $items = $this->normalizarItemsPrecompra($data);
 
             $precompra = null;
             if (! empty($data['precompra_id'])) {
@@ -369,15 +379,21 @@ class EcommerceController extends ApplicationController
                     'documento' => $data['cedtra'],
                     'codser' => $data['codser'],
                     'numero' => $data['numero'],
-                    'codben' => ! empty($data['codben']) ? $data['codben'] : $data['cedtra'],
+                    'codben' => $items[0]['codben'],
+                    'items' => $items,
                     'nota' => $data['nota'] ?? '',
                     'valor' => $data['valor'],
                     'p_id_customer' => $cuenta->p_id_customer,
                     'estado' => EstadoPrecompra::PENDIENTE,
                     'fecha_precompra' => now(),
                 ]);
-            } elseif (empty($precompra->p_id_customer)) {
-                $precompra->p_id_customer = $cuenta->p_id_customer;
+            } else {
+                $precompra->codben = $items[0]['codben'];
+                $precompra->items = $items;
+                $precompra->valor = $data['valor'];
+                if (empty($precompra->p_id_customer)) {
+                    $precompra->p_id_customer = $cuenta->p_id_customer;
+                }
                 $precompra->save();
             }
 
@@ -593,6 +609,7 @@ class EcommerceController extends ApplicationController
             $refpago = $request->input('refpago');
             $nota = $request->input('nota', '');
             $codben = $request->input('codben');
+            $itemsInput = $request->input('items');
             $precompraId = (int) $request->input('precompra_id', 0);
 
             Log::info('Ecommerce.guardarVenta: inicio', [
@@ -601,6 +618,7 @@ class EcommerceController extends ApplicationController
                 'numero' => $numero,
                 'refpago' => $refpago,
                 'codben' => $codben,
+                'items' => $itemsInput,
                 'precompra_id' => $precompraId,
             ]);
 
@@ -733,13 +751,28 @@ class EcommerceController extends ApplicationController
                 ]);
             }
 
+            $items = $this->normalizarItemsPrecompra([
+                'cedtra' => $cedtra,
+                'codben' => $codben,
+                'items' => $itemsInput,
+            ]);
+
+            if ($precompraAntes && empty($itemsInput) && is_array($precompraAntes->items) && count($precompraAntes->items) > 0) {
+                $items = $this->normalizarItemsPrecompra([
+                    'cedtra' => $cedtra,
+                    'codben' => $precompraAntes->codben,
+                    'items' => $precompraAntes->items,
+                ]);
+            }
+
             $params = [
                 'cedtra' => $cedtra,
                 'codser' => $codser,
                 'numero' => $numero,
                 'refpago' => $refpago,
                 'nota' => $nota,
-                'codben' => ! empty($codben) ? $codben : $cedtra,
+                'codben' => $items[0]['codben'],
+                'items' => $items,
             ];
 
             Log::info('Ecommerce.guardarVenta: enviando a Subsidio guardar-venta', $params);
@@ -767,12 +800,13 @@ class EcommerceController extends ApplicationController
                 ]);
             }
 
-            $codbenLog = ! empty($codben) ? $codben : $cedtra;
-            $this->setLogger("Venta Servicio - cedtra: $cedtra, codben: $codbenLog, codser: $codser, refpago: $refpago");
+            $codbenLog = $items[0]['codben'];
+            $this->setLogger("Venta Servicio - cedtra: $cedtra, codben: $codbenLog, items: " . count($items) . ", codser: $codser, refpago: $refpago");
 
             Log::info('Ecommerce.guardarVenta: venta guardada exitosamente', [
                 'cedtra' => $cedtra,
                 'codben' => $codbenLog,
+                'items' => $items,
                 'codser' => $codser,
                 'numero' => $numero,
                 'refpago' => $refpago,
@@ -893,6 +927,10 @@ class EcommerceController extends ApplicationController
                     'codser' => $precompra->codser,
                     'numero' => $precompra->numero,
                     'codben' => $precompra->codben,
+                    'items' => $precompra->items ?? array_map(
+                        static fn (string $codben) => ['codben' => $codben],
+                        $precompra->codbenList()
+                    ),
                     'nota' => $precompra->nota,
                     'valor' => $precompra->valor,
                     'p_id_customer' => $precompra->p_id_customer,
@@ -937,6 +975,10 @@ class EcommerceController extends ApplicationController
                     'codser' => $precompra->codser,
                     'numero' => $precompra->numero,
                     'codben' => $precompra->codben,
+                    'items' => $precompra->items ?? array_map(
+                        static fn (string $codben) => ['codben' => $codben],
+                        $precompra->codbenList()
+                    ),
                     'nota' => $precompra->nota,
                     'valor' => $precompra->valor,
                     'p_id_customer' => $precompra->p_id_customer,
@@ -1237,6 +1279,66 @@ class EcommerceController extends ApplicationController
      * @param  array<string, mixed>  $data
      * @return array{email: string, name: string, typeDoc: string, numberDoc: string, callingCode: string, mobilePhone: ?string}
      */
+    /**
+     * Normaliza items[].codben o codben singular para precompra / guardar venta.
+     * Conserva nombre/valser opcionales para el detalle en UI.
+     *
+     * @param  array<string, mixed>  $data
+     * @return list<array{codben: string, nombre?: string, valser?: float|int|string}>
+     */
+    protected function normalizarItemsPrecompra(array $data): array
+    {
+        $items = $data['items'] ?? null;
+        if (is_string($items)) {
+            $decoded = json_decode($items, true);
+            $items = is_array($decoded) ? $decoded : null;
+        }
+
+        $list = [];
+        if (is_array($items) && count($items) > 0) {
+            foreach ($items as $item) {
+                if (! is_array($item)) {
+                    $codben = trim((string) $item);
+                    if ($codben !== '' && ! in_array($codben, array_column($list, 'codben'), true)) {
+                        $list[] = ['codben' => $codben];
+                    }
+                    continue;
+                }
+
+                $codben = trim((string) ($item['codben'] ?? ''));
+                if ($codben === '' || in_array($codben, array_column($list, 'codben'), true)) {
+                    continue;
+                }
+
+                $row = ['codben' => $codben];
+                $nombre = trim((string) ($item['nombre'] ?? ''));
+                if ($nombre !== '') {
+                    $row['nombre'] = $nombre;
+                }
+                if (isset($item['valser']) && $item['valser'] !== '' && $item['valser'] !== null) {
+                    $row['valser'] = is_numeric($item['valser']) ? (float) $item['valser'] : $item['valser'];
+                }
+                $list[] = $row;
+            }
+        }
+
+        if (count($list) === 0) {
+            $codben = trim((string) ($data['codben'] ?? ''));
+            if ($codben === '') {
+                $codben = trim((string) ($data['cedtra'] ?? ''));
+            }
+            if ($codben !== '') {
+                $list[] = ['codben' => $codben];
+            }
+        }
+
+        if (count($list) === 0) {
+            throw new DebugException('Debe indicar al menos un beneficiario (codben o items).');
+        }
+
+        return $list;
+    }
+
     protected function resolverBillingCheckout(array $data): array
     {
         $nombre = trim((string) ($data['nombre'] ?? ''));

@@ -199,3 +199,7 @@ php artisan mercurio10:backfill-feccie
 ```bash
 php artisan config:show-app --section=epayco
 ```
+
+```bash
+php artisan migrate --path=database/migrations/2026_09_21_154500_add_items_to_precompras_servicios_table.php
+```

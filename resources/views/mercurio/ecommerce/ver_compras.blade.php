@@ -108,6 +108,21 @@
 </div>
 
 <input type="hidden" id="hid_documento" value="{{ $documento }}">
+
+<div class="modal fade" id="modal_detalle_compra" tabindex="-1" aria-labelledby="modal_detalle_compra_titulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_detalle_compra_titulo">Detalle de compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modal_detalle_compra_body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -148,12 +163,23 @@
 
     function compraCoincideBusqueda(compra, query) {
         if (!query) return true;
+        var itemsTexto = '';
+        if (Array.isArray(compra.items)) {
+            itemsTexto = compra.items.map(function (item) {
+                if (!item) return '';
+                if (typeof item === 'object') {
+                    return (item.codben || '') + ' ' + (item.nombre || item.nombre_beneficiario || '');
+                }
+                return String(item);
+            }).join(' ');
+        }
         var texto = (
             (compra.nombre_servicio || '') + ' ' +
             (compra.nombre_beneficiario || '') + ' ' +
             (compra.nombre_titular || '') + ' ' +
             (compra.documento || '') + ' ' +
             (compra.codben || '') + ' ' +
+            itemsTexto + ' ' +
             (compra.cedtra_titular || '') + ' ' +
             (compra.refpago || '') + ' ' +
             (compra.ref_payco || '') + ' ' +
@@ -207,6 +233,181 @@
         return estado;
     }
 
+    var modalDetalleCompra = null;
+
+    function itemsDesdeRegistro(registro) {
+        if (registro && Array.isArray(registro.items) && registro.items.length) {
+            return registro.items.map(function (item) {
+                if (item && typeof item === 'object') {
+                    return {
+                        codben: String(item.codben || ''),
+                        nombre: String(item.nombre || item.nombre_beneficiario || ''),
+                        tipben: String(item.tipben_texto || item.tipben || ''),
+                        valser: item.valser !== undefined && item.valser !== null && item.valser !== ''
+                            ? parseFloat(item.valser)
+                            : null,
+                    };
+                }
+                return { codben: String(item || ''), nombre: '', tipben: '', valser: null };
+            }).filter(function (item) {
+                return item.codben !== '';
+            });
+        }
+
+        if (registro && registro.codben) {
+            return [{
+                codben: String(registro.codben),
+                nombre: String(registro.nombre_beneficiario || ''),
+                tipben: String(registro.tipben_texto || ''),
+                valser: registro.valser !== undefined ? parseFloat(registro.valser) : null,
+            }];
+        }
+
+        return [];
+    }
+
+    function agruparComprasSubsidio(filas) {
+        var mapa = {};
+        var orden = [];
+
+        (filas || []).forEach(function (fila) {
+            var key = String(fila.marca || '') + '|' + String(fila.documento || '');
+            if (!mapa[key]) {
+                mapa[key] = {
+                    marca: fila.marca,
+                    documento: fila.documento,
+                    fecha: fila.fecha,
+                    hora: fila.hora,
+                    estado: fila.estado,
+                    estado_texto: fila.estado_texto,
+                    valpago: fila.valpago,
+                    nota: fila.nota,
+                    cedtra_titular: fila.cedtra_titular,
+                    nombre_titular: fila.nombre_titular,
+                    codser: fila.codser,
+                    numero: fila.numero,
+                    nombre_servicio: fila.nombre_servicio,
+                    servicio_fecini: fila.servicio_fecini,
+                    servicio_fecfin: fila.servicio_fecfin,
+                    forma_pago_detalle: fila.forma_pago_detalle,
+                    refpago: fila.refpago,
+                    items: [],
+                };
+                orden.push(key);
+            }
+
+            mapa[key].items.push({
+                codben: fila.codben,
+                nombre: fila.nombre_beneficiario,
+                tipben_texto: fila.tipben_texto,
+                tipben: fila.tipben,
+                valser: fila.valser,
+                edad: fila.edad,
+                codcat: fila.codcat,
+                detcat: fila.detcat,
+            });
+        });
+
+        return orden.map(function (key) {
+            return mapa[key];
+        });
+    }
+
+    function buildFilaDetalle(label, valorHtml) {
+        return '<div class="compra-detalle__row">' +
+            '<span class="compra-detalle__label">' + escapeHtml(label) + '</span>' +
+            '<span class="compra-detalle__value">' + valorHtml + '</span>' +
+            '</div>';
+    }
+
+    function abrirModalDetalle(registro, esPrecompra) {
+        var items = itemsDesdeRegistro(registro);
+        var total = esPrecompra
+            ? (parseFloat(registro.valor) || 0)
+            : (parseFloat(registro.valpago) || 0);
+        var suma = items.reduce(function (acc, item) {
+            return acc + (item.valser !== null && !isNaN(item.valser) ? item.valser : 0);
+        }, 0);
+        if (suma > 0) {
+            total = suma;
+        }
+
+        var html = '<div class="compra-detalle">';
+        html += '<h6 class="compra-detalle__section">Servicio</h6>';
+        if (esPrecompra) {
+            html += buildFilaDetalle('Nombre', escapeHtml(registro.codser ? ('Servicio ' + registro.codser) : 'Servicio'));
+            html += buildFilaDetalle('Código', escapeHtml(String(registro.codser || '-')));
+            html += buildFilaDetalle('Número / apertura', escapeHtml(String(registro.numero || '-')));
+            html += buildFilaDetalle('Fecha precompra', escapeHtml(registro.fecha_precompra || '-'));
+            html += buildFilaDetalle('Fecha pago', escapeHtml(registro.fecha_pago || '-'));
+            html += buildFilaDetalle('Estado', escapeHtml(registro.estado_descripcion || textoEstado(registro.estado)));
+            if (registro.ref_payco) {
+                html += buildFilaDetalle('Ref. ePayco', escapeHtml(String(registro.ref_payco)));
+            }
+        } else {
+            html += buildFilaDetalle('Nombre', escapeHtml(registro.nombre_servicio || '-'));
+            html += buildFilaDetalle('Código', escapeHtml(String(registro.codser || '-')));
+            html += buildFilaDetalle('Número / apertura', escapeHtml(String(registro.numero || '-')));
+            html += buildFilaDetalle(
+                'Documento',
+                escapeHtml((registro.marca ? registro.marca + ' - ' : '') + (registro.documento || '-'))
+            );
+            html += buildFilaDetalle('Fecha', escapeHtml((registro.fecha || '-') + (registro.hora ? ' ' + registro.hora : '')));
+            html += buildFilaDetalle('Estado', escapeHtml(registro.estado_texto || textoEstado(registro.estado)));
+            html += buildFilaDetalle('Forma de pago', escapeHtml(registro.forma_pago_detalle || '-'));
+            html += buildFilaDetalle('Ref. pago', escapeHtml(registro.refpago || '-'));
+            if (registro.nombre_titular) {
+                html += buildFilaDetalle(
+                    'Titular',
+                    escapeHtml(registro.nombre_titular + ' (' + (registro.cedtra_titular || '') + ')')
+                );
+            }
+        }
+
+        html += '<h6 class="compra-detalle__section mt-3">Beneficiarios</h6>';
+        if (!items.length) {
+            html += '<p class="text-muted mb-0">Sin beneficiarios registrados.</p>';
+        } else {
+            html += '<ul class="compra-detalle__items list-unstyled mb-0">';
+            items.forEach(function (item) {
+                html += '<li class="compra-detalle__item">';
+                html += '<div class="compra-detalle__item-info">';
+                html += '<span class="compra-detalle__item-nombre">' +
+                    escapeHtml(item.nombre || item.codben) +
+                    (item.tipben ? ' (' + escapeHtml(item.tipben) + ')' : '') +
+                    '</span>';
+                html += '<span class="compra-detalle__item-doc">' + escapeHtml(item.codben) + '</span>';
+                html += '</div>';
+                html += '<span class="compra-detalle__item-valor">' +
+                    (item.valser !== null && !isNaN(item.valser) ? formatearValor(item.valser) : '—') +
+                    '</span>';
+                html += '</li>';
+            });
+            html += '</ul>';
+        }
+
+        html += '<div class="compra-detalle__total mt-3">';
+        html += '<span>' + (esPrecompra ? 'Total a pagar' : 'Total pagado') + '</span>';
+        html += '<strong>' + formatearValor(total) + '</strong>';
+        html += '</div></div>';
+
+        var titulo = esPrecompra
+            ? ('Detalle precompra #' + (registro.id || ''))
+            : ('Detalle ' + (registro.marca || '') + (registro.documento ? ' - ' + registro.documento : ''));
+        $('#modal_detalle_compra_titulo').text(titulo);
+        $('#modal_detalle_compra_body').html(html);
+
+        if (!modalDetalleCompra) {
+            var el = document.getElementById('modal_detalle_compra');
+            if (el && typeof bootstrap !== 'undefined') {
+                modalDetalleCompra = new bootstrap.Modal(el);
+            }
+        }
+        if (modalDetalleCompra) {
+            modalDetalleCompra.show();
+        }
+    }
+
     function buildFila(label, valor) {
         return '<div class="compra-card__row">' +
             '<span class="compra-card__label">' + escapeHtml(label) + '</span>' +
@@ -220,19 +421,16 @@
         var fecha = compra.fecha || '-';
         var hora = compra.hora || '';
         var servicio = escapeHtml(compra.nombre_servicio || '-');
-        var beneficiario = escapeHtml(compra.nombre_beneficiario || '-');
-        var tipbenTexto = escapeHtml(compra.tipben_texto || '');
-        var edad = escapeHtml(compra.edad || '-');
-        var categoria = escapeHtml(compra.detcat || compra.codcat || '-');
-        var valor = formatearValor(compra.valpago || compra.valser || 0);
+        var items = itemsDesdeRegistro(compra);
+        var valor = formatearValor(compra.valpago || 0);
         var formaPago = escapeHtml(compra.forma_pago_detalle || '-');
         var refpago = escapeHtml(compra.refpago || '-');
-        var nota = compra.nota || '';
         var marca = escapeHtml(compra.marca || '');
         var documento = escapeHtml(compra.documento || '');
-        var titular = escapeHtml(compra.nombre_titular || '');
-
         var tituloDoc = marca ? marca + ' - ' + documento : documento;
+        var resumenBen = items.length > 1
+            ? escapeHtml(String(items.length) + ' beneficiarios')
+            : escapeHtml((items[0] && (items[0].nombre || items[0].codben)) || '-');
 
         var html = '<article class="compra-card">';
         html += '<div class="compra-card__header">';
@@ -242,25 +440,17 @@
         html += '<h3 class="compra-card__servicio">' + servicio + '</h3>';
         html += '<div class="compra-card__body">';
         html += buildFila('Fecha', escapeHtml(fecha + (hora ? ' ' + hora : '')));
-        html += buildFila('Beneficiario', beneficiario + (tipbenTexto ? ' (' + tipbenTexto + ')' : ''));
-
-        if (titular && String(compra.cedtra_titular) !== String(compra.codben)) {
-            html += buildFila('Titular', titular + ' (' + escapeHtml(compra.cedtra_titular || '') + ')');
-        }
-
-        html += buildFila('Edad', edad);
-        html += buildFila('Categoría', categoria);
+        html += buildFila('Beneficiarios', resumenBen);
         html += buildFila('Forma de pago', formaPago);
         html += buildFila('Ref. pago', '<span class="compra-card__ref">' + refpago + '</span>');
-
-        if (nota && nota.trim() !== '') {
-            html += buildFila('Nota', escapeHtml(nota));
-        }
-
         html += '</div>';
         html += '<div class="compra-card__footer">';
-        html += '<span class="compra-card__valor-label">Valor pagado</span>';
+        html += '<span class="compra-card__valor-label">Total pagado</span>';
         html += '<span class="compra-card__valor">' + valor + '</span>';
+        html += '</div>';
+        html += '<div class="mt-3">';
+        html += '<button type="button" class="btn btn-outline-secondary btn-sm w-100 btn-detalle-compra" data-tipo="subsidio" data-idx="' + escapeHtml(String(compra._idx)) + '">';
+        html += '<i class="fas fa-list me-1"></i> Ver detalle</button>';
         html += '</div>';
         html += '</article>';
 
@@ -273,10 +463,11 @@
         var servicio = escapeHtml(precompra.codser ? ('Servicio ' + precompra.codser) : 'Servicio');
         var valor = formatearValor(precompra.valor || 0);
         var refpago = escapeHtml(precompra.ref_payco || '-');
-        var nota = precompra.nota || '';
         var fecha = escapeHtml(precompra.fecha_precompra || '-');
-        var fechaPago = escapeHtml(precompra.fecha_pago || '-');
-        var motivo = escapeHtml(precompra.motivo_epayco || '');
+        var items = itemsDesdeRegistro(precompra);
+        var resumenBen = items.length > 1
+            ? escapeHtml(String(items.length) + ' beneficiarios')
+            : escapeHtml((items[0] && (items[0].nombre || items[0].codben)) || (precompra.codben || '-'));
 
         var html = '<article class="compra-card">';
         html += '<div class="compra-card__header">';
@@ -286,23 +477,16 @@
         html += '<h3 class="compra-card__servicio">' + servicio + '</h3>';
         html += '<div class="compra-card__body">';
         html += buildFila('Fecha precompra', fecha);
-        html += buildFila('Fecha pago', fechaPago);
-        html += buildFila('Beneficiario', escapeHtml(precompra.codben || '-'));
-        html += buildFila('Cantidad', escapeHtml(String(precompra.numero || '1')));
+        html += buildFila('Beneficiarios', resumenBen);
         html += buildFila('Ref. ePayco', '<span class="compra-card__ref">' + refpago + '</span>');
-        if (precompra.cod_estado_epayco) {
-            html += buildFila('Cód. ePayco', escapeHtml(String(precompra.cod_estado_epayco)));
-        }
-        if (motivo) {
-            html += buildFila('Motivo ePayco', motivo);
-        }
-        if (nota && String(nota).trim() !== '') {
-            html += buildFila('Nota', escapeHtml(nota));
-        }
         html += '</div>';
         html += '<div class="compra-card__footer">';
-        html += '<span class="compra-card__valor-label">Valor</span>';
+        html += '<span class="compra-card__valor-label">Total</span>';
         html += '<span class="compra-card__valor">' + valor + '</span>';
+        html += '</div>';
+        html += '<div class="mt-3">';
+        html += '<button type="button" class="btn btn-outline-secondary btn-sm w-100 btn-detalle-compra" data-tipo="historial" data-idx="' + escapeHtml(String(precompra._idx)) + '">';
+        html += '<i class="fas fa-list me-1"></i> Ver detalle</button>';
         html += '</div>';
         html += '</article>';
 
@@ -338,10 +522,12 @@
         var fin = Math.min(inicio + itemsPorPagina, totalCompras);
 
         for (var i = inicio; i < fin; i++) {
+            var registro = comprasFiltradas[i];
+            registro._idx = i;
             if (vistaActual === 'historial') {
-                grid.append(buildCardPrecompra(comprasFiltradas[i]));
+                grid.append(buildCardPrecompra(registro));
             } else {
-                grid.append(buildCardCompra(comprasFiltradas[i]));
+                grid.append(buildCardCompra(registro));
             }
         }
 
@@ -449,11 +635,11 @@
                 var data = response.data;
 
                 if (Array.isArray(data)) {
-                    comprasData = data;
+                    comprasData = agruparComprasSubsidio(data);
                 } else if (data && Array.isArray(data.compras)) {
-                    comprasData = data.compras;
+                    comprasData = agruparComprasSubsidio(data.compras);
                 } else if (data && typeof data === 'object') {
-                    comprasData = [data];
+                    comprasData = agruparComprasSubsidio([data]);
                 } else {
                     comprasData = [];
                 }
@@ -527,6 +713,17 @@
             itemsPorPagina = parseInt($(this).val(), 10) || 10;
             paginaActual = 0;
             renderizarPagina();
+        });
+
+        $(document).on('click', '.btn-detalle-compra', function () {
+            var tipo = $(this).data('tipo');
+            var idx = parseInt($(this).data('idx'), 10);
+            var filtradas = obtenerComprasFiltradas();
+            var registro = filtradas[idx];
+            if (!registro) {
+                return;
+            }
+            abrirModalDetalle(registro, tipo === 'historial');
         });
     });
 </script>

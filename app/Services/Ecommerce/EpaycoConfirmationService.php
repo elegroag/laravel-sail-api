@@ -244,6 +244,10 @@ class EpaycoConfirmationService
                 return false;
             }
 
+            $items = $precompra->codbenList();
+            $itemsPayload = array_map(static fn (string $codben) => ['codben' => $codben], $items);
+            $codbenPrimero = $items[0] ?? ($precompra->codben ?: $precompra->documento);
+
             $this->apiSubsidio->send([
                 'servicio' => 'Movil',
                 'metodo' => 'guardar-venta',
@@ -253,7 +257,8 @@ class EpaycoConfirmationService
                     'numero' => $precompra->numero,
                     'refpago' => $refpago,
                     'nota' => $precompra->nota ?? '',
-                    'codben' => $precompra->codben ?: $precompra->documento,
+                    'codben' => $codbenPrimero,
+                    'items' => $itemsPayload,
                 ],
             ]);
 

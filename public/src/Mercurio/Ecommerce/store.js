@@ -14,6 +14,10 @@ const store = {
     busquedaServicio: '',
     filtroCodserServicio: '',
     modalResumenCompra: null,
+    /** @type {Array<{codben:string,nombre:string,tipben:string,valser:number,categoria:string,cupos_disponibles:number}>} */
+    items: [],
+    /** true mientras se revalidan ítems al cambiar de servicio */
+    revalidandoServicio: false,
     routes: {},
 };
 

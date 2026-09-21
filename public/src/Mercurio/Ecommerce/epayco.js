@@ -44,6 +44,7 @@ export function limpiarSessionEpayco() {
     sessionStorage.removeItem('epayco_numero');
     sessionStorage.removeItem('epayco_nota');
     sessionStorage.removeItem('epayco_codben');
+    sessionStorage.removeItem('epayco_items');
     sessionStorage.removeItem('epayco_precompra_id');
     sessionStorage.removeItem('epayco_p_id_customer');
 }
@@ -218,6 +219,7 @@ export function abrirCheckoutV2(ctx, target) {
                 codser: ctx.codser,
                 numero: ctx.numero,
                 codben: ctx.codben,
+                items: ctx.items || [],
                 nota: ctx.nota,
                 valor: ctx.valor,
                 nombre_servicio: ctx.servicioNombre,
