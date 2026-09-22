@@ -117,7 +117,8 @@ export default class CertificadoInfoView extends FormInfoView {
         });
     }
 
-    devolverSolicitud() {
+    devolverSolicitud(e) {
+        e.preventDefault();
         const _target = this.$el.find(e.currentTarget);
         const _nota_devolver = this.getInput('#nota_devolver');
         const _codest_devolver = this.getInput('#codest_devolver');
@@ -183,7 +184,8 @@ export default class CertificadoInfoView extends FormInfoView {
         });
     }
 
-    rechazarSolicitud() {
+    rechazarSolicitud(e) {
+        e.preventDefault();
         const _target = this.$el.find(e.currentTarget);
         let _nota_rechazar = this.getInput('#nota_rechazar');
         let _codest_rechazar = this.getInput('#codest_rechazar');

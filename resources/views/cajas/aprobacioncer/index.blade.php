@@ -1,6 +1,11 @@
 @extends('layouts.cajas-request')
 
 @push('scripts')
+{{-- Override del layout: en certificados no aplica "campos para corregir" --}}
+<script type="text/template" id='tmp_devolver'>
+    @include('cajas/aprobacioncer/tmp/tmp_devolver')
+</script>
+
 <script id='tmp_filtro' type="text/template">
     @include('cajas/templates/tmp_filtro', ['campo_filtro' => $campo_filtro])
 </script>

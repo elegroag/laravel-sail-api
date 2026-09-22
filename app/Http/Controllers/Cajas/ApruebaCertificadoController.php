@@ -207,6 +207,48 @@ class ApruebaCertificadoController extends ApplicationController
         return response()->json($salida);
     }
 
+    public function devolver(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'id' => 'required|integer',
+                'nota' => 'nullable|string|max:5000',
+                'codest' => 'required|string|max:10',
+                'campos_corregir' => 'sometimes|nullable',
+            ]);
+
+            $id = $validated['id'];
+            $nota = $validated['nota'] ?? null;
+            $codest = $validated['codest'];
+
+            $array_corregir = $request->input('campos_corregir', []);
+            $campos_corregir = is_array($array_corregir)
+                ? implode(';', array_filter($array_corregir))
+                : (string) ($array_corregir ?? '');
+
+            $mercurio45 = Mercurio45::where('id', $id)->first();
+            if (! $mercurio45) {
+                throw new DebugException('No se encontró la solicitud de certificado.', 404);
+            }
+
+            $certificadosServices = new CertificadosServices;
+            $certificadosServices->devolver($mercurio45, $nota, $codest, $campos_corregir);
+
+            $response = [
+                'success' => true,
+                'msj' => 'Movimiento realizado con exito',
+            ];
+        } catch (DebugException $err) {
+            $response = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+                'errors' => $err->render($request),
+            ];
+        }
+
+        return response()->json($response);
+    }
+
     public function rechazar(Request $request)
     {
         DB::beginTransaction();
