@@ -3,8 +3,10 @@ import TextLink from "@/components/text-link"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -68,27 +70,36 @@ export default function AuthWelcome({
                 Ver opciones de ingreso
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
+            <DialogContent className="flex max-h-[85dvh] w-[calc(100%-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[560px]">
+              <DialogHeader className="shrink-0 space-y-1.5 border-b border-border px-5 py-4 pr-12 text-left">
                 <DialogTitle>Opciones de ingreso</DialogTitle>
                 <DialogDescription>
                   Selecciona el tipo de usuario que mejor te represente para continuar con el proceso.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-3">
-                {userTypes.map((ut) => (
-                  <div key={ut.id} className="flex items-start gap-3">
-                    <div className="shrink-0">{ut.icon}</div>
-                    <div>
-                      <p className="font-medium leading-tight">{ut.label}</p>
-                      <UserTypeDescription
-                        userTypeId={ut.id}
-                        className="text-muted-foreground text-sm"
-                      />
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4">
+                <div className="grid gap-3">
+                  {userTypes.map((ut) => (
+                    <div key={ut.id} className="flex items-start gap-3">
+                      <div className="shrink-0">{ut.icon}</div>
+                      <div>
+                        <p className="font-medium leading-tight">{ut.label}</p>
+                        <UserTypeDescription
+                          userTypeId={ut.id}
+                          className="text-muted-foreground text-sm"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+              <DialogFooter className="shrink-0 border-t border-border px-5 py-3 sm:justify-end">
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" className="w-full sm:w-auto">
+                    Cerrar
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>

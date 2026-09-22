@@ -98,7 +98,7 @@ class ApruebaCertificado
         $data['msj'] = "Se informa que el certificado \"{$this->solicitud->getNomcer()}\" fue presentado con éxito.";
         $data['titulo'] = 'Presentación de Certificado para Aprobación';
 
-        $html = view('layouts/mail_aprobar', $data)->render();
+        $html = view('emails.mail_aprobar', $data)->render();
         $asunto = "Presentación certificado realizada con éxito, identificación {$this->solicitud->getDocumento()}";
 
         $emailCaja = Mercurio01::first();

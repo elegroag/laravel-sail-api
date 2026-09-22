@@ -7,6 +7,7 @@ use App\Http\Middleware\ApiAuthMiddleware;
 use App\Http\Middleware\CajasAuthenticated;
 use App\Http\Middleware\EnsureEndUserAvailable;
 use App\Http\Middleware\MercurioAuthenticated;
+use App\Http\Middleware\RedirectWwwHost;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -35,6 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'mercurio/*',
             'cajas/*',
             'api/*'
+        ]);
+
+        $middleware->web(prepend: [
+            RedirectWwwHost::class,
         ]);
 
         $middleware->web(append: [
