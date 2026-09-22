@@ -279,6 +279,10 @@ export class FormBeneficiarioView extends FormView {
 
         entity.set('biodesco', this.$el.find('#biodesco1').is(':checked') ? 'S' : 'N');
         entity.set('biourbana', this.$el.find("[name='biourbana']:checked").val());
+        if (entity.get('biodesco') === 'S') {
+            this.clearCedcon();
+            entity.set('cedcon', null);
+        }
 
         if (entity.isValid() === false) {
             target.removeAttr('disabled');
@@ -489,6 +493,7 @@ export class FormBeneficiarioView extends FormView {
             if (this.#choiceComponents['biocodciu']) {
                 this.#choiceComponents['biocodciu'].removeActiveItems();
             }
+            this.clearCedcon();
         } else {
             BeneficiarioModel.changeRulesProperty([
                 { rule: 'biocodciu', prop: 'required', value: showBiologico },
@@ -600,6 +605,14 @@ export class FormBeneficiarioView extends FormView {
         if (this.#choiceComponents && this.#choiceComponents[fieldName]) {
             this.#choiceComponents[fieldName].removeActiveItems();
             this.#choiceComponents[fieldName].setChoiceByValue('');
+        }
+    }
+
+    clearCedcon() {
+        this.setInput('cedcon', '');
+        this.resetChoice('cedcon');
+        if (this.model) {
+            this.model.set('cedcon', null);
         }
     }
 

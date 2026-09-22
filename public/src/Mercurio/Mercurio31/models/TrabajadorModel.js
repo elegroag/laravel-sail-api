@@ -69,7 +69,7 @@ class TrabajadorModel extends Backbone.Model {
             priape: { required: true, minlength: 3 },
             prinom: { required: true, minlength: 3 },
             fecnac: { required: true },
-            ciunac: { required: true, minlength: 4 },
+            ciunac: { required: true, minlength: 1 },
             sexo: { required: true },
             estciv: { required: true },
             cabhog: { required: true },

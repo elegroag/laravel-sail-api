@@ -788,6 +788,13 @@ class BeneficiarioController extends ApplicationController
     {
         $fecsol = Carbon::now();
         $asignarFuncionario = new AsignarFuncionario;
+        $biodesco = $request->input('biodesco');
+        $cedcon = $request->input('cedcon');
+        if ($biodesco === 'S') {
+            $cedcon = null;
+        } elseif ($cedcon === '' || $cedcon === '0') {
+            $cedcon = null;
+        }
 
         return [
             'usuario' => $asignarFuncionario->asignar($this->tipopc, $this->user['codciu']),
@@ -795,7 +802,7 @@ class BeneficiarioController extends ApplicationController
             'fecsol' => $fecsol->format('Y-m-d'),
             'nit' => $request->input('nit'),
             'cedtra' => $request->input('cedtra'),
-            'cedcon' => $request->input('cedcon'),
+            'cedcon' => $cedcon,
             'tipdoc' => $request->input('tipdoc'),
             'numdoc' => $request->input('numdoc'),
             'priape' => mb_strtoupper($request->input('priape'), 'UTF-8'),
