@@ -39,7 +39,7 @@ class ApruebaDatosTrabajador
      */
     public function procesar($postData)
     {
-        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+        unset($postData['validaciones_control']);
 
         $mercurio47 = Mercurio47::where('id', $this->solicitud->getId())->first();
 
@@ -76,6 +76,7 @@ class ApruebaDatosTrabajador
         unset($postData['codlis']);
         unset($postData['giro']);
         unset($postData['codgir']);
+        unset($postData['validaciones_control']);
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
@@ -87,7 +88,7 @@ class ApruebaDatosTrabajador
                 'params' => [
                     'cedtra' => $mercurio47->getDocumento(),
                     'coddoc' => $mercurio47->getCoddoc(),
-                    'post' => array_merge($postData, $validacionesControl),
+                    'post' => $postData,
                 ],
             ]
         );
@@ -125,20 +126,19 @@ class ApruebaDatosTrabajador
      */
     public function enviarMail($actapr, $feccap)
     {
-        $feccap = new \DateTime($feccap);
-        $dia = $feccap->format('d');
-        $mes = get_mes_name($feccap->format('m'));
-        $anno = $feccap->format('Y');
+        $documento = $this->solicitud->getDocumento();
+        $data = [
+            'razsoc' => $this->solicitante->getNombre(),
+            'email' => $this->solicitante->getEmail(),
+            'membrete' => "{$this->dominio}/public/img/header_reporte_ugpp.png",
+            'ruta_firma' => "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg",
+            'actapr' => $actapr,
+            'url_activa' => '',
+            'titulo' => 'Actualización de datos del trabajador, Caja De Compensación Familiar del Caquetá COMFACA',
+            'msj' => "Se informa que los datos del trabajador con número de documento de identificación {$documento} fueron actualizados con éxito.",
+        ];
 
-        $data = $this->solicitud->getArray();
-        $data['razsoc'] = $this->solicitante->getNombre();
-        $data['membrete'] = "{$this->dominio}/public/img/header_reporte_ugpp.png";
-        $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
-        $data['actapr'] = $actapr;
-        $data['dia'] = $dia;
-        $data['mes'] = $mes;
-        $data['anno'] = $anno;
-        $data['msj'] = 'Se informa que los datos del trabajador fueron actualizados con éxito.';
+        $html = view('emails.mail_aprobar', $data)->render();
 
         $emailCaja = Mercurio01::first();
         $sender = new SenderEmail(
@@ -146,12 +146,11 @@ class ApruebaDatosTrabajador
                 [
                     'emisor_email' => $emailCaja->getEmail(),
                     'emisor_clave' => $emailCaja->getClave(),
-                    'asunto' => 'Actualización de datos del trabajador realizada con éxito',
+                    'asunto' => "Actualización de datos del trabajador realizada con éxito, identificación {$documento}",
                 ]
             )
         );
 
-        $html = View('cajas.layouts.aprobar', $data)->render();
         $sender->send(
             $this->solicitante->getEmail(),
             $html

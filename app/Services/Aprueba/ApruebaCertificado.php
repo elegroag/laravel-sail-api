@@ -32,10 +32,20 @@ class ApruebaCertificado
 
     public function procesar($postData)
     {
-        $validacionesControl = ValidacionControlChecklist::preparar($postData);
+        unset($postData['validaciones_control']);
 
         $certificado = Mercurio45::where('id', $this->solicitud->getId())->first();
-        $params = array_merge($certificado->getArray(), $postData, $validacionesControl);
+        $params = array_merge($certificado->getArray(), $postData);
+
+        $fecpre = $params['fecpre'] ?? null;
+        if ($fecpre === null || $fecpre === '') {
+            $fecsol = $certificado->fecsol ?? null;
+            if ($fecsol instanceof \DateTimeInterface) {
+                $params['fecpre'] = $fecsol->format('Y-m-d');
+            } elseif (! empty($fecsol)) {
+                $params['fecpre'] = Carbon::parse($fecsol)->format('Y-m-d');
+            }
+        }
 
         $ps = new ApiSubsidio;
         $ps->send(

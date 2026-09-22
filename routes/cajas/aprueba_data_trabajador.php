@@ -11,6 +11,7 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/infor', [ApruebaUpTrabajadorController::class, 'infor']);
         Route::post('/aprueba', [ApruebaUpTrabajadorController::class, 'aprueba']);
         Route::post('/rechazar', [ApruebaUpTrabajadorController::class, 'rechazar']);
+        Route::post('/validar-multiafiliacion', [ApruebaUpTrabajadorController::class, 'validarMultiafiliacion']);
         Route::post('/borrar-filtro', [ApruebaUpTrabajadorController::class, 'borrarFiltro']);
         Route::post('/change_cantidad_pagina/{estado?}', [ApruebaUpTrabajadorController::class, 'changeCantidadPagina']);
     });

@@ -94,7 +94,7 @@ export default class DatosTrabajadorInfoView extends FormInfoView {
         }
 
 		$App.trigger('syncro', {
-			url: 'validarMultiafiliacion',
+			url: 'validar-multiafiliacion',
 			data: {
 				id: this.collection.solicitud.get('id'),
 			},

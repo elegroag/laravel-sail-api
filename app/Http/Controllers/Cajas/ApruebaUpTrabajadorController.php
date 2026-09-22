@@ -199,11 +199,37 @@ class ApruebaUpTrabajadorController extends ApplicationController
 
             $mercurio47 = Mercurio47::where('id', $id)->where('tipact', 'T')->first();
             $mercurio33 = Mercurio33::where('actualizacion', $id)->get();
+            $defaultsConsulta = [
+                'ruuid' => '',
+                'prinom' => '',
+                'segnom' => '',
+                'priape' => '',
+                'segape' => '',
+                'expedicion' => '',
+                'telefono' => '',
+                'celular' => '',
+                'email' => '',
+                'direccion' => '',
+                'dirlab' => '',
+                'codciu' => '',
+                'codzon' => '',
+                'cedtra' => '',
+                'respo_prinom' => '',
+                'respo_segnom' => '',
+                'respo_priape' => '',
+                'respo_segape' => '',
+                'respo_telefono' => '',
+                'respo_celular' => '',
+                'respo_email' => '',
+            ];
             $dataItems = [];
 
             foreach ($mercurio33 as $row) {
-                $campo = $row->getCampo();
-                $dataItems["{$campo}"] = $row->getValor();
+                $campo = trim((string) $row->getCampo());
+                if ($campo === '') {
+                    continue;
+                }
+                $dataItems[$campo] = (string) ($row->getValor() ?? '');
             }
 
             $ps = new ApiSubsidio;
@@ -227,9 +253,11 @@ class ApruebaUpTrabajadorController extends ApplicationController
                 ]
             );
             $sout = $ps->toArray();
-            $datosTraSisu = ($sout['success'] == true) ? $sout['data'] : false;
+            $datosTraSisu = (($sout['success'] ?? false) === true && is_array($sout['data'] ?? null))
+                ? $sout['data']
+                : [];
 
-            $datostra = array_merge($datosTraSisu, $mercurio47->getArray(), $dataItems);
+            $datostra = array_merge($defaultsConsulta, $datosTraSisu, $mercurio47->getArray(), $dataItems);
 
             $htmlEmpresa = view('cajas/actualizatra/tmp/consulta', [
                 'datostra' => $datostra,
@@ -393,5 +421,45 @@ class ApruebaUpTrabajadorController extends ApplicationController
         }
 
         return $this->renderObject($salida, false);
+    }
+
+    public function validarMultiafiliacion(Request $request)
+    {
+        $id = $request->input('id');
+        $mercurio47 = Mercurio47::where('id', $id)->where('tipact', 'T')->first();
+        if (! $mercurio47) {
+            return response()->json(['multi' => false]);
+        }
+
+        $nit = $mercurio47->nit ?? null;
+        $cedtra = $mercurio47->getDocumento();
+
+        $ps = new ApiSubsidio;
+        $ps->send([
+            'servicio' => 'ComfacaEmpresas',
+            'metodo' => 'informacion_trabajador',
+            'params' => $cedtra,
+        ]);
+        $out = $ps->toArray();
+        if ($out['success'] ?? false) {
+            $datos_trabajador = $out['data'] ?? null;
+            if ($datos_trabajador) {
+                foreach ($datos_trabajador as $key => $value) {
+                    if (is_numeric($key)) {
+                        continue;
+                    }
+                    if ($mercurio47->hasAttribute($key)) {
+                        $mercurio47->$key = $value;
+                    }
+                }
+            }
+        }
+
+        $response['multi'] = false;
+        if ($nit !== null && ($mercurio47->nit ?? null) != $nit && ($mercurio47->estado ?? null) == 'A') {
+            $response['multi'] = true;
+        }
+
+        return response()->json($response);
     }
 }
