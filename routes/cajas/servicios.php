@@ -26,6 +26,7 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/change-cantidad-pagina', [AdmserviciosController::class, 'changeCantidadPagina'])->name('admservicios.change-cantidad-pagina');
         Route::post('/buscar', [AdmserviciosController::class, 'buscar'])->name('admservicios.buscar');
         Route::post('/detalle/{id}', [AdmserviciosController::class, 'detalle'])->name('admservicios.detalle');
+        Route::post('/registrar-subsidio/{id}', [AdmserviciosController::class, 'registrarSubsidio'])->name('admservicios.registrar-subsidio');
         Route::get('/reporte/{format?}', [AdmserviciosController::class, 'reporte'])->name('admservicios.reporte');
     });
 });

@@ -122,6 +122,70 @@ $(() => {
         abrirDetallePrecompra(id);
     });
 
+    // Registrar en Subsidio: validar ePayco + guardar-venta
+    $(document).on('click', "[data-toggle='registrar-subsidio']", (e) => {
+        e.preventDefault();
+        const $btn = $(e.currentTarget);
+        const id = $btn.data('id');
+        if (!id) return;
+
+        const $resultado = $('#resultado_validacion_epayco');
+        $resultado.html('<div class="text-muted small">Validando pago ePayco y registrando en Subsidio…</div>');
+        $btn.prop('disabled', true);
+
+        window.App.trigger('syncro', {
+            url: window.App.url(controller() + '/registrar-subsidio/' + id),
+            data: {},
+            callback: (response) => {
+                $btn.prop('disabled', false);
+                if (!response) {
+                    $resultado.html('<div class="alert alert-danger mb-0 py-2">Sin respuesta del servidor.</div>');
+                    return;
+                }
+
+                const pago = response.pago || null;
+                const registrada = !!(response.registrada);
+                const alertClass = response.success
+                    ? (registrada ? 'alert-success' : 'alert-warning')
+                    : 'alert-danger';
+
+                let detalle = '';
+                if (pago) {
+                    detalle =
+                        '<ul class="mb-0 small mt-1">' +
+                        '<li><strong>ref_payco:</strong> <code>' + (pago.ref_payco || '—') + '</code></li>' +
+                        '<li><strong>Estado ePayco:</strong> ' + (pago.cod_estado ?? '—') + ' — ' + (pago.respuesta || '—') + '</li>' +
+                        '<li><strong>Motivo:</strong> ' + (pago.motivo || '—') + '</li>' +
+                        '<li><strong>Monto:</strong> ' + (pago.monto ?? '—') + '</li>' +
+                        '<li><strong>transaction_id:</strong> <code>' + (pago.transaction_id || '—') + '</code></li>' +
+                        '<li><strong>approval_code:</strong> <code>' + (pago.approval_code || '—') + '</code></li>' +
+                        '</ul>';
+                }
+
+                if (response.success && response.html) {
+                    const $body = $('#modal_detalle_precompra_body');
+                    $body.html(response.html);
+                    if (response.titulo) {
+                        $('#modal_detalle_precompra_titulo').text(response.titulo);
+                    }
+                    Messages.display(response.msj || 'Registro en Subsidio completado.', 'success');
+                    return;
+                }
+
+                $resultado.html(
+                    '<div class="alert ' + alertClass + ' mb-0 py-2">' +
+                        '<div>' + (response.msj || 'Proceso finalizado.') + '</div>' +
+                        detalle +
+                    '</div>'
+                );
+
+                if (!response.success) {
+                    Messages.display(response.msj || 'No se pudo registrar en Subsidio.', 'error');
+                }
+            },
+        });
+    });
+
     // Paginación
     $(document).on('click', "[data-toggle='paginate-buscar']", (e) => {
         e.preventDefault();
