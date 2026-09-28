@@ -59,7 +59,7 @@ export default class TrabajadorInformation extends ControllerValidation {
 					deshacer: estado == 'A' ? true : false,
 					aportes: estado == 'A' ? false : true,
 					volver: true,
-					editar: estado == 'A' ? false : true,
+					editar: estado == 'P',
 					info: false,
 					notificar: false,
 					trayectoria: true,

@@ -9,10 +9,6 @@
         @include('cajas/aprobacionemp/tmp/tmp_sisu')
     </script>
 
-    <script id='tmp_editar' type='text/template'>
-        @include('cajas/aprobacionemp/tmp/tmp_editar')
-    </script>
-
     <script type="text/template" id='tmp_aprobar'>
         @include('cajas/aprobacionemp/tmp/tmp_aprobar')
     </script>

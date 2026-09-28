@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Library\Collections\ParamsEmpresa;
 use App\Library\Collections\ParamsTrabajador;
 use Illuminate\Support\Facades\DB;
@@ -21,10 +22,13 @@ use App\Services\Utils\Comman;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ApruebaComunitariaController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected $tipopc = '11';
 
 
@@ -245,6 +249,57 @@ class ApruebaComunitariaController extends ApplicationController
             'title' => "Solicitud Madre Comunitaria - {$mercurio39->getCedtra()} - {$mercurio39->getEstadoDetalle()}",
         ];
         return $this->renderObject($response, false);
+    }
+
+    public function infor(Request $request): JsonResponse
+    {
+        try {
+            $id = $request->input('id');
+            if (! $id) {
+                throw new DebugException('Error se requiere del id de la solicitud', 501);
+            }
+
+            $mercurio39 = Mercurio39::where('id', $id)->first();
+            if (! $mercurio39) {
+                throw new DebugException('La solicitud no está disponible', 404);
+            }
+
+            $procesadorComando = new ApiSubsidio;
+            $procesadorComando->send(
+                [
+                    'servicio' => 'ComfacaAfilia',
+                    'metodo' => 'parametros_empresa',
+                ]
+            );
+            $paramsEmpresa = new ParamsEmpresa;
+            $paramsEmpresa->setDatosCaptura($procesadorComando->toArray());
+
+            $madreComuniServices = new MadresComuniServices;
+            $htmlSolicitud = view('cajas/aprobacioncom/tmp/consulta', [
+                'mercurio39' => $mercurio39,
+                '_calemp' => ParamsEmpresa::getCalidadEmpresa(),
+                '_codciu' => ParamsEmpresa::getCiudades(),
+                '_codzon' => ParamsEmpresa::getZonas(),
+                '_codact' => ParamsEmpresa::getActividades(),
+            ])->render();
+
+            $response = [
+                'success' => true,
+                'data' => $mercurio39->toArray(),
+                'mercurio11' => Mercurio11::all(),
+                'consulta_empresa' => $htmlSolicitud,
+                'adjuntos' => $madreComuniServices->adjuntos($mercurio39),
+                'seguimiento' => $madreComuniServices->seguimiento($mercurio39),
+                'campos_disponibles' => [],
+            ];
+        } catch (DebugException $err) {
+            $response = [
+                'success' => false,
+                'msj' => $err->getMessage(),
+            ];
+        }
+
+        return response()->json($response);
     }
 
     public function loadParametrosView()

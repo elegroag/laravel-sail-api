@@ -1,3 +1,4 @@
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import { Controller } from '@/Common/Controller';
 import { BeneficiarioAprobarModel } from './models/BeneficiarioAprobarModel';
 import { BeneficiarioModel } from './models/BeneficiarioModel';
@@ -36,6 +37,11 @@ class ControllerBeneficiarios extends Controller {
                 }
             },
         });
+    }
+
+    editarRequest(id) {
+        const app = this.startController(SolicitudEditar);
+        app.editarRequest(id, 'Aprobar beneficiario');
     }
 
     deshacerRequest(_id) {

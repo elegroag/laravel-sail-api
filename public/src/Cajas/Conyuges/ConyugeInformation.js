@@ -72,7 +72,7 @@ export default class ConyugeInformation extends ControllerValidation {
                     deshacer: this.solicitudModel.get('estado') == 'A' ? true : false,
                     aportes: false,
                     volver: true,
-                    editar: this.solicitudModel.get('estado') == 'A' ? false : true,
+                    editar: this.solicitudModel.get('estado') == 'P',
                     info: false,
                     notificar: false,
                 },

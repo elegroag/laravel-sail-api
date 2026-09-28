@@ -19,14 +19,14 @@
 				<i class="fa fa-undo" aria-hidden="true"></i> RE-APROBAR
 			</button>
 			<%}%>
-            <% if(estado == 'A' &&  option.editar) {%>
+            <% if(estado == 'P' && option.editar) {%>
 			<button
 				type='button'
-				info="Editar empresa"
+				info="Editar información registrada"
 				class='btn btn-sm bg-purple text-white mr-2'
 				toggle-event="editar"
 				data-cid="<%=id%>">
-				<i class="fa fa-edit" aria-hidden="true"></i> EDITAR
+				<i class="fa fa-edit" aria-hidden="true"></i> EDITAR INFORMACIÓN
 			</button>
 			<%}%>
             <% if(option.aportes) {%>

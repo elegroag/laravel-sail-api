@@ -46,7 +46,7 @@ class EmpresaInformation extends ControllerValidation {
 					deshacer: this.solicitudModel.get('estado') == 'A' ? true : false,
 					aportes: this.solicitudModel.get('estado') == 'A' ? false : true,
 					volver: true,
-					editar: this.solicitudModel.get('estado') == 'A' ? false : true,
+					editar: this.solicitudModel.get('estado') == 'P',
 					info: false,
 					notificar: false,
 				}

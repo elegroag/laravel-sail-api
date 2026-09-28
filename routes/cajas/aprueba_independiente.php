@@ -24,6 +24,8 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/deshacer', [ApruebaIndependienteController::class, 'deshacer']);
         Route::get('/editar/{id}', [ApruebaIndependienteController::class, 'editarView']);
         Route::post('/editar', [ApruebaIndependienteController::class, 'editaEmpresa']);
+        Route::post('/editar-formulario', [ApruebaIndependienteController::class, 'editarFormulario']);
+        Route::post('/editar-solicitud', [ApruebaIndependienteController::class, 'editarSolicitud']);
         Route::get('/buscar-en-sisu/{id}', [ApruebaIndependienteController::class, 'buscarEnSisuView']);
         Route::post('/change_cantidad_pagina/{estado?}', [ApruebaIndependienteController::class, 'changeCantidadPagina']);
     });

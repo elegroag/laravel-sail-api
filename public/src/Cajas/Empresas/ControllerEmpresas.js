@@ -1,7 +1,7 @@
 import { ReportesController } from '@/Cajas/ReportesController';
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import { Controller } from '@/Common/Controller';
 import loading from '@/Componentes/Views/Loading';
-import { EmpresaEditar } from './EmpresaEditar';
 import { EmpresaInformation } from './EmpresaInformation';
 import { EmpresasListas } from './EmpresasListas';
 
@@ -70,25 +70,8 @@ class ControllerEmpresas extends Controller {
     }
 
     editarRequest(id) {
-        const app = this.startController(EmpresaEditar);
-        this.App.trigger('syncro', {
-            url: 'infor',
-            data: {
-                id: id
-            },
-            callback: (response) => {
-                if (response) {
-                    const solicitud = new EmpresaModel(response.data);
-                    const collection = {
-                        empresa_sisuweb: response.empresa_sisuweb,
-                        mercurio11: response.mercurio11,
-                        consulta: response.consulta_empresa,
-                        campos_disponibles: response.campos_disponibles,
-                    };
-                    app.editarRequest(solicitud, collection);
-                }
-            }
-        });
+        const app = this.startController(SolicitudEditar);
+        app.editarRequest(id, 'Aprobar empresa');
     }
 
     reportesRequest() {

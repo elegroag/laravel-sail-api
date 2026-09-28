@@ -1,5 +1,6 @@
 import { $App } from '@/App';
 import { ControllerValidation } from '@/Cajas/ControllerValidation';
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import IndependienteAprobarModel from '../Independientes/models/IndependienteAprobarModel';
 import IndependienteModel from '../Independientes/models/IndependienteModel';
 import { MadreInfoView } from './MadreInfoView';
@@ -63,7 +64,10 @@ class ControllerMadres extends ControllerValidation {
 
 	aportesRequest(_id) {}
 
-	editarRequest(_id) {}
+	editarRequest(id) {
+		const app = new SolicitudEditar({ region: this.region, App: this.App });
+		app.editarRequest(id, 'Aprobar madre comunitaria');
+	}
 }
 
 export { ControllerMadres };

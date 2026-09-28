@@ -17,6 +17,8 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/reaprobar', [ApruebaBeneficiarioController::class, 'reaprobar']);
         Route::post('/borrar-filtro', [ApruebaBeneficiarioController::class, 'borrarFiltro']);
         Route::post('/infor', [ApruebaBeneficiarioController::class, 'infor']);
+        Route::post('/editar-formulario', [ApruebaBeneficiarioController::class, 'editarFormulario']);
+        Route::post('/editar-solicitud', [ApruebaBeneficiarioController::class, 'editarSolicitud']);
         Route::post('/deshacer', [ApruebaBeneficiarioController::class, 'deshacer']);
 
         Route::post('/aplicar_filtro/{estado?}', [ApruebaBeneficiarioController::class, 'aplicarFiltro']);

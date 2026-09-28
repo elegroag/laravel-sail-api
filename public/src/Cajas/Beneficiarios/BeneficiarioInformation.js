@@ -58,7 +58,7 @@ export default class BeneficiarioInformation extends ControllerValidation {
 			deshacer: model.estado == 'A'? true: false,
 			aportes:  false,
 			volver: true,
-			editar:  model.estado == 'A'? false: true,
+			editar: model.estado == 'P',
 			info: false,
 			notificar: false,
 		};

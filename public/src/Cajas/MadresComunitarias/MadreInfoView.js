@@ -58,7 +58,14 @@ class MadreInfoView extends FormInfoView {
 	}
 
 	loadSubmenu() {
-		this.__loadSubmenu();
+		this.__loadSubmenu({
+			deshacer: true,
+			aportes: false,
+			volver: true,
+			editar: this.solicitudAprobar.get('estado') == 'P',
+			info: false,
+			notificar: false,
+		});
 		this.listenTo(this.headerView, 'load:aportes', this.aportesEmpresa);
 	}
 

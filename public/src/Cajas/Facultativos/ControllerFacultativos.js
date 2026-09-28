@@ -1,4 +1,5 @@
 import { $App } from '@/App';
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import { Controller } from '@/Common/Controller';
 import { AportesCollection } from '@/Componentes/Collections/AportesCollection';
 import FacultativoListas from './FacultativoListas';
@@ -60,6 +61,11 @@ class ControllerFacultativos extends Controller {
 				}
 			},
 		});
+	}
+
+	editarRequest(id) {
+		const app = this.startController(SolicitudEditar);
+		app.editarRequest(id, 'Aprobar facultativo');
 	}
 
 	deshacerRequest(_id) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Library\Collections\ParamsIndependiente;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
@@ -32,6 +33,8 @@ use Illuminate\Http\Request;
 
 class ApruebaIndependienteController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected $tipopc = '13';
 
 

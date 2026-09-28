@@ -18,6 +18,7 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/rechazar', [ApruebaTrabajadorController::class, 'rechazar']);
         Route::get('/opcional', [ApruebaTrabajadorController::class, 'opcional']);
         Route::get('/editar/{id}', [ApruebaTrabajadorController::class, 'editarView']);
+        Route::post('/editar-formulario', [ApruebaTrabajadorController::class, 'editarFormulario']);
         Route::post('/editar-solicitud', [ApruebaTrabajadorController::class, 'editarSolicitud']);
         Route::post('/buscar-sisu', [ApruebaTrabajadorController::class, 'buscarSisu']);
         Route::post('/reaprobar', [ApruebaTrabajadorController::class, 'reaprobar']);

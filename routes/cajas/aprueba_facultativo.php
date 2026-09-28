@@ -14,6 +14,8 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/rechazar', [ApruebaFacultativoController::class, 'rechazar']);
         Route::get('/editar/{id}', [ApruebaFacultativoController::class, 'editarView']);
         Route::post('/editar', [ApruebaFacultativoController::class, 'editaEmpresa']);
+        Route::post('/editar-formulario', [ApruebaFacultativoController::class, 'editarFormulario']);
+        Route::post('/editar-solicitud', [ApruebaFacultativoController::class, 'editarSolicitud']);
         Route::post('/borrar-filtro', [ApruebaFacultativoController::class, 'borrarFiltro']);
         Route::post('/change_cantidad_pagina/{estado?}', [ApruebaFacultativoController::class, 'changeCantidadPagina']);
     });

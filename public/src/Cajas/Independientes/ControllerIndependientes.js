@@ -1,3 +1,4 @@
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import { Controller } from '@/Common/Controller';
 import { AportesCollection } from '@/Componentes/Collections/AportesCollection';
 
@@ -8,7 +9,6 @@ import IndependienteNotificar from './IndependienteNotificar';
 import IndependienteAportes from './IndependienteAportes';
 import IndependienteDeshacer from './IndependienteDeshacer';
 import IndependienteReaprobar from './IndependienteReaprobar';
-import IndependienteEditar from './IndependienteEditar';
 
 class ControllerIndependientes extends Controller {
 	constructor(options = {}) {
@@ -66,26 +66,8 @@ class ControllerIndependientes extends Controller {
 	}
 
 	editarRequest(id = 0) {
-		const app = this.startController(IndependienteEditar);
-		this.App.trigger('syncro', {
-			url: 'infor',
-			data: {
-				id
-			},
-			callback: (response) => {
-				if (response) {
-					app.editarRequest({
-						solicitud: new IndependienteModel(response.data),
-						empresa_sisuweb: response.empresa_sisuweb,
-						mercurio11: response.mercurio11,
-						consulta: response.consulta_empresa,
-						adjuntos: response.adjuntos,
-						seguimiento: response.seguimiento,
-						campos_disponibles: response.campos_disponibles,
-					});
-				}
-			},
-		});
+		const app = this.startController(SolicitudEditar);
+		app.editarRequest(id, 'Aprobar independiente');
 	}
 
 	notificarRequest(id) {

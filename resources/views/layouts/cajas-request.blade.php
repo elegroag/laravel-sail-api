@@ -55,6 +55,10 @@
         @include('cajas/templates/tmp_info_header')
     </script>
 
+    <script id='tmp_editar_solicitud' type="text/template">
+        @include('cajas/templates/tmp_editar_solicitud')
+    </script>
+
     <script id='tmp_aportes' type='text/template'>
         @include('cajas/templates/tmp_aportes')
     </script>

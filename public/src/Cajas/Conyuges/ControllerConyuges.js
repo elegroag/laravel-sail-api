@@ -1,3 +1,4 @@
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import { Controller } from '@/Common/Controller';
 import { ConyugeModel } from './models/ConyugeModel';
 import ConyugeDeshacer from './ConyugeDeshacer';
@@ -31,6 +32,11 @@ class ControllerConyuges extends Controller {
 				}
 			},
 		});
+	}
+
+	editarRequest(id) {
+		const app = this.startController(SolicitudEditar);
+		app.editarRequest(id, 'Aprobar cónyuge');
 	}
 
 	deshacerRequest(_id) {

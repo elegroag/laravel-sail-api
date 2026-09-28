@@ -60,7 +60,7 @@ export default class CertificadoInformation extends ControllerValidation {
 					deshacer: this.solicitudModel.get('estado') == 'A' ? true : false,
 					aportes: false,
 					volver: true,
-					editar: this.solicitudModel.get('estado') == 'A' ? false : true,
+					editar: false,
 					notificar: false,
 					info: false,
 				}

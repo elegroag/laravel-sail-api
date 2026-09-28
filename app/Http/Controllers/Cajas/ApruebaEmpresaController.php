@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Http\Resources\ApiResource;
 use App\Http\Resources\ErrorResource;
 use App\Library\Collections\ParamsEmpresa;
@@ -31,6 +32,8 @@ use Illuminate\Http\Request;
 
 class ApruebaEmpresaController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected string $tipopc = '2';
 
     protected mixed $services;
@@ -692,6 +695,29 @@ class ApruebaEmpresaController extends ApplicationController
         }
 
         return response()->json($salida);
+    }
+
+    protected function datosEdicion(array $validated): array
+    {
+        if (isset($validated['tipsoc']) && strlen($validated['tipsoc']) == 1) {
+            $validated['tipsoc'] = str_pad($validated['tipsoc'], 2, '0', STR_PAD_LEFT);
+        }
+
+        $tipper = $validated['tipper'] ?? null;
+        if ($tipper === 'N' || $tipper === 'J') {
+            $sufijo = $tipper === 'N' ? '' : 'repleg';
+            $repleg = trim(preg_replace('/\s+/', ' ', implode(' ', [
+                $validated["priape{$sufijo}"] ?? '',
+                $validated["segape{$sufijo}"] ?? '',
+                $validated["prinom{$sufijo}"] ?? '',
+                $validated["segnom{$sufijo}"] ?? '',
+            ])));
+            if ($repleg !== '') {
+                $validated['repleg'] = $repleg;
+            }
+        }
+
+        return $validated;
     }
 
     /**

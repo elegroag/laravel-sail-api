@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Library\Collections\ParamsTrabajador;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio01;
@@ -33,6 +34,8 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaTrabajadorController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected $tipopc = '1';
 
 
@@ -726,85 +729,6 @@ class ApruebaTrabajadorController extends ApplicationController
         $this->setParamToView('mercurio30', $empresa);
         $this->setParamToView('mercurio11', Mercurio11::all());
         $this->setParamToView('title', "Solicitud Trabajador - {$trabajador->getCedtra()}");
-    }
-
-    public function editarSolicitud(Request $request)
-    {
-        $this->setResponse('ajax');
-        try {
-            $id = $request->input('id');
-            $cedtra = $request->input('cedtra');
-            $mercurio31 = Mercurio31::where('id', $id)->where('cedtra', $cedtra)->first();
-            if (! $mercurio31) {
-                throw new DebugException('El trabajador no está disponible para notificar por email', 501);
-            } else {
-                $data = [
-                    'razsoc' => $request->input('razsoc'),
-                    'priape' => $request->input('priape'),
-                    'segape' => $request->input('segape'),
-                    'prinom' => $request->input('prinom'),
-                    'segnom' => $request->input('segnom'),
-                    'fecnac' => $request->input('fecnac'),
-                    'ciunac' => $request->input('ciunac'),
-                    'sexo' => $request->input('sexo'),
-                    'estciv' => $request->input('estciv'),
-                    'cabhog' => $request->input('cabhog'),
-                    'codciu' => $request->input('codciu'),
-                    'codzon' => $request->input('codzon'),
-                    'direccion' => $request->input('direccion'),
-                    'barrio' => $request->input('barrio'),
-                    'telefono' => $request->input('telefono'),
-                    'celular' => $request->input('celular'),
-                    'email' => $request->input('email'),
-                    'fecing' => $request->input('fecing'),
-                    'salario' => $request->input('salario'),
-                    'tipsal' => $request->input('tipsal'),
-                    'captra' => $request->input('captra'),
-                    'tipdis' => $request->input('tipdis'),
-                    'nivedu' => $request->input('nivedu'),
-                    'rural' => $request->input('rural'),
-                    'horas' => $request->input('horas'),
-                    'tipcon' => $request->input('tipcon'),
-                    'trasin' => $request->input('trasin'),
-                    'vivienda' => $request->input('vivienda'),
-                    'tipafi' => $request->input('tipafi'),
-                    'profesion' => $request->input('profesion'),
-                    'cargo' => $request->input('cargo'),
-                    'orisex' => $request->input('orisex'),
-                    'facvul' => $request->input('facvul'),
-                    'peretn' => $request->input('peretn'),
-                    'dirlab' => $request->input('dirlab'),
-                    'autoriza' => $request->input('autoriza'),
-                    'tipjor' => $request->input('tipjor'),
-                    'ruralt' => $request->input('ruralt'),
-                    'comision' => $request->input('comision'),
-                    'codsuc' => "{$request->input('codsuc')}",
-                ];
-                $setters = '';
-                foreach ($data as $ai => $row) {
-                    if (strlen($row) > 0) {
-                        $setters .= " $ai='{$row}',";
-                    }
-                }
-                $setters = trim($setters, ',');
-                Mercurio31::where('id', $id)->where('cedtra', $cedtra)->update($setters);
-
-                $row = DB::select("SELECT max(id), mercurio31.* FROM mercurio31 WHERE cedtra='{$cedtra}'");
-                $data = $row ? json_decode(json_encode($row[0]), true) : null;
-                $salida = [
-                    'msj' => 'Proceso se ha completado con éxito',
-                    'success' => true,
-                    'data' => $data,
-                ];
-            }
-        } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
-        }
-
-        return response()->json($salida);
     }
 
     /**

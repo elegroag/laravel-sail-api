@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Http\Resources\ApiResource;
 use App\Http\Resources\ErrorResource;
 use App\Library\Collections\ParamsIndependiente;
@@ -32,6 +33,8 @@ use Illuminate\Http\Request;
 
 class ApruebaPensionadoController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected $tipopc = '9';
 
 

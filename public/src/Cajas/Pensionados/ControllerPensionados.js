@@ -1,3 +1,4 @@
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import { Controller } from '@/Common/Controller';
 import { AportesCollection } from '@/Componentes/Collections/AportesCollection';
 import { PensionadoModel } from './models/PensionadoModel';
@@ -80,7 +81,10 @@ class ControllerPensionados extends Controller {
 		});
 	}
 
-	editarRequest(id) {}
+	editarRequest(id) {
+		const app = this.startController(SolicitudEditar);
+		app.editarRequest(id, 'Aprobar pensionado');
+	}
 
 	deshacerRequest(_id) {
 		const app = this.startController(PensionadoDeshacer);

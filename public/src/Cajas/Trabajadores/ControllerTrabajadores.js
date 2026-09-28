@@ -1,4 +1,5 @@
 import { $App } from '@/App';
+import { SolicitudEditar } from '@/Cajas/SolicitudEditar';
 import { Controller } from '@/Common/Controller';
 import { AportesCollection } from '@/Componentes/Collections/AportesCollection';
 
@@ -48,6 +49,11 @@ class ControllerTrabajadores extends Controller {
                 }
             },
         });
+    }
+
+    editarRequest(id) {
+        const app = this.startController(SolicitudEditar);
+        app.editarRequest(id, 'Aprobar trabajador');
     }
 
     deshacerRequest(_id) {

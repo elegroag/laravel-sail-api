@@ -20,6 +20,8 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/infor', [ApruebaEmpresaController::class, 'infor']);
         Route::get('/editar/{id}', [ApruebaEmpresaController::class, 'editarView']);
         Route::post('/editar', [ApruebaEmpresaController::class, 'editaEmpresa']);
+        Route::post('/editar-formulario', [ApruebaEmpresaController::class, 'editarFormulario']);
+        Route::post('/editar-solicitud', [ApruebaEmpresaController::class, 'editarSolicitud']);
         Route::post('/aportes/{id?}', [ApruebaEmpresaController::class, 'aportes']);
 
         Route::post('/aplicar_filtro/{estado?}', [ApruebaEmpresaController::class, 'aplicarFiltro']);

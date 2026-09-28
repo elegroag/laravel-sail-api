@@ -92,7 +92,7 @@ class HeaderInfoView extends ModelView {
 		e.preventDefault();
 		const id = this.$el.find(e.currentTarget).attr('data-cid');
 		$App.trigger('confirma', {
-			message: `Se requiere de confirmar que desea editar la afiliación de la empresa.`,
+			message: `Se requiere de confirmar que desea editar la información registrada de la solicitud.`,
 			title: '¿Confirmar?',
 			icon: 'warning',
 			callback: (status) => {

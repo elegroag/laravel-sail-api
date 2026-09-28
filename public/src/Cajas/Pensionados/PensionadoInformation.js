@@ -56,7 +56,7 @@ export default class PensionadoInformation extends ControllerValidation {
 					deshacer: true,
 					aportes: true,
 					volver: true,
-					editar: true,
+					editar: this.solicitudModel.get('estado') == 'P',
 					notificar: false,
 					info: false,
 				},

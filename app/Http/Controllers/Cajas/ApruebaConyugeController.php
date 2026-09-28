@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Library\Collections\ParamsConyuge;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio06;
@@ -28,6 +29,8 @@ use Illuminate\Http\Request;
 
 class ApruebaConyugeController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected $tipopc = '3';
 
 
@@ -624,73 +627,6 @@ class ApruebaConyugeController extends ApplicationController
                 'title' => "Conyuge SisuWeb - {$mercurio32->getCedcon()}",
             ]
         )->render();
-    }
-
-    public function editarSolicitud(Request $request)
-    {
-        $this->setResponse('ajax');
-        try {
-            $id = $request->input('id');
-            $cedcon = $request->input('cedcon');
-
-            $mercurio32 = Mercurio32::where('id', $id)->where('cedcon', $cedcon)->first();
-            if (! $mercurio32) {
-                throw new DebugException('La cónyuge no está disponible para editar', 501);
-            } else {
-                $data = [
-                    'cedtra' => $request->input('cedtra'),
-                    'cedcon' => $request->input('cedcon'),
-                    'tipdoc' => $request->input('tipdoc'),
-                    'priape' => $request->input('priape'),
-                    'segape' => $request->input('segape'),
-                    'prinom' => $request->input('prinom'),
-                    'segnom' => $request->input('segnom'),
-                    'fecnac' => $request->input('fecnac'),
-                    'ciunac' => $request->input('ciunac'),
-                    'sexo' => $request->input('sexo'),
-                    'estciv' => $request->input('estciv'),
-                    'comper' => $request->input('comper'),
-                    'tiecon' => $request->input('tiecon'),
-                    'ciures' => $request->input('ciures'),
-                    'codzon' => $request->input('codzon'),
-                    'tipviv' => $request->input('tipviv'),
-                    'direccion' => $request->input('direccion'),
-                    'barrio' => $request->input('barrio'),
-                    'telefono' => $request->input('telefono'),
-                    'celular' => $request->input('celular'),
-                    'email' => $request->input('email'),
-                    'nivedu' => $request->input('nivedu'),
-                    'fecing' => $request->input('fecing'),
-                    'codocu' => $request->input('codocu'),
-                    'salario' => $request->input('salario'),
-                    'captra' => $request->input('captra'),
-                    'tipsal' => $request->input('tipsal'),
-                ];
-                $setters = '';
-                foreach ($data as $ai => $row) {
-                    if (strlen($row) > 0) {
-                        $setters .= " $ai='{$row}',";
-                    }
-                }
-                $setters = trim($setters, ',');
-                Mercurio32::where('id', $id)->where('cedcon', $cedcon)->update($data);
-
-                $row = DB::select("SELECT max(id), mercurio32.* FROM mercurio32 WHERE cedcon='{$cedcon}'");
-                $data = $row ? json_decode(json_encode($row[0]), true) : null;
-                $salida = [
-                    'msj' => 'Proceso se ha completado con éxito',
-                    'success' => true,
-                    'data' => $data,
-                ];
-            }
-        } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
-        }
-
-        return $this->renderObject($salida);
     }
 
     public function editarView(int $id)

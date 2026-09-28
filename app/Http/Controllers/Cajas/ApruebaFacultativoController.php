@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Library\Collections\ParamsFacultativo;
 use App\Library\Collections\ParamsPensionado;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,8 @@ use Illuminate\Support\Facades\View;
 
 class ApruebaFacultativoController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected $tipopc = '10';
 
 

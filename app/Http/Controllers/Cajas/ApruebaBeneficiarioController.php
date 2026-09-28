@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Cajas\Concerns\EditaSolicitud;
 use App\Library\Collections\ParamsBeneficiario;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio06;
-use App\Models\Mercurio07;
 use App\Models\Mercurio10;
 use App\Models\Mercurio11;
 use App\Models\Mercurio31;
@@ -19,7 +19,6 @@ use App\Services\Reports\CsvReportStrategy;
 use App\Services\Reports\ExcelReportStrategy;
 use App\Services\Reports\ReportGenerator;
 use App\Services\Srequest;
-use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use App\Services\Utils\Pagination;
@@ -28,6 +27,8 @@ use Illuminate\Http\Request;
 
 class ApruebaBeneficiarioController extends ApplicationController
 {
+    use EditaSolicitud;
+
     protected $tipopc = '4';
 
 
@@ -521,90 +522,6 @@ class ApruebaBeneficiarioController extends ApplicationController
             '_codgir' => ParamsBeneficiario::getCodigoGiro(),
             'tipo' => '',
         ];
-    }
-
-    public function editarSolicitud(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'id' => 'required|integer',
-                'numdoc' => 'required|string|max:50',
-                'tipdoc' => 'sometimes|string|max:5',
-                'priape' => 'sometimes|string|max:50',
-                'segape' => 'sometimes|nullable|string|max:50',
-                'prinom' => 'sometimes|string|max:50',
-                'segnom' => 'sometimes|nullable|string|max:50',
-                'fecnac' => 'sometimes|date',
-                'ciunac' => 'sometimes|string|max:10',
-                'sexo' => 'sometimes|string|max:1',
-                'parent' => 'sometimes|string|max:3',
-                'huerfano' => 'sometimes|string|max:1',
-                'tiphij' => 'sometimes|string|max:3',
-                'nivedu' => 'sometimes|string|max:3',
-                'captra' => 'sometimes|string|max:3',
-                'tipdis' => 'sometimes|string|max:3',
-                'calendario' => 'sometimes|string|max:3',
-                'cedacu' => 'sometimes|nullable|string|max:50',
-            ]);
-            $id = $validated['id'];
-            $numdoc = $validated['numdoc'];
-
-            $mercurio34 = Mercurio34::where('id', $id)->where('numdoc', $numdoc)->first();
-            if (! $mercurio34) {
-                throw new DebugException('El beneficiario no está disponible para notificar por email', 501);
-            } else {
-                $mercurio07 = Mercurio07::where('documento', $mercurio34->getDocumento())->where('coddoc', $mercurio34->getCoddoc())->first();
-                if (! $mercurio07) {
-                    throw new DebugException('El usuario no está disponible para notificar por email', 501);
-                }
-                $asignarFuncionario = new AsignarFuncionario;
-                $usuario = $asignarFuncionario->asignar($this->tipopc, $mercurio07->getCodciu());
-
-                if (empty($usuario)) {
-                    throw new DebugException('No se puede realizar el registro, no hay usuario disponible para la atención de la solicitud, Comuniquese con la Atencion al cliente', 505);
-                }
-                $data = [
-                    'tipdoc' => $validated['tipdoc'] ?? null,
-                    'numdoc' => $validated['numdoc'] ?? null,
-                    'priape' => $validated['priape'] ?? null,
-                    'segape' => $validated['segape'] ?? null,
-                    'prinom' => $validated['prinom'] ?? null,
-                    'segnom' => $validated['segnom'] ?? null,
-                    'fecnac' => $validated['fecnac'] ?? null,
-                    'ciunac' => $validated['ciunac'] ?? null,
-                    'sexo' => $validated['sexo'] ?? null,
-                    'parent' => $validated['parent'] ?? null,
-                    'huerfano' => $validated['huerfano'] ?? null,
-                    'tiphij' => $validated['tiphij'] ?? null,
-                    'nivedu' => $validated['nivedu'] ?? null,
-                    'captra' => $validated['captra'] ?? null,
-                    'tipdis' => $validated['tipdis'] ?? null,
-                    'calendario' => $validated['calendario'] ?? null,
-                    'cedacu' => $validated['cedacu'] ?? null,
-                ];
-                $data = array_filter($data, function ($v) {
-                    return ! is_null($v) && $v !== '';
-                });
-
-                Mercurio34::where('id', $id)
-                    ->where('numdoc', $numdoc)
-                    ->update($data);
-
-                $salida = [
-                    'msj' => 'Proceso se ha completado con éxito',
-                    'success' => true,
-                    'data' => $mercurio34->toArray(),
-                ];
-            }
-        } catch (DebugException $err) {
-            $salida = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-                'errors' => $err->render($request),
-            ];
-        }
-
-        return response()->json($salida);
     }
 
     /**

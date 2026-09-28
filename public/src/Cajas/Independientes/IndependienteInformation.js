@@ -54,7 +54,7 @@ export default class IndependienteInformation extends ControllerValidation {
 					deshacer: true,
 					aportes: true,
 					volver: true,
-					editar: false,
+					editar: this.solicitudModel.get('estado') == 'P',
 					notificar: false,
 					info: false,
 				},
