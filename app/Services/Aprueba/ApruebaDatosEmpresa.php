@@ -61,7 +61,7 @@ class ApruebaDatosEmpresa
             throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
         }
         if (! $out['success']) {
-            throw new DebugException('Error, '.$out['msj'], 1);
+            throw new DebugException('Error, ' . $out['msj'], 1);
         }
         $empresa = $out['data'];
 
@@ -79,10 +79,7 @@ class ApruebaDatosEmpresa
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'actualiza_empresa',
-                'params' => [
-                    'nit' => $mercurio47->getDocumento(),
-                    'post' => array_merge($empresa, $dataItems, $postData, $validacionesControl),
-                ],
+                'params' => array_merge($empresa, $dataItems, $postData, $validacionesControl)
             ]
         );
         if ($ps->isJson() == false) {
