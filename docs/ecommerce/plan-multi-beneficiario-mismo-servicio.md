@@ -2,7 +2,7 @@
 
 **Estado:** F0–F3 listos (API + Mercurio); F4 pendiente de QA manual  
 **Fecha:** 2026-09-21 (actualizado)  
-**Repos:** Mercurio (`comfaca-enlinea/laravel`) + API Subsidio (`comfaca-api/api-clisisu`)
+**Repos:** Mercurio (`comfaca-enlinea/www`) + API Subsidio (`comfaca-api/api-clisisu`)
 
 ## Requisito
 

@@ -232,7 +232,7 @@ docker exec -it <container_name> php artisan route:list
 
 ```bash
 # Rsync a servidor
-rsync -avz --dry-run /home/edwin-tics/proyectos/comfaca-enlinea/laravel/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/mercurio
+rsync -avz --dry-run /home/edwin-tics/proyectos/comfaca-enlinea/www/ admin@172.168.0.15:/home/admin/contenedores/desarrollo/mercurio
 
 # Verificar que el rsync incluye los archivos correctos
 # (remover --dry-run para ejecutar)

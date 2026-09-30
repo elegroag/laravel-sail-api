@@ -1,6 +1,6 @@
 # Checklist — Controllers Cajas / Mercurio (Corte 9)
 
-Repo: `comfaca-enlinea/laravel`, rama `release/v01`. Corte 8 Services cerrado (`beaac54b`). Este inventario es **nuevo** y no mezcla con `deuda-post-migracion-checklist.md`.
+Repo: `comfaca-enlinea/www`, rama `release/v01`. Corte 8 Services cerrado (`beaac54b`). Este inventario es **nuevo** y no mezcla con `deuda-post-migracion-checklist.md`.
 
 Alcance: listar cada controller de `app/Http/Controllers/Cajas` y `.../Mercurio`. Adapter, Api y Web quedan fuera (salvo nota).
 

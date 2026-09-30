@@ -1,6 +1,6 @@
 # Checklist — Models (deuda Kumbia / ActiveRecord)
 
-Repo: `comfaca-enlinea/laravel`, rama `release/v01`. Fuente: hallazgo de operador-edwin (2026-09-11), **números recontados** en `app/Models`. **No se implementa** hasta que Ricardo elija alcance.
+Repo: `comfaca-enlinea/www`, rama `release/v01`. Fuente: hallazgo de operador-edwin (2026-09-11), **números recontados** en `app/Models`. **No se implementa** hasta que Ricardo elija alcance.
 
 Eloquent por fuera, ActiveRecord Kumbia por dentro. No mezclar con Corte 8/9 (consumidores). No borrar `ModelBase` / `DbBase` / `ActiveRecordBase` hasta vaciar consumidores.
 

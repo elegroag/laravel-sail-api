@@ -4,7 +4,7 @@ Fuente: diagnóstico de operador-edwin (2026-09-11). Corte 8 Services cerrado (o
 
 | Dato | Valor |
 | --- | --- |
-| Repo local | `/home/edwin-tics/proyectos/comfaca-enlinea/laravel` |
+| Repo local | `/home/edwin-tics/proyectos/comfaca-enlinea/www` |
 | GitHub | https://github.com/elegroag/laravel-sail-api.git |
 | Rama / HEAD | `release/v01` |
 | vs origin | +33 commits, **sin push**. Incluye Corte 8 Services (Aprueba, Entidades, CajaServices, Cajas, Formularios, PreparaFormularios) más ePayco/ecommerce |

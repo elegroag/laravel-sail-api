@@ -1,3 +1,4 @@
+name: laravel
 services:
   laravel.test:
     container_name: enlinea

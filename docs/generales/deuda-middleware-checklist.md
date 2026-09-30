@@ -1,6 +1,6 @@
 # Checklist — Middleware (deuda Kumbia / ACL)
 
-Repo: `comfaca-enlinea/laravel`, rama `release/v01`. Fuente: hallazgo de operador-edwin (2026-09-11), verificado en las 7 clases. **No se implementa** hasta que Ricardo elija alcance.
+Repo: `comfaca-enlinea/www`, rama `release/v01`. Fuente: hallazgo de operador-edwin (2026-09-11), verificado en las 7 clases. **No se implementa** hasta que Ricardo elija alcance.
 
 No hay `Filter.php` ni `beforeFilter`/`afterFilter`. La carpeta es Laravel. La deuda es el ACL portado + sesión/flash Kumbia + CSRF except por prefijo.
 
