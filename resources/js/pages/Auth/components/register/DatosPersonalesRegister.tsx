@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft } from 'lucide-react'
+import { AlertCircle, ArrowLeft, Building2, Loader2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { 
@@ -24,6 +24,8 @@ const DatosPersonalesRegister: React.FC<DataPersonRegister> = ({
   lastNameRef,
   emailRef,
   phoneRef,
+  identificationRef,
+  documentTypes = [],
   cityOptions,
   isIndependentType,
   isPensionerType,
@@ -32,6 +34,47 @@ const DatosPersonalesRegister: React.FC<DataPersonRegister> = ({
 }) => {
   return (
     <>
+    {isWorkerType && (
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="documentTypeUser" className="text-sm font-medium text-gray-700">
+            Tipo de documento *
+          </Label>
+          <Select
+            key={`doc-user-${values.documentTypeUser || 'empty'}`}
+            value={values.documentTypeUser || undefined}
+            onValueChange={(v) => onChange("documentTypeUser", v)}
+          >
+            <SelectTrigger className={`in-b-form mt-1 ${errors.documentTypeUser ? "border-red-500" : ""}`}>
+              <SelectValue placeholder="Selecciona" />
+            </SelectTrigger>
+            <SelectContent>
+              {documentTypes.map((doc) => (
+                <SelectItem key={doc.value} value={doc.value}>
+                  {doc.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.documentTypeUser && <p className="text-red-500 text-xs mt-1">{errors.documentTypeUser}</p>}
+        </div>
+        <div>
+          <Label htmlFor="identification" className="text-sm font-medium text-gray-700">
+            Número de documento *
+          </Label>
+          <Input
+            id="identification"
+            ref={identificationRef}
+            type="number"
+            value={values.identification}
+            onChange={(e) => onChange("identification", e.target.value)}
+            placeholder="Número de documento"
+            className={`in-b-form mt-1 ${errors.identification ? "border-red-500" : ""}`}
+          />
+          {errors.identification && <p className="text-red-500 text-xs mt-1">{errors.identification}</p>}
+        </div>
+      </div>
+    )}
     <div className="grid grid-cols-2 gap-4">
       <div>
         <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
@@ -160,7 +203,7 @@ const DatosPersonalesRegister: React.FC<DataPersonRegister> = ({
         <ArrowLeft className="h-4 w-4" />
       </Button>
       <Button type="button" onClick={onNextStep} className="flex-1">
-        {isWorkerType ? 'Siguiente: Datos de empresa' : 'Siguiente: Datos de sesión'}
+        {isWorkerType ? 'Siguiente: Seleccionar empresa' : 'Siguiente: Datos de sesión'}
       </Button>
     </div>
   </>
@@ -172,51 +215,89 @@ const DatosEmpresaRegister: React.FC<DataEmpresaRegister> = ({
   errors,
   onChange,
   onNextStep,
-  onPrevStep
+  onPrevStep,
+  companies,
+  isLoadingCompanies,
+  companiesError
 }) => {
+  const canContinue = !isLoadingCompanies && !companiesError && companies.length > 0
+
+  const handleSelectCompany = (nit: string) => {
+    const company = companies.find((c) => c.nit === nit)
+    onChange('companyNit', nit)
+    onChange('companyName', company?.razsoc ?? '')
+  }
+
   return (
     <>
-      <div>
-        <Label htmlFor="companyNit" className="text-sm font-medium text-gray-700">NIT de la empresa *</Label>
-        <Input
-          id="companyNit"
-          type="text"
-          value={values.companyNit}
-          onChange={(e) => onChange('companyNit', e.target.value)}
-          placeholder="NIT de la empresa"
-          className={`in-b-form mt-1 ${errors.companyNit ? 'border-red-500' : ''}`}
-        />
-        {errors.companyNit && <p className="text-red-500 text-xs mt-1">{errors.companyNit}</p>}
-      </div>
-      <div>
-        <Label htmlFor="companyName" className="text-sm font-medium text-gray-700">Razón social *</Label>
-        <Input
-          id="companyName"
-          type="text"
-          value={values.companyName}
-          onChange={(e) => onChange('companyName', e.target.value)}
-          placeholder="Razón social"
-          className={`in-b-form mt-1 ${errors.companyName ? 'border-red-500' : ''}`}
-        />
-        {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
-      </div>
-      <div>
-        <Label htmlFor="position" className="text-sm font-medium text-gray-700">Cargo *</Label>
-        <Input
-          id="position"
-          type="text"
-          value={values.position}
-          onChange={(e) => onChange('position', e.target.value)}
-          placeholder="Cargo que ejerce"
-          className={`in-b-form mt-1 ${errors.position ? 'border-red-500' : ''}`}
-        />
-        {errors.position && <p className="text-red-500 text-xs mt-1">{errors.position}</p>}
-      </div>
+      {isLoadingCompanies && (
+        <div className="flex flex-col items-center justify-center gap-3 py-10 text-gray-600" role="status" aria-live="polite">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+          <p className="text-sm">Consultando las empresas en las que se encuentra activo...</p>
+        </div>
+      )}
+
+      {!isLoadingCompanies && companiesError && (
+        <div className="flex gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <p className="whitespace-pre-line">{companiesError}</p>
+        </div>
+      )}
+
+      {canContinue && (
+        <>
+          <div>
+            <Label className="text-sm font-medium text-gray-700">Empresa con la que desea ingresar *</Label>
+            <RadioGroup
+              value={values.companyNit}
+              onValueChange={handleSelectCompany}
+              className="mt-2 gap-2"
+            >
+              {companies.map((company) => (
+                <label
+                  key={company.nit}
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                    values.companyNit === company.nit ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <RadioGroupItem value={company.nit} />
+                  <Building2 className="h-5 w-5 shrink-0 text-emerald-600" />
+                  <span className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-800">{company.razsoc}</span>
+                    <span className="text-xs text-gray-500">NIT: {company.nit}</span>
+                  </span>
+                </label>
+              ))}
+            </RadioGroup>
+            {errors.companyNit && <p className="text-red-500 text-xs mt-1">{errors.companyNit}</p>}
+          </div>
+          <div>
+            <Label htmlFor="position" className="text-sm font-medium text-gray-700">Cargo (opcional)</Label>
+            <Input
+              id="position"
+              type="text"
+              value={values.position}
+              onChange={(e) => onChange('position', e.target.value)}
+              placeholder="Cargo que ejerce"
+              className="in-b-form mt-1"
+            />
+          </div>
+        </>
+      )}
+
       <div className="flex gap-3 mt-4">
-        <Button type="button" variant="secondary" onClick={onPrevStep} className="bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300 px-3">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onPrevStep}
+          disabled={isLoadingCompanies}
+          className="bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300 px-3"
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <Button type="button" onClick={onNextStep} className="flex-1">Siguiente: Datos de sesión</Button>
+        <Button type="button" onClick={onNextStep} disabled={!canContinue} className="flex-1">
+          Siguiente: Datos de sesión
+        </Button>
       </div>
     </>
   )
@@ -246,6 +327,9 @@ export default function PersonRegisterForm({
   identificationRef,
   passwordRef,
   confirmPasswordRef,
+  workerCompanies = [],
+  isLoadingCompanies = false,
+  companiesError = null,
 }: PropsPersonRegisterForm){
   // Pista visual de contraseña: requisitos básicos
   const pwd = values.password || ""
@@ -300,6 +384,8 @@ export default function PersonRegisterForm({
             lastNameRef={lastNameRef}
             emailRef={emailRef}
             phoneRef={phoneRef}
+            identificationRef={identificationRef}
+            documentTypes={documentTypes}
             cityOptions={cityOptions}
             isIndependentType={isIndependentType}
             isPensionerType={isPensionerType}
@@ -308,7 +394,7 @@ export default function PersonRegisterForm({
           />
         )}
 
-        {/* Paso 2 (Trabajador): Datos de empresa */}
+        {/* Paso 2 (Trabajador): selección de empresa activa */}
         {isWorkerType && step === 2 && (
           <DatosEmpresaRegister 
             values={values}
@@ -316,6 +402,9 @@ export default function PersonRegisterForm({
             onChange={onChange}
             onNextStep={onNextStep}
             onPrevStep={onPrevStep}
+            companies={workerCompanies}
+            isLoadingCompanies={isLoadingCompanies}
+            companiesError={companiesError}
           />
         )}
 
@@ -329,6 +418,7 @@ export default function PersonRegisterForm({
             isJuridicaRepresentative={isJuridicaRepresentative}
             documentTypes={documentTypes}
             cityOptions={cityOptions}
+            hideIdentityFields={isWorkerType}
             identificationRef={identificationRef}
             passwordRef={passwordRef}
             showPassword={showPassword}

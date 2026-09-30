@@ -87,6 +87,14 @@ export type LoginProps = {
 
 export type DocumentTypeOption = { value: string; label: string };
 
+export type WorkerCompany = { nit: string; razsoc: string };
+
+export type WorkerCompaniesResponse = {
+    success: boolean;
+    empresas?: WorkerCompany[];
+    message?: string;
+};
+
 // Tipado fuerte del payload que se envía al backend (evita any)
 export interface RegisterPayload {
     selected_user_type: string | null;

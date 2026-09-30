@@ -401,6 +401,79 @@ class TrabajadorService
         return false;
     }
 
+    /**
+     * Empresas activas del trabajador para el registro en línea.
+     *
+     * @return array<int, array{nit: string, razsoc: string}>
+     *
+     * @throws DebugException
+     */
+    public function buscarEmpresasActivasParaRegistro(string $cedtra, string $coddoc): array
+    {
+        $ps = new ApiSubsidio;
+        $ps->send(
+            [
+                'servicio' => 'ComfacaEmpresas',
+                'metodo' => 'informacion_trabajador',
+                'params' => [
+                    'cedtra' => $cedtra,
+                    'coddoc' => $coddoc,
+                ],
+            ]
+        );
+
+        if ($ps->isJson() == false) {
+            throw new DebugException('No fue posible consultar la información del trabajador. Intente nuevamente.', 501);
+        }
+
+        $out = $ps->toArray();
+        $trabajador = ($out['success'] ?? false) ? ($out['data'] ?? null) : null;
+
+        if (! is_array($trabajador) || (string) ($trabajador['coddoc'] ?? '') !== $coddoc) {
+            throw new DebugException('Los datos ingresados no coinciden con un trabajador afiliado. Verifique el tipo y número de documento.', 404);
+        }
+
+        return $this->empresasActivasTrabajador($trabajador);
+    }
+
+    /**
+     * Afiliación principal (trabajador y empresa activos) más multiafiliaciones activas, sin NIT repetidos.
+     *
+     * @return array<int, array{nit: string, razsoc: string}>
+     */
+    public function empresasActivasTrabajador(array $trabajador): array
+    {
+        $empresas = [];
+        $nitPrincipal = (string) ($trabajador['nit'] ?? '');
+
+        if ($nitPrincipal !== '' && ($trabajador['estado'] ?? '') === 'A' && ($trabajador['empresa_estado'] ?? '') === 'A') {
+            $empresas[$nitPrincipal] = [
+                'nit' => $nitPrincipal,
+                'razsoc' => (string) ($trabajador['razsoc'] ?? $trabajador['empresa_razsoc'] ?? ''),
+            ];
+        }
+
+        $empresaService = new EmpresaService;
+        foreach ($trabajador['multiafiliaciones'] ?? [] as $afiliacion) {
+            $nit = (string) ($afiliacion['nit'] ?? '');
+            if ($nit === '' || ($afiliacion['estado'] ?? '') !== 'A' || isset($empresas[$nit])) {
+                continue;
+            }
+
+            $empresa = $empresaService->buscarEmpresaSubsidio($nit);
+            if (! $empresa || ($empresa['estado'] ?? '') !== 'A') {
+                continue;
+            }
+
+            $empresas[$nit] = [
+                'nit' => $nit,
+                'razsoc' => (string) ($empresa['razsoc'] ?? ''),
+            ];
+        }
+
+        return array_values($empresas);
+    }
+
     public function consultaSeguimiento(int $id)
     {
         $seguimientos = Mercurio10::where('numero', $id)

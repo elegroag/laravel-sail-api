@@ -1,4 +1,4 @@
-import type { DocumentTypeOption } from '@/types/auth';
+import type { DocumentTypeOption, WorkerCompany } from '@/types/auth';
 
 // Interfaces base para compartir propiedades comunes entre pasos del formulario
 interface BaseFormProps {
@@ -33,6 +33,8 @@ export interface DataPersonRegister extends BaseFormProps, WithNextStep {
     lastNameRef: React.Ref<HTMLInputElement>;
     emailRef: React.Ref<HTMLInputElement>;
     phoneRef: React.Ref<HTMLInputElement>;
+    identificationRef?: React.Ref<HTMLInputElement>;
+    documentTypes?: DocumentTypeOption[];
     cityOptions: DocumentTypeOption[];
     isIndependentType?: boolean;
     isPensionerType?: boolean;
@@ -40,12 +42,18 @@ export interface DataPersonRegister extends BaseFormProps, WithNextStep {
     onBack: () => void;
 }
 
-export interface DataEmpresaRegister extends BaseFormProps, WithNextStep, WithPrevStep {}
+export interface DataEmpresaRegister extends BaseFormProps, WithNextStep, WithPrevStep {
+    companies: WorkerCompany[];
+    isLoadingCompanies: boolean;
+    companiesError: string | null;
+}
 
 export interface DataSession extends BaseFormProps, WithPrevStep {
     isJuridicaRepresentative: boolean;
     documentTypes: DocumentTypeOption[];
     cityOptions: DocumentTypeOption[];
+    // Oculta documento y ciudad cuando ya se capturaron en un paso anterior
+    hideIdentityFields?: boolean;
     identificationRef?: React.Ref<HTMLInputElement>;
     passwordRef?: React.Ref<HTMLInputElement>;
     showPassword: boolean;
@@ -122,6 +130,9 @@ export interface PropsPersonRegisterForm extends PropsCompanyRegisterForm {
     isWorkerType: boolean;
     isIndependentType: boolean;
     isPensionerType: boolean;
+    workerCompanies?: WorkerCompany[];
+    isLoadingCompanies?: boolean;
+    companiesError?: string | null;
 }
 
 export interface HeaderRegisterProps {

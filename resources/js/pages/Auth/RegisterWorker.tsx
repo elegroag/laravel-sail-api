@@ -20,6 +20,9 @@ export default function RegisterWorker(props: LoginProps) {
     dialog,
     setDialog,
     step,
+    workerCompanies,
+    isLoadingCompanies,
+    companiesError,
   } = useRegisterController(props);
 
   useEffect(() => {
@@ -98,6 +101,9 @@ export default function RegisterWorker(props: LoginProps) {
               confirmPasswordRef={domRef.confirmPasswordRef}
               companyNameRef={domRef.companyNameRef}
               companyNitRef={domRef.companyNitRef}
+              workerCompanies={workerCompanies}
+              isLoadingCompanies={isLoadingCompanies}
+              companiesError={companiesError}
             />
           </div>
         </div>

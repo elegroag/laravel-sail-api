@@ -1,6 +1,14 @@
 import { TipoFuncionario } from '@/constants/auth';
 import { useRegisterValidation } from '@/pages/Auth/hooks/useRegisterValidation';
-import type { FormAction, FormState, LoginProps, RegisterPayload, UserType } from '@/types/auth';
+import type {
+    FormAction,
+    FormState,
+    LoginProps,
+    RegisterPayload,
+    UserType,
+    WorkerCompaniesResponse,
+    WorkerCompany,
+} from '@/types/auth';
 import { router } from '@inertiajs/react';
 import type React from 'react';
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
@@ -65,6 +73,9 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     const [state, dispatch] = useReducer(formReducer, initialState);
     const [step, setStep] = useState(1);
     const [dialog, setDialog] = useState<{ message: string; type: 'success' | 'error'; showLoginButton?: boolean } | null>(null);
+    const [workerCompanies, setWorkerCompanies] = useState<WorkerCompany[]>([]);
+    const [isLoadingCompanies, setIsLoadingCompanies] = useState(false);
+    const [companiesError, setCompaniesError] = useState<string | null>(null);
 
     const firstNameRef = useRef<HTMLInputElement>(null);
     const lastNameRef = useRef<HTMLInputElement>(null);
@@ -94,9 +105,12 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
     );
 
     useEffect(() => {
-        if (state.selectedUserType && firstNameRef.current) {
-            firstNameRef.current.focus();
+        if (!state.selectedUserType) {
+            return;
         }
+        // Trabajador: la identificación va antes de nombres y apellidos
+        const firstField = state.selectedUserType === 'trabajador' ? identificationRef : firstNameRef;
+        firstField.current?.focus();
     }, [state.selectedUserType]);
 
     // Hook de validación extraído para reducir lógica en el componente
@@ -195,17 +209,65 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
         }
     };
 
+    const fetchWorkerCompanies = async () => {
+        setIsLoadingCompanies(true);
+        setCompaniesError(null);
+        setWorkerCompanies([]);
+        dispatch({ type: 'SET_FIELD', field: 'companyNit', value: '' });
+        dispatch({ type: 'SET_FIELD', field: 'companyName', value: '' });
+
+        try {
+            const response = await fetch(route('register.worker.empresas'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    coddoc: state.documentTypeUser,
+                    documento: state.identification,
+                }),
+            });
+
+            if (response.status === 429) {
+                throw new Error('Demasiados intentos de consulta. Espere un minuto e intente nuevamente.');
+            }
+
+            const json = (await response.json().catch(() => null)) as WorkerCompaniesResponse | null;
+            if (!response.ok || !json?.success) {
+                throw new Error(json?.message || 'No fue posible consultar las empresas del trabajador.');
+            }
+
+            const empresas = json.empresas ?? [];
+            setWorkerCompanies(empresas);
+            if (empresas.length === 1) {
+                dispatch({ type: 'SET_FIELD', field: 'companyNit', value: empresas[0].nit });
+                dispatch({ type: 'SET_FIELD', field: 'companyName', value: empresas[0].razsoc });
+            }
+        } catch (error) {
+            setCompaniesError(error instanceof Error ? error.message : 'No fue posible consultar las empresas del trabajador.');
+        } finally {
+            setIsLoadingCompanies(false);
+        }
+    };
+
     // Navegación entre pasos usando validación
     const handleNextStep = () => {
         const isCompany = state.selectedUserType === 'empresa';
         const isWorker = state.selectedUserType === 'trabajador';
 
         // Empresa: 1 datos empresa -> 2 representante -> 3 sesión
+        // Trabajador: 1 identificación y datos personales -> 2 selección de empresa -> 3 sesión
         const maxSteps = isCompany ? 3 : isWorker ? 3 : 2;
         if (validateStep()) {
             const nextStep = Math.min(step + 1, maxSteps);
             applyCompanyPrefillsForStep(nextStep);
             setStep(nextStep);
+            if (isWorker && step === 1) {
+                void fetchWorkerCompanies();
+            }
         }
     };
 
@@ -458,6 +520,9 @@ const useRegisterController = ({ Coddoc, Tipsoc, Codciu, errors }: LoginProps) =
         setDialog,
         step,
         validateStep,
+        workerCompanies,
+        isLoadingCompanies,
+        companiesError,
         domRef: {
             firstNameRef,
             lastNameRef,

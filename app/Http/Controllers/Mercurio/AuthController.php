@@ -30,6 +30,7 @@ use App\Services\Utils\AsignarFuncionario;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -77,6 +78,55 @@ class AuthController extends Controller
     public function registerWorker()
     {
         return Inertia::render('Auth/RegisterWorker', (new AutenticaGeneral)->paramsAuthentication());
+    }
+
+    /**
+     * Empresas activas del trabajador para seleccionar en el registro.
+     * Solo expone NIT y razón social.
+     */
+    public function registerWorkerEmpresas(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'coddoc' => 'required|string|min:1|max:2',
+                'documento' => 'required|integer|digits_between:6,18',
+            ]);
+
+            $empresas = (new TrabajadorService)->buscarEmpresasActivasParaRegistro(
+                (string) $data['documento'],
+                (string) $data['coddoc']
+            );
+
+            if (empty($empresas)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontraron empresas activas asociadas a su afiliación. '.
+                        'Comuníquese con COMFACA en afiliacionyregistro@comfaca.com para validar su estado.',
+                    'empresas' => [],
+                ], 422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'empresas' => $empresas,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Los datos ingresados no son válidos.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (DebugException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No fue posible consultar las empresas del trabajador. Intente nuevamente.',
+            ], 500);
+        }
     }
 
     /**
@@ -163,8 +213,10 @@ class AuthController extends Controller
                 'telefono' => 'required|integer|digits_between:6,10',
                 'codciu' => 'required|integer|digits:5',
                 'tipo' => 'required|string|min:1',
-                'razsoc' => 'required|string|min:5',
+                'first_name' => 'required|string|min:2',
+                'last_name' => 'required|string|min:2',
                 'nit' => 'required|integer|digits_between:6,18',
+                'cargo' => 'nullable|string|max:100',
             ]);
 
             $data = $request->all();

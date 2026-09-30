@@ -5,6 +5,7 @@ namespace App\Services\Signup;
 use App\Exceptions\DebugException;
 use App\Models\Mercurio07;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\TrabajadorService;
 use App\Services\PreparaFormularios\GestionFirmaNoImage;
 use App\Services\Srequest;
 use App\Services\Utils\AsignarFuncionario;
@@ -76,6 +77,7 @@ class SignupService
                 if ($res == false) {
                     throw new DebugException('Error al validar el trabajador no está afiliado a la empresa con nit: '.$this->nit, 501);
                 }
+                $this->razsoc = $res['razsoc'];
             }
             $signupParticular = new SignupParticular(
                 new Srequest(
@@ -260,53 +262,22 @@ class SignupService
         }
     }
 
+    /**
+     * @return array{nit: string, razsoc: string}|false
+     */
     public function validaTrabajadorEmpresa(): array|bool
     {
-        $ps = new ApiSubsidio;
-        $ps->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_empresa',
-                'params' => [
-                    'nit' => $this->nit,
-                ],
-            ]
-        );
-        if ($ps->isJson() == false) {
-            return false;
-        }
-
-        $out = $ps->toArray();
-        $isSuccess = $out['success'] ?? null;
-        if (! $isSuccess) {
-            return false;
-        }
-
-        $ps->send(
-            [
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_trabajador',
-                'params' => [
-                    'cedtra' => $this->cedrep,
-                ],
-            ]
+        $empresas = (new TrabajadorService)->buscarEmpresasActivasParaRegistro(
+            (string) $this->cedrep,
+            (string) $this->coddoc
         );
 
-        if ($ps->isJson() == false) {
-            return false;
+        foreach ($empresas as $empresa) {
+            if ($empresa['nit'] === (string) $this->nit) {
+                return $empresa;
+            }
         }
 
-        $out = $ps->toArray();
-        $isSuccess = $out['success'] ?? null;
-        if (! $isSuccess) {
-            return false;
-        }
-
-        $data = $out['data'] ?? null;
-        if (! $data) {
-            return false;
-        }
-
-        return ($data['nit'] == $this->nit) ? $data : false;
+        return false;
     }
 }

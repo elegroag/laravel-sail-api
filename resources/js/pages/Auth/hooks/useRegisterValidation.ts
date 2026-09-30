@@ -130,14 +130,27 @@ function validateCompanyStep(step: number, state: FormState, refs: Refs, dispatc
 
 // Validación para flujo de trabajador
 function validateWorkerStep(step: number, state: FormState, refs: Refs, dispatch: (action: FormAction) => void): boolean {
-    const { firstNameRef, lastNameRef, emailRef, identificationRef, passwordRef, confirmPasswordRef, companyNameRef, companyNitRef } = refs;
+    const { firstNameRef, lastNameRef, emailRef, identificationRef, passwordRef, confirmPasswordRef } = refs;
     let isValid = true;
 
-    // Paso 1: datos personales
+    // Paso 1: identificación y datos personales
     if (step === 1) {
+        if (!state.documentTypeUser) {
+            dispatch({ type: 'SET_ERROR', field: 'documentTypeUser', error: 'El tipo de documento es requerido' });
+            isValid = false;
+        }
+        if (!state.identification.trim()) {
+            dispatch({ type: 'SET_ERROR', field: 'identification', error: 'La identificación es requerida' });
+            if (isValid) identificationRef.current?.focus();
+            isValid = false;
+        } else if (!/^\d{6,18}$/.test(state.identification.trim())) {
+            dispatch({ type: 'SET_ERROR', field: 'identification', error: 'La identificación debe tener entre 6 y 18 dígitos' });
+            if (isValid) identificationRef.current?.focus();
+            isValid = false;
+        }
         if (!state.firstName.trim()) {
             dispatch({ type: 'SET_ERROR', field: 'firstName', error: 'El nombre es requerido' });
-            firstNameRef.current?.focus();
+            if (isValid) firstNameRef.current?.focus();
             isValid = false;
         }
         if (!state.lastName.trim()) {
@@ -162,44 +175,17 @@ function validateWorkerStep(step: number, state: FormState, refs: Refs, dispatch
         return isValid;
     }
 
-    // Paso 2: datos de empresa (nit, razón social, cargo)
+    // Paso 2: selección de empresa activa (cargo opcional)
     if (step === 2) {
-        const reasons: string[] = [];
         if (!state.companyNit?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'companyNit', error: 'El NIT de la empresa es requerido' });
-            reasons.push('companyNit');
-            companyNitRef.current?.focus();
+            dispatch({ type: 'SET_ERROR', field: 'companyNit', error: 'Selecciona la empresa con la que deseas ingresar' });
             isValid = false;
         }
-        if (!state.companyName?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'companyName', error: 'La razón social es requerida' });
-            reasons.push('companyName');
-            if (isValid) companyNameRef.current?.focus();
-            isValid = false;
-        }
-        if (!state.position?.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'position', error: 'El cargo es requerido' });
-            reasons.push('position');
-            isValid = false;
-        }
-        if (reasons.length) {
-            console.debug('[validación] Paso 2 (Trabajador) inválido ->', reasons);
-        }
-        console.log('state', state, 'paso', step);
         return isValid;
     }
 
-    // Paso 3: datos de sesión
+    // Paso 3: datos de sesión (documento y ciudad ya validados en el paso 1)
     if (step === 3) {
-        if (!state.documentTypeUser) {
-            dispatch({ type: 'SET_ERROR', field: 'documentTypeUser', error: 'El tipo de documento es requerido' });
-            isValid = false;
-        }
-        if (!state.identification.trim()) {
-            dispatch({ type: 'SET_ERROR', field: 'identification', error: 'La identificación es requerida' });
-            if (isValid) identificationRef.current?.focus();
-            isValid = false;
-        }
         if (!state.password.trim()) {
             dispatch({ type: 'SET_ERROR', field: 'password', error: 'La contraseña es requerida' });
             if (isValid) passwordRef.current?.focus();

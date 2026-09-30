@@ -18,6 +18,7 @@ const SessionRegister: React.FC<DataSession> = ({
     isJuridicaRepresentative: _isJuridicaRepresentative,
     documentTypes,
     cityOptions,
+    hideIdentityFields = false,
     identificationRef,
     passwordRef,
     showPassword,
@@ -30,6 +31,8 @@ const SessionRegister: React.FC<DataSession> = ({
     isSubmitting
   }) => {
     return (
+      <>
+      {!hideIdentityFields && (
       <>
       <div className="grid grid-cols-1 gap-4">
         <div>
@@ -93,6 +96,8 @@ const SessionRegister: React.FC<DataSession> = ({
           {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
         </div>
       </div>
+      </>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="password" className="text-sm font-medium text-gray-700">
