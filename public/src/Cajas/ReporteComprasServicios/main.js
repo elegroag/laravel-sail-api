@@ -6,8 +6,12 @@ window.App = $App;
 window.App.initialize();
 
 let consultando = false;
+let exportando = false;
 let lastFilters = null;
 let currentPagination = null;
+// Filtros y total de la última consulta exitosa; el Excel se genera con ellos
+let exportFilters = null;
+let lastTotal = 0;
 
 const PER_PAGE = 25;
 
@@ -73,12 +77,17 @@ const setConsultando = (loading) => {
     $btn.prop('disabled', loading).attr('aria-busy', loading ? 'true' : 'false');
     $btn.find('[data-role="btn-label"]').text(loading ? 'Consultando…' : 'Consultar');
     $btn.find('i').attr('class', loading ? 'fas fa-spinner fa-spin' : 'fas fa-search');
+    syncExportarButton();
 };
 
-const setImprimirEnabled = (enabled) => {
-    $('#btn-imprimir')
-        .prop('disabled', !enabled)
-        .attr('aria-disabled', enabled ? 'false' : 'true');
+const syncExportarButton = () => {
+    const enabled = lastTotal > 0 && !exportando && !consultando;
+    const $btn = $('#btn-exportar');
+    $btn.prop('disabled', !enabled)
+        .attr('aria-disabled', enabled ? 'false' : 'true')
+        .attr('aria-busy', exportando ? 'true' : 'false');
+    $btn.find('[data-role="btn-label"]').text(exportando ? 'Exportando…' : 'Exportar Excel');
+    $btn.find('i').attr('class', exportando ? 'fas fa-spinner fa-spin' : 'fas fa-file-excel');
 };
 
 const buildPayload = ({ page = 1 } = {}) => {
@@ -241,7 +250,13 @@ const applyResult = (data, payload, { notifyResult = true } = {}) => {
     renderRows(rows);
     renderPagination(data.pagination || null);
     $('#rcs-results').addClass('is-visible');
-    setImprimirEnabled(total > 0);
+
+    exportFilters = { fecini: payload.fecini, fecfin: payload.fecfin };
+    if (payload.estado) {
+        exportFilters.estado = payload.estado;
+    }
+    lastTotal = total;
+    syncExportarButton();
 
     if (!notifyResult) {
         return;
@@ -310,6 +325,76 @@ const consultar = async ({ page = 1, notifyResult = true } = {}) => {
     }
 };
 
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+const extractFilename = (contentDisposition) => {
+    const match = (contentDisposition || '').match(/filename="?([^";]+)"?/i);
+    return match?.[1] || `ventas_en_linea_servicios_${Date.now()}.xlsx`;
+};
+
+const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
+};
+
+const exportar = async () => {
+    if (exportando || consultando || !exportFilters || lastTotal <= 0) {
+        return;
+    }
+
+    const url = window.ReporteComprasServiciosRoutes?.exportar;
+    if (!url) {
+        notify('error', 'No está configurada la ruta de exportación.');
+        return;
+    }
+
+    exportando = true;
+    syncExportarButton();
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                // JSON primero para que Laravel responda los errores de validación en JSON
+                Accept: `application/json, ${XLSX_MIME}`,
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify(exportFilters),
+        });
+
+        const contentType = response.headers.get('Content-Type') || '';
+
+        if (!response.ok || !contentType.includes(XLSX_MIME)) {
+            const data = contentType.includes('application/json') ? await response.json().catch(() => ({})) : {};
+            const message =
+                data.message ||
+                Object.values(data.errors || {})
+                    .flat()
+                    .join(' ') ||
+                'No fue posible exportar el reporte.';
+            throw new Error(message);
+        }
+
+        const filename = extractFilename(response.headers.get('Content-Disposition'));
+        downloadBlob(await response.blob(), filename);
+        notify('success', `Se descargó el archivo ${filename}.`, 'Exportación exitosa');
+    } catch (error) {
+        notify('error', error?.message || 'Error al exportar el reporte.');
+    } finally {
+        exportando = false;
+        syncExportarButton();
+    }
+};
+
 $(document).ready(() => {
     flatpickr('.datepicker', {
         locale: Spanish,
@@ -322,8 +407,8 @@ $(document).ready(() => {
         consultar({ page: 1 });
     });
 
-    $('#btn-imprimir').on('click', () => {
-        window.print();
+    $('#btn-exportar').on('click', () => {
+        exportar();
     });
 
     $('#rcs-pagination').on('click', 'button[data-page]', (e) => {

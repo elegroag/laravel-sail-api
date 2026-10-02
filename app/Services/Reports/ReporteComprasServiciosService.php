@@ -54,6 +54,20 @@ class ReporteComprasServiciosService
     }
 
     /**
+     * Todas las filas del rango, sin paginación, para exportación.
+     *
+     * @param  array{fecini: string, fecfin: string, estado?: string|null}  $filtros
+     * @return array<int, array<string, mixed>>
+     */
+    public function exportRows(array $filtros): array
+    {
+        return $this->baseQuery($filtros)
+            ->get()
+            ->map(fn (PrecompraServicio $item) => $this->normalize($item))
+            ->all();
+    }
+
+    /**
      * @param  array{fecini: string, fecfin: string, estado?: string|null}  $filtros
      */
     private function baseQuery(array $filtros)

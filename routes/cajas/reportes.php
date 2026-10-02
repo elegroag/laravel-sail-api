@@ -50,6 +50,9 @@ Route::middleware(['cajas.auth'])->group(function () {
 
         Route::post('/consultar', [ReporteComprasServiciosController::class, 'consultar'])
             ->name('cajas.reporte-compras-servicios.consultar');
+
+        Route::post('/exportar', [ReporteComprasServiciosController::class, 'exportar'])
+            ->name('cajas.reporte-compras-servicios.exportar');
     });
 
     Route::get('/cajas/reportesol/index', [ReportesolController::class, 'index'])

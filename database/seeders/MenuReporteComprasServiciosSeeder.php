@@ -30,6 +30,7 @@ class MenuReporteComprasServiciosSeeder extends Seeder
         $opciones = json_encode([
             'index' => true,
             'consultar' => true,
+            'exportar' => true,
         ]);
 
         foreach (['01', '02'] as $index => $tipfun) {

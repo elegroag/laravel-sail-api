@@ -233,35 +233,6 @@
         .rcs-pagination-controls .btn.is-current {
             pointer-events: none;
         }
-
-        @media print {
-            .tmp_header_adapter,
-            .sidenav,
-            .navbar,
-            .rcs-info,
-            .rcs-filters,
-            .rcs-actions,
-            .rcs-pagination,
-            .card-header,
-            footer {
-                display: none !important;
-            }
-
-            .rcs-results {
-                display: block !important;
-            }
-
-            .rcs-page-card {
-                box-shadow: none;
-                border: 0;
-            }
-
-            .main-content,
-            .container-fluid {
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-        }
     </style>
 @endpush
 
@@ -328,9 +299,9 @@
                                 <i class="fas fa-search" aria-hidden="true"></i>
                                 <span data-role="btn-label">Consultar</span>
                             </button>
-                            <button type="button" id="btn-imprimir" class="btn btn-outline-secondary" disabled aria-disabled="true">
-                                <i class="fas fa-print" aria-hidden="true"></i>
-                                <span>Imprimir</span>
+                            <button type="button" id="btn-exportar" class="btn btn-success" disabled aria-disabled="true" aria-busy="false">
+                                <i class="fas fa-file-excel" aria-hidden="true"></i>
+                                <span data-role="btn-label">Exportar Excel</span>
                             </button>
                         </div>
                     </form>
@@ -385,6 +356,7 @@
         window.ServerController = 'reporte-compras-servicios';
         window.ReporteComprasServiciosRoutes = {
             consultar: @json(route('cajas.reporte-compras-servicios.consultar')),
+            exportar: @json(route('cajas.reporte-compras-servicios.exportar')),
         };
         window.ReporteComprasServiciosEstados = @json($estadosLabels);
     </script>
