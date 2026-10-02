@@ -10,6 +10,10 @@ Route::middleware(['mercurio.auth'])->group(function () {
         ->whereIn('formato', ['pdf', 'png'])
         ->middleware('throttle:10,1')
         ->name('carnet.descargar');
+    Route::post('mercurio/carnet/enviar/{formato}', [CarnetController::class, 'enviar'])
+        ->whereIn('formato', ['pdf', 'png'])
+        ->middleware('throttle:10,1')
+        ->name('carnet.enviar');
 });
 
 Route::get('web/carnet/verificar/{token}', [CarnetVerificacionController::class, 'show'])

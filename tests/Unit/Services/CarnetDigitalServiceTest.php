@@ -21,4 +21,16 @@ class CarnetDigitalServiceTest extends TestCase
     {
         $this->assertSame('', CarnetDigitalService::enmascararNombre('   '));
     }
+
+    public function test_enmascara_documento_dejando_ultimos_cuatro(): void
+    {
+        $this->assertSame('***0111', CarnetDigitalService::enmascararDocumento('1.117.000.111'));
+        $this->assertSame('***5678', CarnetDigitalService::enmascararDocumento('AB-12345678'));
+    }
+
+    public function test_enmascara_documento_corto_o_vacio(): void
+    {
+        $this->assertSame('***', CarnetDigitalService::enmascararDocumento('1234'));
+        $this->assertSame('', CarnetDigitalService::enmascararDocumento(''));
+    }
 }

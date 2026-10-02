@@ -88,8 +88,9 @@ class CarnetDigitalService
 
     /**
      * Valida el token contra el estado actual del afiliado en SISU.
+     * La categoría y los beneficiarios solo se consultan si la afiliación está activa; beneficiarios es null si no se pudieron obtener.
      *
-     * @return array{nombre: string, activo: bool, estado_detalle: string, fecha: string}|null
+     * @return array{nombre: string, activo: bool, estado_detalle: string, fecha: string, categoria: string, beneficiarios: array<int, array<string, string>>|null}|null
      */
     public function verificar(string $token): ?array
     {
@@ -116,12 +117,73 @@ class CarnetDigitalService
         $carnetToken->registrarVerificacion();
 
         $estado = (string) ($out['data']['estado'] ?? '');
+        $activo = $estado === 'A';
+        $nucleo = $activo ? $this->nucleoVerificacion((string) $carnetToken->getDocumento()) : null;
 
         return [
             'nombre' => self::enmascararNombre($this->nombreCompleto($out['data'])),
-            'activo' => $estado === 'A',
+            'activo' => $activo,
             'estado_detalle' => get_user_estados()[$estado] ?? 'Sin afiliación vigente',
             'fecha' => now(self::ZONA_HORARIA)->format('d/m/Y h:i a'),
+            'categoria' => $nucleo['categoria'] ?? '',
+            'beneficiarios' => $nucleo['beneficiarios'] ?? null,
+        ];
+    }
+
+    /**
+     * Deja visibles solo los últimos 4 caracteres del documento.
+     */
+    public static function enmascararDocumento(string $documento): string
+    {
+        $limpio = preg_replace('/[^0-9A-Za-z]/', '', $documento) ?? '';
+        if ($limpio === '') {
+            return '';
+        }
+
+        return '***'.(strlen($limpio) > 4 ? substr($limpio, -4) : '');
+    }
+
+    /**
+     * Categoría y beneficiarios activos con datos enmascarados para la verificación pública; null si SISU no responde.
+     *
+     * @return array{categoria: string, beneficiarios: array<int, array<string, string>>}|null
+     */
+    private function nucleoVerificacion(string $cedtra): ?array
+    {
+        try {
+            $ps = new ApiSubsidio;
+            $ps->send([
+                'servicio' => 'PoblacionAfiliada',
+                'metodo' => 'nucleo_familiar_trabajador',
+                'params' => [
+                    'cedtra' => $cedtra,
+                ],
+            ]);
+            $out = $ps->toArray();
+        } catch (Throwable) {
+            return null;
+        }
+
+        $trabajador = ($out['success'] ?? false) ? ($out['data']['trabajador'] ?? []) : [];
+        if (empty($trabajador)) {
+            return null;
+        }
+
+        $beneficiarios = $this->beneficiarios(
+            $out['data']['conyuges'] ?? [],
+            $out['data']['beneficiarios'] ?? [],
+            $this->parametros('parametros_trabajadores', 'tipo_documentos', 'coddoc', 'codrua'),
+            $this->parametros('parametros_beneficiarios', 'parent', 'estado', 'detalle')
+        );
+
+        return [
+            'categoria' => (string) ($trabajador['codcat'] ?? ''),
+            'beneficiarios' => array_map(fn (array $beneficiario) => [
+                'nombre' => self::enmascararNombre($beneficiario['nombre']),
+                'documento' => trim($beneficiario['tipo_documento'].' '.self::enmascararDocumento($beneficiario['documento'])),
+                'parentesco' => $beneficiario['parentesco'],
+                'icono' => $beneficiario['icono'],
+            ], $beneficiarios),
         ];
     }
 

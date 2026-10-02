@@ -17,6 +17,78 @@
             btnFlip.querySelector('span').textContent = flipped ? 'Ver frente' : 'Ver reverso';
         });
     })();
+
+    // En celular o tablet el carnet se envía al correo registrado en lugar de descargarse.
+    (function () {
+        const downloads = document.getElementById('carnetDownloads');
+        if (!downloads || typeof Swal === 'undefined') {
+            return;
+        }
+
+        const isMobile = () =>
+            window.innerWidth <= 768 ||
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+            (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
+        const escapeHtml = (text) => {
+            const el = document.createElement('span');
+            el.textContent = text || '';
+            return el.innerHTML;
+        };
+
+        downloads.addEventListener('click', async function (event) {
+            const link = event.target.closest('a[data-send-url]');
+            if (!link || !isMobile()) {
+                return;
+            }
+            event.preventDefault();
+
+            Swal.fire({
+                title: 'Enviando carnet…',
+                text: 'Lo estamos enviando a tu correo registrado.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => Swal.showLoading(),
+            });
+
+            try {
+                const response = await fetch(link.dataset.sendUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'application/json',
+                    },
+                });
+                const payload = await response.json().catch(() => null);
+
+                if (response.status === 429) {
+                    throw new Error('Has realizado demasiadas solicitudes. Intenta de nuevo en un minuto.');
+                }
+                if (!response.ok || !payload?.success) {
+                    throw new Error(payload?.msj || 'No se pudo enviar el carnet por correo.');
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Carnet enviado',
+                    html:
+                        'Por seguridad, tu carnet se envió al correo <strong>' + escapeHtml(payload.email_masked) + '</strong>.' +
+                        '<br><small class="text-muted">Revisa tu bandeja de entrada o la carpeta de spam.</small>',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#2e8b4e',
+                });
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo enviar',
+                    text: error instanceof Error ? error.message : 'No se pudo enviar el carnet por correo.',
+                    confirmButtonText: 'Entendido',
+                });
+            }
+        });
+    })();
 </script>
 @endpush
 
@@ -170,9 +242,9 @@
             <button type="button" class="carnet-btn-flip" id="btnFlip"><i class="fas fa-sync-alt"></i> <span>Ver reverso</span></button>
         </div>
 
-        <div class="carnet-downloads">
-            <a class="carnet-btn-download" href="{{ route('carnet.descargar', 'pdf') }}" download><i class="fas fa-file-pdf"></i> <span>Descargar PDF</span></a>
-            <a class="carnet-btn-download" href="{{ route('carnet.descargar', 'png') }}" download><i class="fas fa-file-image"></i> <span>Descargar imagen</span></a>
+        <div class="carnet-downloads" id="carnetDownloads">
+            <a class="carnet-btn-download" href="{{ route('carnet.descargar', 'pdf') }}" data-send-url="{{ route('carnet.enviar', 'pdf') }}"><i class="fas fa-file-pdf"></i> <span>Descargar PDF</span></a>
+            <a class="carnet-btn-download" href="{{ route('carnet.descargar', 'png') }}" data-send-url="{{ route('carnet.enviar', 'png') }}"><i class="fas fa-file-image"></i> <span>Descargar imagen</span></a>
         </div>
     </div>
 </div>
