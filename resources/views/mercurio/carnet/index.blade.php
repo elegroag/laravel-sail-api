@@ -56,7 +56,7 @@
                             </defs>
                             <path d="M0 0H420V150C340 190 270 130 190 150C120 168 60 180 0 160Z" fill="url(#carnetGradMobile)" />
                         </svg>
-                        <div class="carnet-logo"><img src="{{ asset('img/comfaca-logo.png') }}" alt="Comfaca" /></div>
+                        <div class="carnet-logo"><img src="{{ asset('img/comfaca-logo.png') }}" srcset="{{ asset('img/comfaca-logo.png') }} 1x, {{ asset('img/comfaca-logo@2x.png') }} 2x" alt="Comfaca" /></div>
                         <div class="carnet-title">
                             <strong>CARNET DE AFILIADO</strong>
                             <span>Trabajador</span>
@@ -135,7 +135,7 @@
                             <strong>NÚCLEO FAMILIAR</strong>
                             <span>Beneficiarios a cargo del afiliado</span>
                         </div>
-                        <div class="carnet-logo"><img src="{{ asset('img/comfaca-logo.png') }}" alt="Comfaca" /></div>
+                        <div class="carnet-logo"><img src="{{ asset('img/comfaca-logo.png') }}" srcset="{{ asset('img/comfaca-logo.png') }} 1x, {{ asset('img/comfaca-logo@2x.png') }} 2x" alt="Comfaca" /></div>
                     </header>
 
                     <div class="carnet-back-body">
@@ -168,6 +168,11 @@
 
         <div class="carnet-actions">
             <button type="button" class="carnet-btn-flip" id="btnFlip"><i class="fas fa-sync-alt"></i> <span>Ver reverso</span></button>
+        </div>
+
+        <div class="carnet-downloads">
+            <a class="carnet-btn-download" href="{{ route('carnet.descargar', 'pdf') }}" download><i class="fas fa-file-pdf"></i> <span>Descargar PDF</span></a>
+            <a class="carnet-btn-download" href="{{ route('carnet.descargar', 'png') }}" download><i class="fas fa-file-image"></i> <span>Descargar imagen</span></a>
         </div>
     </div>
 </div>

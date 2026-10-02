@@ -14,8 +14,8 @@
             </div>
 
             <div class="card-body px-3 px-md-4 py-4">
-                <div id="app" class="row g-4">
-                    <div class="col-lg-6">
+                <div id="app" class="row firma-grid">
+                    <div class="col-lg-5">
                         <section class="firma-section">
                             <div class="firma-section-title">
                                 <i class="fas fa-key" aria-hidden="true"></i>
@@ -29,7 +29,7 @@
                                 <div class="firma-key-toolbar">
                                     <span class="firma-key-label">Certificado público</span>
                                     <button type="button" class="btn btn-sm btn-outline-primary" id="copyPublicKey">
-                                        <i class="fas fa-copy me-1" aria-hidden="true"></i>
+                                        <i class="fas fa-copy mr-1" aria-hidden="true"></i>
                                         Copiar
                                     </button>
                                 </div>
@@ -38,8 +38,8 @@
                         </section>
                     </div>
 
-                    <div class="col-lg-6">
-                        <section class="firma-section h-100">
+                    <div class="col-lg-7">
+                        <section class="firma-section">
                             <div class="firma-section-title">
                                 <i class="fas fa-file-signature" aria-hidden="true"></i>
                                 <span>Validar documento</span>
@@ -54,12 +54,14 @@
                 </div>
 
                 <div class="firma-recovery-section">
-                    <button type="button" id="toggleRecoveryForm" class="btn btn-outline-secondary">
-                        <i class="fas fa-eye me-1" aria-hidden="true"></i>
-                        Mostrar recuperación de firma
-                    </button>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" id="toggleRecoveryForm" class="btn btn-outline-secondary">
+                            <i class="fas fa-eye mr-1" aria-hidden="true"></i>
+                            Mostrar recuperación de firma
+                        </button>
+                    </div>
 
-                    <div class="card border-0 shadow-sm mt-3" id="recoveryFormCard" style="display: none;">
+                    <div class="card border-0 shadow-sm firma-recovery-card" id="recoveryFormCard" style="display: none;">
                         <div class="card-body p-4">
                             <div class="firma-section-title mb-3">
                                 <i class="fas fa-unlock-alt" aria-hidden="true"></i>
@@ -68,18 +70,18 @@
                             <p class="firma-section-text mb-3">
                                 Ingresa tu clave del sistema para recuperar tu firma digital. Las credenciales se enviarán a tu correo registrado.
                             </p>
-                            <div class="row g-3 align-items-end">
-                                <div class="col-md-8">
-                                    <label for="systemKey" class="form-label fw-semibold">Clave del sistema</label>
+                            <div class="form-row align-items-end">
+                                <div class="col-sm-7 mb-2 mb-sm-0">
+                                    <label for="systemKey" class="form-control-label">Clave del sistema</label>
                                     <input type="password"
                                            class="form-control"
                                            id="systemKey"
                                            name="systemKey"
                                            placeholder="Ingresa tu clave del sistema">
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="button" id="recoverSignatureBtn" class="btn btn-primary w-100">
-                                        <i class="fas fa-key me-1" aria-hidden="true"></i>
+                                <div class="col-sm-5">
+                                    <button type="button" id="recoverSignatureBtn" class="btn btn-primary btn-block">
+                                        <i class="fas fa-key mr-1" aria-hidden="true"></i>
                                         Recuperar firma
                                     </button>
                                 </div>
@@ -104,9 +106,9 @@
 
             try {
                 await navigator.clipboard.writeText(content);
-                this.innerHTML = '<i class="fas fa-check me-1" aria-hidden="true"></i>Copiado';
+                this.innerHTML = '<i class="fas fa-check mr-1" aria-hidden="true"></i>Copiado';
                 setTimeout(() => {
-                    this.innerHTML = '<i class="fas fa-copy me-1" aria-hidden="true"></i>Copiar';
+                    this.innerHTML = '<i class="fas fa-copy mr-1" aria-hidden="true"></i>Copiar';
                 }, 2000);
             } catch (error) {
                 window.prompt('Copia la clave pública:', content);
@@ -142,7 +144,14 @@
         line-height: 1.55;
     }
 
+    /* El tema es Bootstrap 4: sin utilidades g-*, el espacio entre columnas apiladas se define aquí */
+    .firma-grid {
+        row-gap: 1.5rem;
+    }
+
     .firma-section {
+        display: flex;
+        flex-direction: column;
         height: 100%;
         padding: 1.15rem 1.25rem;
         border: 1px solid #e9ecef;
@@ -172,6 +181,9 @@
     }
 
     .firma-key-block {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
         border: 1px solid #dbeafe;
         border-radius: 12px;
         overflow: hidden;
@@ -197,9 +209,11 @@
     }
 
     .firma-key-content {
+        flex: 1 1 auto;
         margin: 0;
         padding: 1rem;
-        max-height: 280px;
+        min-height: 180px;
+        max-height: 320px;
         overflow: auto;
         font-size: 0.75rem;
         line-height: 1.6;
@@ -213,6 +227,11 @@
         margin-top: 1.5rem;
         padding-top: 1.25rem;
         border-top: 1px solid #eef2f7;
+    }
+
+    .firma-recovery-card {
+        max-width: 720px;
+        margin: 1rem auto 0;
     }
 
     .file-container {
@@ -232,7 +251,7 @@
         align-items: center;
         justify-content: center;
         gap: 0.35rem;
-        min-height: 220px;
+        min-height: 200px;
         padding: 1.5rem;
         border: 2px dashed #cbd5e1;
         border-radius: 14px;
@@ -288,18 +307,23 @@
         background: #fff;
     }
 
-    .file-container > table {
-        width: 100%;
+    .firma-table-wrap {
         margin-top: 1rem;
+        overflow-x: auto;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+    }
+
+    .firma-table-wrap > table {
+        width: 100%;
+        min-width: 480px;
         border-collapse: separate;
         border-spacing: 0;
         font-size: 0.84rem;
-        border: 1px solid #e9ecef;
-        border-radius: 12px;
-        overflow: hidden;
     }
 
-    .file-container > table thead th {
+    .firma-table-wrap > table thead th {
+        white-space: nowrap;
         background: #f1f5f9;
         color: #334155;
         font-size: 0.78rem;
@@ -310,38 +334,46 @@
         border-bottom: 1px solid #e9ecef;
     }
 
-    .file-container > table tbody td {
-        padding: 0.75rem 0.85rem;
+    .firma-table-wrap > table tbody td {
+        padding: 0.65rem 0.85rem;
         border-bottom: 1px solid #eef2f7;
         vertical-align: middle;
         color: #334155;
     }
 
-    .file-container > table tbody tr:last-child td {
+    .firma-table-wrap > table tbody tr:last-child td {
         border-bottom: 0;
     }
 
-    .file-container > table tbody tr:hover {
+    .firma-table-wrap > table tbody tr:hover {
         background: #f8fbff;
     }
 
-    .file-container > table tbody tr > td:nth-child(2) {
-        max-width: 180px;
+    .firma-table-wrap > table tbody tr > td:nth-child(2),
+    .firma-table-wrap > table tbody tr > td:nth-child(4) {
+        max-width: 160px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    .file-container > table tbody tr > td.no-file {
+    .firma-table-wrap > table tbody tr > td:nth-child(3),
+    .firma-table-wrap > table tbody tr > td:last-child {
+        white-space: nowrap;
+    }
+
+    .firma-table-wrap > table tbody tr > td.no-file {
         text-align: center;
         color: #64748b;
     }
 
-    .file-container > table button {
+    .firma-table-wrap > table button {
         border-radius: 8px;
     }
 
     #signatureResult pre {
+        max-height: 220px;
+        overflow: auto;
         margin: 0.75rem 0 0;
         padding: 0.85rem;
         border-radius: 10px;
@@ -349,6 +381,32 @@
         color: #fff;
         white-space: pre-wrap;
         word-break: break-all;
+    }
+
+    #signatureResult .firma-clave-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    #signatureResult .firma-clave-valor {
+        display: inline-block;
+        min-width: 8rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #0f172a;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        text-align: center;
+    }
+
+    #signatureResult .firma-clave-reveal {
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
     }
 
     @media (max-width: 991.98px) {

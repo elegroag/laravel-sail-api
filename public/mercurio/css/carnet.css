@@ -52,7 +52,7 @@
 
 /* Escala proporcional (640 -> 736 px) solo cuando el área de contenido tiene espacio junto al menú lateral. */
 @media (min-width: 1100px) {
-    .carnet {
+    .carnet-scene .carnet {
         zoom: 1.15;
     }
 }
@@ -124,13 +124,16 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
+/* Capa propia para que el zoom y el giro 3D de la tarjeta no reescalen el logo ya rasterizado. */
 .carnet-logo img {
     display: block;
-    height: 30px;
+    height: 42px;
+    width: auto;
+    transform: translateZ(0);
 }
 
 .carnet-back .carnet-logo img {
-    height: 22px;
+    height: 30px;
 }
 
 .carnet-title {
@@ -407,16 +410,45 @@
     background: var(--cf-green-dark);
 }
 
+.carnet-downloads {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.carnet-btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--cf-green);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--cf-green);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.carnet-btn-download:hover,
+.carnet-btn-download:focus {
+    background: var(--cf-green);
+    color: #fff;
+    text-decoration: none;
+}
+
 /* Celular: tarjeta vertical */
 @media (max-width: 720px) {
-    .carnet {
+    .carnet-scene .carnet {
         width: 100%;
         max-width: 420px;
         aspect-ratio: auto;
         perspective: none;
     }
 
-    .carnet-inner {
+    .carnet-scene .carnet-inner {
         position: static;
         transform: none !important;
         display: flex;
@@ -424,22 +456,22 @@
         gap: 16px;
     }
 
-    .carnet-face {
+    .carnet-scene .carnet-face {
         position: relative;
         backface-visibility: visible;
         visibility: visible !important;
         transition: none;
     }
 
-    .carnet-back {
+    .carnet-scene .carnet-back {
         transform: none;
     }
 
-    .carnet-actions {
+    .carnet-scene .carnet-actions {
         display: none;
     }
 
-    .carnet-front .carnet-header {
+    .carnet-scene .carnet-front .carnet-header {
         height: 190px;
         flex-direction: column;
         align-items: center;
@@ -448,19 +480,23 @@
         padding-top: 18px;
     }
 
-    .carnet-front .carnet-wave-desktop {
+    .carnet-scene .carnet-front .carnet-logo img {
+        height: 48px;
+    }
+
+    .carnet-scene .carnet-front .carnet-wave-desktop {
         display: none;
     }
 
-    .carnet-front .carnet-wave-mobile {
+    .carnet-scene .carnet-front .carnet-wave-mobile {
         display: block;
     }
 
-    .carnet-front .carnet-title {
+    .carnet-scene .carnet-front .carnet-title {
         text-align: center;
     }
 
-    .carnet-body {
+    .carnet-scene .carnet-body {
         grid-template-columns: 1fr;
         padding: 0 20px;
         margin-top: -44px;
@@ -468,30 +504,30 @@
         z-index: 2;
     }
 
-    .carnet-identity {
+    .carnet-scene .carnet-identity {
         flex-direction: column;
         text-align: center;
         gap: 8px;
     }
 
-    .carnet-avatar {
+    .carnet-scene .carnet-avatar {
         width: 88px;
         height: 88px;
         font-size: 1.8rem;
         border-width: 4px;
     }
 
-    .carnet-name {
+    .carnet-scene .carnet-name {
         font-size: 1.15rem;
     }
 
-    .carnet-data {
+    .carnet-scene .carnet-data {
         grid-template-columns: 1fr;
         gap: 0;
         margin-top: 8px;
     }
 
-    .carnet-data>div {
+    .carnet-scene .carnet-data>div {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -500,31 +536,31 @@
         border-bottom: 1px solid var(--cf-line);
     }
 
-    .carnet-data dt {
+    .carnet-scene .carnet-data dt {
         font-size: 0.68rem;
         flex-shrink: 0;
     }
 
-    .carnet-data dd {
+    .carnet-scene .carnet-data dd {
         font-size: 0.85rem;
         text-align: right;
         white-space: normal;
     }
 
-    .carnet-qr {
+    .carnet-scene .carnet-qr {
         padding: 14px 0 4px;
     }
 
-    .carnet-qr-code img {
+    .carnet-scene .carnet-qr-code img {
         width: 150px;
         height: 150px;
     }
 
-    .carnet-qr small {
+    .carnet-scene .carnet-qr small {
         font-size: 0.7rem;
     }
 
-    .carnet-footer {
+    .carnet-scene .carnet-footer {
         flex-direction: column;
         gap: 4px;
         text-align: center;

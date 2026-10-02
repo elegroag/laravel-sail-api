@@ -241,18 +241,13 @@ class FirmasController extends ApplicationController
                 throw new DebugException('No existe firma registrada para el usuario.', 404);
             }
 
-            $signature = [
-                'private_key' => $mfirma->getKeyprivate(),
-                'public_key' => $mfirma->getKeypublic(),
-                'password' => $mfirma->password,
-            ];
-
             // emitir correo con la clave de la firma Digital
             $this->sendMailFirmaDigital($usuario, $mfirma->getKeypublic(), $mfirma->getPassword());
 
             $response = [
                 'success' => true,
-                'signature' => json_encode($signature),
+                'private_key' => $mfirma->getKeyprivate(),
+                'password' => $mfirma->getPassword(),
                 'msj' => 'Firma digital recuperada exitosamente. Se ha enviado un correo con sus credenciales.',
             ];
 

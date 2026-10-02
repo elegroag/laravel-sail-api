@@ -33,9 +33,9 @@ import { $App } from '@/App';
                     <table>
                         <thead>
                             <tr>
-                                <th></th>
-                                <th style="width: 30%;">Nombre archivo</th>
-                                <th style="width: 20%;">Tamaño</th>
+                                <th>#</th>
+                                <th>Nombre archivo</th>
+                                <th>Tamaño</th>
                                 <th>Tipo</th>
                                 <th>Opciones</th>
                             </tr>
@@ -46,7 +46,7 @@ import { $App } from '@/App';
                 `);
 
                 tableBody = table.find('tbody');
-                fileUploadDiv.append(table);
+                fileUploadDiv.append($('<div class="firma-table-wrap"></div>').append(table));
             }
 
             // Adds the information of uploaded files to table.
@@ -69,7 +69,7 @@ import { $App } from '@/App';
                                 <td>${fileType}</td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-primary validaBtn" data-cid='${index}'>
-                                        <i class="fas fa-check-circle me-1" aria-hidden="true"></i>Validar
+                                        <i class="fas fa-check-circle mr-1" aria-hidden="true"></i>Validar
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-danger deleteBtn">
                                         <i class="fas fa-trash-alt" aria-hidden="true"></i>
@@ -134,6 +134,56 @@ import { $App } from '@/App';
     };
 })(jQuery);
 
+const escapeHtml = (value) =>
+    String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+// La clave solo se muestra mientras se mantiene pulsado el botón; no se escribe en el DOM hasta entonces
+const renderRecoveredSignature = (privateKey, password) => {
+    const clave = String(password ?? '');
+    const mask = '•'.repeat(clave.length || 6);
+
+    $('#signatureResult').html(`
+        <div class="alert alert-success pt-3 pb-3">
+            <h6 class="text-white">Firma digital privada:</h6>
+            <pre>${escapeHtml(privateKey)}</pre>
+            <div class="firma-clave mt-3">
+                <h6 class="text-white mb-2">Clave de seguridad para firmar documentos:</h6>
+                <div class="firma-clave-row">
+                    <code class="firma-clave-valor" data-role="clave-valor">${mask}</code>
+                    <button type="button" class="btn btn-sm btn-light firma-clave-reveal" data-role="clave-reveal"
+                        aria-label="Mantener pulsado para ver la clave">
+                        <i class="fas fa-eye mr-1" aria-hidden="true"></i>Mantener pulsado para ver
+                    </button>
+                </div>
+            </div>
+            <p class="mt-3 mb-0">
+                La clave también le fue enviada a su correo electrónico. Guarde esta información en un lugar seguro.
+            </p>
+        </div>
+    `);
+
+    const $valor = $('#signatureResult [data-role="clave-valor"]');
+    const show = (e) => {
+        e.preventDefault();
+        $valor.text(clave);
+    };
+    const hide = () => $valor.text(mask);
+
+    $('#signatureResult [data-role="clave-reveal"]')
+        .on('mousedown touchstart', show)
+        .on('mouseup mouseleave touchend touchcancel blur', hide)
+        .on('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') show(e);
+        })
+        .on('keyup', hide)
+        .on('contextmenu', (e) => e.preventDefault());
+};
+
 $(() => {
     $App.initialize();
 
@@ -146,10 +196,10 @@ $(() => {
 
         if ($card.is(':visible')) {
             $card.slideUp();
-            $btn.html('<i class="fas fa-eye me-1" aria-hidden="true"></i>Mostrar recuperación de firma');
+            $btn.html('<i class="fas fa-eye mr-1" aria-hidden="true"></i>Mostrar recuperación de firma');
         } else {
             $card.slideDown();
-            $btn.html('<i class="fas fa-eye-slash me-1" aria-hidden="true"></i>Ocultar recuperación de firma');
+            $btn.html('<i class="fas fa-eye-slash mr-1" aria-hidden="true"></i>Ocultar recuperación de firma');
         }
     });
 
@@ -167,14 +217,7 @@ $(() => {
             data: { systemKey: systemKey },
             callback: (response) => {
                 if (response.success == true) {
-                    $('#signatureResult').html(`
-                        <div class="alert alert-success pt-3 pb-3">
-                            <h6 class='text-white'>Firma Digital Recuperada:</h6>
-                            <pre>${response.signature}</pre>
-                            <p class="mt-2">
-                            La clave de seguridad para firmar documentos le fue enviada a su correo electrónico. Por favor, guarde esta información en un lugar seguro.</p>
-                        </div>
-                    `);
+                    renderRecoveredSignature(response.private_key, response.password);
                     $App.trigger('alert:success', { message: response.msj });
                 } else {
                     $('#signatureResult').html(`
