@@ -46,7 +46,7 @@
                 }
                 $tx = $precompra->ultimaTransaccionEpayco;
             @endphp
-            <tr>
+            <tr data-href="{{ route('admservicios.ver', ['id' => $precompra->id]) }}" style="cursor:pointer" title="Doble clic para ver el detalle">
                 <td>{{ $precompra->id }}</td>
                 <td>{{ $precompra->documento }}</td>
                 <td>{{ $precompra->codben }}</td>
@@ -64,15 +64,15 @@
                 <td>{{ optional($precompra->fecha_pago)->format('Y-m-d H:i') }}</td>
                 <td>{{ $motivo }}</td>
                 <td class="text-center text-nowrap">
-                    <button
-                        type="button"
+                    <a
+                        href="{{ route('admservicios.ver', ['id' => $precompra->id]) }}"
+                        target="_blank"
+                        rel="noopener"
                         class="btn btn-sm btn-outline-primary"
-                        data-toggle="detalle-precompra"
-                        data-id="{{ $precompra->id }}"
                         title="Ver detalle y transacciones"
                     >
                         <i class="fas fa-eye"></i>
-                    </button>
+                    </a>
                 </td>
             </tr>
         @empty

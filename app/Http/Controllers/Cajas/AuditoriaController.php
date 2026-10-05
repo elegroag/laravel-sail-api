@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Cajas;
 use App\Http\Controllers\Adapter\ApplicationController;
 use App\Models\Gener02;
 use App\Models\Mercurio09;
+use App\Models\Mercurio33;
 use App\Services\ReportGenerator\Products\OptimizedXlsxProduct;
 use App\Services\Utils\CalculatorDias;
 use App\Services\Utils\GeneralService;
@@ -22,6 +23,8 @@ class AuditoriaController extends ApplicationController
     protected $user;
 
     protected $tipfun;
+
+    private ?array $camposActualizacion = null;
 
     public function __construct()
     {
@@ -157,10 +160,21 @@ class AuditoriaController extends ApplicationController
     private function getExtra($mmercurio, string $tipopc): string
     {
         if ($tipopc == '5') {
-            return $mmercurio->getCampoDetalle().' - '.$mmercurio->getAntval().' - '.$mmercurio->getValor();
+            return $this->getExtraActualizacion($mmercurio);
         }
 
         return $mmercurio->getNomcer();
+    }
+
+    private function getExtraActualizacion($mmercurio): string
+    {
+        $this->camposActualizacion ??= $mmercurio->CamposDisponibles();
+
+        return Mercurio33::where('actualizacion', $mmercurio->getId())
+            ->get()
+            ->map(fn ($row) => ($this->camposActualizacion[$row->getCampo()] ?? $row->getCampo())
+                .': '.$row->getAntval().' → '.$row->getValor())
+            ->implode('; ');
     }
 
     private function formatFecha($mmercurio, string $field): ?string

@@ -31,6 +31,13 @@ class WebController extends Controller
     {
         $videos = [
             [
+                'id' => 'compra-servicios',
+                'title' => 'Creación de cuenta de trabajador y compra de servicios',
+                'description' => 'Aprenda a crear su cuenta como trabajador afiliado y a comprar servicios en el portal COMFACA En Línea.',
+                'video' => '/videos/compra-servicios.mp4',
+                'duration' => null,
+            ],
+            [
                 'id' => 'registro-empresas',
                 'title' => 'Registro de empresas',
                 'description' => 'Guía paso a paso para registrar su empresa en el portal COMFACA En Línea.',

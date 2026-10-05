@@ -12,6 +12,7 @@ use App\Services\Ecommerce\EstadoPrecompra;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -106,6 +107,29 @@ class AdmserviciosController extends ApplicationController
     }
 
     /**
+     * GET /cajas/admservicios/ver/{id}
+     * Vista completa del detalle de precompra (reemplaza la modal del listado).
+     */
+    public function ver(int $id)
+    {
+        $precompra = PrecompraServicio::with([
+            'transaccionesEpayco' => function ($q) {
+                $q->orderBy('id');
+            },
+        ])->find($id);
+
+        if (! $precompra) {
+            abort(404, 'La precompra no existe');
+        }
+
+        return view('cajas.admservicios.ver', [
+            'title' => 'Precompra #' . $precompra->id,
+            'precompra' => $precompra,
+            'detalleHtml' => $this->renderDetalleHtml($precompra),
+        ]);
+    }
+
+    /**
      * POST /cajas/admservicios/detalle/{id}
      * HTML del detalle de precompra + historial epayco_transacciones + registro Subsidio.
      */
@@ -129,7 +153,7 @@ class AdmserviciosController extends ApplicationController
         return $this->renderObject([
             'success' => true,
             'html' => $html,
-            'titulo' => 'Precompra #'.$precompra->id,
+            'titulo' => 'Precompra #' . $precompra->id,
         ]);
     }
 
@@ -165,7 +189,7 @@ class AdmserviciosController extends ApplicationController
                 'registrada' => true,
                 'pago' => null,
                 'html' => $this->renderDetalleHtml($precompra->fresh([
-                    'transaccionesEpayco' => fn ($q) => $q->orderBy('id'),
+                    'transaccionesEpayco' => fn($q) => $q->orderBy('id'),
                 ])),
             ]);
         }
@@ -218,7 +242,7 @@ class AdmserviciosController extends ApplicationController
             }
 
             $precompra = $precompra->fresh([
-                'transaccionesEpayco' => fn ($q) => $q->orderBy('id'),
+                'transaccionesEpayco' => fn($q) => $q->orderBy('id'),
             ]);
 
             return $this->renderObject([
@@ -228,7 +252,7 @@ class AdmserviciosController extends ApplicationController
                 'registrada' => true,
                 'subsidio' => $guardado['resultado'] ?? null,
                 'html' => $this->renderDetalleHtml($precompra),
-                'titulo' => 'Precompra #'.$precompra->id,
+                'titulo' => 'Precompra #' . $precompra->id,
             ]);
         } catch (\Throwable $e) {
             Log::warning('Admservicios.registrarSubsidio: error', [
@@ -239,7 +263,7 @@ class AdmserviciosController extends ApplicationController
 
             return $this->renderObject([
                 'success' => false,
-                'msj' => 'Error al registrar en Subsidio: '.$e->getMessage(),
+                'msj' => 'Error al registrar en Subsidio: ' . $e->getMessage(),
                 'registrada' => false,
             ]);
         }
@@ -258,7 +282,29 @@ class AdmserviciosController extends ApplicationController
             'precompra' => $precompra,
             'ventaSubsidio' => $ventaSubsidio,
             'puedeRegistrarSubsidio' => $puedeRegistrarSubsidio,
+            'relacionadas' => $this->precomprasRelacionadas($precompra),
         ])->render();
+    }
+
+    /**
+     * Otras precompras del mismo titular, servicio/apertura y día que comparten al menos un beneficiario.
+     */
+    protected function precomprasRelacionadas(PrecompraServicio $precompra): Collection
+    {
+        $codbens = $precompra->codbenList();
+        if ($codbens === [] || ! $precompra->fecha_precompra) {
+            return collect();
+        }
+
+        return PrecompraServicio::where('id', '!=', $precompra->id)
+            ->where('documento', $precompra->documento)
+            ->where('codser', $precompra->codser)
+            ->where('numero', $precompra->numero)
+            ->whereDate('fecha_precompra', $precompra->fecha_precompra->toDateString())
+            ->orderBy('fecha_precompra')
+            ->get()
+            ->filter(fn (PrecompraServicio $otra) => array_intersect($otra->codbenList(), $codbens) !== [])
+            ->values();
     }
 
     /**
@@ -269,12 +315,12 @@ class AdmserviciosController extends ApplicationController
     protected function guardarVentaSubsidio(PrecompraServicio $precompra, string $refpago): array
     {
         $items = $precompra->codbenList();
-        $itemsPayload = array_map(static fn (string $codben) => ['codben' => $codben], $items);
+        $itemsPayload = array_map(static fn(string $codben) => ['codben' => $codben], $items);
         $codbenPrimero = $items[0] ?? ($precompra->codben ?: $precompra->documento);
 
         try {
             $api = new ApiSubsidio;
-            $api->send([
+            $sender = [
                 'servicio' => 'Movil',
                 'metodo' => 'guardar-venta',
                 'params' => [
@@ -286,7 +332,13 @@ class AdmserviciosController extends ApplicationController
                     'codben' => $codbenPrimero,
                     'items' => $itemsPayload,
                 ],
+            ];
+
+            Log::info('Admservicios.guardarVentaSubsidio: sender', [
+                'sender' => $sender,
             ]);
+
+            $api->send($sender);
 
             $resultado = $api->toArray();
             if (! is_array($resultado)) {
@@ -326,7 +378,7 @@ class AdmserviciosController extends ApplicationController
 
             return [
                 'ok' => false,
-                'msg' => 'Error access api / guardar-venta: '.$e->getMessage(),
+                'msg' => 'Error al guardar la venta: ' . $e->getMessage(),
                 'resultado' => null,
             ];
         }
@@ -389,6 +441,8 @@ class AdmserviciosController extends ApplicationController
         }
 
         $codbens = $precompra->codbenList();
+        $fechaRef = $precompra->fecha_pago ?? $precompra->fecha_precompra;
+        $diaRef = $fechaRef ? $fechaRef->format('Ymd') : null;
 
         try {
             $api = new ApiSubsidio;
@@ -448,6 +502,9 @@ class AdmserviciosController extends ApplicationController
                 if ($codbens !== [] && ! in_array($codbenFila, $codbens, true)) {
                     continue;
                 }
+                if ($diaRef !== null && substr(preg_replace('/\D/', '', (string) ($fila['fecha'] ?? '')), 0, 8) !== $diaRef) {
+                    continue;
+                }
                 $candidatas[] = $fila;
             }
 
@@ -455,14 +512,14 @@ class AdmserviciosController extends ApplicationController
                 return [
                     'consultado' => true,
                     'registrada' => false,
-                    'msg' => 'No registrada en Subsidio (sin coincidencia de servicio/apertura/beneficiario).',
+                    'msg' => 'No registrada en Subsidio (sin coincidencia de servicio/apertura/beneficiario/fecha).',
                     'data' => null,
                 ];
             }
 
             $grupos = [];
             foreach ($candidatas as $fila) {
-                $clave = trim((string) ($fila['marca'] ?? '')).'|'.trim((string) ($fila['documento'] ?? ''));
+                $clave = trim((string) ($fila['marca'] ?? '')) . '|' . trim((string) ($fila['documento'] ?? ''));
                 $grupos[$clave][] = $fila;
             }
 
@@ -536,7 +593,7 @@ class AdmserviciosController extends ApplicationController
             return [
                 'consultado' => true,
                 'registrada' => false,
-                'msg' => 'Error al consultar Subsidio: '.$e->getMessage(),
+                'msg' => 'Error al consultar Subsidio: ' . $e->getMessage(),
                 'data' => null,
             ];
         }
@@ -549,7 +606,7 @@ class AdmserviciosController extends ApplicationController
             $this->query = $consultasOldServices->converQuery($request);
             $precompras = $this->queryPrecompras($request)->get();
 
-            $filename = 'ventas_servicios_'.date('Ymd_His').'.csv';
+            $filename = 'ventas_servicios_' . date('Ymd_His') . '.csv';
 
             return new StreamedResponse(function () use ($precompras) {
                 $handle = fopen('php://output', 'w');
@@ -585,7 +642,7 @@ class AdmserviciosController extends ApplicationController
                         $tx?->approval_code,
                         optional($precompra->fecha_precompra)->format('Y-m-d H:i'),
                         optional($precompra->fecha_pago)->format('Y-m-d H:i'),
-                        trim(($precompra->motivo_desestimacion ?? '').' '.($precompra->detalle_desestimacion ?? '')),
+                        trim(($precompra->motivo_desestimacion ?? '') . ' ' . ($precompra->detalle_desestimacion ?? '')),
                     ], ';');
                 }
                 fclose($handle);
@@ -594,7 +651,7 @@ class AdmserviciosController extends ApplicationController
                 'Content-Disposition' => "attachment; filename=\"{$filename}\"",
             ]);
         } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo generar el reporte: '.$e->getMessage());
+            $response = parent::errorFunc('No se pudo generar el reporte: ' . $e->getMessage());
 
             return $this->renderObject($response, false);
         }

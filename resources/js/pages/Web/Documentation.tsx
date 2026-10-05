@@ -41,7 +41,7 @@ export default function Documentation({ videos, manuales }: Props) {
             </section>
 
             {/* Videos */}
-            <section className="py-16">
+            <section id="videos" className="py-16 scroll-mt-20">
                 <div className="container mx-auto px-4 md:max-w-7xl">
                     <h2 className="text-2xl font-semibold text-gray-900 mb-2">Videos tutoriales</h2>
                     <p className="text-gray-500 mb-8">

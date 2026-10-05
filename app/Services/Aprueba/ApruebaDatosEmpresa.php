@@ -9,6 +9,7 @@ use App\Models\Mercurio30;
 use App\Models\Mercurio33;
 use App\Models\Mercurio47;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Entidades\EmpresaService;
 use App\Services\Srequest;
 use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
@@ -27,6 +28,8 @@ class ApruebaDatosEmpresa
     private $solicitud;
 
     private $dominio;
+
+    private $empresa = [];
 
     public function __construct()
     {
@@ -71,6 +74,8 @@ class ApruebaDatosEmpresa
         foreach ($mercurio33 as $row) {
             $dataItems[$row->getCampo()] = $row->getValor();
         }
+
+        $this->empresa = array_merge($empresa, $dataItems);
 
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
@@ -124,6 +129,10 @@ class ApruebaDatosEmpresa
         $anno = $feccap->format('Y');
 
         $data = $this->solicitud->getArray();
+        $data['repleg'] = $this->empresa['repleg'] ?? '';
+        $data['razsoc'] = $this->empresa['razsoc'] ?? $this->solicitante->getNombre();
+        $data['direccion'] = $this->empresa['direccion'] ?? '';
+        $data['email'] = $this->empresa['email'] ?? $this->solicitante->getEmail();
         $data['membrete'] = "{$this->dominio}/public/img/header_reporte_ugpp.png";
         $data['ruta_firma'] = "{$this->dominio}Mercurio/public/img/Mercurio/firma_jefe_yenny.jpg";
         $data['actapr'] = $actapr;
@@ -152,10 +161,10 @@ class ApruebaDatosEmpresa
         return true;
     }
 
-    public function findSolicitud($idSolicitud)
-    {
-        $this->solicitud = Mercurio30::where('id', $idSolicitud)->first();
 
+    public function findSolicitud(int $idSolicitud)
+    {
+        $this->solicitud = Mercurio47::where('id', $idSolicitud)->where('tipo', 'E')->first();
         return $this->solicitud;
     }
 

@@ -58,7 +58,7 @@ class ApruebaDatosTrabajador
             throw new DebugException('Error, no hay respuesta del servidor para validación del resultado.', 1);
         }
         if (! $out['success']) {
-            throw new DebugException('Error, '.$out['msj'], 1);
+            throw new DebugException('Error, ' . $out['msj'], 1);
         }
         $trabajador = $out['data'];
 
@@ -159,10 +159,9 @@ class ApruebaDatosTrabajador
         return true;
     }
 
-    public function findSolicitud($idSolicitud)
+    public function findSolicitud(int $idSolicitud)
     {
-        $this->solicitud = Mercurio47::where('id', $idSolicitud)->first();
-
+        $this->solicitud = Mercurio47::where('id', $idSolicitud)->where('tipo', 'T')->first();
         return $this->solicitud;
     }
 

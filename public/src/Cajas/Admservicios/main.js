@@ -61,48 +61,15 @@ const buscar = (elem = undefined) => {
     });
 };
 
-const abrirDetallePrecompra = (id) => {
-    const modalEl = document.getElementById('modal_detalle_precompra');
-    if (!modalEl) {
-        Messages.display('No se encontró el modal de detalle.', 'error');
-        return;
-    }
-
-    const $body = $('#modal_detalle_precompra_body');
-    const $titulo = $('#modal_detalle_precompra_titulo');
-    $titulo.text('Detalle de precompra #' + id);
-    $body.html('<div class="text-center text-muted py-4">Cargando…</div>');
-
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    modal.show();
-
-    window.App.trigger('syncro', {
-        url: window.App.url(controller() + '/detalle/' + id),
-        data: {},
-        callback: (response) => {
-            if (response && response.success && response.html) {
-                if (response.titulo) {
-                    $titulo.text(response.titulo);
-                }
-                $body.html(response.html);
-                return;
-            }
-            $body.html(
-                '<div class="alert alert-warning mb-0">' +
-                    (response?.msj || 'No se pudo cargar el detalle.') +
-                '</div>'
-            );
-        },
-    });
-};
-
 $(() => {
     window.App.initialize();
 
     const filtrarModalEl = document.getElementById('filtrar-modal');
     const modalFilter = filtrarModalEl ? new bootstrap.Modal(filtrarModalEl) : null;
 
-    aplicarFiltro();
+    if ($('#consulta').length) {
+        aplicarFiltro();
+    }
 
     // Chips de estado (Todos / Pendientes / Pagadas / Desestimadas / Rechazadas)
     $(document).on('click', "[data-toggle='chip-estado']", (e) => {
@@ -114,12 +81,12 @@ $(() => {
         aplicarFiltro();
     });
 
-    // Detalle precompra + transacciones
-    $(document).on('click', "[data-toggle='detalle-precompra']", (e) => {
-        e.preventDefault();
-        const id = $(e.currentTarget).data('id');
-        if (!id) return;
-        abrirDetallePrecompra(id);
+    // Doble clic en la fila: mismo efecto que el botón de ver detalle
+    $(document).on('dblclick', '#consulta tbody tr[data-href]', (e) => {
+        if ($(e.target).closest('a, button').length) return;
+        const href = $(e.currentTarget).data('href');
+        if (!href) return;
+        window.open(href, '_blank', 'noopener');
     });
 
     // Registrar en Subsidio: validar ePayco + guardar-venta
@@ -163,11 +130,7 @@ $(() => {
                 }
 
                 if (response.success && response.html) {
-                    const $body = $('#modal_detalle_precompra_body');
-                    $body.html(response.html);
-                    if (response.titulo) {
-                        $('#modal_detalle_precompra_titulo').text(response.titulo);
-                    }
+                    $('#detalle_precompra').html(response.html);
                     Messages.display(response.msj || 'Registro en Subsidio completado.', 'success');
                     return;
                 }

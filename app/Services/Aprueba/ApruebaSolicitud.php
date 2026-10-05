@@ -6,7 +6,7 @@ use App\Exceptions\DebugException;
 
 class ApruebaSolicitud
 {
-    public function main($calemp, $idSolicitud, $postData)
+    public function main(string $calemp, int $idSolicitud, mixed $postData)
     {
         /**
          * valida tipo empresa
@@ -65,7 +65,11 @@ class ApruebaSolicitud
         /**
          * valida que tenga tipo documento el aportante
          */
-        if (intval($solicitud->getTipdoc()) == 0) {
+        if (
+            $calemp != 'UE' &&
+            $calemp != 'UT' &&
+            intval($solicitud->getTipdoc()) == 0
+        ) {
             throw new DebugException('Error el tipo de documento es requerido para la aprobación de la afiliación.', 501);
         }
 

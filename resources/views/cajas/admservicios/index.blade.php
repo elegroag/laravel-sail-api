@@ -43,23 +43,6 @@
     </div>
 </div>
 
-{{-- Modal detalle precompra + transacciones ePayco --}}
-<div class="modal fade" id="modal_detalle_precompra" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modal_detalle_precompra_titulo">Detalle de precompra</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body" id="modal_detalle_precompra_body">
-                <div class="text-center text-muted py-4">Cargando…</div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
