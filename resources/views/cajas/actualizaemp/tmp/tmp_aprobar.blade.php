@@ -7,14 +7,14 @@
 		<div class='col-md-4' group-for='codsuc'>
 			<div class='d-flex align-items-center'>
 				<label for='codsuc' class='form-label me-2 mb-0 flex-shrink-0'>Sucursal planilla</label>
-				<input type="text" id="codsuc" class="form-control" placeholder="Sucursal planilla">
+				<input type="text" id="codsuc" name="codsuc" class="form-control" placeholder="Sucursal planilla">
 			</div>
 		</div>
 
 		<div class='col-md-4' group-for='fecapr'>
 			<div class='d-flex align-items-center'>
 				<label for='fecapr' class='form-label me-2 mb-0 flex-shrink-0'>Fecha aprobación</label>
-				<input type="date" id="fecapr" class="form-control" placeholder="Fecha de aprobación">
+				<input type="date" id="fecapr" name="fecapr" class="form-control" placeholder="Fecha de aprobación">
 			</div>
 		</div>
 
@@ -23,7 +23,7 @@
 		<div class='col-12' group-for='nota_aprobar'>
 			<div class='form-group'>
 				<label for='nota_aprobar' class='form-label'>Nota</label>
-				<textarea id="nota_aprobar" class="form-control" placeholder="Nota"></textarea>
+				<textarea id="nota_aprobar" name="nota_aprobar" class="form-control" placeholder="Nota"></textarea>
 			</div>
 		</div>
     </div>

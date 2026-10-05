@@ -11,11 +11,6 @@ class RegistroSeguimiento
     /**
      * crearNota function
      * Se crea la nota de seguimeinto
-     *
-     * @param [type] $tipopc
-     * @param [type] $id
-     * @param [type] $nota
-     * @param  string  $estado
      * @return void
      */
     public function crearNota($tipopc, $id, $nota, $estado)

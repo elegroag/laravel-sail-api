@@ -14,6 +14,7 @@ use App\Services\Utils\RegistroSeguimiento;
 use App\Services\Utils\SenderEmail;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Facades\Log;
 
 class ApruebaDatosEmpresa
 {
@@ -36,7 +37,7 @@ class ApruebaDatosEmpresa
     /**
      * procesar function
      *
-     * @param [type] $postData
+     * @param array $postData
      * @return bool
      */
     public function procesar($postData)
@@ -74,12 +75,13 @@ class ApruebaDatosEmpresa
         /**
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
+        $params = array_merge($empresa, $dataItems, $postData, $validacionesControl);
         $ps = new ApiSubsidio;
         $ps->send(
             [
                 'servicio' => 'ComfacaAfilia',
                 'metodo' => 'actualiza_empresa',
-                'params' => array_merge($empresa, $dataItems, $postData, $validacionesControl)
+                'params' => $params,
             ]
         );
         if ($ps->isJson() == false) {
@@ -92,7 +94,8 @@ class ApruebaDatosEmpresa
         }
 
         if ($out['success'] == false) {
-            throw new DebugException($out['message'], 501);
+            $message = $out['message'] ?? $out['msj'] ?? $out['error'] ?? 'Error desconocido al actualizar la empresa.';
+            throw new DebugException($message, 501, ['out' => $out, 'command' => $ps->getLineaComando()]);
         }
 
         $registroSeguimiento = new RegistroSeguimiento;

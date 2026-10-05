@@ -514,57 +514,41 @@ class ApruebaUpEmpresaController extends ApplicationController
 
     /**
      * aprueba function
-     *
-     * @return void
      */
     public function aprueba(Request $request)
     {
-        $this->setResponse('ajax');
-        $debuginfo = [];
         try {
-            try {
-                $user = session()->get('user');
-                $acceso = (new Gener42)->count('*', "conditions: permiso='62' AND usuario='{$user['usuario']}'");
-                if ($acceso == 0) {
-                    return $this->renderObject(['success' => false, 'msj' => 'El usuario no dispone de permisos de aprobación'], false);
-                }
-                $apruebaSolicitud = new ApruebaSolicitud;
-                DB::beginTransaction();
+            $apruebaSolicitud = new ApruebaSolicitud;
+            DB::beginTransaction();
 
-                $postData = $_POST;
-                $idSolicitud = $request->input('id');
-                $calemp = 'UE';
-                $solicitud = $apruebaSolicitud->main(
-                    $calemp,
-                    $idSolicitud,
-                    $postData
-                );
+            $postData = $request->all();
+            $idSolicitud = $postData['id'];
+            $calemp = 'UE';
+            $solicitud = $apruebaSolicitud->main(
+                $calemp,
+                $idSolicitud,
+                $postData
+            );
 
-                DB::commit();
-                $solicitud->enviarMail($request->input('actapr'), $request->input('fecapr'));
-                $salida = [
-                    'success' => true,
-                    'msj' => 'El registro se completo con éxito',
-                ];
-            } catch (DebugException $err) {
-                DB::rollBack();
-                $salida = [
-                    'success' => false,
-                    'msj' => $err->getMessage(),
-                ];
-            }
-        } catch (DebugException $e) {
+            DB::commit();
+            $solicitud->enviarMail($postData['actapr'], $postData['fecapr']);
+            $salida = [
+                'success' => true,
+                'msj' => 'El registro se completo con éxito',
+            ];
+        } catch (\Exception $e) {
+            Log::error('actualizaemp.aprueba: error', [
+                'msj' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            DB::rollBack();
             $salida = [
                 'success' => false,
                 'msj' => $e->getMessage(),
             ];
         }
-
-        if ($debuginfo) {
-            $salida['info'] = $debuginfo;
-        }
-
-        return $this->renderObject($salida, false);
+        return response()->json($salida, 201);
     }
 
     public function borrarFiltro()
