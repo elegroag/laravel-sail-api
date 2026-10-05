@@ -56,6 +56,7 @@ class ApruebaSolicitud
          */
         if (
             $calemp != 'UE' &&
+            $calemp != 'UT' &&
             intval($solicitud->getCodciu()) == 0
         ) {
             throw new DebugException('Error código de ciudad es requerido para la aprobación de la afiliación.', 501);

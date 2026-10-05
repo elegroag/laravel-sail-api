@@ -287,14 +287,14 @@ class PrincipalController extends Controller
             $id = $request->input('id');
             $coddoc = $request->input('coddoc');
 
-            Log::info('file_existe_global: inicio', [
-                'file_b64' => $file,
-                'id' => $id,
-                'coddoc' => $coddoc,
-            ]);
+            // Log::info('file_existe_global: inicio', [
+            //     'file_b64' => $file,
+            //     'id' => $id,
+            //     'coddoc' => $coddoc,
+            // ]);
 
             if (! $file) {
-                Log::warning('file_existe_global: file vacío o ausente');
+                // Log::warning('file_existe_global: file vacío o ausente');
 
                 return response()->json([
                     'success' => false,
@@ -304,9 +304,9 @@ class PrincipalController extends Controller
 
             $archivo = base64_decode($file, true);
             if ($archivo === false || $archivo === '') {
-                Log::warning('file_existe_global: base64 inválido', [
-                    'file_b64' => $file,
-                ]);
+                // Log::warning('file_existe_global: base64 inválido', [
+                //     'file_b64' => $file,
+                // ]);
 
                 return response()->json([
                     'success' => false,
@@ -317,17 +317,17 @@ class PrincipalController extends Controller
             $archivo = basename($archivo);
             $fichero = storage_path('temp/' . $archivo);
 
-            Log::info('file_existe_global: path resuelto', [
-                'archivo' => $archivo,
-                'fichero' => $fichero,
-                'exists' => file_exists($fichero),
-            ]);
+            // Log::info('file_existe_global: path resuelto', [
+            //     'archivo' => $archivo,
+            //     'fichero' => $fichero,
+            //     'exists' => file_exists($fichero),
+            // ]);
 
             if (file_exists($fichero)) {
-                Log::info('file_existe_global: archivo local encontrado', [
-                    'fichero' => $fichero,
-                    'size' => @filesize($fichero),
-                ]);
+                // Log::info('file_existe_global: archivo local encontrado', [
+                //     'fichero' => $fichero,
+                //     'size' => @filesize($fichero),
+                // ]);
 
                 return response()->file($fichero, [
                     'Content-Type' => 'application/pdf',
@@ -335,10 +335,10 @@ class PrincipalController extends Controller
                 ]);
             }
 
-            Log::warning('file_existe_global: archivo no encontrado', [
-                'archivo' => $archivo,
-                'fichero' => $fichero,
-            ]);
+            // Log::warning('file_existe_global: archivo no encontrado', [
+            //     'archivo' => $archivo,
+            //     'fichero' => $fichero,
+            // ]);
 
             return response()->json([
                 'success' => false,
@@ -350,7 +350,6 @@ class PrincipalController extends Controller
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
                 'request' => $request->only(['file', 'id', 'coddoc']),
             ]);
 

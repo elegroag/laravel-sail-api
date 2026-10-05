@@ -102,20 +102,18 @@ class ApruebaDatosEmpresa
         $registroSeguimiento->crearNota($this->tipopc, $this->solicitud->getId(), $postData['nota_aprobar'], 'A');
 
         $fechaEstado = $this->today->format('Y-m-d');
-        Mercurio47::where('id', $this->solicitud->getId())->update([
-            'estado' => 'A',
-            'fecest' => $fechaEstado,
-        ]);
+        Mercurio47::where('id', $this->solicitud->getId())
+            ->update([
+                'estado' => 'A',
+                'fecest' => $fechaEstado,
+                'fecapr' => $postData['fecapr'],
+            ]);
 
         return true;
     }
 
     /**
      * enviarMail function
-     *
-     * @param [type] $mercurio30
-     * @param [type] $actapr
-     * @param [type] $feccap
      * @return bool
      */
     public function enviarMail($actapr, $feccap)
