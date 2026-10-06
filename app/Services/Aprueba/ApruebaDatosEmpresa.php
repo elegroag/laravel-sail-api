@@ -81,6 +81,11 @@ class ApruebaDatosEmpresa
          * la empresa se debe registrar con el tipo de documento correspondiente y no con el tipo del registro de solicitud
          */
         $params = array_merge($empresa, $dataItems, $postData, $validacionesControl);
+
+        Log::info('ApruebaDatosEmpresa - params', $params);
+
+        $params['nota'] = str_replace('"', " ", $params['nota']);
+
         $ps = new ApiSubsidio;
         $ps->send(
             [

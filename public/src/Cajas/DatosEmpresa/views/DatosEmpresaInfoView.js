@@ -30,6 +30,7 @@ export default class DatosEmpresaInfoView extends FormInfoView {
         return {
             "click [data-toggle='event-cuenta']": 'cambioCuenta',
             "click [data-toggle='info']": 'infoDetalle',
+            "click [data-toggle='adjunto']": 'verArchivo',
             'click #aprobar_solicitud': 'aprobarSolicitud',
             'click #devolver_solicitud': 'devolverSolicitud',
             'click #rechazar_solicitud': 'rechazarSolicitud',
