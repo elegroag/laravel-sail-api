@@ -186,6 +186,59 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modal_confirmar_contacto" tabindex="-1" aria-labelledby="modal_confirmar_contacto_title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal_confirmar_contacto_title">Confirmar datos de contacto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3">Verifique sus datos de contacto antes de continuar con el pago. Al correo electrónico registrado le será enviada la factura electrónica.</p>
+
+                    <dl class="row mb-3">
+                        <dt class="col-3">Correo</dt>
+                        <dd class="col-9" id="txt_contacto_email">-</dd>
+                        <dt class="col-3">Teléfono</dt>
+                        <dd class="col-9" id="txt_contacto_telefono">-</dd>
+                    </dl>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="chk_cambiar_contacto">
+                        <label class="form-check-label" for="chk_cambiar_contacto">Deseo actualizar mis datos de contacto</label>
+                    </div>
+
+                    <div id="form_cambiar_contacto" style="display:none;">
+                        <div class="alert py-2 small" style="background-color:#e6f4fa; border:1px solid #c5e4f1; color:#1f3a4d;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Los datos modificados serán actualizados en la ficha de afiliación del trabajador en Subsidio.
+                        </div>
+                        <div class="mb-2">
+                            <label for="inp_contacto_email" class="form-label">Correo electrónico</label>
+                            <input type="email" id="inp_contacto_email" class="form-control" maxlength="100" autocomplete="email">
+                        </div>
+                        <div class="mb-2">
+                            <label for="inp_contacto_email_confirmacion" class="form-label">Confirmar correo electrónico</label>
+                            <input type="email" id="inp_contacto_email_confirmacion" class="form-control" maxlength="100" autocomplete="off">
+                        </div>
+                        <div class="mb-2">
+                            <label for="inp_contacto_telefono" class="form-label">Teléfono</label>
+                            <input type="tel" id="inp_contacto_telefono" class="form-control" maxlength="10" inputmode="numeric" autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <div id="error_contacto" class="alert alert-danger py-2 small mb-0" style="display:none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btn_confirmar_contacto" class="btn btn-primary">
+                        <i class="fas fa-credit-card"></i> Continuar al pago
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <input type="hidden" id="hid_documento" value="{{ $documento }}">
@@ -205,6 +258,7 @@
 
     var routes = {
         identificarTrabajador: "{{ route('servicios.identificar-trabajador') }}",
+        actualizarContacto: "{{ route('servicios.actualizar-contacto') }}",
         listarServicios: "{{ route('servicios.listar-servicios') }}",
         validarTarifa: "{{ route('servicios.validar-tarifa') }}",
         crearPrecompra: "{{ route('servicios.crear-precompra') }}",

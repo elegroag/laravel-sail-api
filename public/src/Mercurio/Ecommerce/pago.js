@@ -8,6 +8,7 @@ import store from './store.js';
 import { sanitizarTexto } from './utils.js';
 import { obtenerCuposMes, mostrarAlertaCuposMesCero } from './cupos.js';
 import { itemsPayload, totalItems } from './panelCompra.js';
+import { confirmarDatosContacto } from './contacto.js';
 import {
     configurarCheckoutV1,
     esCheckoutV2,
@@ -81,6 +82,17 @@ export function procesarPago(event) {
         return;
     }
 
+    confirmarDatosContacto(
+        function () {
+            continuarPago(target, items, valor);
+        },
+        function () {
+            target.removeAttr('disabled');
+        }
+    );
+}
+
+function continuarPago(target, items, valor) {
     var nombre = sanitizarTexto((store.trabajadorData && store.trabajadorData.nombre) ? store.trabajadorData.nombre : 'Cliente');
     var email = (store.trabajadorData && store.trabajadorData.email) ? store.trabajadorData.email.trim() : 'sin@email.com';
     var documento = $('#hid_documento').val();

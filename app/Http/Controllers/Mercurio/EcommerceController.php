@@ -159,6 +159,82 @@ class EcommerceController extends ApplicationController
     }
 
     /**
+     * POST /mercurio/servicios/actualizar-contacto
+     * AJAX: Actualiza email y telefono del trabajador en Subsidio (ComfacaAfilia / actualiza_trabajador)
+     * antes de procesar el pago. El documento se toma de la sesion, no del request.
+     */
+    public function actualizarContacto(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'email' => 'required|email|max:100|confirmed',
+                'telefono' => 'required|digits_between:7,10',
+            ]);
+
+            $cedtra = self::getActUser('documento');
+            $coddoc = self::getActUser('coddoc');
+
+            if (empty($cedtra) || empty($coddoc)) {
+                throw new DebugException('No se encontró la sesión del trabajador', 401);
+            }
+
+            $this->api->send([
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'actualiza_trabajador',
+                'params' => [
+                    'cedtra' => $cedtra,
+                    'coddoc' => $coddoc,
+                    'post' => [
+                        'email' => $data['email'],
+                        'telefono' => $data['telefono'],
+                    ],
+                ],
+            ]);
+
+            if ($this->api->isJson() == false) {
+                throw new DebugException('No hay respuesta del servidor de Subsidio', 501);
+            }
+
+            $resultado = $this->api->toArray();
+
+            if (! ($resultado['success'] ?? false)) {
+                throw new DebugException($resultado['msj'] ?? $resultado['message'] ?? 'No fue posible actualizar los datos de contacto', 501);
+            }
+
+            $this->actualizarContactoMercurio07($data['email'], $data['telefono']);
+
+            $this->setLogger("Contacto actualizado - cedtra: {$cedtra}");
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'email' => $data['email'],
+                    'telefono' => $data['telefono'],
+                ],
+                'message' => 'Datos de contacto actualizados',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos de contacto inválidos',
+                'errors' => $e->errors(),
+            ]);
+        } catch (DebugException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar los datos de contacto',
+            ]);
+        }
+    }
+
+    /**
      * POST /mercurio/servicios/listar-servicios
      * AJAX: Listar servicios disponibles
      */
@@ -1408,6 +1484,37 @@ class EcommerceController extends ApplicationController
             'coddoc' => $coddoc,
             'tipo' => $tipo,
         ])->first();
+    }
+
+    /**
+     * Actualiza el email del usuario en sesion (mercurio07) y el whatsapp solo si no tiene,
+     * cuando el telefono es un celular de 10 digitos.
+     */
+    protected function actualizarContactoMercurio07(string $email, string $telefono): void
+    {
+        $mercurio07 = $this->usuarioMercurio07Sesion();
+        if (! $mercurio07) {
+            throw new DebugException('Los datos se actualizaron en Subsidio, pero no se encontró el usuario del portal para actualizarlo', 501);
+        }
+
+        $cambios = ['email' => $email];
+        $whatsapp = trim((string) ($mercurio07->getWhatsapp() ?? ''));
+        if ($whatsapp === '' && preg_match('/^[0-9]{10}$/', $telefono)) {
+            $cambios['whatsapp'] = $telefono;
+        }
+
+        try {
+            Mercurio07::where([
+                'documento' => $mercurio07->getDocumento(),
+                'coddoc' => $mercurio07->getCoddoc(),
+                'tipo' => $mercurio07->getTipo(),
+            ])->update($cambios);
+        } catch (\Throwable $e) {
+            $this->setLogger('Error actualizando mercurio07: ' . $e->getMessage());
+            throw new DebugException('Los datos se actualizaron en Subsidio, pero no fue posible actualizar el usuario del portal', 501);
+        }
+
+        session(['user' => array_merge(session('user') ?? [], ['email' => $email])]);
     }
 
     /**

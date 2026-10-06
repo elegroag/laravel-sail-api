@@ -13,6 +13,7 @@ Route::middleware(['mercurio.auth'])->group(function () {
         Route::post('/desestimar-precompra', [EcommerceController::class, 'desestimarPrecompra'])->name('servicios.desestimar-precompra');
         Route::post('/abandonar-precompra', [EcommerceController::class, 'abandonarPrecompra'])->name('servicios.abandonar-precompra');
         Route::post('/identificar-trabajador', [EcommerceController::class, 'identificarTrabajador'])->name('servicios.identificar-trabajador');
+        Route::post('/actualizar-contacto', [EcommerceController::class, 'actualizarContacto'])->name('servicios.actualizar-contacto');
         Route::post('/listar-servicios', [EcommerceController::class, 'listarServicios'])->name('servicios.listar-servicios');
         Route::post('/validar-tarifa', [EcommerceController::class, 'validarTarifa'])->name('servicios.validar-tarifa');
         Route::post('/crear-precompra', [EcommerceController::class, 'crearPrecompra'])->name('servicios.crear-precompra');

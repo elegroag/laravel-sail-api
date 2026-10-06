@@ -28,6 +28,7 @@ import { identificarTrabajador, seleccionarBeneficiario } from './beneficiarios.
 import { filtrarServicios, seleccionarServicio } from './serviciosRender.js';
 import { verificarRespuestaEpayco } from './epayco.js';
 import { procesarPago } from './pago.js';
+import { initConfirmacionContacto } from './contacto.js';
 
 function bindHandlers() {
     var modalEl = document.getElementById('modal_resumen_compra');
@@ -90,6 +91,7 @@ function bindHandlers() {
     });
 
     $(document).on('click', '#btn_procesar_pago', procesarPago);
+    initConfirmacionContacto();
 }
 
 function init() {
