@@ -9,34 +9,36 @@ import { servicioPasaFiltros, poblarFiltroCodser } from './serviciosFiltros.js';
 import { limpiarSeleccionServicio } from './panelCompra.js';
 import { validarTarifa, revalidarItemsConServicio } from './tarifa.js';
 
-export function contarServiciosDisponibles(servicios, query, codser) {
+export function contarServiciosDisponibles(servicios, query, codser, codzon) {
     var count = 0;
     $.each(servicios, function (i, srv) {
         var cupos = parseInt(srv.cupos_disponibles, 10) || 0;
-        if (cupos > 0 && servicioPasaFiltros(srv, query, codser)) {
+        if (cupos > 0 && servicioPasaFiltros(srv, query, codser, codzon)) {
             count++;
         }
     });
     return count;
 }
 
-export function renderServiciosGrid(servicios, query, codser) {
+export function renderServiciosGrid(servicios, query, codser, codzon) {
     var grid = $('#grid_servicios');
     grid.empty();
     query = query || '';
     codser = codser || '';
+    codzon = codzon || '';
     store.busquedaServicio = query;
     store.filtroCodserServicio = codser;
+    store.filtroZonaServicio = codzon;
 
     var visibles = 0;
-    var disponibles = contarServiciosDisponibles(servicios, query, codser);
+    var disponibles = contarServiciosDisponibles(servicios, query, codser, codzon);
 
     $('#contador_servicios').text(
         disponibles + ' servicio' + (disponibles === 1 ? '' : 's') + ' disponible' + (disponibles === 1 ? '' : 's')
     );
 
     $.each(servicios, function (i, srv) {
-        if (!servicioPasaFiltros(srv, query, codser)) {
+        if (!servicioPasaFiltros(srv, query, codser, codzon)) {
             return;
         }
 
@@ -87,16 +89,17 @@ export function renderServiciosGrid(servicios, query, codser) {
 export function filtrarServicios() {
     var query = $('#buscar_servicio').val().trim();
     var codser = $('#filtro_codser').val();
+    var codzon = $('#filtro_zona').val() || '';
 
     if (
         store.servicioSeleccionado &&
         !(store.items && store.items.length > 0) &&
-        !servicioPasaFiltros(store.servicioSeleccionado, query, codser)
+        !servicioPasaFiltros(store.servicioSeleccionado, query, codser, codzon)
     ) {
         limpiarSeleccionServicio();
     }
 
-    renderServiciosGrid(store.serviciosData, query, codser);
+    renderServiciosGrid(store.serviciosData, query, codser, codzon);
 }
 
 export function cargarServicios() {
@@ -115,7 +118,7 @@ export function cargarServicios() {
         if (response.success) {
             store.serviciosData = response.data || [];
             poblarFiltroCodser(store.serviciosData);
-            renderServiciosGrid(store.serviciosData, store.busquedaServicio, store.filtroCodserServicio);
+            renderServiciosGrid(store.serviciosData, store.busquedaServicio, store.filtroCodserServicio, store.filtroZonaServicio);
             $('#contenedor_servicios').css('display', 'flex');
         } else {
             Swal.fire({

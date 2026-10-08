@@ -73,9 +73,41 @@ class EcommerceController extends ApplicationController
                 'pendientesCount' => PrecompraServicio::where('documento', $documento)
                     ->where('estado', EstadoPrecompra::PENDIENTE)
                     ->count(),
+                'zonas' => $this->listarZonas(),
                 'title' => 'Catálogo de Servicios',
             ]
         );
+    }
+
+    /**
+     * Zonas (codzon, detzon) para filtrar servicios por codzon.
+     * Si la API falla retorna [] para no bloquear el catalogo.
+     */
+    protected function listarZonas(): array
+    {
+        try {
+            $this->api->send([
+                'servicio' => 'Movil',
+                'metodo' => 'listar-zonas',
+            ]);
+
+            $resultado = $this->api->toArray();
+
+            if (! ($resultado['flag'] ?? false) || ! is_array($resultado['data'] ?? null)) {
+                $this->setLogger('listar-zonas: ' . ($resultado['msg'] ?? 'respuesta sin datos'));
+
+                return [];
+            }
+
+            return array_values(array_filter(
+                $resultado['data'],
+                fn ($zona) => is_array($zona) && ! empty($zona['codzon'])
+            ));
+        } catch (\Throwable $e) {
+            $this->setLogger('listar-zonas: ' . $e->getMessage());
+
+            return [];
+        }
     }
 
     /**

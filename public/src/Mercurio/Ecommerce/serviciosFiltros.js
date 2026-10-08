@@ -22,8 +22,36 @@ export function servicioCoincideCodser(srv, codser) {
     return String(srv.codser) === String(codser);
 }
 
-export function servicioPasaFiltros(srv, query, codser) {
-    return servicioCoincideBusqueda(srv, query) && servicioCoincideCodser(srv, codser);
+export function servicioCoincideZona(srv, codzon) {
+    if (!codzon) return true;
+    return String(srv.codzon || '').trim() === String(codzon).trim();
+}
+
+export function servicioPasaFiltros(srv, query, codser, codzon) {
+    return servicioCoincideBusqueda(srv, query) && servicioCoincideCodser(srv, codser) && servicioCoincideZona(srv, codzon);
+}
+
+export function initFiltroZonaSelect2() {
+    var $select = $('#filtro_zona');
+
+    if (!$select.length || typeof $.fn.select2 === 'undefined') {
+        return;
+    }
+
+    $select.select2({
+        allowClear: true,
+        placeholder: 'Todas las zonas',
+        width: '100%',
+        minimumResultsForSearch: 6,
+        language: {
+            noResults: function () {
+                return 'Sin resultados';
+            },
+            searching: function () {
+                return 'Buscando...';
+            }
+        }
+    });
 }
 
 export function initFiltroCodserSelect2() {

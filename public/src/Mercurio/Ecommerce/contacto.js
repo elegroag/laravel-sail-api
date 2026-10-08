@@ -6,7 +6,7 @@
  * Depende de globales del layout: $ (jQuery), bootstrap.
  */
 import store from './store.js';
-import { mostrarNoty } from './utils.js';
+import { mostrarNoty, escapeHtml } from './utils.js';
 import { esVistaMovil, cerrarResumenCompraMovil } from './vistaMovil.js';
 
 var EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,6 +15,7 @@ var TELEFONO_REGEX = /^[0-9]{7,10}$/;
 var modalContacto = null;
 var callbacks = { onConfirmar: null, onCancelar: null };
 var confirmado = false;
+var requiereAceptarZona = false;
 
 function datosActuales() {
     var trabajador = store.trabajadorData || {};
@@ -32,7 +33,26 @@ function ocultarError() {
     $('#error_contacto').text('').hide();
 }
 
+function prepararAvisoZona() {
+    var srv = store.servicioSeleccionado || {};
+    var zona = String(srv.uis_ciudad || '').trim();
+
+    requiereAceptarZona = zona !== '';
+    $('#chk_acepta_zona').prop('checked', false);
+
+    if (!requiereAceptarZona) {
+        $('#aviso_zona_servicio').hide();
+        return;
+    }
+
+    $('#txt_aviso_zona').html(
+        'El servicio <strong>' + escapeHtml(srv.nombre || '') + '</strong> solo se brindará en la zona <strong>' + escapeHtml(zona) + '</strong>.'
+    );
+    $('#aviso_zona_servicio').show();
+}
+
 function resetFormulario() {
+    prepararAvisoZona();
     var actuales = datosActuales();
     $('#txt_contacto_email').text(actuales.email || 'Sin correo registrado');
     $('#txt_contacto_telefono').text(actuales.telefono || 'Sin teléfono registrado');
@@ -70,6 +90,11 @@ function finalizarConfirmacion() {
 function confirmarContacto(e) {
     e.preventDefault();
     ocultarError();
+
+    if (requiereAceptarZona && !$('#chk_acepta_zona').is(':checked')) {
+        mostrarError('Debe confirmar que entiende que el servicio solo se brindará en la zona indicada.');
+        return;
+    }
 
     if (!$('#chk_cambiar_contacto').is(':checked')) {
         finalizarConfirmacion();
@@ -123,6 +148,8 @@ export function initConfirmacionContacto() {
         backdrop: 'static',
         keyboard: false,
     });
+
+    $('#chk_acepta_zona').on('change', ocultarError);
 
     $('#chk_cambiar_contacto').on('change', function () {
         ocultarError();

@@ -79,7 +79,7 @@ export function guardarVenta(refpago) {
             });
             setTimeout(function () {
                 limpiarSeleccionServicio();
-                renderServiciosGrid(store.serviciosData, store.busquedaServicio, store.filtroCodserServicio);
+                renderServiciosGrid(store.serviciosData, store.busquedaServicio, store.filtroCodserServicio, store.filtroZonaServicio);
             }, 3000);
         } else {
             Swal.fire({

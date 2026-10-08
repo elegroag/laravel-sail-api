@@ -13,6 +13,7 @@ const store = {
     servicioSeleccionado: null,
     busquedaServicio: '',
     filtroCodserServicio: '',
+    filtroZonaServicio: '',
     modalResumenCompra: null,
     /** @type {Array<{codben:string,nombre:string,tipben:string,valser:number,categoria:string,cupos_disponibles:number}>} */
     items: [],

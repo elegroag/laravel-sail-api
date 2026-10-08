@@ -96,6 +96,20 @@
                                                 <option value="">Todos los servicios</option>
                                             </select>
                                         </div>
+                                        @if (! empty($zonas))
+                                        <div class="servicios-catalog__filter-wrap">
+                                            <select
+                                                id="filtro_zona"
+                                                class="form-control servicios-catalog__filter"
+                                                aria-label="Filtrar por zona"
+                                            >
+                                                <option value="">Todas las zonas</option>
+                                                @foreach ($zonas as $zona)
+                                                <option value="{{ $zona['codzon'] }}">{{ $zona['detzon'] ?? $zona['codzon'] }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @endif
                                     </div>
                                     <span id="contador_servicios" class="servicios-catalog__counter badge"></span>
                                 </div>
@@ -195,6 +209,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
+                    <div id="aviso_zona_servicio" class="alert py-2 mb-3" style="display:none; background-color:#fff4d6; border:1px solid #f3d98b; color:#4a3b0b;">
+                        <p class="mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <span id="txt_aviso_zona"></span>
+                        </p>
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="chk_acepta_zona">
+                            <label class="form-check-label" for="chk_acepta_zona"><strong>Entiendo que el servicio solo se brindará en esta zona</strong></label>
+                        </div>
+                    </div>
+
                     <p class="text-muted mb-3">Verifique sus datos de contacto antes de continuar con el pago. Al correo electrónico registrado le será enviada la factura electrónica.</p>
 
                     <dl class="row mb-3">

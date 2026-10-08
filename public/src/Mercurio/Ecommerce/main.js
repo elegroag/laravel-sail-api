@@ -26,6 +26,7 @@ import {
 } from './vistaMovil.js';
 import { identificarTrabajador, seleccionarBeneficiario } from './beneficiarios.js';
 import { filtrarServicios, seleccionarServicio } from './serviciosRender.js';
+import { initFiltroZonaSelect2 } from './serviciosFiltros.js';
 import { verificarRespuestaEpayco } from './epayco.js';
 import { procesarPago } from './pago.js';
 import { initConfirmacionContacto } from './contacto.js';
@@ -83,6 +84,11 @@ function bindHandlers() {
     $(document).on('change', '#filtro_codser', function () {
         filtrarServicios();
     });
+
+    $(document).on('change', '#filtro_zona', function () {
+        filtrarServicios();
+    });
+    initFiltroZonaSelect2();
 
     $(document).on('click', '.servicio-card:not(.servicio-card--disabled)', function () {
         var srv = $(this).data('srv');
