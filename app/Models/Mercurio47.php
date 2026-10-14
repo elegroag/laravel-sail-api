@@ -191,6 +191,11 @@ class Mercurio47 extends ModelBase
         return solicitud_estado_detalle($this->estado);
     }
 
+    public function getEstadoDetalle()
+    {
+        return solicitud_estado_detalle((string) $this->estado);
+    }
+
     public function getTipActArray()
     {
         return solicitud_tipo_actualizacion_array();
