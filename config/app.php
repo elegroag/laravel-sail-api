@@ -150,6 +150,9 @@ return [
 
     'api_mode' => env('API_MODE', 'production'),
 
+    /** Timeout en segundos para Http client de ApiSubsidio / APIClient */
+    'api_timeout' => (int) env('API_SUBSIDIO_TIMEOUT', 90),
+
     'host_api_user' => env('HOST_API_USER', '2'),
     'host_api_password' => env('HOST_API_PASSWORD', null),
 

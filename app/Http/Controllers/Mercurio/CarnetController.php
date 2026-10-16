@@ -9,6 +9,7 @@ use App\Services\Carnet\CarnetArchivoService;
 use App\Services\Carnet\CarnetDigitalService;
 use App\Services\Carnet\CarnetEmailService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class CarnetController extends ApplicationController
 {
@@ -42,9 +43,24 @@ class CarnetController extends ApplicationController
             ]);
         } catch (\Throwable $e) {
             $salida = $this->captureException($e);
-            set_flashdata('error', [
-                'msj' => $salida['msj'],
+            $mensajeReal = $this->mensajeExcepcionCarnet($e, $salida);
+
+            Log::error('Carnet index falló', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'code' => $e->getCode(),
+                'errors' => $salida['errors'] ?? null,
+                'class' => $e::class,
+            ]);
+
+            set_flashdata('error', [
+                'msj' => config('app.debug')
+                    ? $mensajeReal
+                    : ($e instanceof DebugException
+                        ? $e->getMessage()
+                        : 'No fue posible cargar el carnet digital. Intente más tarde.'),
+                'code' => $e instanceof DebugException ? $e->getCode() : (int) ($salida['out']['code'] ?? 501),
             ]);
 
             return redirect()->route('principal.index');
@@ -124,5 +140,31 @@ class CarnetController extends ApplicationController
             : $carnetArchivoService->png($carnet, $url);
 
         return [$contenido, 'carnet-comfaca-'.preg_replace('/\D/', '', $documento).'.'.$formato];
+    }
+
+    /**
+     * Mensaje útil para flash/log: el genérico de captureException oculta el detalle real.
+     *
+     * @param  array<string, mixed>  $salida
+     */
+    private function mensajeExcepcionCarnet(\Throwable $e, array $salida): string
+    {
+        if ($e instanceof DebugException) {
+            return $e->getMessage();
+        }
+
+        $errors = $salida['errors'] ?? null;
+        if (is_array($errors) && isset($errors[0]) && is_string($errors[0]) && $errors[0] !== '') {
+            $archivo = isset($errors[2]) ? (string) $errors[2] : basename($e->getFile());
+            $linea = isset($errors[1]) ? (string) $errors[1] : (string) $e->getLine();
+
+            return $errors[0].' ('.$archivo.':'.$linea.')';
+        }
+
+        $msg = trim($e->getMessage());
+
+        return $msg !== ''
+            ? $msg.' ('.basename($e->getFile()).':'.$e->getLine().')'
+            : (string) ($salida['msj'] ?? 'Error al cargar el carnet digital');
     }
 }

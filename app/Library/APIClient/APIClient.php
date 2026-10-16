@@ -27,7 +27,7 @@ class APIClient
 
     public function consumeAPI(string $method, ?array $request = null): object|array
     {
-        $url = rtrim($this->hostConnection, '/') . '/' . ltrim($this->apiUrl, '/');
+        $url = rtrim($this->hostConnection, '/').'/'.ltrim($this->apiUrl, '/');
         $headers = [];
 
         if ($this->auth instanceof BasicAuth) {
@@ -43,35 +43,28 @@ class APIClient
         }
 
         $body = $request ?? [];
+        $timeout = max(1, (int) config('app.api_timeout', 90));
 
-        #Log::info('ApiSubsidio body' . json_encode($body));
-        #Log::info('ApiSubsidio url' . json_encode($url));
+        // Log::info('ApiSubsidio body' . json_encode($body));
+        // Log::info('ApiSubsidio url' . json_encode($url));
+
+        $http = Http::withHeaders($headers)
+            ->timeout($timeout)
+            ->withoutVerifying();
 
         $response = match ($method) {
-            'POST' => Http::withHeaders($headers)
-                ->timeout(30)
-                ->withoutVerifying()
-                ->post($url, $body),
-            'GET' => Http::withHeaders($headers)
-                ->timeout(30)
-                ->withoutVerifying()
-                ->get($url, $body),
-            'PUT' => Http::withHeaders($headers)
-                ->timeout(30)
-                ->withoutVerifying()
-                ->put($url, $body),
-            'DELETE' => Http::withHeaders($headers)
-                ->timeout(30)
-                ->withoutVerifying()
-                ->delete($url, $body),
+            'POST' => $http->post($url, $body),
+            'GET' => $http->get($url, $body),
+            'PUT' => $http->put($url, $body),
+            'DELETE' => $http->delete($url, $body),
             default => throw new DebugException('Error no está definido el metodo http', 1),
         };
 
         $this->statusCode = $response->status();
         $bodyResponse = $response->body();
 
-        #Log::info('ApiSubsidio response status' . $this->statusCode);
-        #Log::info('ApiSubsidio response body' . $bodyResponse);
+        // Log::info('ApiSubsidio response status' . $this->statusCode);
+        // Log::info('ApiSubsidio response body' . $bodyResponse);
 
         if ($response->failed()) {
             throw new DebugException('Error access api', 501, $bodyResponse);

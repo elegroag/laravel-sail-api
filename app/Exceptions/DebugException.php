@@ -46,7 +46,7 @@ class DebugException extends Exception
             'msj' => $this->getMessage(),
             'errors' => is_array($this->errors) || is_object($this->errors) ? $this->errors : json_decode($this->errors),
         ];
-        if (config('app.debug') == 'local') {
+        if (config('app.debug') == true) {
             $data['out'] = [
                 'code' => $this->getCode(),
                 'file' => basename($this->getFile()),
