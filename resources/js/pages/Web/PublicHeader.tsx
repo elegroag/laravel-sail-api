@@ -9,11 +9,12 @@ import { cn } from '@/lib/utils';
 const AGENTI_SCRIPT_ID = 'agenti-lite-comfaca-script';
 const AGENTI_SCRIPT_SRC = 'https://comfaca.agenti.com.co/agenti_lite_comfaca/js/scripts.js';
 
-const navLinks = [
+const navLinks: { title: string; href: string; external?: boolean }[] = [
     { title: 'Nosotros', href: '/web/about' },
     { title: 'Servicios', href: '/web/products' },
     { title: 'Tutoriales', href: '/web/documentation' },
     { title: 'Contáctenos', href: '/web/contact' },
+    { title: 'Agencia de Empleo', href: 'https://comfacaenlinea.com.co:4070/', external: true },
 ];
 
 function shouldLoadAgenti(url: string): boolean {
@@ -66,18 +67,30 @@ export default function PublicHeader() {
 
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-6">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                                'text-sm font-medium transition-colors hover:text-emerald-600',
-                                page.url === link.href ? 'text-emerald-600' : 'text-gray-600',
-                            )}
-                        >
-                            {link.title}
-                        </Link>
-                    ))}
+                    {navLinks.map((link) =>
+                        link.external ? (
+                            <a
+                                key={link.href}
+                                href={link.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-gray-600 transition-colors hover:text-emerald-600"
+                            >
+                                {link.title}
+                            </a>
+                        ) : (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={cn(
+                                    'text-sm font-medium transition-colors hover:text-emerald-600',
+                                    page.url === link.href ? 'text-emerald-600' : 'text-gray-600',
+                                )}
+                            >
+                                {link.title}
+                            </Link>
+                        ),
+                    )}
                 </nav>
 
                 {/* CTA + Mobile Menu */}
@@ -117,21 +130,34 @@ export default function PublicHeader() {
                             </SheetHeader>
 
                             <nav className="flex flex-1 flex-col gap-1 p-4">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        onClick={() => setMobileOpen(false)}
-                                        className={cn(
-                                            'rounded-md px-3 py-2.5 text-sm font-medium text-white transition-colors',
-                                            page.url === link.href
-                                                ? 'bg-white/20'
-                                                : 'hover:bg-white/10',
-                                        )}
-                                    >
-                                        {link.title}
-                                    </Link>
-                                ))}
+                                {navLinks.map((link) =>
+                                    link.external ? (
+                                        <a
+                                            key={link.href}
+                                            href={link.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => setMobileOpen(false)}
+                                            className="rounded-md px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+                                        >
+                                            {link.title}
+                                        </a>
+                                    ) : (
+                                        <Link
+                                            key={link.href}
+                                            href={link.href}
+                                            onClick={() => setMobileOpen(false)}
+                                            className={cn(
+                                                'rounded-md px-3 py-2.5 text-sm font-medium text-white transition-colors',
+                                                page.url === link.href
+                                                    ? 'bg-white/20'
+                                                    : 'hover:bg-white/10',
+                                            )}
+                                        >
+                                            {link.title}
+                                        </Link>
+                                    ),
+                                )}
                             </nav>
 
                             <div className="mt-auto flex flex-col gap-2 border-t border-white/15 p-4">

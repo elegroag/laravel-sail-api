@@ -60,7 +60,7 @@ export default function About() {
             <section className="py-16 bg-gray-50">
                 <div className="container mx-auto px-4 md:max-w-7xl">
                     <h2 className="text-2xl font-semibold text-gray-900 mb-8 text-center">Servicios que ofrecemos</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
                             {
                                 title: 'Afiliación',
@@ -74,10 +74,28 @@ export default function About() {
                                 title: 'Recreación',
                                 desc: 'Programas recreativos, culturales y turísticos para el bienestar de su familia.',
                             },
+                            {
+                                title: 'Agencia de Empleo',
+                                desc: 'La Agencia de Gestión y Colocación de Empleo FOSFEC (Fondo de Fomento al Empleo y Protección al Desempleado), dirigida a todas las personas que se encuentran en búsqueda de empleo formal, primer empleo o que desean mejorar sus condiciones laborales actuales en el departamento del Caquetá.',
+                                href: 'https://comfacaenlinea.com.co:4070/',
+                            },
                         ].map((item) => (
-                            <div key={item.title} className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                            <div
+                                key={item.title}
+                                className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm flex flex-col"
+                            >
                                 <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-                                <p className="text-sm text-gray-500">{item.desc}</p>
+                                <p className="text-sm text-gray-500 flex-1">{item.desc}</p>
+                                {'href' in item && item.href ? (
+                                    <a
+                                        href={item.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-4 inline-flex text-sm font-medium text-emerald-600 hover:text-emerald-700"
+                                    >
+                                        Ir a Agencia de Empleo →
+                                    </a>
+                                ) : null}
                             </div>
                         ))}
                     </div>

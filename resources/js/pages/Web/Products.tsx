@@ -83,6 +83,22 @@ const servicios = [
         cta: 'Más información',
         href: '/web/login',
     },
+    {
+        id: 'agencia-empleo',
+        title: 'Agencia de Empleo',
+        description:
+            'La Agencia de Gestión y Colocación de Empleo FOSFEC (Fondo de Fomento al Empleo y Protección al Desempleado), dirigida a todas las personas que se encuentran en búsqueda de empleo formal, primer empleo o que desean mejorar sus condiciones laborales actuales en el departamento del Caquetá.',
+        icon: '🤝',
+        features: [
+            'Búsqueda de empleo formal',
+            'Primer empleo',
+            'Mejora de condiciones laborales',
+            'Cobertura en el departamento del Caquetá',
+        ],
+        cta: 'Ir a Agencia de Empleo',
+        href: 'https://comfacaenlinea.com.co:4070/',
+        external: true,
+    },
 ];
 
 export default function Products() {
@@ -130,14 +146,30 @@ export default function Products() {
 
                                 {/* Footer */}
                                 <div className="px-6 pb-6">
-                                    <Link href={servicio.href}>
-                                        <Button
-                                            variant={servicio.id === 'empresa' ? 'default' : 'outline'}
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                    {'external' in servicio && servicio.external ? (
+                                        <a
+                                            href={servicio.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block"
                                         >
-                                            {servicio.cta}
-                                        </Button>
-                                    </Link>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                                            >
+                                                {servicio.cta}
+                                            </Button>
+                                        </a>
+                                    ) : (
+                                        <Link href={servicio.href}>
+                                            <Button
+                                                variant={servicio.id === 'empresa' ? 'default' : 'outline'}
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                            >
+                                                {servicio.cta}
+                                            </Button>
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                         ))}
