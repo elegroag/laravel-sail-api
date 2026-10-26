@@ -543,7 +543,7 @@ class BeneficiarioController extends ApplicationController
             $cedtras = [];
 
             $trabajadorService = new TrabajadorService;
-            $mercurio31 = $trabajadorService->findRequestByDocumentoCoddoc($this->user['documento'], $this->user['coddoc']);
+            $mercurio31 = $trabajadorService->findRequestByDocumentoCoddoc($this->user['documento'], $this->user['coddoc'], $this->tipo);
             if ($this->tipo == 'E') {
                 $trabajadoresSisu = $trabajadorService->findApiTrabajadoresByNit($this->user['documento']);
                 $listAfiliados = collect($trabajadoresSisu)->map(function ($row) {
@@ -580,10 +580,11 @@ class BeneficiarioController extends ApplicationController
                 $cedtras[$this->user['documento']] = $this->user['documento'];
                 $empresa_sisu = false;
 
-                $listAfiliados = collect($mercurio31)->map(function ($row) {
+                $afiliados = collect($mercurio31 ?: [])->where('tipo', $this->tipo)->values();
+                $listAfiliados = $afiliados->map(function ($row) {
                     return ['cedula' => $row['cedula'], 'nombre_completo' => $row['nombre_completo']];
                 });
-                $nit = collect($mercurio31)->pluck('nit', 'nit');
+                $nit = $afiliados->pluck('nit', 'nit');
                 $listAfiliados[] = ['cedula' => $this->user['documento'], 'nombre_completo' => $this->user['nombre']];
 
                 $trabajador_sisu = $trabajadorService->buscarTrabajadorSubsidio($this->user['documento']);

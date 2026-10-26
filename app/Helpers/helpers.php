@@ -70,8 +70,7 @@ if (! function_exists('normalize_spaces')) {
 if (! function_exists('get_app_url')) {
     function get_app_url(): string
     {
-        $path = config('app.dominio') . (config('app.env') === 'local' ? ':' . config('app.port') : '');
-        return $path;
+        return rtrim((string) config('app.url'), '/');
     }
 }
 

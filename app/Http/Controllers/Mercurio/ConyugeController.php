@@ -377,6 +377,7 @@ class ConyugeController extends ApplicationController
             'documento' => $this->user['documento'],
             'usuario' => $usuario,
             'zoneurbana' => $request->input('zoneurbana') ?? 'N',
+            'tipcue' => $request->input('tipcue') ?? 'A'
         ];
     }
 

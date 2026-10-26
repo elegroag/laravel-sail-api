@@ -40,8 +40,9 @@ class BeneficiarioService
         // usuario empresa, unica solicitud de afiliación
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
+        $tipo = $this->tipo ?? $this->user['tipo'] ?? '';
 
-        if (Mercurio34::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
+        if (Mercurio34::where('documento', $documento)->where('coddoc', $coddoc)->where('tipo', $tipo)->count() == 0) {
             return [];
         }
         $conditions = (empty($estado)) ? " AND m34.estado NOT IN('I') " : " AND m34.estado='{$estado}' ";
@@ -60,7 +61,7 @@ class BeneficiarioService
                 END) as estado_detalle,
                 coddoc as tipo_documento
                 FROM mercurio34 as m34
-                WHERE m34.documento='{$documento}' and m34.coddoc='{$coddoc}' {$conditions}
+                WHERE m34.documento='{$documento}' and m34.coddoc='{$coddoc}' and m34.tipo='{$tipo}' {$conditions}
                 ORDER BY m34.fecsol ASC;"
         );
     }
@@ -72,8 +73,9 @@ class BeneficiarioService
     {
         $documento = $this->user['documento'];
         $coddoc = $this->user['coddoc'];
+        $tipo = $this->tipo ?? $this->user['tipo'] ?? '';
 
-        if (Mercurio34::where('documento', $documento)->where('coddoc', $coddoc)->count() == 0) {
+        if (Mercurio34::where('documento', $documento)->where('coddoc', $coddoc)->where('tipo', $tipo)->count() == 0) {
             return ['items' => [], 'total' => 0, 'page' => 1, 'per_page' => max(1, min(100, $perPage))];
         }
 
@@ -92,7 +94,7 @@ class BeneficiarioService
                 END) as estado_detalle,
                 coddoc as tipo_documento
                 FROM mercurio34 as m34
-                WHERE m34.documento='{$documento}' and m34.coddoc='{$coddoc}' {$conditions}
+                WHERE m34.documento='{$documento}' and m34.coddoc='{$coddoc}' and m34.tipo='{$tipo}' {$conditions}
                 ORDER BY m34.fecsol ASC";
 
         return $this->paginateRawQuery($sql, $page, $perPage);

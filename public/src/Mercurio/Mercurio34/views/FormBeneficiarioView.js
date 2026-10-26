@@ -696,6 +696,9 @@ export class FormBeneficiarioView extends FormView {
         let cedcon = this.getInput('[name="cedcon"]');
         if (cedcon == '') return false;
 
+        console.log(this.collection.props.list_conyuges);
+        console.log(this.collection.props.conyuges);
+
         let has = false;
         const afili = this.collection.props.list_conyuges;
         const cedcons = this.collection.props.conyuges;

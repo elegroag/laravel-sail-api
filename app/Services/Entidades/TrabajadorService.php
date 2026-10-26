@@ -520,7 +520,7 @@ class TrabajadorService
      * @param  string  $coddoc
      * @return array|bool
      */
-    public function findRequestByDocumentoCoddoc($documento, $coddoc)
+    public function findRequestByDocumentoCoddoc($documento, $coddoc, $tipo = null)
     {
         $datos = Mercurio31::select(
             'cedtra as cedula',
@@ -535,6 +535,9 @@ class TrabajadorService
                 ['documento', $documento],
                 ['coddoc', $coddoc],
             ])
+            ->when($tipo, function ($query) use ($tipo) {
+                $query->where('tipo', $tipo);
+            })
             ->get()
             ->toArray();
 
