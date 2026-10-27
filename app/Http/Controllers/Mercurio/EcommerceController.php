@@ -101,7 +101,7 @@ class EcommerceController extends ApplicationController
 
             return array_values(array_filter(
                 $resultado['data'],
-                fn ($zona) => is_array($zona) && ! empty($zona['codzon'])
+                fn($zona) => is_array($zona) && ! empty($zona['codzon'])
             ));
         } catch (\Throwable $e) {
             $this->setLogger('listar-zonas: ' . $e->getMessage());
@@ -905,6 +905,7 @@ class EcommerceController extends ApplicationController
                 return response()->json([
                     'success' => false,
                     'message' => $msg,
+                    'errors' => $resultado['errors'] ?? null #errores de validación de datos de la venta
                 ]);
             }
 
@@ -1036,7 +1037,7 @@ class EcommerceController extends ApplicationController
                     'numero' => $precompra->numero,
                     'codben' => $precompra->codben,
                     'items' => $precompra->items ?? array_map(
-                        static fn (string $codben) => ['codben' => $codben],
+                        static fn(string $codben) => ['codben' => $codben],
                         $precompra->codbenList()
                     ),
                     'nota' => $precompra->nota,
@@ -1084,7 +1085,7 @@ class EcommerceController extends ApplicationController
                     'numero' => $precompra->numero,
                     'codben' => $precompra->codben,
                     'items' => $precompra->items ?? array_map(
-                        static fn (string $codben) => ['codben' => $codben],
+                        static fn(string $codben) => ['codben' => $codben],
                         $precompra->codbenList()
                     ),
                     'nota' => $precompra->nota,
