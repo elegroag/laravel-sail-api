@@ -89,6 +89,17 @@ $(() => {
         window.open(href, '_blank', 'noopener');
     });
 
+    const replaceDetalle = (response, okType = 'success') => {
+        if (response && response.html) {
+            $('#detalle_precompra').html(response.html);
+        }
+        if (response && response.success) {
+            Messages.display(response.msj || 'Operación completada.', okType);
+        } else {
+            Messages.display((response && response.msj) || 'No se pudo completar la operación.', 'error');
+        }
+    };
+
     // Registrar en Subsidio: validar ePayco + guardar-venta
     $(document).on('click', "[data-toggle='registrar-subsidio']", (e) => {
         e.preventDefault();
@@ -114,7 +125,7 @@ $(() => {
                 const registrada = !!(response.registrada);
                 const alertClass = response.success
                     ? (registrada ? 'alert-success' : 'alert-warning')
-                    : 'alert-danger';
+                    : (response.vencida ? 'alert-warning' : 'alert-danger');
 
                 let detalle = '';
                 if (pago) {
@@ -129,8 +140,11 @@ $(() => {
                         '</ul>';
                 }
 
-                if (response.success && response.html) {
+                if (response.html) {
                     $('#detalle_precompra').html(response.html);
+                }
+
+                if (response.success) {
                     Messages.display(response.msj || 'Registro en Subsidio completado.', 'success');
                     return;
                 }
@@ -142,11 +156,52 @@ $(() => {
                     '</div>'
                 );
 
-                if (!response.success) {
-                    Messages.display(response.msj || 'No se pudo registrar en Subsidio.', 'error');
-                }
+                Messages.display(response.msj || 'No se pudo registrar en Subsidio.', response.vencida ? 'warning' : 'error');
             },
         });
+    });
+
+    $(document).on('click', "[data-toggle='marcar-vencida']", (e) => {
+        e.preventDefault();
+        const id = $(e.currentTarget).data('id');
+        if (!id) return;
+
+        window.App.trigger('syncro', {
+            url: window.App.url(controller() + '/marcar-vencida/' + id),
+            data: {
+                motivo: $('#motivo_vencida').val(),
+                detalle: $('#detalle_vencida').val(),
+            },
+            callback: (response) => replaceDetalle(response),
+        });
+    });
+
+    const postDevolucion = (accion, id) => {
+        window.App.trigger('syncro', {
+            url: window.App.url(controller() + '/devolucion/' + id + '/' + accion),
+            data: {
+                nota: $('#nota_gestion_devolucion').val() || '',
+            },
+            callback: (response) => replaceDetalle(response),
+        });
+    };
+
+    $(document).on('click', "[data-toggle='devolucion-en-tramite']", (e) => {
+        e.preventDefault();
+        const id = $(e.currentTarget).data('id');
+        if (id) postDevolucion('en-tramite', id);
+    });
+
+    $(document).on('click', "[data-toggle='devolucion-aprobar']", (e) => {
+        e.preventDefault();
+        const id = $(e.currentTarget).data('id');
+        if (id) postDevolucion('aprobar', id);
+    });
+
+    $(document).on('click', "[data-toggle='devolucion-rechazar']", (e) => {
+        e.preventDefault();
+        const id = $(e.currentTarget).data('id');
+        if (id) postDevolucion('rechazar', id);
     });
 
     // Paginación

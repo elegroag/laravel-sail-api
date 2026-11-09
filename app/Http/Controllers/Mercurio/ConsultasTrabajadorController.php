@@ -417,17 +417,51 @@ class ConsultasTrabajadorController extends ApplicationController
         }
     }
 
+    /**
+     * Catálogo de certificados disponibles para el trabajador.
+     *
+     * @return array<int, array<string, string>>
+     */
+    private function catalogoCertificados(): array
+    {
+        return [
+            [
+                'codigo' => 'A',
+                'titulo' => 'Certificado de Afiliación Principal',
+                'descripcion' => 'Acredita su condición de afiliado y el detalle de su trayectoria laboral.',
+                'imagen' => 'img/certificados/cert_principal.png',
+                'icono' => 'fa-file-certificate',
+            ],
+            [
+                'codigo' => 'I',
+                'titulo' => 'Certificación con Núcleo Familiar',
+                'descripcion' => 'Certifica los integrantes de su núcleo familiar y los beneficiaries sin giro.',
+                'imagen' => 'img/certificados/cert_nucleo.png',
+                'icono' => 'fa-users',
+            ],
+            [
+                'codigo' => 'T',
+                'titulo' => 'Certificación de Multiafiliación',
+                'descripcion' => 'Informa los enlistamientos vigentes en los que figura como afiliado.',
+                'imagen' => 'img/certificados/cert_multiafiliacion.png',
+                'icono' => 'fa-clone',
+            ],
+            [
+                'codigo' => 'P',
+                'titulo' => 'Reporte de Trabajador en Planillas',
+                'descripcion' => 'Detalla los aportes y retenciones registrados en cada planilla.',
+                'imagen' => 'img/certificados/cert_planillas.png',
+                'icono' => 'fa-table',
+            ],
+        ];
+    }
+
     public function certificadoAfiliacionView()
     {
         try {
             return view('mercurio/subsidio/certificado_afiliacion', [
                 'title' => 'Certificado Afiliacion',
-                'tipo' => [
-                    'A' => 'Certificado Afiliacion Principal',
-                    'I' => 'Certificacion Con Nucleo',
-                    'T' => 'Certificacion de Multiafiliacion',
-                    'P' => 'Reporte trabajador en planillas',
-                ],
+                'certificados' => $this->catalogoCertificados(),
             ]);
         } catch (\Throwable $e) {
             $salida = $this->captureException($e, request());
@@ -443,11 +477,35 @@ class ConsultasTrabajadorController extends ApplicationController
     public function certificadoAfiliacion(Request $request)
     {
         $tipo = $request->input('tipo');
-        $cedtra = $this->user['documento'];
-        $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
-        $certificado->generate();
+        $permitidos = array_column($this->catalogoCertificados(), 'codigo');
 
-        return $this->respondCertificado($request, $certificado, $tipo);
+        if (! in_array($tipo, $permitidos, true)) {
+            return response()->json([
+                'success' => false,
+                'msj' => 'El tipo de certificado no es válido.',
+            ], 422);
+        }
+
+        try {
+            $cedtra = $this->user['documento'];
+            $certificado = new Certificado(new CertiTrabajador($cedtra, $tipo));
+            $certificado->generate();
+
+            return $this->respondCertificado($request, $certificado, $tipo);
+        } catch (\Throwable $e) {
+            $salida = $this->captureException($e, $request);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'msj' => $salida['msj'] ?: 'No se pudo generar el certificado.',
+                ], 422);
+            }
+
+            return response()->view('mercurio/subsidio/certificado_error', [
+                'mensaje' => $salida['msj'] ?: 'No se pudo generar el certificado.',
+            ], 500);
+        }
     }
 
     private function respondCertificado(Request $request, Certificado $certificado, ?string $tipoCertificado = null)

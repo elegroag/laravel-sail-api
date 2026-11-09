@@ -2,11 +2,7 @@
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
-@if ($EPAYCO_CHECKOUT_VERSION === '2')
-<script src="https://checkout.epayco.co/checkout-v2.js"></script>
-@else
-<script src="https://checkout.epayco.co/checkout.js"></script>
-@endif
+@include('mercurio.ecommerce._epayco_scripts', ['EPAYCO_CHECKOUT_VERSION' => $EPAYCO_CHECKOUT_VERSION])
 
 <div class="col-12 mt-3 servicios-catalog">
     <div class="card shadow-sm border-0 servicios-page-card">
@@ -27,6 +23,9 @@
                     </a>
                     <a href="{{ route('servicios.ver-compras') }}" class="btn btn-sm servicios-catalog__btn-compras">
                         <i class="fas fa-receipt me-1"></i> Mis compras
+                    </a>
+                    <a href="{{ route('servicios.mis-devoluciones') }}" class="btn btn-sm servicios-catalog__btn-compras">
+                        <i class="fas fa-undo me-1"></i> Mis devoluciones
                     </a>
                 </div>
             </div>
@@ -168,6 +167,13 @@
                                     <input type="hidden" id="txt_tarifa_cupos">
                                     <input type="hidden" id="hid_cupos_mes" value="">
 
+                                    <div id="aviso_cooldown_compra" class="alert alert-warning py-2 small mt-3 mb-0" style="display:none;">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Hay un pago pendiente para este servicio y beneficiario. Podrás intentar de nuevo en
+                                        <strong id="txt_cooldown_tiempo">00:00</strong>.
+                                        <a href="{{ route('servicios.compras-pendientes') }}" class="alert-link">Ver pendientes</a>
+                                    </div>
+
                                     <div class="panel-compra__actions mt-3">
                                         <button type="button" id="btn_cancelar_resumen_compra" class="btn panel-compra__btn-cancelar">
                                             <i class="fas fa-eraser"></i> Cancelar
@@ -288,6 +294,7 @@
         validarTarifa: "{{ route('servicios.validar-tarifa') }}",
         crearPrecompra: "{{ route('servicios.crear-precompra') }}",
         crearSesionEpayco: "{{ route('servicios.crear-sesion-epayco') }}",
+        bloqueosPrecompra: "{{ route('servicios.bloqueos-precompra') }}",
         abandonarPrecompra: "{{ route('servicios.abandonar-precompra') }}",
         validarPagoEpayco: "{{ route('servicios.validar-pago-epayco') }}",
         guardarVenta: "{{ route('servicios.guardar-venta') }}",

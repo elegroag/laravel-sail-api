@@ -9,6 +9,7 @@ import { sanitizarTexto } from './utils.js';
 import { obtenerCuposMes, mostrarAlertaCuposMesCero } from './cupos.js';
 import { itemsPayload, totalItems } from './panelCompra.js';
 import { confirmarDatosContacto } from './contacto.js';
+import { estaBloqueado, aplicarEstadoCooldown, manejarRespuestaCooldown } from './cooldown.js';
 import {
     configurarCheckoutV1,
     esCheckoutV2,
@@ -45,6 +46,11 @@ export function procesarPago(event) {
             timer: 3000
         });
         target.removeAttr('disabled');
+        return;
+    }
+
+    if (estaBloqueado()) {
+        aplicarEstadoCooldown();
         return;
     }
 
@@ -204,7 +210,7 @@ function continuarPago(target, items, valor) {
                 data.confirmation = store.routes.epaycoConfirmation;
             }
             handler.open(data);
-        } else {
+        } else if (!manejarRespuestaCooldown(response)) {
             Swal.fire({
                 title: 'No se pudo iniciar el pago',
                 text: response.message || 'Error al registrar la precompra. Intente nuevamente.',

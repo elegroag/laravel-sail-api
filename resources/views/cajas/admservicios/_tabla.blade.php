@@ -7,6 +7,8 @@
         EstadoPrecompra::DESESTIMADO => 'badge-estado-desestimado',
         EstadoPrecompra::RECHAZADO => 'bg-danger',
         EstadoPrecompra::ABANDONADA => 'bg-dark',
+        EstadoPrecompra::VENCIDA => 'bg-warning text-dark',
+        EstadoPrecompra::DEVOLUCION => 'bg-info text-dark',
     ];
 @endphp
 

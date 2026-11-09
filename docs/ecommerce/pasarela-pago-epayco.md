@@ -2,12 +2,15 @@
 
 Documentación del flujo completo de la pasarela de pago **ePayco** integrada en el
 catálogo de servicios de Mercurio, accesible en
-`http://comfaca.ecommerce.com.co:9043/mercurio/servicios/index` (ruta
-`/mercurio/servicios/index`).
+`https://comfaca.ecommerce.com.co:9043/mercurio/servicios/index` (ruta
+`/mercurio/servicios/index`; el contenedor publica `9043→443`, HTTPS obligatorio
+para Smart Checkout v2 / `crypto.randomUUID`).
 
-> **Última revisión:** 2026-09-09 (multi-cuenta desde `epayco_cuentas`;
-> catálogo `epayco` → `p_id_customer`).
+> **Última revisión:** 2026-11-04 (alineación con doc oficial Smart Checkout
+> v2 / Apify; validación vía `validarReferenciaApify`; firma por cuenta DB).
 > **Audiencia:** desarrolladores y mantenedores del módulo de ecommerce Mercurio.
+> **Fuente oficial ePayco:** [repo-api-epayco.md](../../../repo-api-epayco.md)
+> (captura de docs.epayco.com — General, Implementación, Respuesta y Confirmación).
 
 Documentos relacionados:
 - [epayco-modal-control.md](./epayco-modal-control.md) — control de la modal.
@@ -23,6 +26,8 @@ Documentos relacionados:
 - [precompras-job-abandonadas.md](./precompras-job-abandonadas.md) — job TTL.
 - [analisis-mejoras-epayco-precompras.md](./analisis-mejoras-epayco-precompras.md)
   — inventario aplicado vs pendientes.
+- [conciliacion-subsidio.md](./conciliacion-subsidio.md) — cruce
+  precompras `PA` vs ventas Subsidio (`ref_payco` = `refpago`).
 
 ---
 
@@ -36,21 +41,22 @@ se paga electrónicamente con **ePayco**. Según `EPAYCO_CHECKOUT_VERSION`:
 - **Móvil / WebView** — siempre Smart Checkout v2 con `type: standard`
   (entorno seguro ePayco / redirect), aunque `EPAYCO_CHECKOUT_VERSION=1`.
 
-Además hay un **endpoint de validación de referencia** y un **webhook
-`confirmation`** firmado para confirmar el estado real aunque el cliente no
-vuelva.
+Además hay **consulta de transacción vía Apify** (`POST /payment/transaction`)
+y un **webhook `confirmation`** firmado para confirmar el estado real aunque
+el cliente no vuelva. La página `response` solo sirve de UX (no es fuente de
+verdad).
 
-El diseño se articula en torno a cinco principios:
+El diseño se articula en torno a estos principios:
 
 1. **Precompra antes de pagar** — Registro `PE` en `precompras_servicios`
    antes de abrir la pasarela.
 2. **Validación server-side del pago** — No se confía solo en query params;
-   el backend consulta `reference` (y/o recibe el webhook) y solo con
-   `x_cod_transaction_state = 1` registra la venta en subsidio.
+   el backend consulta Apify con `referencePayco` (y/o recibe el webhook) y
+   solo con código de estado `1` (Aceptada) registra la venta en subsidio.
 3. **Auditoría append-only** — Cada validación / webhook inserta una fila en
    `epayco_transacciones` (`origen=validacion` | `webhook`).
-4. **Detección de abandonos** — `onCloseModal` / `onClosed` → `PE → AB` y job
-   nocturno para PE huérfanas (> N días).
+4. **Detección de abandonos** — `onCloseModal` (v1) / hooks de cierre (v2) →
+   `PE → AB` y job nocturno para PE huérfanas (> N días).
 5. **Confirmación híbrida** — Cliente (`response`) + webhook firmado.
 6. **Multi-cuenta ePayco** — Las llaves de comercio **no** salen del `.env`.
    Cada servicio del catálogo trae `epayco` (= `P_CUST_ID_CLIENTE`); se resuelve
@@ -82,7 +88,8 @@ El diseño se articula en torno a cinco principios:
 | Job limpieza      | [app/Jobs/MarcarPrecomprasAbandonadas.php](../app/Jobs/MarcarPrecomprasAbandonadas.php)                |
 | Comando consola   | [app/Console/Commands/MarcarPrecomprasAbandonadasCommand.php](../app/Console/Commands/MarcarPrecomprasAbandonadasCommand.php) |
 | Config            | [config/app.php](../config/app.php) (sección `epayco`)                                                 |
-| Migraciones       | [2026_07_08_120000_add_epayco_reference_api_endpoint](../database/migrations/2026_07_08_120000_add_epayco_reference_api_endpoint.php)<br>[2026_07_15_100000_create_precompras_servicios_table](../database/migrations/2026_07_15_100000_create_precompras_servicios_table.php)<br>[2026_07_15_170000_add_desestimacion_to_precompras_servicios_table](../database/migrations/2026_07_15_170000_add_desestimacion_to_precompras_servicios_table.php)<br>[2026_08_14_160000_create_epayco_transacciones_table](../database/migrations/2026_08_14_160000_create_epayco_transacciones_table.php) |
+| Scripts SDK       | [resources/views/mercurio/ecommerce/_epayco_scripts.blade.php](../resources/views/mercurio/ecommerce/_epayco_scripts.blade.php) (`checkout.js` / `checkout-v2.js`) |
+| Migraciones       | [2026_07_15_100000_create_precompras_servicios_table](../database/migrations/2026_07_15_100000_create_precompras_servicios_table.php)<br>[2026_07_15_170000_add_desestimacion_to_precompras_servicios_table](../database/migrations/2026_07_15_170000_add_desestimacion_to_precompras_servicios_table.php)<br>[2026_08_14_160000_create_epayco_transacciones_table](../database/migrations/2026_08_14_160000_create_epayco_transacciones_table.php)<br>[2026_09_09_143000_create_epayco_cuentas_table](../database/migrations/2026_09_09_143000_create_epayco_cuentas_table.php)<br>[2026_09_09_163000_add_p_id_customer_to_precompras_servicios_table](../database/migrations/2026_09_09_163000_add_p_id_customer_to_precompras_servicios_table.php) |
 
 ---
 
@@ -109,18 +116,28 @@ Lookup por servicio: campo **`epayco`** en `listar-servicios` =
 > `EPAYCO_CUSTOMER_ID`, `EPAYCO_P_KEY`, `EPAYCO_MODE` (el modo viene de
 > `cuenta.env_mode`).
 
-### 3.2 Endpoint dinámico en `api_endpoints`
+### 3.2 Endpoints Apify (Smart Checkout + consulta de transacción)
 
-La URL del servicio **Epayco-Reference** (validación de pagos) se guarda en la
-tabla `api_endpoints` (ver
-[migración](../database/migrations/2026_07_08_120000_add_epayco_reference_api_endpoint.php)):
+La base URL es `config('app.epayco.apify_url')` → `EPAYCO_APIFY_URL`
+(default `https://apify.epayco.co`). Todas las llamadas usan las llaves de la
+cuenta resuelta con `ApiEpayco::withCuenta()` y respetan
+`EPAYCO_HTTP_VERIFY_SSL`.
 
-| connection_name | service_name        | endpoint_name | host_dev / host_pro                      |
-| --------------- | ------------------- | ------------- | ----------------------------------------- |
-| `api-epayco`    | `Epayco-Reference`  | `reference`   | `https://secure.epayco.co/validation/v1`  |
+| Paso | Método | Path | Auth | Uso en Mercurio |
+| ---- | ------ | ---- | ---- | --------------- |
+| Login | `POST` | `/login` | Basic `PUBLIC_KEY:PRIVATE_KEY` (base64) | `ApiEpayco::obtenerTokenApify()` (token JWT cacheado) |
+| Crear sesión | `POST` | `/payment/session/create` | Bearer token | `ApiEpayco::crearSesionCheckout()` → `sessionId` |
+| Consultar pago | `POST` | `/payment/transaction` | Bearer token | `ApiEpayco::validarReferenciaApify()` body `{ referencePayco }` |
 
-`ApiEpayco::validarReferencia()` resuelve el host según el `mode` de la
-instancia (`withCuenta` → `env_mode` de la cuenta).
+> **Histórico:** la migración
+> [2026_07_08_120000_add_epayco_reference_api_endpoint](../database/migrations/2026_07_08_120000_add_epayco_reference_api_endpoint.php)
+> insertó `Epayco-Reference` → `https://secure.epayco.co/validation/v1` en
+> `api_endpoints`. Ese host **ya no lo consume** el código de checkout;
+> la validación activa es Apify. La doc oficial aún documenta el GET
+> `secure.epayco.co/validation/v1/reference/{ref_payco}` para enriquecer la
+> página de `response` en el cliente; Mercurio no lo usa en runtime.
+
+Detalle de propiedades de sesión y hooks: §16.
 
 ---
 
@@ -255,12 +272,14 @@ const ABANDONADA  = 'AB';
 │   2. Selecciona beneficiario y servicio                                  │
 │   3. Click "Procesar pago"                                               │
 │   4. (Backend crea precompra PE en DB)                                   │
-│   5. Checkout open (v1 open(data) | v2 sessionId)                        │
-│        + confirmation + extra4=precompra_id                              │
-│        + onClose/onClosed → POST /abandonar-precompra (PE → AB)          │
+│   5. Checkout open:                                                      │
+│        v1 → open(data) + onCloseModal                                    │
+│        v2 → Apify session + configure({sessionId,type,test}) + open()    │
+│        + confirmation + extras.extra4=precompra_id                       │
+│        + cierre → POST /abandonar-precompra (PE → AB)                    │
 │   6. Usuario paga con tarjeta / PSE / Nequi / etc.                       │
 │   7a. ePayco redirige a response URL con ?ref_payco=...                  │
-│       → verificarRespuestaEpayco → validarReferencia → guardarVenta      │
+│       → verificarRespuestaEpayco → validarReferenciaApify → guardarVenta │
 │   7b. (en paralelo / si cierra navegador)                                │
 │       ePayco POST /api/epayco/confirmation (firma)                       │
 │       → audita origen=webhook → PA + guardar-venta si aplica             │
@@ -276,21 +295,16 @@ const ABANDONADA  = 'AB';
 - `GET /mercurio/servicios/index` →
   [`EcommerceController@index`](../app/Http/Controllers/Mercurio/EcommerceController.php).
 - Renderiza `mercurio/ecommerce/index.blade.php`. Inyecta a la vista:
-  - `EPAYCO_PUBLIC_KEY`
-  - `EPAYCO_TEST` (`true` cuando `config('app.epayco.mode') === 'development'`)
   - `EPAYCO_CHECKOUT_VERSION` (`1` o `2`)
   - `documento` del usuario activo
   - `pendientesCount` (badge rojo con cantidad de precompras en `PE`)
-- En el `<head>` del blade se carga el SDK según versión (`checkout.js` o
-  `checkout-v2.js`) y se configura el handler Standard cuando aplica:
-  ```js
-  epaycoHandler = ePayco.checkout.configure({
-      key: EPAYCO_PUBLIC_KEY,
-      test: EPAYCO_TEST
-  });
-  ```
+- El partial `_epayco_scripts` carga el SDK según versión (`checkout.js` o
+  `checkout-v2.js`). Las llaves / `test` **no** se inyectan en el layout: se
+  resuelven por cuenta al crear precompra (v1) o sesión Apify (v2).
+- En v1, `configurarCheckoutV1(publicKey, test)` arma el handler con
+  `ePayco.checkout.configure({ key, test })` al momento del pago.
 - Se cargan las rutas generadas con `route()` para usarlas desde JS
-  (incluye `epaycoConfirmation`).
+  (incluye `crearSesionEpayco` y `epaycoConfirmation`).
 
 #### ② Identificación del trabajador
 
@@ -341,48 +355,63 @@ const ABANDONADA  = 'AB';
 
 [`procesarPago(event)`](../public/src/Mercurio/Ecommerce/pago.js):
 
-1. **Valida cliente** que `valor > 0` y que `epaycoHandler` esté listo.
-2. **Persiste contexto en `sessionStorage`** para sobrevivir el redirect de
-   ePayco:
+1. Valida cupos, items, valor y campo `epayco` del servicio; confirma contacto.
+2. **Persiste contexto en `sessionStorage`** para sobrevivir el redirect:
    ```
    epayco_cedtra, epayco_codser, epayco_numero,
-   epayco_nota, epayco_codben, epayco_precompra_id
+   epayco_nota, epayco_codben, epayco_items, epayco_p_id_customer
    ```
-3. **Crea la precompra** vía
-   [`POST /mercurio/servicios/crear-precompra`](../app/Http/Controllers/Mercurio/EcommerceController.php)
-   → `PrecompraServicio::create([... 'estado' => PE])`.
-4. **Registra el callback `onClose`** con
-   [`registrarOnCloseEpayco()`](../public/src/Mercurio/Ecommerce/epayco.js):
-   - Si el usuario cierra la modal **sin** completar el pago y no se está
-     validando un pago (`__epaycoPagoEnValidacion === false`), el callback
-     llama a `POST /mercurio/servicios/abandonar-precompra` con el id de la
-     precompra después de **2.5 s** (espera por si ePayco redirige a la
-     response URL tras un pago válido).
-5. **Guarda `epayco_precompra_id`** en `sessionStorage` y abre la pasarela
-   (Standard v1). Incluye `confirmation` y `extra4`:
-   ```js
-   epaycoHandler.open({
-       name, description, invoice: 'ORD' + Date.now(),
-       currency: 'cop', amount: valor,
-       tax_base: '0', tax: '0',
-       country: 'co', lang: 'es',
-       external: 'false',
-       extra1: cedtra,           // documento
-       extra2: codser,
-       extra3: numero,
-       extra4: String(precompraId),
-       response: window.location.href,
-       confirmation: store.routes.epaycoConfirmation,
-       name_billing, type_doc_billing: 'cc', number_doc_billing,
-       email_billing
-   });
-   ```
-   Con Smart Checkout (v2) el backend crea la sesión Apify (mismo
-   `confirmation` / extras) y el frontend abre con `sessionId`.
+3. Según versión / entorno:
+   - **Smart Checkout v2** (`EPAYCO_CHECKOUT_VERSION=2` o móvil):
+     [`abrirCheckoutV2()`](../public/src/Mercurio/Ecommerce/epayco.js) →
+     `POST /mercurio/servicios/crear-sesion-epayco` (crea/reusa precompra +
+     sesión Apify) →
+     `ePayco.checkout.configure({ sessionId, type, test })` → `open()`.
+     `type` = `onpage` (desktop) o `standard` (móvil/WebView).
+   - **Standard v1** (desktop con versión `1`):
+     `POST /crear-precompra` → `configurarCheckoutV1(public_key, test)` →
+     `registrarOnCloseEpayco()` → `handler.open({...})` con `confirmation`
+     y `extra4`.
 
-> **`invoice`**: el frontend genera un id único local con
-> `Date.now()` (`ORD1691234567890`). No se persiste en la precompra — la
-> referencia canónica para reconciliar es la `ref_payco` que devuelve ePayco.
+Payload típico de apertura **v1**:
+```js
+epaycoHandler.open({
+    name, description, invoice: 'ORD' + Date.now(),
+    currency: 'cop', amount: valor,
+    tax_base: '0', tax: '0',
+    country: 'co', lang: 'es',
+    external: 'false',
+    extra1: cedtra, extra2: codser, extra3: numero,
+    extra4: String(precompraId),
+    response: window.location.href,
+    confirmation: store.routes.epaycoConfirmation,
+    name_billing, type_doc_billing: 'cc', number_doc_billing,
+    email_billing
+});
+```
+
+Sesión Apify **v2** (backend, resumido — ver §16):
+```json
+{
+  "checkout_version": "2",
+  "name": "<nombre servicio>",
+  "description": "<nombre servicio>",
+  "invoice": "ORD{precompra_id}-{timestamp}",
+  "currency": "COP",
+  "amount": 35000.0,
+  "lang": "ES",
+  "country": "CO",
+  "response": "<route servicios.index>",
+  "confirmation": "<route api.epayco.confirmation>",
+  "extras": { "extra1": "cedtra", "extra2": "codser", "extra3": "numero",
+              "extra4": "precompra_id", "extra5": "billing.name", "extra6": "billing.email" },
+  "billing": { "email", "name", "typeDoc": "CC", "numberDoc", "callingCode": "+57", "mobilePhone", "address" }
+}
+```
+
+> **`invoice`**: en v1 lo genera el front (`ORD` + `Date.now()`); en v2 el
+> backend usa `ORD{precompra_id}-{time()}`. No se persiste en la precompra —
+> la referencia canónica es `ref_payco`.
 
 #### ⑥ Pago en la pasarela ePayco
 
@@ -414,21 +443,23 @@ dispara `POST /mercurio/servicios/validar-pago-epayco` →
 [`EcommerceController@validarPagoEpayco`](../app/Http/Controllers/Mercurio/EcommerceController.php):
 
 ```php
-$resultado = $this->epayco->validarReferencia($ref_payco);
+$apiEpayco = $this->apiEpaycoParaPrecompra($precompraAntes);
+$resultado = $apiEpayco->validarReferenciaApify($ref_payco);
 ```
 
-[`ApiEpayco::validarReferencia()`](../app/Services/Api/ApiEpayco.php)
-hace `GET https://secure.epayco.co/validation/v1/reference/{refPayco}`
-(TLS según `EPAYCO_HTTP_VERIFY_SSL`) y:
+[`ApiEpayco::validarReferenciaApify()`](../app/Services/Api/ApiEpayco.php)
+hace `POST {EPAYCO_APIFY_URL}/payment/transaction` con Bearer (login Apify
+previo) y body `{ "referencePayco": "..." }` (TLS según
+`EPAYCO_HTTP_VERIFY_SSL`) y:
 
-1. Detecta envelopes de **error de datos/conexión** de ePayco
-   (`status: false` / `data.status: "error"`) → `success: false` + mensaje.
+1. Si Apify responde `success: false` → `success: false` + mensaje
+   (`textResponse` / `titleResponse`).
 2. Si hay transacción válida, normaliza `aprobado` / `cod_estado` /
-   `payload_raw` (aliases `x_cod_respuesta`, `x_respuesta`, etc.).
+   `payload_raw` desde campos Apify (`codTransactionState`, `refPayco`, …).
 3. Detalle de casos y SweetAlert al cliente:
    [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md).
 
-Si `validarReferencia` falla pero la precompra ya está `PA` (webhook),
+Si `validarReferenciaApify` falla pero la precompra ya está `PA` (webhook),
 `validarPagoEpayco` responde como aprobado (`ya_pagada`) para no bloquear
 el flujo.
 
@@ -461,7 +492,7 @@ dispara `POST /mercurio/servicios/guardar-venta` con los datos originales
 [`EcommerceController@guardarVenta`](../app/Http/Controllers/Mercurio/EcommerceController.php):
 
 1. Resuelve la precompra (ref / id) **antes** de interpretar ePayco.
-2. Vuelve a llamar a `ApiEpayco::validarReferencia($refpago)` (doble check).
+2. Vuelve a llamar a `ApiEpayco::validarReferenciaApify($refpago)` (doble check).
 3. Si la API falla o no aprueba **pero** la precompra ya está `PA` →
    responde éxito “Venta ya registrada previamente” (no rechazo falso).
 4. Si aprueba y aún no estaba `PA`, llama a Subsidio `guardar-venta`.
@@ -474,7 +505,8 @@ Matriz completa de mensajes UI:
 #### ⑩ Si el usuario cierra el checkout sin pagar → abandonar
 
 [`marcarPrecompraAbandonada(precompraId)`](../public/src/Mercurio/Ecommerce/epayco.js)
-se dispara desde el callback `onCloseModal` (registrado en el paso ⑤):
+se dispara desde el callback de cierre (v1: `onCloseModal` vía
+`registrarOnCloseEpayco`; v2 onpage: hooks de cierre — ver §16.4):
 
 1. Verifica que `window.__epaycoPagoEnValidacion === false` (si es `true`,
    significa que la response URL está en juego y la precompra puede estar
@@ -542,21 +574,24 @@ Ruta `GET /mercurio/servicios/compras-pendientes` →
 
 Hay **dos mecanismos complementarios** para evitar precompras `PE` huérfanas.
 
-### 8.1 `onClose` (frontend → backend)
+### 8.1 Cierre del checkout (frontend → backend)
 
-Cuando el usuario cierra el checkout de ePayco sin completar el pago, el
-callback `onCloseModal` configurado en el paso ⑤ dispara, después de
-2.5 s, `POST /mercurio/servicios/abandonar-precompra` → estado `AB` con
-motivo `ABANDONO_CHECKOUT`. Este mecanismo **no requiere que el usuario
-haya vuelto al catálogo**.
+Cuando el usuario cierra el checkout sin completar el pago, tras **2.5 s**
+se llama a `POST /mercurio/servicios/abandonar-precompra` → estado `AB`
+con motivo `ABANDONO_CHECKOUT` (si `__epaycoPagoEnValidacion === false`).
+
+- **v1:** `epaycoHandler.onCloseModal`.
+- **v2 `onpage`:** debería usarse `checkout.setHooks({ onClosed, ... })`
+  (API oficial). Hoy el código aún intenta `onClosed(fn)` / `onErrors(fn)`
+  — pendiente de alinear (§15 #16).
+- **v2 `standard`:** no hay hooks de cierre en el dominio propio (redirect);
+  el job nocturno cubre abandonos huérfanos.
 
 Carrera controlada con `window.__epaycoPagoEnValidacion`:
-- Si la response URL ya llegó y disparó la validación del pago, esa
-  bandera queda `true` y `onClose` **no** marca la precompra como
-  abandonada (evita pisar un pago legítimo que ya pasó la barrera del
-  backend).
-- Una vez que `validarPagoEpayco()` termina (aprobado o rechazado), la
-  bandera se libera a `false`.
+- Si la response URL ya disparó la validación, la bandera queda `true` y
+  el cierre **no** marca `AB`.
+- Al terminar `validarPagoEpayco()` (aprobado o rechazado) se libera a
+  `false`.
 
 ### 8.2 Job nocturno de inactividad
 
@@ -604,33 +639,41 @@ navegador y el callback `onClose` nunca tuvo oportunidad de ejecutarse.
 | POST   | `/mercurio/servicios/listar-servicios`            | `EcommerceController@listarServicios`     |
 | POST   | `/mercurio/servicios/validar-tarifa`              | `EcommerceController@validarTarifa`       |
 | POST   | `/mercurio/servicios/crear-precompra`             | `EcommerceController@crearPrecompra`      |
+| POST   | `/mercurio/servicios/crear-sesion-epayco`          | `EcommerceController@crearSesionCheckout` |
 | POST   | `/mercurio/servicios/abandonar-precompra`         | `EcommerceController@abandonarPrecompra`  |
 | POST   | `/mercurio/servicios/validar-pago-epayco`         | `EcommerceController@validarPagoEpayco`   |
 | POST   | `/mercurio/servicios/guardar-venta`               | `EcommerceController@guardarVenta`        |
 | POST   | `/mercurio/servicios/mis-compras`                 | `EcommerceController@misCompras`          |
 | POST   | `/mercurio/servicios/listar-precompras`           | `EcommerceController@listarPrecompras`    |
 | POST   | `/mercurio/servicios/desestimar-precompra`        | `EcommerceController@desestimarPrecompra` |
+| POST   | `/api/epayco/confirmation`                        | `EpaycoWebhookController@confirmation` (público) |
 
-Todas viven bajo `middleware('mercurio.auth')`.
+Las rutas `/mercurio/servicios/*` viven bajo `middleware('mercurio.auth')`.
+El webhook es público (seguridad = firma `x_signature`).
 
 ---
 
 ## 10. APIs externas consumidas
 
-### 10.1 ePayco — validación de pagos
+### 10.1 ePayco Apify — Smart Checkout y validación
 
-- **Método:** `GET`
-- **URL:** `https://secure.epayco.co/validation/v1/reference/{ref_payco}`
-- **Auth:** ninguno en este endpoint público (solo el path lleva la
-  referencia). Las credenciales `EPAYCO_PUBLIC_KEY` / `EPAYCO_PRIVATE_KEY`
-  se usan en Apify (`obtenerTokenApify` / login Basic → Bearer) para crear
-  sesiones de Smart Checkout.
-- **Llamador:** [`ApiEpayco::validarReferencia()`](../app/Services/Api/ApiEpayco.php).
-- **Campos consumidos de la respuesta:** `x_cod_transaction_state`,
-  `x_response`, `x_response_reason_text`, `x_amount`, `x_ref_payco`,
-  `x_id_invoice`, `x_transaction_id`, `x_approval_code`, `x_bank_name`,
-  `x_franchise`, `x_card_number`, `x_quotas`, `x_currency_code`, `x_date`,
-  `x_signature`.
+Base: `EPAYCO_APIFY_URL` (`https://apify.epayco.co`). Credenciales de
+comercio: `public_key` / `private_key` de `epayco_cuentas` vía `withCuenta()`.
+
+| Operación | Método / path | Auth | Llamador |
+| --------- | ------------- | ---- | -------- |
+| Token | `POST /login` | Basic | `obtenerTokenApify()` |
+| Sesión checkout | `POST /payment/session/create` | Bearer | `crearSesionCheckout()` |
+| Consultar pago | `POST /payment/transaction` `{ referencePayco }` | Bearer | `validarReferenciaApify()` |
+
+- **Llamadores de validación:** `EcommerceController@validarPagoEpayco`,
+  `guardarVenta`, `AdmserviciosController` (reconsulta soporte).
+- **Campos normalizados desde Apify:** `codTransactionState` → `cod_estado`,
+  `refPayco`, `status`/`response`, `responseReasonText`, `amount`,
+  `invoice`, `transactionId`, `autorizacion`, `bank`, `franchise`,
+  `cardNumber`, `quotas`, `currency`, `date`, `signature`.
+- **QA:** con `EPAYCO_FORCE_APPROVED=true` (solo non-prod) se omite Apify y
+  se simula aprobado.
 
 ### 10.2 CLIS/SISU — backend de subsidio
 
@@ -650,45 +693,44 @@ Todas viven bajo `middleware('mercurio.auth')`.
 ## 11. Consideraciones de seguridad y operación
 
 1. **No confiar en el cliente.** Toda confirmación se valida con
-   `validarReferencia()` antes de invocar `guardar-venta`. El query string
-   que llega en el redirect solo se usa como UX.
+   `validarReferenciaApify()` (o el webhook firmado) antes de invocar
+   `guardar-venta`. El query string del redirect `response` solo se usa
+   como UX (alineado con la doc oficial ePayco).
 2. **Doble validación del pago.** `validarPagoEpayco()` y `guardarVenta()`
-   llaman ambos a `ApiEpayco::validarReferencia()`; esto es defensa en
-   profundidad por si el usuario re-abre la URL de respuesta varias veces.
-   Cada llamada deja su propia fila en `epayco_transacciones`.
+   llaman ambos a `ApiEpayco::validarReferenciaApify()`; defensa en
+   profundidad si el usuario re-abre la URL de respuesta. Cada llamada
+   deja su propia fila en `epayco_transacciones`.
 3. **Carrera `onClose` vs response URL.** La bandera
-   `window.__epaycoPagoEnValidacion` evita que un `onClose` marque como
+   `window.__epaycoPagoEnValidacion` evita que un cierre marque como
    `AB` una precompra cuyo pago está siendo validado en paralelo.
 4. **Carrera `actualizarPrecompraDesdePago()`** permite actualizar una
    precompra en `AB` si llega una validación con `ref_payco` (pago tardío
-   que llegó después del `onClose`).
-5. **CSRF.** Todas las llamadas AJAX envían el token CSRF vía
-   `$.ajaxSetup({ headers: { 'X-CSRF-TOKEN': ... } })`.
+   que llegó después del cierre).
+5. **CSRF.** Todas las llamadas AJAX autenticadas envían el token CSRF vía
+   `$.ajaxSetup({ headers: { 'X-CSRF-TOKEN': ... } })`. El webhook
+   `api/*` está excluido de CSRF.
 6. **TLS.** `ApiEpayco` verifica el certificado SSL por defecto
-   (`EPAYCO_HTTP_VERIFY_SSL=true`) en `validarReferencia` y llamadas Apify.
+   (`EPAYCO_HTTP_VERIFY_SSL=true`) en login, sesión y consulta Apify.
    Solo desactivar en entornos con CA/proxy problemáticos (`false`).
-7. **Trazabilidad.** `setLogger()` se invoca en cada paso crítico
-   (creación de precompra, pago validado, venta guardada, desestimación,
-   abandono) y `epayco_transacciones` guarda el payload crudo de cada
-   validación / webhook.
-8. **Idempotencia.** `actualizarPrecompraDesdePago()` / webhook no degradan
-   una precompra que ya esté en `PA`. La auditoría es siempre
-   *append-only* — nunca se sobrescribe. Además,
-   `EcommerceController::guardarVenta` y el webhook omiten la llamada a
-   Subsidio si la precompra **ya estaba** `PA` antes de actualizar (evita
-   doble `guardar-venta` cuando el webhook llega primero).
-9. **Datos personales.** `sanitizarTexto()` en el frontend limpia acentos y
-   caracteres no ASCII antes de enviar el `name` del checkout (ePayco es
-   quisquilloso con tildes y emojis). El email se sanea con un fallback
-   `sin@email.com` cuando el trabajador no tiene correo registrado.
-10. **Modo development.** `EPAYCO_MODE=development` activa el modo test del
-    checkout (`test: true` en JS). El cambio de comportamiento real entre
-    development/production se hace dentro del panel de ePayco.
+7. **Trazabilidad.** `setLogger()` / `Log::info` en pasos críticos y
+   `epayco_transacciones` guarda el payload crudo de cada validación /
+   webhook.
+8. **Idempotencia.** Webhook / actualización no degradan una precompra
+   `PA`. Auditoría *append-only*. `guardarVenta` y el webhook omiten
+   Subsidio si la precompra **ya estaba** `PA` (evita doble registro).
+9. **Datos personales.** `sanitizarTexto()` limpia acentos/no-ASCII en el
+   nombre del checkout. Email con fallback `sin@email.com`. Billing v2
+   se arma en `resolverBillingCheckout()`.
+10. **Modo test.** Viene de `epayco_cuentas.env_mode === 'development'` →
+    `test: true` en `configure()`. `EPAYCO_MODE` del `.env` está
+    **deprecado**.
 11. **Webhook firmado.** `POST /api/epayco/confirmation` valida
-    `x_signature` con `EPAYCO_CUSTOMER_ID` / `EPAYCO_P_KEY`. Guía:
-    [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md).
+    `x_signature` con `p_id_customer` + `p_key` de la cuenta asociada a
+    la precompra (no vars de `.env`). Fórmula:
+    `sha256(p_cust_id_cliente^p_key^x_ref_payco^x_transaction_id^x_amount^x_currency_code)`.
+    Guía: [epayco-webhook-confirmation.md](./epayco-webhook-confirmation.md).
 12. **`EPAYCO_FORCE_APPROVED` (solo QA).** Si es `true` y el entorno no es
-    production (`APP_ENV` / `APP_MODE`), `validarReferencia` fuerza
+    production (`APP_ENV` / `APP_MODE`), `validarReferenciaApify` fuerza
     `aprobado=true`. **Nunca** activar en producción. No afecta el webhook.
 
 ---
@@ -704,8 +746,10 @@ Todas viven bajo `middleware('mercurio.auth')`.
 | Precompra queda `PE` eternamente                                  | `onClose` nunca se disparó (cierre brusco del navegador) y el job nocturno aún no la procesó. | Esperar el siguiente run de `precompras:marcar-abandonadas` (02:00). |
 | ePayco devuelve código distinto de 1 pero la precompra queda `PE`  | El usuario reabrió la URL de respuesta tras un pago válido anterior.           | `actualizarPrecompraDesdePago()` no degrada `PA` → `RE` ni `PE` → `PE` si ya estaba pagada.  |
 | Precompra pasa a `AB` aunque el pago se completó                  | Carrera entre `onClose` y la response URL cuando la red es lenta.              | Revisar `epayco_transacciones` por `precompra_id`; si hay una fila con `cod_estado=1` y la precompra está `AB`, re-marcar manualmente como `PA`. |
-| No aparecen filas en `epayco_transacciones`                       | `validarReferencia()` no devolvió HTTP 200 o no llegó al insert.               | Revisar `setLogger('Error registrando epayco_transacciones: ...')` en backend.              |
-| Cliente ve “Error” / “pago no aprobado” pero cobro y webhook OK   | Reconsulta `reference` devolvió error de conexión ePayco; sin idempotencia PA. | Ver [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md). Con el fix, si precompra `PA` → “Compra exitosa”. |
+| No aparecen filas en `epayco_transacciones`                       | `validarReferenciaApify()` no devolvió éxito o no llegó al insert.             | Logs `ApiEpayco.validarReferenciaApify` / error registrando auditoría.                      |
+| Cliente ve “Error” / “pago no aprobado” pero cobro y webhook OK   | Reconsulta Apify falló; sin idempotencia PA.                                   | Ver [epayco-validacion-respuesta-cliente.md](./epayco-validacion-respuesta-cliente.md). Si precompra `PA` → “Compra exitosa”. |
+| Sesión v2 no se crea / “No se pudo autenticar con ePayco”         | Llaves de cuenta vacías o login Apify fallido.                                 | Cajas → cuentas ePayco; logs `obtenerTokenApify` / `crearSesionCheckout`.                   |
+| Abandono `AB` no ocurre al cerrar checkout v2 onpage              | Hooks no registrados con `setHooks()` (API oficial v2).                        | Ver §16.4 y pendiente #16 en §15.                                                           |
 | `precompras:marcar-abandonadas` no se ejecuta                     | Scheduler no configurado o `withoutOverlapping()` trabado.                      | `php artisan schedule:list` y `schedule:run`.                                                |
 | Cupos del mes en 0                                               | El beneficiario ya agotó la cuota mensual del servicio.                         | `validar-tarifa` retorna `cupos_mes = 0` y el frontend bloquea el botón "Procesar pago".    |
 
@@ -713,25 +757,48 @@ Todas viven bajo `middleware('mercurio.auth')`.
 
 ## 13. Anexo: callbacks y parámetros relevantes de ePayco
 
-Cuando ePayco redirige al `response` URL, envía los siguientes query params
-(los nombres pueden variar ligeramente según el método de pago):
+### 13.1 Página de respuesta (`response`)
+
+Cuando ePayco redirige al `response` URL, incluye al menos `ref_payco` en
+query (y a menudo más params). **No es confiable** para cerrar la venta:
+el usuario puede cerrar el navegador o manipular la URL. Mercurio usa el
+redirect solo como disparador UX → luego consulta Apify / espera webhook.
 
 | Param                       | Significado                                             |
 | --------------------------- | ------------------------------------------------------- |
 | `ref_payco` / `x_ref_payco` | Referencia única de la transacción en ePayco            |
 | `x_cod_transaction_state`   | Código de estado (1=Aceptada, 2=Rechazada, etc.)        |
-| `x_response`                | Respuesta corta (`Aceptada`, `Rechazada`, ...)          |
+| `x_response`                | Respuesta corta (`Aceptada`, `Rechazada`, `Pendiente`, `Fallida`) |
 | `x_response_reason_text`    | Motivo detallado (texto legible)                        |
 | `x_amount`                  | Monto cobrado                                           |
 | `x_id_invoice`              | Identificador enviado como `invoice` (`ORD…`)           |
 
-Y los que se persisten en `epayco_transacciones` desde el payload crudo:
-`x_transaction_id`, `x_approval_code`, `x_bank_name`, `x_franchise`,
-`x_card_number`, `x_quotas`, `x_currency_code`, `x_date`, `x_signature`.
+El frontend lee `ref_payco` desde `ref_payco` / `refPayco` / `x_ref_payco`
+y también el path `/checkout/{ref}/response` por compatibilidad.
 
-El frontend lee `ref_payco` desde varios nombres
-(`ref_payco` / `refPayco` / `x_ref_payco`) y también analiza el path
-`/checkout/{ref}/response` por compatibilidad.
+La doc oficial permite enriquecer el resultado con
+`GET https://secure.epayco.co/validation/v1/reference/{ref_payco}`; Mercurio
+**no** usa ese GET en runtime (usa Apify, §10.1).
+
+### 13.2 Webhook `confirmation` (parámetros principales)
+
+ePayco puede notificar por GET o POST según el `method` de la sesión
+(Mercurio hoy solo registra `POST` y no envía `method` en la sesión).
+Parámetros relevantes (lista completa en §16.5 / doc oficial):
+
+| Parámetro | Uso en Mercurio |
+| --------- | --------------- |
+| `x_ref_payco` / `ref_payco` | Correlacionar / persistir |
+| `x_cod_transaction_state` | Mapear a `PA` / `RE` / `PE` |
+| `x_response` | Auditoría (`Aceptada`, `Rechazada`, `Pendiente`, `Fallida`) |
+| `x_signature` | Validar autenticidad |
+| `x_amount` / `x_currency_code` / `x_transaction_id` | Firma + auditoría |
+| `x_extra1`…`x_extra4` | documento, codser, numero, precompra_id |
+| `x_extra5` / `x_extra6` | billing name / email (v2) |
+
+Persistidos en `epayco_transacciones`: `x_transaction_id`, `x_approval_code`,
+`x_bank_name`, `x_franchise`, `x_card_number`, `x_quotas`, `x_currency_code`,
+`x_date` / `x_transaction_date`, `x_signature`.
 
 ---
 
@@ -740,20 +807,24 @@ El frontend lee `ref_payco` desde varios nombres
 - **Precompra** — registro en `precompras_servicios` que representa una
   intención de compra antes de que ePayco confirme el pago. Es el ancla que
   permite reintentar pagos y conciliar transacciones.
+- **sessionId** — ID de sesión Smart Checkout v2 retornado por Apify
+  (`/payment/session/create`); se pasa a `ePayco.checkout.configure`.
 - **ref_payco** — referencia única de la transacción devuelta por ePayco;
   es la llave de cruce entre la precompra y el pago real.
-- **Cod_estado_epayco** — copia local del `x_cod_transaction_state`; se
+- **Cod_estado_epayco** — copia local del código de estado (1–12); se
   persiste para auditoría y para mostrar el motivo del fallo.
 - **Estado DE** — `Desestimado`. Solo el usuario lo asigna desde la pantalla
   de "Compras pendientes" con un motivo del catálogo; nunca viene de
   ePayco.
-- **Estado AB** — `Abandonada`. Asignado por `onClose` (frontend) o por el
-  job nocturno `precompras:marcar-abandonadas`. Una precompra en `AB` **no
-  es retomable** y no aparece en el listado de "Compras pendientes".
+- **Estado AB** — `Abandonada`. Asignado por cierre del checkout (frontend)
+  o por el job nocturno `precompras:marcar-abandonadas`. Una precompra en
+  `AB` **no es retomable** y no aparece en "Compras pendientes".
 - **EpaycoTransaccion** — fila en `epayco_transacciones` con un snapshot
   completo de cada validación (`origen=validacion`) o webhook
   (`origen=webhook`). Es append-only y se usa para auditoría y soporte
   (tabla/CSV Admservicios + modal `detalle/{id}`).
+- **onpage / standard** — tipos de Smart Checkout: embebido en el sitio vs
+  redirect al entorno seguro ePayco (mejor en móvil/WebView).
 
 ---
 
@@ -766,16 +837,149 @@ El frontend lee `ref_payco` desde varios nombres
 | 3 | Modal detalle Admservicios con historial completo | Hecho |
 | 4 | Webhook `confirmation` + firma | Hecho |
 | 5 | Job `precompras:marcar-abandonadas` | Hecho |
-| 6 | `onClose` / `onClosed` + abandono `AB` | Hecho |
+| 6 | Cierre checkout + abandono `AB` (v1 `onCloseModal`; v2 parcial) | Hecho* |
 | 7 | Auditoría `epayco_transacciones` | Hecho |
 | 8 | Checkout modular + `EPAYCO_CHECKOUT_VERSION` | Hecho |
 | 9 | Móvil/WebView fuerza Checkout v2 `type: standard` | Hecho |
 | 10 | `EPAYCO_FORCE_APPROVED` (QA non-prod) | Hecho |
 | 11 | `transaction_id` / `approval_code` en `ReporteComprasServicios` | Hecho |
-| 12 | Whitelist de medios (`methods` / `methodsDisable`) | Pendiente |
+| 12 | Whitelist de medios (`methodsDisable` string[]) | Pendiente |
 | 13 | TLS configurable en `APIClient` (Subsidio) | Pendiente |
 | 14 | Tests Feature del webhook | Pendiente |
 | 15 | Alertas operativas firma `400` / credenciales `503` | Pendiente |
+| 16 | Migrar hooks v2 a `checkout.setHooks({ onCreated, onResponse, onClosed, onErrors })` | Pendiente |
+| 17 | Enviar `method: "POST"` (y valorar `noRedirectOnClose` / `forceResponse`) en sesión Apify | Pendiente |
+| 18 | Desglose impuestos sesión (`taxBase` / `tax` / `taxIco`) si facturación lo exige | Pendiente |
+
+\*El abandono en v1 está operativo. En v2 onpage el código aún registra
+`checkout.onClosed(fn)` / `onErrors(fn)`; la API oficial exige `setHooks`
+(§16.4). En `type: standard` los hooks no aplican (redirect).
 
 Detalle de backlog: [analisis-mejoras-epayco-precompras.md](./analisis-mejoras-epayco-precompras.md).  
 Especificaciones a implementar: [pendientes-compra-en-linea.md](./pendientes-compra-en-linea.md).
+
+---
+
+## 16. Referencia oficial Smart Checkout v2 → Mercurio
+
+Resumen del contrato ePayco (fuente:
+[repo-api-epayco.md](../../../repo-api-epayco.md) / docs.epayco.com) mapeado
+a la implementación actual. No aplica a Mercurio: `splitPayment`,
+`PSEMultiCredit`, `PSESubMerchant`.
+
+### 16.1 Ciclo de vida (oficial)
+
+1. **Inicialización** — backend crea sesión Apify.
+2. **Renderizado** — front monta Smart Checkout con `sessionId`.
+3. **Procesamiento** — usuario paga en PCI DSS de ePayco.
+4. **Confirmación** — webhook `confirmation` + redirect a `response`.
+
+### 16.2 Autenticación y sesión (Apify)
+
+```bash
+# 1) Token
+POST https://apify.epayco.co/login
+Authorization: Basic base64(PUBLIC_KEY:PRIVATE_KEY)
+→ { "token": "<JWT>" }
+
+# 2) Sesión
+POST https://apify.epayco.co/payment/session/create
+Authorization: Bearer <JWT>
+Content-Type: application/json
+→ { "success": true, "data": { "sessionId": "...", "token": "..." } }
+```
+
+Mercurio: `ApiEpayco::obtenerTokenApify()` (cache por JWT `exp`) +
+`crearSesionCheckout()` desde `EcommerceController@crearSesionCheckout`.
+
+### 16.3 Propiedades de sesión
+
+**Requeridas (oficial):** `checkout_version` (`"2"`), `name`, `currency`,
+`amount`.
+
+**Opcionales relevantes para Mercurio:**
+
+| Propiedad | Tipo | En Mercurio hoy |
+| --------- | ---- | --------------- |
+| `description` | string | Sí (= nombre servicio) |
+| `lang` | `ES` \| `EN` | Sí (`ES`) |
+| `country` | string | Sí (`CO`) |
+| `invoice` | string | Sí (`ORD{id}-{ts}`) |
+| `taxBase` / `tax` / `taxIco` | number | No (pendiente #18) |
+| `response` | URL | Sí (`servicios.index`) |
+| `confirmation` | URL webhook | Sí (`api.epayco.confirmation`) |
+| `methodsDisable` | string[] | No (pendiente #12) |
+| `method` | `GET` \| `POST` | No (pendiente #17; webhook solo POST) |
+| `dues` | number | No |
+| `noRedirectOnClose` | boolean | No (útil con control de modal) |
+| `forceResponse` | boolean | No (omite summary final) |
+| `uniqueTransactionPerBill` | boolean | No |
+| `extras.extra1`–`extra11` | string | Sí extra1–6 |
+| `billing.*` | object | Sí (`email`, `name`, `typeDoc`, `numberDoc`, `callingCode`, `mobilePhone`, `address`) |
+
+### 16.4 Frontend: script, configure y hooks
+
+```html
+<script src="https://checkout.epayco.co/checkout-v2.js"></script>
+```
+
+```js
+// API oficial (docs ePayco)
+const checkout = ePayco.checkout.configure({
+  sessionId,
+  type: 'onpage', // o 'standard'
+  test: true      // false en producción
+});
+
+checkout.setHooks({
+  onCreated: (data) => { /* checkout abierto */ },
+  onResponse: (response) => { /* resultado pago (UX) */ },
+  onErrors: (error) => { /* error de proceso */ },
+  onClosed: (errors) => { /* cierre / cancelación */ },
+});
+
+checkout.open();
+```
+
+| Concepto oficial | Mercurio |
+| ---------------- | -------- |
+| Script `checkout-v2.js` | `_epayco_scripts.blade.php` + carga bajo demanda en móvil si versión=1 |
+| `type: onpage` | Desktop con v2 |
+| `type: standard` | Móvil / WebView (redirect entorno seguro) |
+| `test` | `cuenta.env_mode === 'development'` |
+| `setHooks` | **Pendiente** — hoy `onClosed(fn)` / `onErrors(fn)` (API legacy). Hooks oficiales solo en `onpage`. |
+| `onClosed` → abandono | Tras 2.5 s → `POST abandonar-precompra` si no hay pago en validación |
+
+### 16.5 Response vs confirmation (oficial)
+
+| Mecanismo | Quién | Confiable para cerrar venta | Mercurio |
+| --------- | ----- | --------------------------- | -------- |
+| `response` | Browser redirect | **No** | `verificarRespuestaEpayco` → Apify → `guardarVenta` |
+| `confirmation` | Server→server webhook | **Sí** (firma + reintentos) | `EpaycoConfirmationService` → auditoría + `PA` + Subsidio |
+
+Buenas prácticas oficiales ya cubiertas o parciales:
+
+1. Siempre validar en webhook / no confiar solo en `response` — sí.
+2. Idempotencia ante reintentos — sí (`PA` no se degrada; no doble Subsidio).
+3. Responder HTTP 200 rápido — sí (`OK`).
+4. Validar `x_signature` — sí (por cuenta DB).
+5. Registrar webhooks — sí (`epayco_transacciones`).
+6. HTTPS en confirmation — ops / entorno.
+7. No redirigir el endpoint webhook — sí (respuesta texto plana).
+
+Fórmula de firma (oficial = Mercurio):
+
+```text
+SHA256(p_cust_id_cliente^p_key^x_ref_payco^x_transaction_id^x_amount^x_currency_code)
+```
+
+### 16.6 Mapa rápido oficial → archivos
+
+| Paso oficial | Archivo Mercurio |
+| ------------ | ---------------- |
+| Login Apify | `ApiEpayco::obtenerTokenApify` |
+| Create session | `ApiEpayco::crearSesionCheckout` / `EcommerceController@crearSesionCheckout` |
+| Configure + open | `public/src/Mercurio/Ecommerce/epayco.js` (`abrirCheckoutV2`) |
+| Response UX | `verificarRespuestaEpayco` |
+| Consulta estado | `validarReferenciaApify` |
+| Confirmation | `EpaycoWebhookController` + `EpaycoConfirmationService` + `EpaycoSignatureValidator` |

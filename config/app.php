@@ -188,6 +188,7 @@ return [
         'apify_url' => env('EPAYCO_APIFY_URL', 'https://apify.epayco.co'),
         // Verificación TLS en llamadas Apify (default true).
         // Solo poner false en entornos dev con CA/proxy problemáticos.
+        // Independiente del HTTPS del browser (eso lo define APP_URL + ForceHttps).
         'verify_ssl' => filter_var(env('EPAYCO_HTTP_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
         // TEMPORAL (solo non-prod): omite Apify y fuerza aprobado=true / cod_estado=1
         // en validarReferenciaApify. Default false. Nunca true en production.

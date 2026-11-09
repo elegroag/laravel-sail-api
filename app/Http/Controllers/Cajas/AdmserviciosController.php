@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Models\DevolucionPrecompra;
 use App\Models\PrecompraServicio;
 use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Ecommerce\DevolucionPrecompraService;
 use App\Services\Ecommerce\EpaycoCuentaResolver;
 use App\Services\Ecommerce\EstadoPrecompra;
+use App\Services\Ecommerce\PrecompraVencimientoService;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
@@ -43,7 +46,7 @@ class AdmserviciosController extends ApplicationController
             'codser' => 'Servicio',
             'numero' => 'Apertura',
             'codben' => 'Beneficiario',
-            'estado' => 'Estado (PE, PA, DE, RE)',
+            'estado' => 'Estado (PE, PA, DE, RE, AB, VE, DV)',
             'ref_payco' => 'Referencia ePayco',
             'valor' => 'Valor',
             'fecha_precompra' => 'Fecha precompra',
@@ -116,6 +119,7 @@ class AdmserviciosController extends ApplicationController
             'transaccionesEpayco' => function ($q) {
                 $q->orderBy('id');
             },
+            'devolucion',
         ])->find($id);
 
         if (! $precompra) {
@@ -139,6 +143,7 @@ class AdmserviciosController extends ApplicationController
             'transaccionesEpayco' => function ($q) {
                 $q->orderBy('id');
             },
+            'devolucion',
         ])->find($id);
 
         if (! $precompra) {
@@ -189,7 +194,8 @@ class AdmserviciosController extends ApplicationController
                 'registrada' => true,
                 'pago' => null,
                 'html' => $this->renderDetalleHtml($precompra->fresh([
-                    'transaccionesEpayco' => fn($q) => $q->orderBy('id'),
+                    'transaccionesEpayco' => fn ($q) => $q->orderBy('id'),
+                    'devolucion',
                 ])),
             ]);
         }
@@ -232,17 +238,33 @@ class AdmserviciosController extends ApplicationController
 
             $guardado = $this->guardarVentaSubsidio($precompra, $refpago);
             if (! ($guardado['ok'] ?? false)) {
+                $msg = (string) ($guardado['msg'] ?? 'No se pudo guardar la venta en Subsidio.');
+                $vencimiento = app(PrecompraVencimientoService::class)->marcarSiAplica($precompra, $msg);
+                $precompraFresh = ($vencimiento['precompra'] ?? $precompra)->fresh([
+                    'transaccionesEpayco' => fn ($q) => $q->orderBy('id'),
+                    'devolucion',
+                ]);
+
+                $msj = $msg;
+                if (($vencimiento['marcada'] ?? false) === true) {
+                    $msj .= ' La precompra quedó marcada como Vencida: el afiliado debe solicitar formalmente la devolución.';
+                }
+
                 return $this->renderObject([
                     'success' => false,
-                    'msj' => (string) ($guardado['msg'] ?? 'No se pudo guardar la venta en Subsidio.'),
+                    'msj' => $msj,
                     'pago' => $pagoResumen,
                     'registrada' => false,
+                    'vencida' => ($vencimiento['marcada'] ?? false) === true,
                     'subsidio' => $guardado['resultado'] ?? null,
+                    'html' => $this->renderDetalleHtml($precompraFresh),
+                    'titulo' => 'Precompra #' . $precompraFresh->id,
                 ]);
             }
 
             $precompra = $precompra->fresh([
-                'transaccionesEpayco' => fn($q) => $q->orderBy('id'),
+                'transaccionesEpayco' => fn ($q) => $q->orderBy('id'),
+                'devolucion',
             ]);
 
             return $this->renderObject([
@@ -270,18 +292,143 @@ class AdmserviciosController extends ApplicationController
     }
 
     /**
+     * POST /cajas/admservicios/marcar-vencida/{id}
+     * Marca manualmente PA → VE (cupos/plazo) desde Cajas.
+     */
+    public function marcarVencida(int $id, Request $request, PrecompraVencimientoService $service)
+    {
+        $precompra = PrecompraServicio::find($id);
+        if (! $precompra) {
+            return $this->renderObject([
+                'success' => false,
+                'msj' => 'La precompra no existe',
+            ]);
+        }
+
+        $data = $request->validate([
+            'motivo' => 'required|string|in:' . implode(',', array_keys(EstadoPrecompra::MOTIVOS_VENCIDA)),
+            'detalle' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $precompra = $service->marcarManual($precompra, $data['motivo'], $data['detalle'] ?? null);
+            $precompra->load([
+                'transaccionesEpayco' => fn ($q) => $q->orderBy('id'),
+                'devolucion',
+            ]);
+
+            return $this->renderObject([
+                'success' => true,
+                'msj' => 'Precompra marcada como Vencida.',
+                'html' => $this->renderDetalleHtml($precompra),
+                'titulo' => 'Precompra #' . $precompra->id,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->renderObject([
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * POST /cajas/admservicios/devolucion/{id}/en-tramite
+     */
+    public function devolucionEnTramite(int $id, Request $request, DevolucionPrecompraService $service)
+    {
+        return $this->gestionarDevolucion($id, $request, function (DevolucionPrecompra $devolucion, string $usuario, ?string $nota) use ($service) {
+            return $service->ponerEnTramite($devolucion, $usuario, $nota);
+        }, 'Solicitud de devolución en trámite.');
+    }
+
+    /**
+     * POST /cajas/admservicios/devolucion/{id}/aprobar
+     * Aprueba: DevolucionPrecompra → APROBADO y precompra → DV.
+     */
+    public function devolucionAprobar(int $id, Request $request, DevolucionPrecompraService $service)
+    {
+        return $this->gestionarDevolucion($id, $request, function (DevolucionPrecompra $devolucion, string $usuario, ?string $nota) use ($service) {
+            return $service->aprobar($devolucion, $usuario, $nota);
+        }, 'Devolución aprobada. La compra quedó en estado Devolución.');
+    }
+
+    /**
+     * POST /cajas/admservicios/devolucion/{id}/rechazar
+     */
+    public function devolucionRechazar(int $id, Request $request, DevolucionPrecompraService $service)
+    {
+        return $this->gestionarDevolucion($id, $request, function (DevolucionPrecompra $devolucion, string $usuario, ?string $nota) use ($service) {
+            return $service->rechazar($devolucion, $usuario, $nota);
+        }, 'Solicitud de devolución rechazada.');
+    }
+
+    /**
+     * @param  callable(DevolucionPrecompra, string, ?string): DevolucionPrecompra  $accion
+     */
+    protected function gestionarDevolucion(int $precompraId, Request $request, callable $accion, string $okMessage)
+    {
+        $precompra = PrecompraServicio::with('devolucion')->find($precompraId);
+        if (! $precompra) {
+            return $this->renderObject([
+                'success' => false,
+                'msj' => 'La precompra no existe',
+            ]);
+        }
+
+        if (! $precompra->devolucion) {
+            return $this->renderObject([
+                'success' => false,
+                'msj' => 'La precompra no tiene solicitud de devolución.',
+            ]);
+        }
+
+        $data = $request->validate([
+            'nota' => 'nullable|string|max:1000',
+        ]);
+
+        $usuario = (string) ($this->user['usuario'] ?? 'sistema');
+
+        try {
+            $accion($precompra->devolucion, $usuario, $data['nota'] ?? null);
+            $precompra = $precompra->fresh([
+                'transaccionesEpayco' => fn ($q) => $q->orderBy('id'),
+                'devolucion',
+            ]);
+
+            return $this->renderObject([
+                'success' => true,
+                'msj' => $okMessage,
+                'html' => $this->renderDetalleHtml($precompra),
+                'titulo' => 'Precompra #' . $precompra->id,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->renderObject([
+                'success' => false,
+                'msj' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * HTML del detalle (misma vista que detalle/).
      */
     protected function renderDetalleHtml(PrecompraServicio $precompra): string
     {
+        if (! $precompra->relationLoaded('devolucion')) {
+            $precompra->load('devolucion');
+        }
+
         $ventaSubsidio = $this->consultarVentaSubsidioViaMisCompras($precompra);
         $puedeRegistrarSubsidio = ($ventaSubsidio['registrada'] ?? false) !== true
-            && trim((string) ($precompra->ref_payco ?? '')) !== '';
+            && trim((string) ($precompra->ref_payco ?? '')) !== ''
+            && $precompra->isPagado();
 
         return view('cajas.admservicios._detalle', [
             'precompra' => $precompra,
             'ventaSubsidio' => $ventaSubsidio,
             'puedeRegistrarSubsidio' => $puedeRegistrarSubsidio,
+            'puedeMarcarVencida' => $precompra->isPagado() && ($ventaSubsidio['registrada'] ?? false) !== true,
+            'motivosVencida' => EstadoPrecompra::MOTIVOS_VENCIDA,
             'relacionadas' => $this->precomprasRelacionadas($precompra),
         ])->render();
     }

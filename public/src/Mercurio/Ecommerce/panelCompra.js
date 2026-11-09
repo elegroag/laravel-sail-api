@@ -6,6 +6,7 @@
 import store from './store.js';
 import { obtenerCodben, formatearValor, escapeHtml } from './utils.js';
 import { cerrarResumenCompraMovil, restaurarPanelAlSlot } from './vistaMovil.js';
+import { aplicarEstadoCooldown } from './cooldown.js';
 
 export function actualizarPanelBeneficiario() {
     // Con ítems en el carrito, la lista del resumen reemplaza el bloque único.
@@ -39,6 +40,7 @@ export function limpiarSeleccionServicio() {
     $('#hid_valor_raw').val('');
     $('#txt_cupos_mes').text('-').removeClass('panel-compra__cupos-mes--cero');
     $('#btn_procesar_pago').prop('disabled', false).show();
+    $('#aviso_cooldown_compra').hide();
     $('#lista_items_compra').empty().hide();
     $('.servicio-card--selected').removeClass('servicio-card--selected');
     $('.beneficiario-card').removeClass('beneficiario-card--locked beneficiario-card--en-carrito');
@@ -122,6 +124,7 @@ export function renderListaItemsCompra() {
     $('#hid_valor_raw').val(String(total));
 
     marcarBeneficiariosEnCarrito();
+    aplicarEstadoCooldown();
 }
 
 export function quitarItemCompra(codben) {

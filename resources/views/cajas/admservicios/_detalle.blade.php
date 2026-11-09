@@ -1,4 +1,5 @@
 @php
+    use App\Services\Ecommerce\EstadoDevolucionPrecompra;
     use App\Services\Ecommerce\EstadoPrecompra;
 
     $badgeEstado = [
@@ -7,6 +8,15 @@
         EstadoPrecompra::DESESTIMADO => 'badge-estado-desestimado',
         EstadoPrecompra::RECHAZADO => 'bg-danger',
         EstadoPrecompra::ABANDONADA => 'bg-dark',
+        EstadoPrecompra::VENCIDA => 'bg-warning text-dark',
+        EstadoPrecompra::DEVOLUCION => 'bg-info text-dark',
+    ];
+
+    $badgeDevolucion = [
+        EstadoDevolucionPrecompra::SOLICITADA => 'bg-warning text-dark',
+        EstadoDevolucionPrecompra::EN_TRAMITE => 'bg-primary',
+        EstadoDevolucionPrecompra::APROBADO => 'bg-success',
+        EstadoDevolucionPrecompra::RECHAZADA => 'bg-danger',
     ];
 
     $motivo = '';
@@ -92,6 +102,20 @@
                     @endif
                 </div>
             @endif
+            @if ($precompra->motivo_vencida || $precompra->isVencida() || $precompra->isDevolucion())
+                <div class="col-12">
+                    <div class="small text-muted">Motivo vencimiento</div>
+                    <div>{{ $precompra->motivo_vencida_descripcion ?: '—' }}</div>
+                    @if ($precompra->detalle_vencida)
+                        <div class="text-muted small mt-1">{{ $precompra->detalle_vencida }}</div>
+                    @endif
+                    @if ($precompra->fecha_vencida)
+                        <div class="text-muted small mt-1">
+                            Fecha: {{ $precompra->fecha_vencida->format('Y-m-d H:i:s') }}
+                        </div>
+                    @endif
+                </div>
+            @endif
             @if ($precompra->nota)
                 <div class="col-12">
                     <div class="small text-muted">Nota</div>
@@ -100,6 +124,120 @@
             @endif
         </div>
     </div>
+
+    @if (! empty($puedeMarcarVencida))
+        <div class="border rounded p-3 mt-3">
+            <h6 class="heading-small text-muted mb-2">Marcar como vencida</h6>
+            <p class="small text-muted mb-2">
+                Use esta acción si Subsidio rechazó el registro por cupos o plazo y la precompra sigue en Pagado.
+            </p>
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="motivo_vencida">Motivo</label>
+                    <select id="motivo_vencida" class="form-select form-select-sm">
+                        @foreach (($motivosVencida ?? []) as $codigo => $label)
+                            <option value="{{ $codigo }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-12 col-md-5">
+                    <label class="form-label small mb-1" for="detalle_vencida">Detalle (opcional)</label>
+                    <input type="text" id="detalle_vencida" class="form-control form-control-sm" maxlength="1000">
+                </div>
+                <div class="col-12 col-md-3">
+                    <button type="button" class="btn btn-sm btn-warning w-100" data-toggle="marcar-vencida" data-id="{{ $precompra->id }}">
+                        Marcar vencida
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <h6 class="heading-small text-muted mb-3 mt-4">
+        Solicitud de devolución
+        @if ($precompra->devolucion)
+            <span class="badge {{ $badgeDevolucion[$precompra->devolucion->estado] ?? 'bg-secondary' }} ms-1">
+                {{ $precompra->devolucion->estado_descripcion }}
+            </span>
+        @else
+            <span class="badge bg-light text-dark ms-1">Sin solicitud</span>
+        @endif
+    </h6>
+
+    @if ($precompra->devolucion)
+        @php $dev = $precompra->devolucion; @endphp
+        <div class="border rounded p-3">
+            <div class="row g-3">
+                <div class="col-12 col-md-4">
+                    <div class="small text-muted">Fecha solicitud</div>
+                    <div>{{ optional($dev->fecha_solicitud)->format('Y-m-d H:i:s') ?: '—' }}</div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="small text-muted">En trámite</div>
+                    <div>{{ optional($dev->fecha_en_tramite)->format('Y-m-d H:i:s') ?: '—' }}</div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="small text-muted">Resolución</div>
+                    <div>{{ optional($dev->fecha_resolucion)->format('Y-m-d H:i:s') ?: '—' }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="small text-muted">Motivo solicitud</div>
+                    <div>{{ $dev->motivo_solicitud ?: '—' }}</div>
+                </div>
+                @if ($dev->nota_afiliado)
+                    <div class="col-12">
+                        <div class="small text-muted">Nota afiliado</div>
+                        <div>{{ $dev->nota_afiliado }}</div>
+                    </div>
+                @endif
+                @if ($dev->nota_gestion)
+                    <div class="col-12">
+                        <div class="small text-muted">Nota gestión</div>
+                        <div style="white-space: pre-wrap">{{ $dev->nota_gestion }}</div>
+                    </div>
+                @endif
+                @if ($dev->usuario_gestion)
+                    <div class="col-12 col-md-4">
+                        <div class="small text-muted">Usuario gestión</div>
+                        <div>{{ $dev->usuario_gestion }}</div>
+                    </div>
+                @endif
+            </div>
+
+            @if ($dev->estaAbierta())
+                <div class="mt-3">
+                    <label class="form-label small mb-1" for="nota_gestion_devolucion">Nota de gestión (opcional)</label>
+                    <textarea id="nota_gestion_devolucion" class="form-control form-control-sm mb-2" rows="2" maxlength="1000"></textarea>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if ($dev->isSolicitada())
+                            <button type="button" class="btn btn-sm btn-primary" data-toggle="devolucion-en-tramite" data-id="{{ $precompra->id }}">
+                                Poner en trámite
+                            </button>
+                        @endif
+                        <button type="button" class="btn btn-sm btn-success" data-toggle="devolucion-aprobar" data-id="{{ $precompra->id }}">
+                            Aprobar devolución
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="devolucion-rechazar" data-id="{{ $precompra->id }}">
+                            Rechazar
+                        </button>
+                    </div>
+                    <div class="form-text">Al aprobar, la precompra pasa a estado <strong>Devolución</strong> y la solicitud a <strong>Aprobado</strong>.</div>
+                </div>
+            @endif
+        </div>
+    @elseif ($precompra->isVencida())
+        <ul class="list-group list-group-flush border rounded mb-0">
+            <li class="list-group-item py-2 text-muted">
+                Compra vencida. Pendiente de que el afiliado solicite formalmente la devolución desde Mercurio.
+            </li>
+        </ul>
+    @else
+        <ul class="list-group list-group-flush border rounded mb-0">
+            <li class="list-group-item py-2 text-muted">
+                No aplica solicitud de devolución en el estado actual.
+            </li>
+        </ul>
+    @endif
 
     <h6 class="heading-small text-muted mb-3 mt-4">
         Otras precompras relacionadas

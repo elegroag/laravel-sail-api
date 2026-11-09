@@ -22,6 +22,9 @@
                             <i class="fas fa-history me-1"></i> Historial de precompras
                         </button>
                     </div>
+                    <a href="{{ route('servicios.mis-devoluciones') }}" class="btn btn-sm servicios-catalog__btn-compras">
+                        <i class="fas fa-undo me-1"></i> Mis devoluciones
+                    </a>
                     <a href="{{ route('servicios.index') }}" class="btn btn-sm servicios-catalog__btn-compras">
                         <i class="fas fa-store me-1"></i> Volver al catálogo
                     </a>
@@ -123,6 +126,60 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modal_solicitar_devolucion" tabindex="-1" aria-labelledby="modal_solicitar_devolucion_titulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_solicitar_devolucion_titulo">Solicitar devolución</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2 text-muted small">
+                    Su compra está vencida (pago aprobado, sin registro en Subsidio).
+                    Envíe la solicitud formal para que un operador de Cajas la gestione.
+                </p>
+                <div class="border rounded p-3 mb-3 bg-light">
+                    <div class="small text-muted">Precompra</div>
+                    <div class="fw-semibold" id="devolucion_precompra_label">—</div>
+                    <div class="small mt-2 text-muted">Servicio / apertura</div>
+                    <div id="devolucion_servicio_label">—</div>
+                    <div class="small mt-2 text-muted">Referencia ePayco</div>
+                    <div><code id="devolucion_ref_label">—</code></div>
+                    <div class="small mt-2 text-muted">Valor</div>
+                    <div class="fw-semibold" id="devolucion_valor_label">—</div>
+                    <div class="small mt-2 text-muted">Motivo vencimiento</div>
+                    <div id="devolucion_motivo_vencida_label">—</div>
+                </div>
+                <input type="hidden" id="hid_devolucion_precompra_id" value="">
+                <div class="mb-2">
+                    <label for="txt_devolucion_nota" class="form-label">Nota / observación (opcional)</label>
+                    <textarea
+                        id="txt_devolucion_nota"
+                        class="form-control"
+                        rows="3"
+                        maxlength="1000"
+                        placeholder="Indique cualquier detalle útil para la gestión de la devolución..."
+                    ></textarea>
+                </div>
+                <div id="error_solicitar_devolucion" class="alert alert-warning py-2 mb-0" style="display:none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="error_solicitar_devolucion_msg"></span>
+                </div>
+                <div id="ok_solicitar_devolucion" class="alert alert-success py-2 mb-0" style="display:none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="ok_solicitar_devolucion_msg"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btn_confirmar_solicitar_devolucion" class="btn btn-warning btn-sm">
+                    <i class="fas fa-undo me-1"></i> Enviar solicitud
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -132,10 +189,13 @@
     var paginaActual = 0;
     var itemsPorPagina = 10;
     var vistaActual = 'subsidio';
+    var modalSolicitarDevolucion = null;
+    var precompraDevolucionActual = null;
 
     var routes = {
         misCompras: "{{ route('servicios.mis-compras') }}",
         historialPrecompras: "{{ route('servicios.historial-precompras') }}",
+        solicitarDevolucion: "{{ route('servicios.solicitar-devolucion') }}",
     };
 
     $.ajaxSetup({
@@ -216,6 +276,8 @@
         if (est === 'D' || est === 'DE') return 'compra-card__estado--de';
         if (est === 'PE') return 'compra-card__estado--pe';
         if (est === 'AB') return 'compra-card__estado--ab';
+        if (est === 'VE') return 'compra-card__estado--re';
+        if (est === 'DV') return 'compra-card__estado--de';
         return 'compra-card__estado--x';
     }
 
@@ -230,6 +292,8 @@
         if (est === 'AB') return 'Abandonada';
         if (est === 'RE') return 'Rechazado';
         if (est === 'DE') return 'Desestimado';
+        if (est === 'VE') return 'Vencida';
+        if (est === 'DV') return 'Devolución';
         return estado;
     }
 
@@ -343,6 +407,15 @@
             html += buildFilaDetalle('Estado', escapeHtml(registro.estado_descripcion || textoEstado(registro.estado)));
             if (registro.ref_payco) {
                 html += buildFilaDetalle('Ref. ePayco', escapeHtml(String(registro.ref_payco)));
+            }
+            if (registro.motivo_vencida_descripcion) {
+                html += buildFilaDetalle('Motivo vencimiento', escapeHtml(registro.motivo_vencida_descripcion));
+            }
+            if (registro.devolucion) {
+                html += buildFilaDetalle(
+                    'Devolución',
+                    escapeHtml(registro.devolucion.estado_descripcion || registro.devolucion.estado || '-')
+                );
             }
         } else {
             html += buildFilaDetalle('Nombre', escapeHtml(registro.nombre_servicio || '-'));
@@ -484,13 +557,137 @@
         html += '<span class="compra-card__valor-label">Total</span>';
         html += '<span class="compra-card__valor">' + valor + '</span>';
         html += '</div>';
-        html += '<div class="mt-3">';
-        html += '<button type="button" class="btn btn-outline-secondary btn-sm w-100 btn-detalle-compra" data-tipo="historial" data-idx="' + escapeHtml(String(precompra._idx)) + '">';
+        html += '<div class="mt-3 d-grid gap-2">';
+        html += '<button type="button" class="btn btn-outline-secondary btn-sm btn-detalle-compra" data-tipo="historial" data-idx="' + escapeHtml(String(precompra._idx)) + '">';
         html += '<i class="fas fa-list me-1"></i> Ver detalle</button>';
+        if (precompra.puede_solicitar_devolucion) {
+            html += '<button type="button" class="btn btn-warning btn-sm btn-solicitar-devolucion" data-id="' + escapeHtml(String(precompra.id || '')) + '">';
+            html += '<i class="fas fa-undo me-1"></i> Solicitar devolución</button>';
+        } else if (precompra.devolucion) {
+            html += '<div class="small text-muted text-center">Devolución: ' +
+                escapeHtml(precompra.devolucion.estado_descripcion || precompra.devolucion.estado || '') +
+                '</div>';
+        } else if (String(precompra.estado || '').toUpperCase() === 'PA' && precompra._fuente === 'local') {
+            html += '<div class="small text-warning text-center">Pagada sin registro en Subsidio</div>';
+        }
         html += '</div>';
         html += '</article>';
 
         return html;
+    }
+
+    function abrirModalSolicitarDevolucion(precompra) {
+        if (!precompra || !precompra.id) return;
+
+        precompraDevolucionActual = precompra;
+        $('#hid_devolucion_precompra_id').val(String(precompra.id));
+        $('#devolucion_precompra_label').text('#' + precompra.id + ' — ' + (precompra.estado_descripcion || textoEstado(precompra.estado)));
+        $('#devolucion_servicio_label').text(
+            (precompra.codser || '-') + ' / ' + (precompra.numero != null ? precompra.numero : '-')
+        );
+        $('#devolucion_ref_label').text(precompra.ref_payco || '—');
+        $('#devolucion_valor_label').text(formatearValor(precompra.valor || 0));
+        $('#devolucion_motivo_vencida_label').text(
+            precompra.motivo_vencida_descripcion || precompra.detalle_vencida || '—'
+        );
+        $('#txt_devolucion_nota').val('');
+        $('#error_solicitar_devolucion').hide();
+        $('#ok_solicitar_devolucion').hide();
+        $('#btn_confirmar_solicitar_devolucion').prop('disabled', false);
+
+        if (!modalSolicitarDevolucion) {
+            var el = document.getElementById('modal_solicitar_devolucion');
+            if (el && typeof bootstrap !== 'undefined') {
+                modalSolicitarDevolucion = new bootstrap.Modal(el);
+            }
+        }
+        if (modalSolicitarDevolucion) {
+            modalSolicitarDevolucion.show();
+        }
+    }
+
+    function enviarSolicitudDevolucion() {
+        var id = parseInt($('#hid_devolucion_precompra_id').val(), 10);
+        if (!id) return;
+
+        var $btn = $('#btn_confirmar_solicitar_devolucion');
+        var nota = ($('#txt_devolucion_nota').val() || '').trim();
+
+        $('#error_solicitar_devolucion').hide();
+        $('#ok_solicitar_devolucion').hide();
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: routes.solicitarDevolucion,
+            method: 'POST',
+            dataType: 'JSON',
+            cache: false,
+            data: {
+                precompra_id: id,
+                nota: nota
+            }
+        }).done(function (response) {
+            if (response && response.success) {
+                $('#ok_solicitar_devolucion_msg').text(response.message || 'Solicitud registrada.');
+                $('#ok_solicitar_devolucion').show();
+                setTimeout(function () {
+                    if (modalSolicitarDevolucion) {
+                        modalSolicitarDevolucion.hide();
+                    }
+                    cargarDatosVista();
+                }, 700);
+                return;
+            }
+
+            $btn.prop('disabled', false);
+            $('#error_solicitar_devolucion_msg').text(
+                (response && response.message) || 'No se pudo registrar la solicitud.'
+            );
+            $('#error_solicitar_devolucion').show();
+        }).fail(function () {
+            $btn.prop('disabled', false);
+            $('#error_solicitar_devolucion_msg').text('Error de conexión al solicitar la devolución.');
+            $('#error_solicitar_devolucion').show();
+        });
+    }
+
+    function mergeMisComprasConLocales(data) {
+        var filas = [];
+        var locales = [];
+
+        if (Array.isArray(data)) {
+            filas = data;
+        } else if (data && typeof data === 'object') {
+            if (Array.isArray(data.compras)) {
+                filas = data.compras;
+            } else if (!Array.isArray(data.precompras_locales)) {
+                filas = [data];
+            }
+            if (Array.isArray(data.precompras_locales)) {
+                locales = data.precompras_locales;
+            }
+        }
+
+        var lista = agruparComprasSubsidio(filas).map(function (c) {
+            c._fuente = 'subsidio';
+            return c;
+        });
+
+        locales.forEach(function (p) {
+            p._fuente = 'local';
+            lista.push(p);
+        });
+
+        lista.sort(function (a, b) {
+            var fa = String(a.fecha_pago || a.fecha || a.fecha_precompra || '');
+            var fb = String(b.fecha_pago || b.fecha || b.fecha_precompra || '');
+            if (fa === fb) {
+                return (b.id || 0) - (a.id || 0);
+            }
+            return fa < fb ? 1 : -1;
+        });
+
+        return lista;
     }
 
     function renderizarPagina() {
@@ -524,7 +721,7 @@
         for (var i = inicio; i < fin; i++) {
             var registro = comprasFiltradas[i];
             registro._idx = i;
-            if (vistaActual === 'historial') {
+            if (vistaActual === 'historial' || registro._fuente === 'local') {
                 grid.append(buildCardPrecompra(registro));
             } else {
                 grid.append(buildCardCompra(registro));
@@ -556,8 +753,8 @@
         $('#titulo_vista').text(esHistorial ? 'Historial de precompras' : 'Mis compras');
         $('#subtitulo_vista').text(
             esHistorial
-                ? 'Consulte el estado local de cada precompra (pendiente, pagada, abandonada, rechazada o desestimada).'
-                : 'Consulte el historial de servicios adquiridos y el estado de cada transacción.'
+                ? 'Consulte el estado local de cada precompra (pendiente, pagada, vencida, devolución, abandonada, rechazada o desestimada).'
+                : 'Compras en Subsidio y compras pagadas locales sin registro (vencidas o pendientes de grabar).'
         );
         $('#loader_texto').text(
             esHistorial ? 'Consultando historial de precompras...' : 'Consultando compras realizadas...'
@@ -632,17 +829,7 @@
             ocultarLoader('loader_compras');
 
             if (response.success) {
-                var data = response.data;
-
-                if (Array.isArray(data)) {
-                    comprasData = agruparComprasSubsidio(data);
-                } else if (data && Array.isArray(data.compras)) {
-                    comprasData = agruparComprasSubsidio(data.compras);
-                } else if (data && typeof data === 'object') {
-                    comprasData = agruparComprasSubsidio([data]);
-                } else {
-                    comprasData = [];
-                }
+                comprasData = mergeMisComprasConLocales(response.data);
 
                 if (comprasData.length === 0) {
                     $('#sin_compras').show();
@@ -723,7 +910,29 @@
             if (!registro) {
                 return;
             }
-            abrirModalDetalle(registro, tipo === 'historial');
+            var esLocal = tipo === 'historial' || registro._fuente === 'local';
+            abrirModalDetalle(registro, esLocal);
+        });
+
+        $(document).on('click', '.btn-solicitar-devolucion', function () {
+            var id = parseInt($(this).data('id'), 10);
+            if (!id) return;
+
+            var precompra = null;
+            for (var i = 0; i < comprasData.length; i++) {
+                if (parseInt(comprasData[i].id, 10) === id) {
+                    precompra = comprasData[i];
+                    break;
+                }
+            }
+            if (!precompra) {
+                precompra = { id: id };
+            }
+            abrirModalSolicitarDevolucion(precompra);
+        });
+
+        $(document).on('click', '#btn_confirmar_solicitar_devolucion', function () {
+            enviarSolicitudDevolucion();
         });
     });
 </script>

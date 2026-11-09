@@ -30,6 +30,7 @@ import { initFiltroZonaSelect2 } from './serviciosFiltros.js';
 import { verificarRespuestaEpayco } from './epayco.js';
 import { procesarPago } from './pago.js';
 import { initConfirmacionContacto } from './contacto.js';
+import { cargarBloqueos } from './cooldown.js';
 
 function bindHandlers() {
     var modalEl = document.getElementById('modal_resumen_compra');
@@ -110,6 +111,7 @@ function init() {
     });
 
     bindHandlers();
+    cargarBloqueos();
     identificarTrabajador();
     verificarRespuestaEpayco();
 }

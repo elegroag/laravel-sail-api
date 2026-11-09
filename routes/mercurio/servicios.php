@@ -7,10 +7,14 @@ Route::middleware(['mercurio.auth'])->group(function () {
     Route::prefix('/mercurio/servicios')->group(function () {
         Route::get('/index', [EcommerceController::class, 'index'])->name('servicios.index');
         Route::get('/ver-compras', [EcommerceController::class, 'verCompras'])->name('servicios.ver-compras');
+        Route::get('/mis-devoluciones', [EcommerceController::class, 'misDevoluciones'])->name('servicios.mis-devoluciones');
         Route::get('/compras-pendientes', [EcommerceController::class, 'comprasPendientes'])->name('servicios.compras-pendientes');
         Route::post('/listar-precompras', [EcommerceController::class, 'listarPrecompras'])->name('servicios.listar-precompras');
+        Route::post('/bloqueos-precompra', [EcommerceController::class, 'bloqueosPrecompra'])->name('servicios.bloqueos-precompra');
         Route::post('/historial-precompras', [EcommerceController::class, 'historialPrecompras'])->name('servicios.historial-precompras');
+        Route::post('/listar-devoluciones', [EcommerceController::class, 'listarDevoluciones'])->name('servicios.listar-devoluciones');
         Route::post('/desestimar-precompra', [EcommerceController::class, 'desestimarPrecompra'])->name('servicios.desestimar-precompra');
+        Route::post('/solicitar-devolucion', [EcommerceController::class, 'solicitarDevolucion'])->name('servicios.solicitar-devolucion');
         Route::post('/abandonar-precompra', [EcommerceController::class, 'abandonarPrecompra'])->name('servicios.abandonar-precompra');
         Route::post('/identificar-trabajador', [EcommerceController::class, 'identificarTrabajador'])->name('servicios.identificar-trabajador');
         Route::post('/actualizar-contacto', [EcommerceController::class, 'actualizarContacto'])->name('servicios.actualizar-contacto');

@@ -10,6 +10,7 @@ import { ESTADOS_EPAYCO } from './constants.js';
 import { limpiarSeleccionServicio } from './panelCompra.js';
 import { guardarVenta } from './venta.js';
 import { esEntornoMovil } from './vistaMovil.js';
+import { manejarRespuestaCooldown } from './cooldown.js';
 
 var CHECKOUT_V2_SRC = 'https://checkout.epayco.co/checkout-v2.js';
 
@@ -197,6 +198,20 @@ export function registrarHooksCheckoutV2(checkout, precompraId) {
 
 // Smart Checkout v2: crea la sesion en backend y abre el checkout con sessionId.
 export function abrirCheckoutV2(ctx, target) {
+    // ePayco new-checkout usa crypto.randomUUID (solo en contexto seguro / HTTPS).
+    if (typeof window.isSecureContext !== 'undefined' && !window.isSecureContext) {
+        Swal.fire({
+            title: 'Se requiere HTTPS',
+            html:
+                '<p>El checkout de ePayco solo funciona en una conexión segura.</p>' +
+                '<p class="mb-0 text-muted">Abra el catálogo con <strong>https://</strong> (puerto 9043) e intente de nuevo.</p>',
+            icon: 'warning',
+            confirmButtonText: 'Entendido',
+        });
+        if (target) target.removeAttr('disabled');
+        return;
+    }
+
     asegurarSdkCheckoutV2(function (errSdk) {
         if (errSdk) {
             Swal.fire({
@@ -270,7 +285,7 @@ export function abrirCheckoutV2(ctx, target) {
                     } else {
                         checkout.open();
                     }
-                } else {
+                } else if (!manejarRespuestaCooldown(response)) {
                     Swal.fire({
                         title: 'No se pudo iniciar el pago',
                         text: response.message || 'Error al crear la sesion de pago. Intente nuevamente.',

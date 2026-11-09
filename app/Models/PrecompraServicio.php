@@ -36,6 +36,9 @@ class PrecompraServicio extends Model
         'fecha_precompra',
         'fecha_pago',
         'fecha_desestimacion',
+        'motivo_vencida',
+        'detalle_vencida',
+        'fecha_vencida',
     ];
 
     protected $casts = [
@@ -44,6 +47,7 @@ class PrecompraServicio extends Model
         'fecha_precompra' => 'datetime',
         'fecha_pago' => 'datetime',
         'fecha_desestimacion' => 'datetime',
+        'fecha_vencida' => 'datetime',
     ];
 
     /**
@@ -97,9 +101,28 @@ class PrecompraServicio extends Model
         return $this->estado === EstadoPrecompra::ABANDONADA;
     }
 
+    public function isVencida(): bool
+    {
+        return $this->estado === EstadoPrecompra::VENCIDA;
+    }
+
+    public function isDevolucion(): bool
+    {
+        return $this->estado === EstadoPrecompra::DEVOLUCION;
+    }
+
     public function getEstadoDescripcionAttribute(): string
     {
         return EstadoPrecompra::descripcion($this->estado);
+    }
+
+    public function getMotivoVencidaDescripcionAttribute(): string
+    {
+        if ($this->motivo_vencida === null || $this->motivo_vencida === '') {
+            return '';
+        }
+
+        return EstadoPrecompra::MOTIVOS_VENCIDA[$this->motivo_vencida] ?? (string) $this->motivo_vencida;
     }
 
     public function transaccionesEpayco(): HasMany
@@ -113,5 +136,10 @@ class PrecompraServicio extends Model
     public function ultimaTransaccionEpayco(): HasOne
     {
         return $this->hasOne(EpaycoTransaccion::class, 'precompra_id')->latestOfMany();
+    }
+
+    public function devolucion(): HasOne
+    {
+        return $this->hasOne(DevolucionPrecompra::class, 'precompra_id');
     }
 }

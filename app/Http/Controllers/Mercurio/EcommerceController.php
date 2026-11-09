@@ -4,13 +4,18 @@ namespace App\Http\Controllers\Mercurio;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
+use App\Models\DevolucionPrecompra;
 use App\Models\EpaycoTransaccion;
 use App\Models\Mercurio07;
 use App\Models\PrecompraServicio;
 use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Ecommerce\DevolucionPrecompraService;
 use App\Services\Ecommerce\EpaycoCuentaResolver;
+use App\Services\Ecommerce\EstadoDevolucionPrecompra;
 use App\Services\Ecommerce\EstadoPrecompra;
+use App\Services\Ecommerce\PrecompraCooldownService;
+use App\Services\Ecommerce\PrecompraVencimientoService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -134,6 +139,21 @@ class EcommerceController extends ApplicationController
         return view('mercurio/ecommerce/ver_compras', [
             'documento' => $documento,
             'title' => 'Mis Compras',
+        ]);
+    }
+
+    /**
+     * GET /mercurio/servicios/mis-devoluciones
+     * Seguimiento de solicitudes de devolución del afiliado.
+     */
+    public function misDevoluciones()
+    {
+        $documento = self::getActUser('documento');
+
+        return view('mercurio/ecommerce/mis_devoluciones', [
+            'documento' => $documento,
+            'title' => 'Mis devoluciones',
+            'filtro_estados' => EstadoDevolucionPrecompra::DESCRIPCIONES,
         ]);
     }
 
@@ -389,6 +409,10 @@ class EcommerceController extends ApplicationController
             $cuenta = $this->epaycoCuentaResolver->findByPIdCustomer($data['epayco']);
             $items = $this->normalizarItemsPrecompra($data);
 
+            if ($bloqueo = $this->bloqueoCooldown($data, $items)) {
+                return $this->respuestaCooldown($bloqueo);
+            }
+
             $precompra = PrecompraServicio::create([
                 'documento' => $data['cedtra'],
                 'codser' => $data['codser'],
@@ -483,6 +507,10 @@ class EcommerceController extends ApplicationController
             $apiEpayco = $this->epayco->withCuenta($cuenta);
 
             if (! $precompra) {
+                if ($bloqueo = $this->bloqueoCooldown($data, $items)) {
+                    return $this->respuestaCooldown($bloqueo);
+                }
+
                 $precompra = PrecompraServicio::create([
                     'documento' => $data['cedtra'],
                     'codser' => $data['codser'],
@@ -902,11 +930,26 @@ class EcommerceController extends ApplicationController
             if (! ($resultado['flag'] ?? false)) {
                 $msg = $resultado['message'] ?? 'Error al guardar la venta';
 
-                return response()->json([
+                $precompraPost = $this->resolverPrecompraPorRefOId((string) $refpago, $precompraId);
+                $vencimiento = null;
+                if ($precompraPost) {
+                    $vencimiento = app(PrecompraVencimientoService::class)
+                        ->marcarSiAplica($precompraPost, is_string($msg) ? $msg : null);
+                }
+
+                $payload = [
                     'success' => false,
                     'message' => $msg,
-                    'errors' => $resultado['errors'] ?? null #errores de validación de datos de la venta
-                ]);
+                    'errors' => $resultado['errors'] ?? null, // errores de validación de datos de la venta
+                ];
+
+                if (($vencimiento['marcada'] ?? false) === true) {
+                    $payload['vencida'] = true;
+                    $payload['estado'] = EstadoPrecompra::VENCIDA;
+                    $payload['message'] = $msg . ' La compra quedó marcada como vencida: debe solicitar formalmente la devolución.';
+                }
+
+                return response()->json($payload);
             }
 
             $codbenLog = $items[0]['codben'];
@@ -1001,9 +1044,16 @@ class EcommerceController extends ApplicationController
                 ]);
             }
 
+            $filasSubsidio = $this->normalizarFilasMisCompras($resultado['data'] ?? []);
+            $refsSubsidio = $this->extraerRefpagosMisCompras($filasSubsidio);
+            $locales = $this->precomprasLocalesSinSubsidio((string) $cedtra, $refsSubsidio);
+
             return response()->json([
                 'success' => true,
-                'data' => $resultado['data'] ?? [],
+                'data' => [
+                    'compras' => $filasSubsidio,
+                    'precompras_locales' => $locales,
+                ],
                 'message' => '',
             ]);
         } catch (\Throwable $e) {
@@ -1016,6 +1066,57 @@ class EcommerceController extends ApplicationController
                 ]
             );
         }
+    }
+
+    /**
+     * POST /mercurio/servicios/bloqueos-precompra
+     * AJAX: Bloqueos activos (precompras PE < 20 min) del usuario en sesion.
+     */
+    public function bloqueosPrecompra(PrecompraCooldownService $cooldown): JsonResponse
+    {
+        try {
+            $documento = (string) ($this->user['documento'] ?? '');
+
+            return response()->json([
+                'success' => true,
+                'data' => $cooldown->listarBloqueos($documento),
+                'ttl_minutos' => PrecompraCooldownService::TTL_MINUTES,
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al consultar bloqueos de compra: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Bloqueo activo para servicio + beneficiarios de la solicitud, si existe.
+     *
+     * @param  list<array{codben: string}>  $items
+     */
+    protected function bloqueoCooldown(array $data, array $items): ?array
+    {
+        return app(PrecompraCooldownService::class)->findBloqueo(
+            (string) $data['cedtra'],
+            (string) $data['codser'],
+            (int) $data['numero'],
+            array_column($items, 'codben')
+        );
+    }
+
+    protected function respuestaCooldown(array $bloqueo): JsonResponse
+    {
+        $minutos = (int) ceil($bloqueo['segundos_restantes'] / 60);
+
+        return response()->json([
+            'success' => false,
+            'code' => PrecompraCooldownService::CODE,
+            'message' => "Ya existe un pago pendiente para este servicio y beneficiario. Podrá intentarlo nuevamente en {$minutos} min.",
+            'data' => $bloqueo,
+        ]);
     }
 
     /**
@@ -1076,29 +1177,11 @@ class EcommerceController extends ApplicationController
             $documento = $this->user['documento'] ?? '';
 
             $precompras = PrecompraServicio::where('documento', $documento)
+                ->with('devolucion')
                 ->orderByDesc('fecha_precompra')
                 ->orderByDesc('id')
                 ->get()
-                ->map(fn(PrecompraServicio $precompra) => [
-                    'id' => $precompra->id,
-                    'codser' => $precompra->codser,
-                    'numero' => $precompra->numero,
-                    'codben' => $precompra->codben,
-                    'items' => $precompra->items ?? array_map(
-                        static fn(string $codben) => ['codben' => $codben],
-                        $precompra->codbenList()
-                    ),
-                    'nota' => $precompra->nota,
-                    'valor' => $precompra->valor,
-                    'p_id_customer' => $precompra->p_id_customer,
-                    'estado' => $precompra->estado,
-                    'estado_descripcion' => $precompra->estado_descripcion,
-                    'ref_payco' => $precompra->ref_payco,
-                    'cod_estado_epayco' => $precompra->cod_estado_epayco,
-                    'motivo_epayco' => $precompra->motivo_epayco,
-                    'fecha_precompra' => $precompra->fecha_precompra?->format('Y-m-d H:i'),
-                    'fecha_pago' => $precompra->fecha_pago?->format('Y-m-d H:i'),
-                ]);
+                ->map(fn (PrecompraServicio $precompra) => $this->serializarPrecompraHistorial($precompra));
 
             return response()->json([
                 'success' => true,
@@ -1111,6 +1194,265 @@ class EcommerceController extends ApplicationController
             return response()->json([
                 'success' => false,
                 'message' => 'Error al cargar el historial de precompras: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Normaliza la respuesta de Movil/mis-compras a una lista de filas.
+     *
+     * @param  mixed  $data
+     * @return list<array<string, mixed>>
+     */
+    protected function normalizarFilasMisCompras(mixed $data): array
+    {
+        if (! is_array($data)) {
+            return [];
+        }
+
+        if (isset($data['compras']) && is_array($data['compras'])) {
+            $data = $data['compras'];
+        }
+
+        if ($data === []) {
+            return [];
+        }
+
+        $esLista = array_keys($data) === range(0, count($data) - 1);
+        if (! $esLista) {
+            return [$data];
+        }
+
+        return array_values(array_filter($data, 'is_array'));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $filas
+     * @return list<string>
+     */
+    protected function extraerRefpagosMisCompras(array $filas): array
+    {
+        $refs = [];
+        foreach ($filas as $fila) {
+            $ref = trim((string) ($fila['refpago'] ?? $fila['ref_payco'] ?? ''));
+            if ($ref !== '' && ! in_array($ref, $refs, true)) {
+                $refs[] = $ref;
+            }
+        }
+
+        return $refs;
+    }
+
+    /**
+     * Precompras locales pagadas/vencidas/devolución que no aparecen en Subsidio
+     * (por ref_payco), para mostrarlas en la pestaña Mis compras.
+     *
+     * @param  list<string>  $refsSubsidio
+     * @return list<array<string, mixed>>
+     */
+    protected function precomprasLocalesSinSubsidio(string $documento, array $refsSubsidio): array
+    {
+        $documento = trim($documento);
+        if ($documento === '') {
+            return [];
+        }
+
+        $query = PrecompraServicio::query()
+            ->where('documento', $documento)
+            ->whereIn('estado', [
+                EstadoPrecompra::PAGADO,
+                EstadoPrecompra::VENCIDA,
+                EstadoPrecompra::DEVOLUCION,
+            ])
+            ->with('devolucion')
+            ->orderByDesc('fecha_pago')
+            ->orderByDesc('id');
+
+        if ($refsSubsidio !== []) {
+            $query->where(function ($q) use ($refsSubsidio) {
+                $q->whereNull('ref_payco')
+                    ->orWhere('ref_payco', '')
+                    ->orWhereNotIn('ref_payco', $refsSubsidio);
+            });
+        }
+
+        return $query->get()
+            ->map(fn (PrecompraServicio $precompra) => $this->serializarPrecompraHistorial($precompra))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function serializarPrecompraHistorial(PrecompraServicio $precompra): array
+    {
+        return [
+            'id' => $precompra->id,
+            'codser' => $precompra->codser,
+            'numero' => $precompra->numero,
+            'codben' => $precompra->codben,
+            'items' => $precompra->items ?? array_map(
+                static fn (string $codben) => ['codben' => $codben],
+                $precompra->codbenList()
+            ),
+            'nota' => $precompra->nota,
+            'valor' => $precompra->valor,
+            'p_id_customer' => $precompra->p_id_customer,
+            'estado' => $precompra->estado,
+            'estado_descripcion' => $precompra->estado_descripcion,
+            'ref_payco' => $precompra->ref_payco,
+            'cod_estado_epayco' => $precompra->cod_estado_epayco,
+            'motivo_epayco' => $precompra->motivo_epayco,
+            'motivo_vencida' => $precompra->motivo_vencida,
+            'motivo_vencida_descripcion' => $precompra->motivo_vencida_descripcion,
+            'detalle_vencida' => $precompra->detalle_vencida,
+            'fecha_precompra' => $precompra->fecha_precompra?->format('Y-m-d H:i'),
+            'fecha_pago' => $precompra->fecha_pago?->format('Y-m-d H:i'),
+            'puede_solicitar_devolucion' => $precompra->isVencida() && ! $precompra->devolucion,
+            'devolucion' => $precompra->devolucion ? [
+                'id' => $precompra->devolucion->id,
+                'estado' => $precompra->devolucion->estado,
+                'estado_descripcion' => $precompra->devolucion->estado_descripcion,
+                'fecha_solicitud' => $precompra->devolucion->fecha_solicitud?->format('Y-m-d H:i'),
+            ] : null,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function serializarDevolucionAfiliado(DevolucionPrecompra $dev): array
+    {
+        $precompra = $dev->precompra;
+
+        return [
+            'id' => $dev->id,
+            'estado' => $dev->estado,
+            'estado_descripcion' => $dev->estado_descripcion,
+            'motivo_solicitud' => $dev->motivo_solicitud,
+            'nota_afiliado' => $dev->nota_afiliado,
+            'nota_gestion' => $dev->estaAbierta() ? null : $dev->nota_gestion,
+            'fecha_solicitud' => $dev->fecha_solicitud?->format('Y-m-d H:i'),
+            'fecha_en_tramite' => $dev->fecha_en_tramite?->format('Y-m-d H:i'),
+            'fecha_resolucion' => $dev->fecha_resolucion?->format('Y-m-d H:i'),
+            'precompra' => $precompra ? [
+                'id' => $precompra->id,
+                'codser' => $precompra->codser,
+                'numero' => $precompra->numero,
+                'valor' => $precompra->valor,
+                'ref_payco' => $precompra->ref_payco,
+                'estado' => $precompra->estado,
+                'estado_descripcion' => $precompra->estado_descripcion,
+                'motivo_vencida_descripcion' => $precompra->motivo_vencida_descripcion,
+                'fecha_pago' => $precompra->fecha_pago?->format('Y-m-d H:i'),
+            ] : null,
+        ];
+    }
+
+    /**
+     * POST /mercurio/servicios/listar-devoluciones
+     * AJAX: Solicitudes de devolución del usuario en sesión.
+     */
+    public function listarDevoluciones(Request $request): JsonResponse
+    {
+        try {
+            $documento = (string) ($this->user['documento'] ?? self::getActUser('documento') ?? '');
+            $estado = trim((string) $request->input('estado', ''));
+
+            if ($documento === '') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay documento de usuario en sesión',
+                ]);
+            }
+
+            $query = DevolucionPrecompra::query()
+                ->whereHas('precompra', function ($q) use ($documento) {
+                    $q->where('documento', $documento);
+                })
+                ->with('precompra')
+                ->orderByDesc('fecha_solicitud')
+                ->orderByDesc('id');
+
+            if ($estado !== '' && array_key_exists($estado, EstadoDevolucionPrecompra::DESCRIPCIONES)) {
+                $query->where('estado', $estado);
+            }
+
+            $items = $query->get()->map(fn (DevolucionPrecompra $dev) => $this->serializarDevolucionAfiliado($dev));
+
+            return response()->json([
+                'success' => true,
+                'data' => $items,
+                'message' => '',
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar las devoluciones: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * POST /mercurio/servicios/solicitar-devolucion
+     * AJAX: Solicitud formal de devolución sobre una precompra VE.
+     */
+    public function solicitarDevolucion(Request $request, DevolucionPrecompraService $service): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'precompra_id' => 'required|integer|min:1',
+                'motivo' => 'nullable|string|max:255',
+                'nota' => 'nullable|string|max:1000',
+            ]);
+
+            $documento = self::getActUser('documento');
+
+            $precompra = PrecompraServicio::where('id', $data['precompra_id'])
+                ->where('documento', $documento)
+                ->with('devolucion')
+                ->first();
+
+            if (! $precompra) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La compra no existe o no pertenece al usuario en sesión',
+                ]);
+            }
+
+            $devolucion = $service->solicitar(
+                $precompra,
+                $data['motivo'] ?? null,
+                $data['nota'] ?? null
+            );
+
+            $this->setLogger("Devolución solicitada precompra {$precompra->id} por documento {$documento}");
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'precompra_id' => $precompra->id,
+                    'devolucion_id' => $devolucion->id,
+                    'estado' => $devolucion->estado,
+                    'estado_descripcion' => $devolucion->estado_descripcion,
+                ],
+                'message' => 'Solicitud de devolución registrada. Un operador de Cajas la gestionará.',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($e->errors())->flatten()->first() ?? 'Datos inválidos',
+                'errors' => $e->errors(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->setLogger($e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
             ]);
         }
     }
@@ -1340,8 +1682,10 @@ class EcommerceController extends ApplicationController
                 return;
             }
 
-            // No degradar una precompra que ya quedo pagada
-            if ($precompraActualizable->isPagado()) {
+            // No degradar una precompra ya pagada, vencida o en devolución
+            if ($precompraActualizable->isPagado()
+                || $precompraActualizable->isVencida()
+                || $precompraActualizable->isDevolucion()) {
                 return;
             }
 

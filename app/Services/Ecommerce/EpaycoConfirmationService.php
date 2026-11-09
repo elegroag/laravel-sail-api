@@ -207,11 +207,10 @@ class EpaycoConfirmationService
      */
     protected function actualizarPrecompra(PrecompraServicio $precompra, array $datosPago): void
     {
-        if ($precompra->isPagado()) {
-            return;
-        }
-
-        if ($precompra->isDesestimado()) {
+        if ($precompra->isPagado()
+            || $precompra->isVencida()
+            || $precompra->isDevolucion()
+            || $precompra->isDesestimado()) {
             return;
         }
 
@@ -266,10 +265,13 @@ class EpaycoConfirmationService
             $ok = (bool) ($resultado['flag'] ?? false);
 
             if (! $ok) {
+                $msg = (string) ($resultado['message'] ?? $resultado['msg'] ?? $resultado['error'] ?? '');
                 Log::warning('ePayco confirmation: guardar-venta no OK', [
                     'precompra_id' => $precompra->id,
-                    'message' => $resultado['message'] ?? null,
+                    'message' => $msg !== '' ? $msg : null,
                 ]);
+
+                app(PrecompraVencimientoService::class)->marcarSiAplica($precompra, $msg !== '' ? $msg : null);
             }
 
             return $ok;

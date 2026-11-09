@@ -2,11 +2,7 @@
 
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
-@if ($EPAYCO_CHECKOUT_VERSION === '2')
-<script src="https://checkout.epayco.co/checkout-v2.js"></script>
-@else
-<script src="https://checkout.epayco.co/checkout.js"></script>
-@endif
+@include('mercurio.ecommerce._epayco_scripts', ['EPAYCO_CHECKOUT_VERSION' => $EPAYCO_CHECKOUT_VERSION])
 
 <div class="col-12 col-xl-11 mx-auto mt-3 servicios-catalog compras-catalog">
     <div class="card shadow-sm border-0 servicios-page-card">
@@ -24,6 +20,9 @@
                     </a>
                     <a href="{{ route('servicios.ver-compras') }}" class="btn btn-sm servicios-catalog__btn-compras">
                         <i class="fas fa-receipt me-1"></i> Mis compras
+                    </a>
+                    <a href="{{ route('servicios.mis-devoluciones') }}" class="btn btn-sm servicios-catalog__btn-compras">
+                        <i class="fas fa-undo me-1"></i> Mis devoluciones
                     </a>
                 </div>
             </div>

@@ -23,12 +23,18 @@ class EstadoPrecompra
 
     public const ABANDONADA = 'AB';
 
+    public const VENCIDA = 'VE';
+
+    public const DEVOLUCION = 'DV';
+
     public const DESCRIPCIONES = [
         self::PENDIENTE => 'Pendiente de pago',
         self::PAGADO => 'Pagado',
         self::DESESTIMADO => 'Desestimado',
         self::RECHAZADO => 'Rechazado',
         self::ABANDONADA => 'Abandonada',
+        self::VENCIDA => 'Vencida',
+        self::DEVOLUCION => 'Devolución',
     ];
 
     /**
@@ -49,6 +55,15 @@ class EstadoPrecompra
         self::MOTIVO_OTRO => 'Otro motivo',
     ];
 
+    public const MOTIVO_VENCIDA_SIN_CUPOS = 'VENCIDA_SIN_CUPOS';
+
+    public const MOTIVO_VENCIDA_PLAZO = 'VENCIDA_PLAZO';
+
+    public const MOTIVOS_VENCIDA = [
+        self::MOTIVO_VENCIDA_SIN_CUPOS => 'Sin cupos disponibles en Subsidio',
+        self::MOTIVO_VENCIDA_PLAZO => 'Fuera de plazo de registro en Subsidio',
+    ];
+
     /**
      * El estado DESESTIMADO nunca se asigna automaticamente: queda reservado
      * para cuando el usuario desestima la compra de forma manual con un motivo.
@@ -56,6 +71,10 @@ class EstadoPrecompra
      * El estado ABANDONADA se asigna cuando el usuario cierra el checkout de
      * ePayco sin completar el pago (onClose), o cuando el job de limpieza
      * marca precompras PE antiguas por inactividad. Queda cerrada y no es retomable.
+     *
+     * VENCIDA se asigna cuando el pago ya fue aprobado (PA) pero Subsidio
+     * rechaza guardar-venta por cupos o plazo. DEVOLUCION se asigna cuando
+     * Cajas aprueba la solicitud formal de devolución.
      *
      * Mientras el pago no se complete ni sea rechazado por la pasarela,
      * la precompra permanece PENDIENTE para que el usuario pueda retomarla.
