@@ -1,0 +1,324 @@
+/* Modal Confirmar datos de contacto — skin fiel a modal-confirmar-contacto.html */
+.mcc-modal {
+    --mcc-brand: #0f9aa0;
+    --mcc-brand-dark: #0b7a80;
+    --mcc-brand-tint: #e6f5f6;
+    --mcc-ink: #1c2b33;
+    --mcc-muted: #5d6f78;
+    --mcc-line: #d9e2e6;
+    --mcc-surface: #ffffff;
+    --mcc-soft: #f5f8f9;
+    --mcc-warn-bg: #fff6e0;
+    --mcc-warn-line: #f0c66a;
+    --mcc-warn-ink: #6b4a00;
+    --mcc-error: #b42318;
+    --mcc-radius: 10px;
+}
+
+.mcc-modal .modal-dialog {
+    width: min(480px, calc(100% - 2rem));
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mcc-content {
+    border: 0;
+    border-radius: 14px;
+    background: var(--mcc-surface);
+    color: var(--mcc-ink);
+    box-shadow: 0 24px 60px rgba(15, 40, 50, 0.28);
+    overflow: hidden;
+}
+
+.mcc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--mcc-line);
+    background: var(--mcc-surface);
+}
+
+.mcc-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--mcc-brand-dark);
+    line-height: 1.3;
+}
+
+.mcc-close {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--mcc-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mcc-close:hover {
+    background: var(--mcc-soft);
+    color: var(--mcc-ink);
+}
+
+.mcc-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    display: grid;
+    gap: 1.25rem;
+}
+
+.mcc-zona {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--mcc-warn-line);
+    border-radius: var(--mcc-radius);
+    background: var(--mcc-warn-bg);
+    color: var(--mcc-warn-ink);
+    cursor: pointer;
+    margin: 0;
+}
+
+.mcc-zona input {
+    margin-top: 0.2rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--mcc-brand-dark);
+}
+
+.mcc-zona strong {
+    font-weight: 600;
+}
+
+.mcc-zona small {
+    grid-column: 2;
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+.mcc-intro {
+    margin: 0;
+    color: var(--mcc-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.mcc-resumen {
+    margin: 0;
+    padding: 0.25rem 1rem;
+    border-radius: var(--mcc-radius);
+    background: var(--mcc-soft);
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 1.5rem;
+}
+
+.mcc-resumen dt,
+.mcc-resumen dd {
+    margin: 0;
+    padding: 0.65rem 0;
+}
+
+.mcc-resumen dt {
+    color: var(--mcc-muted);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.mcc-resumen dd {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.mcc-resumen dt:not(:first-of-type),
+.mcc-resumen dt:not(:first-of-type) + dd {
+    border-top: 1px solid var(--mcc-line);
+}
+
+.mcc-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    margin: 0;
+    color: var(--mcc-ink);
+}
+
+.mcc-switch input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: none;
+    width: 2.5rem;
+    height: 1.4rem;
+    border-radius: 1rem;
+    background: #b9c6cc;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin: 0;
+}
+
+.mcc-switch input::after {
+    content: "";
+    position: absolute;
+    top: 0.15rem;
+    left: 0.15rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s;
+}
+
+.mcc-switch input:checked {
+    background: var(--mcc-brand);
+}
+
+.mcc-switch input:checked::after {
+    transform: translateX(1.1rem);
+}
+
+.mcc-edicion {
+    display: none;
+    gap: 1rem;
+}
+
+.mcc-edicion.is-open {
+    display: grid;
+}
+
+.mcc-nota {
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    background: var(--mcc-brand-tint);
+    color: var(--mcc-brand-dark);
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.mcc-campo {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.mcc-campo label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--mcc-ink);
+    margin: 0;
+}
+
+.mcc-campo input {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    font: inherit;
+    color: var(--mcc-ink);
+    border: 1px solid var(--mcc-line);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.mcc-campo input:hover {
+    border-color: #b9c6cc;
+}
+
+.mcc-campo input:focus {
+    outline: 3px solid rgba(15, 154, 160, 0.3);
+    border-color: var(--mcc-brand);
+}
+
+.mcc-error-box {
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    background: #fef3f2;
+    border: 1px solid #fecdca;
+    color: var(--mcc-error);
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.mcc-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 0.25rem;
+}
+
+.mcc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    font: inherit;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+.mcc-btn-sec {
+    background: #fff;
+    color: var(--mcc-ink);
+    border: 1px solid var(--mcc-line);
+}
+
+.mcc-btn-sec:hover {
+    background: var(--mcc-soft);
+}
+
+.mcc-btn-pri {
+    background: var(--mcc-brand);
+    color: #fff;
+    border: 1px solid var(--mcc-brand);
+}
+
+.mcc-btn-pri:hover:not(:disabled) {
+    background: var(--mcc-brand-dark);
+    border-color: var(--mcc-brand-dark);
+    color: #fff;
+}
+
+.mcc-btn-pri:disabled {
+    background: #b9dfe1;
+    border-color: #b9dfe1;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.mcc-btn:focus-visible,
+.mcc-close:focus-visible,
+.mcc-switch input:focus-visible,
+.mcc-zona input:focus-visible {
+    outline: 3px solid rgba(15, 154, 160, 0.4);
+    outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+    .mcc-acciones {
+        flex-direction: column-reverse;
+    }
+
+    .mcc-btn {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mcc-switch input,
+    .mcc-switch input::after {
+        transition: none;
+    }
+}

@@ -51,18 +51,32 @@ function prepararAvisoZona() {
     $('#aviso_zona_servicio').show();
 }
 
+function actualizarEstadoBoton() {
+    var zonaOk = !requiereAceptarZona || $('#chk_acepta_zona').is(':checked');
+    $('#btn_confirmar_contacto').prop('disabled', !zonaOk);
+}
+
+function setFormEdicionVisible(visible) {
+    var form = $('#form_cambiar_contacto');
+    if (visible) {
+        form.addClass('is-open').css('display', 'grid').removeAttr('hidden');
+    } else {
+        form.removeClass('is-open').css('display', 'none').attr('hidden', true);
+    }
+}
+
 function resetFormulario() {
     prepararAvisoZona();
     var actuales = datosActuales();
     $('#txt_contacto_email').text(actuales.email || 'Sin correo registrado');
     $('#txt_contacto_telefono').text(actuales.telefono || 'Sin teléfono registrado');
     $('#chk_cambiar_contacto').prop('checked', false);
-    $('#form_cambiar_contacto').hide();
+    setFormEdicionVisible(false);
     $('#inp_contacto_email').val(actuales.email);
     $('#inp_contacto_email_confirmacion').val('');
     $('#inp_contacto_telefono').val(actuales.telefono);
-    $('#btn_confirmar_contacto').prop('disabled', false);
     ocultarError();
+    actualizarEstadoBoton();
 }
 
 function validarFormulario() {
@@ -130,10 +144,10 @@ function confirmarContacto(e) {
             finalizarConfirmacion();
             return;
         }
-        boton.prop('disabled', false);
+        actualizarEstadoBoton();
         mostrarError(response.message || 'No fue posible actualizar los datos de contacto.');
     }).fail(function () {
-        boton.prop('disabled', false);
+        actualizarEstadoBoton();
         mostrarError('Error de conexión al actualizar los datos de contacto. Intente nuevamente.');
     });
 }
@@ -149,11 +163,14 @@ export function initConfirmacionContacto() {
         keyboard: false,
     });
 
-    $('#chk_acepta_zona').on('change', ocultarError);
+    $('#chk_acepta_zona').on('change', function () {
+        ocultarError();
+        actualizarEstadoBoton();
+    });
 
     $('#chk_cambiar_contacto').on('change', function () {
         ocultarError();
-        $('#form_cambiar_contacto').toggle(this.checked);
+        setFormEdicionVisible(this.checked);
     });
 
     $('#inp_contacto_telefono').on('input', function () {

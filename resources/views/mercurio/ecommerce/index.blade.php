@@ -1,5 +1,9 @@
 @extends('layouts.bone')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ versioned_asset('mercurio/css/modal-confirmar-contacto.css') }}" />
+@endpush
+
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @include('mercurio.ecommerce._epayco_scripts', ['EPAYCO_CHECKOUT_VERSION' => $EPAYCO_CHECKOUT_VERSION])
@@ -207,65 +211,59 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal_confirmar_contacto" tabindex="-1" aria-labelledby="modal_confirmar_contacto_title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal fade mcc-modal" id="modal_confirmar_contacto" tabindex="-1" aria-labelledby="modal_confirmar_contacto_title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal_confirmar_contacto_title">Confirmar datos de contacto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="modal-content mcc-content">
+                <div class="modal-header mcc-head">
+                    <h5 class="modal-title mcc-title" id="modal_confirmar_contacto_title">Confirmar datos de contacto</h5>
+                    <button type="button" class="mcc-close" data-bs-dismiss="modal" aria-label="Cerrar">&times;</button>
                 </div>
-                <div class="modal-body">
-                    <div id="aviso_zona_servicio" class="alert py-2 mb-3" style="display:none; background-color:#fff4d6; border:1px solid #f3d98b; color:#4a3b0b;">
-                        <p class="mb-2">
-                            <i class="fas fa-map-marker-alt me-1"></i>
-                            <span id="txt_aviso_zona"></span>
-                        </p>
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" id="chk_acepta_zona">
-                            <label class="form-check-label" for="chk_acepta_zona"><strong>Entiendo que el servicio solo se brindará en esta zona</strong></label>
-                        </div>
-                    </div>
+                <div class="modal-body mcc-body">
+                    <label class="mcc-zona" id="aviso_zona_servicio" style="display:none;">
+                        <input type="checkbox" id="chk_acepta_zona">
+                        <span id="txt_aviso_zona"></span>
+                        <small>Entiendo que el servicio solo se brindará en esta zona.</small>
+                    </label>
 
-                    <p class="text-muted mb-3">Verifique sus datos de contacto antes de continuar con el pago. Al correo electrónico registrado le será enviada la factura electrónica.</p>
+                    <p class="mcc-intro">Verifique sus datos antes de continuar con el pago. La factura electrónica se enviará al correo registrado.</p>
 
-                    <dl class="row mb-3">
-                        <dt class="col-3">Correo</dt>
-                        <dd class="col-9" id="txt_contacto_email">-</dd>
-                        <dt class="col-3">Teléfono</dt>
-                        <dd class="col-9" id="txt_contacto_telefono">-</dd>
+                    <dl class="mcc-resumen">
+                        <dt>Correo</dt>
+                        <dd id="txt_contacto_email">-</dd>
+                        <dt>Teléfono</dt>
+                        <dd id="txt_contacto_telefono">-</dd>
                     </dl>
 
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="chk_cambiar_contacto">
-                        <label class="form-check-label" for="chk_cambiar_contacto">Deseo actualizar mis datos de contacto</label>
+                    <label class="mcc-switch">
+                        <input type="checkbox" id="chk_cambiar_contacto" role="switch">
+                        Deseo actualizar mis datos de contacto
+                    </label>
+
+                    <div class="mcc-edicion" id="form_cambiar_contacto" style="display:none;" hidden>
+                        <p class="mcc-nota">Los datos modificados se actualizarán en la ficha de afiliación del trabajador en Subsidio.</p>
+
+                        <div class="mcc-campo">
+                            <label for="inp_contacto_email">Correo electrónico</label>
+                            <input type="email" id="inp_contacto_email" maxlength="100" autocomplete="email">
+                        </div>
+                        <div class="mcc-campo">
+                            <label for="inp_contacto_email_confirmacion">Confirmar correo electrónico</label>
+                            <input type="email" id="inp_contacto_email_confirmacion" maxlength="100" autocomplete="off">
+                        </div>
+                        <div class="mcc-campo">
+                            <label for="inp_contacto_telefono">Teléfono</label>
+                            <input type="tel" id="inp_contacto_telefono" maxlength="10" inputmode="numeric" autocomplete="tel-national">
+                        </div>
                     </div>
 
-                    <div id="form_cambiar_contacto" style="display:none;">
-                        <div class="alert py-2 small" style="background-color:#e6f4fa; border:1px solid #c5e4f1; color:#1f3a4d;">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Los datos modificados serán actualizados en la ficha de afiliación del trabajador en Subsidio.
-                        </div>
-                        <div class="mb-2">
-                            <label for="inp_contacto_email" class="form-label">Correo electrónico</label>
-                            <input type="email" id="inp_contacto_email" class="form-control" maxlength="100" autocomplete="email">
-                        </div>
-                        <div class="mb-2">
-                            <label for="inp_contacto_email_confirmacion" class="form-label">Confirmar correo electrónico</label>
-                            <input type="email" id="inp_contacto_email_confirmacion" class="form-control" maxlength="100" autocomplete="off">
-                        </div>
-                        <div class="mb-2">
-                            <label for="inp_contacto_telefono" class="form-label">Teléfono</label>
-                            <input type="tel" id="inp_contacto_telefono" class="form-control" maxlength="10" inputmode="numeric" autocomplete="tel">
-                        </div>
-                    </div>
+                    <div id="error_contacto" class="mcc-error-box" style="display:none;" role="alert"></div>
 
-                    <div id="error_contacto" class="alert alert-danger py-2 small mb-0" style="display:none;"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btn_confirmar_contacto" class="btn btn-primary">
-                        <i class="fas fa-credit-card"></i> Continuar al pago
-                    </button>
+                    <div class="mcc-acciones">
+                        <button type="button" class="mcc-btn mcc-btn-sec" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btn_confirmar_contacto" class="mcc-btn mcc-btn-pri">
+                            Continuar al pago
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
