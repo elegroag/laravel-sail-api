@@ -110,7 +110,6 @@ class DatabaseSeeder extends Seeder
             Mercurio68Seeder::class,
             Mercurio69Seeder::class,
             Mercurio71Seeder::class,
-            Mercurio72Seeder::class,
             Mercurio73Seeder::class,
             Mercurio74Seeder::class,
             // Tablas XML

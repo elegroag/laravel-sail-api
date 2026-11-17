@@ -142,7 +142,6 @@ require __DIR__.'/cajas/consulta.php';
 require __DIR__.'/cajas/reportes.php';
 require __DIR__.'/cajas/movile_basica.php';
 require __DIR__.'/cajas/movile_promociones.php';
-require __DIR__.'/cajas/movile_turismo.php';
 require __DIR__.'/cajas/movile_recreacion.php';
 require __DIR__.'/cajas/movile_educacion.php';
 require __DIR__.'/cajas/movile_destacadas.php';

@@ -1,3 +1,28 @@
+/* Breadcrumb de afiliación (cabecera verde): texto blanco visible */
+.breadcrumb-nav .breadcrumb {
+    background: transparent;
+}
+
+.breadcrumb-nav .breadcrumb-item,
+.breadcrumb-nav .breadcrumb-item a,
+.breadcrumb-nav .breadcrumb-item span,
+.breadcrumb-nav .breadcrumb-item.active {
+    color: #fff !important;
+}
+
+.breadcrumb-nav .breadcrumb-item a:hover {
+    color: #fff !important;
+    text-decoration: underline;
+}
+
+.breadcrumb-nav .breadcrumb-item + .breadcrumb-item::before {
+    content: "/";
+    display: inline-block;
+    float: none;
+    padding-right: 0.5rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
 #contentView {
     padding-bottom: 1rem;
 }

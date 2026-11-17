@@ -6,7 +6,7 @@
 
 @php
 $user = session()->get('user');
-list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('CA');
+list($menu, , $pageTitle) = App\Services\Menu\MenuCajas::showMenu('CA');
 @endphp
 
 @push('styles')
@@ -31,8 +31,7 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('C
 
 <div class="main-content" id="panel">
     @include('templates.navbar-cajas', [
-        'user_name' => capitalize($user['nombre']), 
-        'breadcrumbs'=> $breadcrumbs, 
+        'user_name' => capitalize($user['nombre']),
         'pageTitle'=> $pageTitle
     ]) 
     @yield('content')

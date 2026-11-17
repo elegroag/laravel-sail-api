@@ -5,7 +5,7 @@
 @section('content-main')
 @php
 $user = session()->get('user');
-list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
+list($menu, , $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 @endphp
 
 @push('styles')
@@ -27,7 +27,6 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 <div class="main-content" id="panel">
 @include('templates.navbar', [
     'user_name' => capitalize($user['nombre']),
-    'breadcrumbs' => $breadcrumbs,
     'pageTitle' => $pageTitle ?: ($title ?? ''),
 ])
     @yield('content')

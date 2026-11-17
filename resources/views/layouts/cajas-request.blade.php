@@ -79,7 +79,7 @@
 
     @php
         $user = session()->get('user');
-        list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\MenuCajas::showMenu('CA');
+        list($menu, , $pageTitle) = App\Services\Menu\MenuCajas::showMenu('CA');
     @endphp
 
     @include('templates.sidebar-cajas',
@@ -92,7 +92,6 @@
     <div class="main-content" id="panel">
         @include('templates.navbar-cajas', [
             'user_name' => capitalize($user['nombre']),
-            'breadcrumbs'=> $breadcrumbs,
             'pageTitle'=> $pageTitle
         ])
         <div id='boneLayout'></div>

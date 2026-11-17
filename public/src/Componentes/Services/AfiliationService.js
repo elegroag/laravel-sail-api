@@ -152,11 +152,15 @@ class AfiliationService {
 
         $App.layout.getRegion('header').show(this.headerView);
 
-        // Breadcrumb dinámico
-        const breadcrumbItems = [
-            { title: 'Inicio', url: '#list' },
-            { title: options.breadcrumb_menu || '', is_active: true },
-        ];
+        // Breadcrumb: en listado solo la acción activa; fuera de list, Listar (#list) + acción
+        const accionActiva = options.breadcrumb_menu || '';
+        const esListado = accionActiva === 'Listar solicitudes';
+        const breadcrumbItems = esListado
+            ? [{ title: accionActiva, is_active: true }]
+            : [
+                  { title: 'Listar', url: '#list' },
+                  { title: accionActiva, is_active: true },
+              ];
         const breadcrumbView = new BreadcrumbView({ model: { breadcrumbs: breadcrumbItems } });
         $App.layout.getRegion('breadcrumb').show(breadcrumbView);
 

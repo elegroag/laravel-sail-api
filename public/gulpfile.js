@@ -87,7 +87,6 @@ const appModules = {
         'Mercurio59',
         'Mercurio65',
         'Mercurio67',
-        'Mercurio72',
         'Mercurio73',
         'Mercurio74',
         'Banners',

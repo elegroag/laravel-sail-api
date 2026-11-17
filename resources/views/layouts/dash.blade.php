@@ -5,7 +5,7 @@
 @section('content-main')
 @php
 $user = session()->get('user');
-list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
+list($menu, , $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 @endphp
 
 @push('styles')
@@ -31,7 +31,7 @@ list($menu, $breadcrumbs, $pageTitle) = App\Services\Menu\Menu::showMenu('ME');
 <div class="sidenav-overlay" aria-hidden="true"></div>
 
 <div class="main-content" id="panel">
-@include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'breadcrumbs'=> $breadcrumbs, 'pageTitle'=> ($pageTitle)? $pageTitle : $title ]) 
+@include('templates.navbar', ['user_name' => capitalize($user['nombre']), 'pageTitle'=> ($pageTitle)? $pageTitle : $title ]) 
 
 <div class="container-fluid mt-3">
     <div class="row">
