@@ -1,26 +1,17 @@
 <?php
 
-// Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio09Controller;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio09')->group(function () {
-        Route::get('/index', [Mercurio09Controller::class, 'index']);
-        Route::post('/buscar', [Mercurio09Controller::class, 'buscar']);
-        Route::post('/editar/{tipopc?}', [Mercurio09Controller::class, 'editar']);
-        Route::post('/borrar', [Mercurio09Controller::class, 'borrar']);
-        Route::post('/guardar', [Mercurio09Controller::class, 'guardar']);
-        Route::post('/valide-pk', [Mercurio09Controller::class, 'validePk']);
-        Route::post('/archivos_view/{tipopc?}', [Mercurio09Controller::class, 'archivosView']);
-        Route::post('/guardar_archivos', [Mercurio09Controller::class, 'guardarArchivos']);
-        Route::post('/obliga_archivos', [Mercurio09Controller::class, 'obligaArchivos']);
-        Route::post('/archivos_empresa_view', [Mercurio09Controller::class, 'archivosEmpresaView']);
-        Route::post('/guardar_empresa_archivos', [Mercurio09Controller::class, 'guardarEmpresaArchivos']);
-        Route::post('/obliga_empresa_archivos', [Mercurio09Controller::class, 'obligaEmpresaArchivos']);
-        Route::post('/reporte/{format?}', [Mercurio09Controller::class, 'reporte']);
+        Route::get('/index', [Mercurio09Controller::class, 'index'])->name('cajas.mercurio09.index');
+        Route::post('/', [Mercurio09Controller::class, 'store'])->name('cajas.mercurio09.store');
+        Route::put('/{tipopc}', [Mercurio09Controller::class, 'update'])->name('cajas.mercurio09.update')->where('tipopc', '[A-Za-z0-9]{1,2}');
+        Route::delete('/{tipopc}', [Mercurio09Controller::class, 'destroy'])->name('cajas.mercurio09.destroy')->where('tipopc', '[A-Za-z0-9]{1,2}');
 
-        Route::post('/aplicar_filtro', [Mercurio09Controller::class, 'aplicarFiltro']);
-        Route::post('/change_cantidad_pagina', [Mercurio09Controller::class, 'changeCantidadPagina']);
+        Route::get('/{tipopc}/documentos', [Mercurio09Controller::class, 'documentos'])->name('cajas.mercurio09.documentos')->where('tipopc', '[A-Za-z0-9]{1,2}');
+        Route::post('/{tipopc}/documentos/trabajador', [Mercurio09Controller::class, 'syncTrabajador'])->name('cajas.mercurio09.documentos.trabajador')->where('tipopc', '[A-Za-z0-9]{1,2}');
+        Route::post('/{tipopc}/documentos/empresa', [Mercurio09Controller::class, 'syncEmpresa'])->name('cajas.mercurio09.documentos.empresa')->where('tipopc', '[A-Za-z0-9]{1,2}');
     });
 });

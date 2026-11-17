@@ -12,6 +12,10 @@ class Mercurio12 extends ModelBase
 
     protected $primaryKey = 'coddoc';
 
+    public $incrementing = false;
+
+    protected $keyType = 'int';
+
     protected $fillable = [
         'coddoc',
         'detalle',

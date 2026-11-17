@@ -2,206 +2,105 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio11;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
+use App\Services\Cajas\Mercurio11Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio11Controller extends ApplicationController
+class Mercurio11Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio11Service $service
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected $user;
-
-    protected $tipo;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session('user') ?? null;
-        $this->tipo = session('tipo') ?? null;
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function showTabla($paginate)
-    {
-        return view('cajas.mercurio11._table', compact('paginate'))->render();
-    }
-
-    public function aplicarFiltro(Request $request)
-    {
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-
-        return $this->buscar($request);
-    }
-
-    public function index()
-    {
-        $campo_field = [
-            'codest' => 'Codest',
-            'detalle' => 'Detalle',
-        ];
-
-        return view('cajas.mercurio11.index', [
-            'title' => 'Motivos Rechazo',
-            'campo_filtro' => $campo_field,
+        return Inertia::render('Cajas/Mercurio11/Index', [
+            'items' => [
+                'data' => collect($paginator->items())->map(fn (Mercurio11 $row) => [
+                    'codest' => (string) $row->codest,
+                    'detalle' => (string) $row->detalle,
+                ])->values()->all(),
+                'meta' => [
+                    'pagination' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'from' => $paginator->firstItem(),
+                        'to' => $paginator->lastItem(),
+                        'total' => $paginator->total(),
+                    ],
+                ],
+            ],
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function buscar(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
+        $data = $this->validated($request);
+        $result = $this->service->guardar($data);
 
-        $paginate = Paginate::execute(
-            Mercurio11::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
-
-        $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-
-        $response = [
-            'consulta' => $html,
-            'query' => $this->query,
-            'paginate' => $html_paginate,
-        ];
-
-        return $this->renderObject($response, false);
-    }
-
-    public function editar(Request $request)
-    {
-        try {
-            $codest = $request->input('codest');
-            $mercurio11 = Mercurio11::where('codest', $codest)->first();
-            if ($mercurio11 == false) {
-                $mercurio11 = new Mercurio11;
-            }
-            $response = [
-                'success' => true,
-                'data' => $mercurio11->toArray(),
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'message' => $e->getMessage(),
-            ];
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
 
-        return $this->renderObject($response, false);
+        return redirect()
+            ->route('cajas.mercurio11.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function borrar(Request $request)
+    public function update(Request $request, string $codest): RedirectResponse
     {
-        try {
-            $codest = $request->input('codest');
-            DB::beginTransaction();
-            Mercurio11::where('codest', $codest)->delete();
-            DB::commit();
+        Mercurio11::findOrFail($codest);
+        $data = $this->validated($request, $codest);
+        $result = $this->service->guardar($data, $codest);
 
-            $response = [
-                'success' => true,
-                'msj' => 'Proceso completado con éxito.',
-            ];
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
 
-        return $this->renderObject($response, false);
+        return redirect()
+            ->route('cajas.mercurio11.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function destroy(string $codest): RedirectResponse
     {
-        try {
-            $codest = $request->input('codest');
-            $detalle = $request->input('detalle');
+        $result = $this->service->borrar($codest);
 
-            DB::beginTransaction();
-            $mercurio11 = Mercurio11::where('codest', $codest)->first();
-
-            if (! $mercurio11) {
-                $mercurio11 = new Mercurio11;
-                $mercurio11->setCodest($codest);
-                $mercurio11->setDetalle($detalle);
-            } else {
-                $mercurio11->setDetalle($detalle);
-            }
-            $mercurio11->save();
-            DB::commit();
-
-            $response = [
-                'success' => true,
-                'msj' => 'Proceso completado con éxito.',
-            ];
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
 
-        return $this->renderObject($response, false);
+        return redirect()->back()->with('success', $result['msj']);
     }
 
-    public function validePk(Request $request)
+    /**
+     * @return array{codest: string, detalle: string}
+     */
+    private function validated(Request $request, ?string $currentCodest = null): array
     {
-        try {
-            $this->setResponse('ajax');
-            $codest = $request->input('codest');
-            $response = parent::successFunc('');
-            $l = Mercurio11::where('codest', $codest)->count();
-            if ($l > 0) {
-                $response = parent::errorFunc('El Registro ya se encuentra Digitado');
-            }
+        $isUpdate = $currentCodest !== null;
 
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo validar la informacion');
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function reporte($format = 'P')
-    {
-        $this->setResponse('ajax');
-        $_fields = [];
-        $_fields['codest'] = ['header' => 'Codigo', 'size' => '15', 'align' => 'C'];
-        $_fields['detalle'] = ['header' => 'Detalle', 'size' => '31', 'align' => 'C'];
-        $consultasOldServices = new GeneralService;
-        $file = $consultasOldServices->createReport('mercurio11', $_fields, $this->query, 'Motivos Rechazo', $format);
-
-        return $this->renderObject($file, false);
-    }
-
-    public function borrarFiltro()
-    {
-        set_flashdata('filter_mercurio11', false, true);
-        set_flashdata('filter_params', false, true);
-
-        return $this->renderObject([
-            'success' => true,
-            'query' => get_flashdata_item('filter_mercurio11'),
-            'filter' => get_flashdata_item('filter_params'),
+        $data = $request->validate([
+            'codest' => $isUpdate
+                ? ['nullable', 'string', 'size:2']
+                : ['required', 'string', 'size:2'],
+            'detalle' => 'required|string|max:45',
         ]);
+
+        return [
+            'codest' => $isUpdate ? $currentCodest : strtoupper((string) $data['codest']),
+            'detalle' => (string) $data['detalle'],
+        ];
     }
 }

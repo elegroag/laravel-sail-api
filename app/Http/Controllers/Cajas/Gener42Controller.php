@@ -2,113 +2,74 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use App\Models\Gener02;
-use App\Models\Gener40;
-use App\Models\Gener42;
+use App\Http\Controllers\Controller;
+use App\Services\Cajas\Gener42Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Gener42Controller extends ApplicationController
+class Gener42Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Gener42Service $service
+    ) {}
 
-    protected $cantidad_pagina = 0;
-
-
-    protected $user;
-
-    protected $tipo;
-
-    protected $tipfun;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session('user') ?? null;
-        $this->tipfun = session('tipfun') ?? null;
-        $this->tipo = 'A';
-    }
+        $usuario = $request->query('usuario');
+        $usuario = $usuario !== null && $usuario !== '' ? $usuario : null;
 
-    public function tablePermisos($table, $tipo)
-    {
-        return view('cajas/gener42/asigna_permisos', ['table' => $table, 'tipo' => $tipo])->render();
-    }
-
-    public function buscar(Request $request)
-    {
-        $usuario = $request->input('usuario');
-        $buscar = $request->input('buscar');
-        $tipo = $request->input('tipo');
-        $response['flag'] = true;
-
-        $likes = '';
-        if ($tipo == 'S') {
-            $likes = " and detalle like '%{$buscar}%'";
-        }
-        $table = Gener40::whereRaw("codigo IN(select permiso from gener42 where usuario={$usuario}) {$likes}")->orderBy('orden', 'ASC')->get();
-        $response['permite'] = $this->tablePermisos($table, 'S');
-
-        $liken = '';
-        if ($tipo == 'N') {
-            $liken = " and detalle like '%{$buscar}%'";
-        }
-        $table = Gener40::whereRaw("codigo NOT IN(select permiso from gener42 where usuario={$usuario}) {$liken}")->orderBy('orden', 'ASC')->get();
-        $response['nopermite'] = $this->tablePermisos($table, 'N');
-        $this->renderObject($response, false);
-    }
-
-    public function index()
-    {
-        return view('cajas.gener42.index', [
-            'title' => 'Permisos por usuario',
-            'gener02' => Gener02::all(),
-            'campo_filtro' => [
-                'usuario' => 'Usuario',
-                'tipfun' => 'Tipo funcionario',
-            ]
+        return Inertia::render('Cajas/Gener42/Index', [
+            'usuarios' => $this->service->opcionesUsuarios(),
+            'usuario' => $usuario,
+            'asignados' => $usuario !== null ? $this->service->permisosAsignados($usuario) : [],
+            'disponibles' => $usuario !== null ? $this->service->permisosDisponibles($usuario) : [],
         ]);
     }
 
-    public function guardar(Request $request)
+    public function assign(Request $request): RedirectResponse
     {
-        try {
-            $tipo = $request->input('tipo');
-            $usuario = $request->input('usuario');
-            $permisos = $request->input('permisos');
-            $permisos = explode(';', $permisos);
+        $data = $this->validated($request);
+        $result = $this->service->asignar($data['usuario'], $data['permisos']);
 
-            DB::beginTransaction();
-            if ($tipo == 'A') {
-                foreach ($permisos as $permiso) {
-                    if (empty($permiso)) continue;
-
-                    $table = new Gener42;
-                    $table->setUsuario($usuario);
-                    $table->setPermiso($permiso);
-                    if (! $table->save()) {
-                        DB::rollBack();
-                    }
-                }
-            }
-            if ($tipo == 'E') {
-                foreach ($permisos as $permiso) {
-                    if (empty($permiso)) continue;
-                    Gener42::whereRaw("usuario='{$usuario}' and permiso='{$permiso}'")->delete();
-                }
-            }
-            DB::commit();
-            $response = [
-                'flag' => true,
-                'msg' => 'Operación realizada correctamente'
-            ];
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = [
-                'flag' => false,
-                'msg' => $e->getMessage()
-            ];
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
-        return $this->renderObject($response, false);
+
+        return redirect()
+            ->route('cajas.gener42.index', ['usuario' => $data['usuario']])
+            ->with('success', $result['msj']);
+    }
+
+    public function revoke(Request $request): RedirectResponse
+    {
+        $data = $this->validated($request);
+        $result = $this->service->quitar($data['usuario'], $data['permisos']);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
+        }
+
+        return redirect()
+            ->route('cajas.gener42.index', ['usuario' => $data['usuario']])
+            ->with('success', $result['msj']);
+    }
+
+    /**
+     * @return array{usuario: int|string, permisos: list<string>}
+     */
+    private function validated(Request $request): array
+    {
+        $data = $request->validate([
+            'usuario' => 'required|integer',
+            'permisos' => 'required|array|min:1',
+            'permisos.*' => 'required|string|max:5',
+        ]);
+
+        return [
+            'usuario' => (int) $data['usuario'],
+            'permisos' => array_values($data['permisos']),
+        ];
     }
 }

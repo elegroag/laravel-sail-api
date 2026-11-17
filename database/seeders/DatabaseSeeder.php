@@ -48,7 +48,6 @@ class DatabaseSeeder extends Seeder
             // Tablas Mercurio
             Mercurio01Seeder::class,
             Mercurio02Seeder::class,
-            Mercurio03Seeder::class,
             Mercurio04Seeder::class,
             Mercurio05Seeder::class,
             Mercurio06Seeder::class,

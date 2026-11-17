@@ -121,7 +121,6 @@ require __DIR__.'/cajas/comandos.php';
 require __DIR__.'/cajas/config_basica.php';
 require __DIR__.'/cajas/config_caja.php';
 require __DIR__.'/cajas/config_documentos.php';
-require __DIR__.'/cajas/config_firmas.php';
 require __DIR__.'/cajas/config_oficina.php';
 require __DIR__.'/cajas/config_tipo_acceso.php';
 require __DIR__.'/cajas/config_tipo_opciones.php';

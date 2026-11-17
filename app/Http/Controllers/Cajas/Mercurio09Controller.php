@@ -2,387 +2,198 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio09;
-use App\Models\Mercurio12;
-use App\Models\Mercurio13;
-use App\Models\Mercurio14;
-use App\Services\Api\ApiSubsidio;
-use App\Services\Utils\Comman;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
+use App\Services\Cajas\Mercurio09Service;
+use App\Services\Cajas\Mercurio14Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio09Controller extends ApplicationController
+class Mercurio09Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio09Service $service,
+        protected Mercurio14Service $mercurio14Service,
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected $user;
-
-    protected $tipfun;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session('user') ?? null;
-        $this->tipfun = session('tipfun') ?? null;
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function showTabla($paginate)
-    {
-        return view('cajas.mercurio09._table', compact('paginate'))->render();
-    }
-
-    public function aplicarFiltro(Request $request)
-    {
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-        return $this->buscar($request);
-    }
-
-    public function index()
-    {
-        $apiRest = new ApiSubsidio();
-        $apiRest->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'parametros_empresa',
-            ]
-        );
-        $datos_captura = $apiRest->toArray();
-        $_tipsoc = [];
-        foreach ($datos_captura['tipo_sociedades'] as $data) {
-            $_tipsoc[$data['tipsoc']] = $data['detalle'];
-        }
-
-        return view('cajas.mercurio09.index', [
-            'title' => 'Tipos Opciones',
-            'campo_filtro' => [
-                'tipopc' => 'Codigo',
-                'detalle' => 'Detalle',
+        return Inertia::render('Cajas/Mercurio09/Index', [
+            'items' => [
+                'data' => collect($paginator->items())->map(fn (Mercurio09 $row) => [
+                    'tipopc' => (string) $row->tipopc,
+                    'detalle' => (string) $row->detalle,
+                    'dias' => $row->dias !== null ? (int) $row->dias : null,
+                    'allows_empresa' => $this->service->allowsEmpresa((string) $row->tipopc),
+                ])->values()->all(),
+                'meta' => [
+                    'pagination' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'from' => $paginator->firstItem(),
+                        'to' => $paginator->lastItem(),
+                        'total' => $paginator->total(),
+                    ],
+                ],
             ],
-            '_tipsoc' => $_tipsoc,
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function buscar(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
+        $data = $this->validated($request);
+        $result = $this->service->guardar($data);
 
-        $paginate = Paginate::execute(
-            Mercurio09::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
+        }
+
+        return redirect()
+            ->route('cajas.mercurio09.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
+    }
+
+    public function update(Request $request, string $tipopc): RedirectResponse
+    {
+        Mercurio09::findOrFail($tipopc);
+        $data = $this->validated($request, $tipopc);
+        $result = $this->service->guardar($data, $tipopc);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
+        }
+
+        return redirect()
+            ->route('cajas.mercurio09.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
+    }
+
+    public function destroy(string $tipopc): RedirectResponse
+    {
+        $result = $this->service->borrar($tipopc);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
+        }
+
+        return redirect()->back()->with('success', $result['msj']);
+    }
+
+    public function documentos(Request $request, string $tipopc): Response
+    {
+        $tipo = Mercurio09::findOrFail($tipopc);
+        $allowsEmpresa = $this->service->allowsEmpresa($tipopc);
+        $tab = (string) $request->query('tab', 'trabajador');
+        if (! in_array($tab, ['trabajador', 'empresa'], true) || ($tab === 'empresa' && ! $allowsEmpresa)) {
+            $tab = 'trabajador';
+        }
+
+        $tipsocOptions = $allowsEmpresa ? $this->mercurio14Service->opcionesTipsoc() : [];
+        $tipsoc = (string) $request->query('tipsoc', '');
+        if ($tipsoc === '' && $tipsocOptions !== []) {
+            $tipsoc = (string) $tipsocOptions[0]['value'];
+        }
+
+        return Inertia::render('Cajas/Mercurio09/Documentos', [
+            'tipo' => [
+                'tipopc' => (string) $tipo->tipopc,
+                'detalle' => (string) $tipo->detalle,
+                'dias' => $tipo->dias !== null ? (int) $tipo->dias : null,
+                'allows_empresa' => $allowsEmpresa,
+            ],
+            'tab' => $tab,
+            'tipsoc' => $tipsoc,
+            'tipsocOptions' => $tipsocOptions,
+            'documentos' => $tab === 'empresa' && $tipsoc !== ''
+                ? $this->service->documentosEmpresa($tipopc, $tipsoc)
+                : $this->service->documentosTrabajador($tipopc),
+        ]);
+    }
+
+    public function syncTrabajador(Request $request, string $tipopc): RedirectResponse
+    {
+        $data = $request->validate([
+            'coddoc' => 'required|integer',
+            'adjunto' => 'required|boolean',
+            'obliga' => 'nullable|in:S,N',
+        ]);
+
+        $result = $this->service->syncTrabajador(
+            $tipopc,
+            (int) $data['coddoc'],
+            (bool) $data['adjunto'],
+            $data['obliga'] ?? null,
         );
 
-        $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
-
-        return $this->renderObject($response, false);
-    }
-
-    public function editar(Request $request)
-    {
-        try {
-            $tipopc = $request->input('tipopc');
-            $mercurio09 = Mercurio09::where('tipopc', $tipopc)->first();
-            if ($mercurio09 == false) {
-                $mercurio09 = new Mercurio09;
-            }
-
-            $response = [
-                'success' => true,
-                'data' => $mercurio09->toArray(),
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'Error al obtener el registro ' . $e->getMessage(),
-            ];
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
-        return $this->renderObject($response, false);
+
+        return redirect()
+            ->route('cajas.mercurio09.documentos', ['tipopc' => $tipopc, 'tab' => 'trabajador'])
+            ->with('success', $result['msj']);
     }
 
-    public function borrar(Request $request)
+    public function syncEmpresa(Request $request, string $tipopc): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
+        $data = $request->validate([
+            'tipsoc' => 'required|string|max:2',
+            'coddoc' => 'required|integer',
+            'adjunto' => 'required|boolean',
+            'obliga' => 'nullable|in:S,N',
+        ]);
 
-            DB::beginTransaction();
-            Mercurio09::where('tipopc', $tipopc)->delete();
-            DB::commit();
+        $result = $this->service->syncEmpresa(
+            $tipopc,
+            (string) $data['tipsoc'],
+            (int) $data['coddoc'],
+            (bool) $data['adjunto'],
+            $data['obliga'] ?? null,
+        );
 
-            $response = parent::successFunc('Borrado Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede Borrar el Registro');
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
-    }
 
-    public function guardar(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $detalle = $request->input('detalle');
-            $dias = $request->input('dias');
-
-            if ($tipopc === null || $tipopc === '') {
-                return $this->renderObject([
-                    'flag' => false,
-                    'msg' => 'El campo tipopc es obligatorio',
-                ], false);
-            }
-
-            DB::beginTransaction();
-            $mercurio09 = Mercurio09::firstOrNew(['tipopc' => $tipopc]);
-            $mercurio09->setTipopc($tipopc);
-            $mercurio09->setDetalle($detalle);
-            $mercurio09->setDias($dias);
-
-            if (! $mercurio09->save()) {
-                DB::rollBack();
-                throw new DebugException('Error al guardar el registro');
-            }
-
-            DB::commit();
-
-            return $this->renderObject([
-                'flag' => true,
-                'msg' => 'Operación realizada con éxito',
-            ], false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-
-            return $this->renderObject([
-                'flag' => false,
-                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
-            ], false);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return $this->renderObject([
-                'flag' => false,
-                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
-            ], false);
-        }
-    }
-
-    public function validePk(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-
-            $response = [
-                'flag' => true,
-                'msg' => 'Validacion Exitosa',
-                'msj' => 'Validacion Exitosa',
-            ];
-            $l = Mercurio09::where('tipopc', $tipopc)->count();
-            if ($l > 0) {
-                $response = [
-                    'flag' => false,
-                    'msg' => 'El Registro ya se encuentra Digitado',
-                    'msj' => 'El Registro ya se encuentra Digitado',
-                ];
-            }
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            return $this->renderObject([
-                'flag' => false,
-                'msg' => 'No se pudo validar la informacion',
-                'msj' => 'No se pudo validar la informacion',
-            ], false);
-        }
-    }
-
-    public function archivosView(Request $request)
-    {
-        try {
-            $this->setResponse('view');
-            $tipopc = $request->input('tipopc');
-            $mercurio12 = Mercurio12::all();
-
-            return view('cajas.mercurio09.tmp.archivos_view', [
+        return redirect()
+            ->route('cajas.mercurio09.documentos', [
                 'tipopc' => $tipopc,
-                'mercurio12' => $mercurio12,
-                'mercurio13' => Mercurio13::where('tipopc', $tipopc)->get(),
-            ]);
-        } catch (DebugException $e) {
-            return $this->renderObject([
-                'flag' => false,
-                'msg' => 'No se pudo validar la informacion',
-            ]);
-        }
+                'tab' => 'empresa',
+                'tipsoc' => $data['tipsoc'],
+            ])
+            ->with('success', $result['msj']);
     }
 
-    public function guardarArchivos(Request $request)
+    /**
+     * @return array{tipopc: string, detalle: string, dias: int|null}
+     */
+    private function validated(Request $request, ?string $currentTipopc = null): array
     {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $acc = $request->input('acc');
+        $isUpdate = $currentTipopc !== null;
 
-            DB::beginTransaction();
-            if ($acc == '1') {
-                $mercurio13 = new Mercurio13;
-                $mercurio13->setTipopc($tipopc);
-                $mercurio13->setCoddoc($coddoc);
-                $mercurio13->setObliga('N');
-                if (! $mercurio13->save()) {
-                    DB::rollBack();
-                    throw new DebugException('Error al guardar archivo');
-                }
-            } else {
-                Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
-            }
-            DB::commit();
-            $response = 'Movimiento Realizado Con Exito';
+        $data = $request->validate([
+            'tipopc' => $isUpdate
+                ? ['nullable', 'string', 'max:2']
+                : ['required', 'string', 'min:1', 'max:2'],
+            'detalle' => 'required|string|max:45',
+            'dias' => 'nullable|integer|min:0|max:99999',
+        ]);
 
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function obligaArchivos(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $obliga = $request->input('obliga');
-
-            DB::beginTransaction();
-            Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->update(['obliga' => $obliga]);
-            DB::commit();
-            $response = 'Movimiento Realizado Con Exito';
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function archivosEmpresaView(Request $request)
-    {
-        try {
-            $tipopc = $request->input('tipopc');
-            $tipsoc = $request->input('tipsoc');
-            $mercurio12 = Mercurio12::all();
-
-            return view('cajas.mercurio09.tmp.archivos_empresas', [
-                'tipopc' => $tipopc,
-                'tipsoc' => $tipsoc,
-                'mercurio12' => $mercurio12,
-                'mercurio14' => Mercurio14::all(),
-            ]);
-        } catch (DebugException $e) {
-            return $this->renderObject([
-                'flag' => false,
-                'msg' => 'No se pudo validar la informacion',
-            ]);
-        }
-    }
-
-    public function guardarEmpresaArchivos(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $tipsoc = $request->input('tipsoc');
-            $coddoc = $request->input('coddoc');
-            $acc = $request->input('acc');
-
-            DB::beginTransaction();
-            if ($acc == '1') {
-                $mercurio14 = new Mercurio14;
-                $mercurio14->setTipopc($tipopc);
-                $mercurio14->setTipsoc($tipsoc);
-                $mercurio14->setCoddoc($coddoc);
-                $mercurio14->setObliga('N');
-                if (! $mercurio14->save()) {
-                    DB::rollBack();
-                    throw new DebugException('Error al guardar archivo de empresa');
-                }
-            } else {
-                Mercurio14::where('tipopc', $tipopc)->where('tipsoc', $tipsoc)->where('coddoc', $coddoc)->delete();
-            }
-            DB::commit();
-            $response = 'Movimiento Realizado Con Exito';
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function obligaEmpresaArchivos(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $tipsoc = $request->input('tipsoc');
-            $coddoc = $request->input('coddoc');
-            $obliga = $request->input('obliga');
-
-            DB::beginTransaction();
-            Mercurio14::where('tipopc', $tipopc)
-                ->where('tipsoc', $tipsoc)
-                ->where('coddoc', $coddoc)
-                ->update(['obliga' => $obliga]);
-            DB::commit();
-            $response = 'Movimiento Realizado Con Exito';
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = 'No se pudo realizar el movimiento: ' . $e->getMessage();
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function reporte($format = 'P')
-    {
-        $this->setResponse('ajax');
-        $_fields = [];
-        $_fields['tipopc'] = ['header' => 'Codigo', 'size' => '15', 'align' => 'C'];
-        $_fields['detalle'] = ['header' => 'Detalle', 'size' => '31', 'align' => 'C'];
-        $_fields['dias'] = ['header' => 'Dias', 'size' => '31', 'align' => 'C'];
-        $consultasOldServices = new GeneralService;
-        $file = $consultasOldServices->createReport('mercurio09', $_fields, $this->query, 'Tipos Opciones', $format);
-
-        return $this->renderObject($file, false);
+        return [
+            'tipopc' => $isUpdate ? $currentTipopc : (string) $data['tipopc'],
+            'detalle' => (string) $data['detalle'],
+            'dias' => array_key_exists('dias', $data) && $data['dias'] !== null && $data['dias'] !== ''
+                ? (int) $data['dias']
+                : null,
+        ];
     }
 }

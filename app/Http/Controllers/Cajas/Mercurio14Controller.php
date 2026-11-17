@@ -2,196 +2,162 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
-use App\Models\Mercurio09;
-use App\Models\Mercurio12;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio14;
-use App\Models\Subsi54;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
-use Illuminate\Http\JsonResponse;
+use App\Services\Cajas\Mercurio14Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Js;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio14Controller extends ApplicationController
+class Mercurio14Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio14Service $service
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected $user;
-
-    protected $tipo;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function index()
-    {
-        $tipopc = ['' => 'Selecciona aquí...'] + Mercurio09::pluck('detalle', 'tipopc')->toArray();
-        $coddoc = ['' => 'Selecciona aquí...'] + Mercurio12::pluck('detalle', 'coddoc')->toArray();
-        $tipsoc = ['' => 'Selecciona aquí...'] + Subsi54::pluck('detalle', 'tipsoc')->toArray();
-
-        return view('cajas.mercurio14.index', [
-            'title' => 'Documentos requeridos empleadores',
-            'campo_filtro' => [
-                'tipopc' => 'Tipo servicio afiliación',
-                'tipsoc' => 'Tipo sociedad',
-                'coddoc' => 'Tipo documento',
+        $items = [
+            'data' => collect($paginator->items())->map(fn (Mercurio14 $row) => [
+                'tipopc' => $row->tipopc,
+                'tipsoc' => $row->tipsoc,
+                'coddoc' => (int) $row->coddoc,
+                'tipopc_detalle' => $row->mercurio09?->detalle,
+                'tipsoc_detalle' => $row->subsi54?->detalle,
+                'coddoc_detalle' => $row->mercurio12?->detalle,
+                'obliga' => $row->obliga,
+                'auto_generado' => (int) $row->auto_generado,
+                'nota' => $row->nota,
+            ])->values()->all(),
+            'meta' => [
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                    'total' => $paginator->total(),
+                ],
             ],
-            'tipopc' => $tipopc,
-            'coddoc' => $coddoc,
-            'tipsoc' => $tipsoc,
+        ];
+
+        return Inertia::render('Cajas/Mercurio14/Index', [
+            'items' => $items,
+            'tipopcOptions' => $this->service->opcionesTipopc(),
+            'tipsocOptions' => $this->service->opcionesTipsoc(),
+            'coddocOptions' => $this->service->opcionesCoddoc(),
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function aplicarFiltro(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $this->cantidad_pagina = $request->input('numero', 10);
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
+        $data = $this->validated($request);
+        $result = $this->service->guardar($data, false);
 
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-
-        return $this->buscar($request);
-    }
-
-    public function showTabla($paginate)
-    {
-        return view('cajas.mercurio14._table', compact('paginate'))->render();
-    }
-
-    public function buscar(Request $request)
-    {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
-
-        $paginate = Paginate::execute(
-            Mercurio14::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
-
-        $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
-
-        return $this->renderObject($response, false);
-    }
-
-    public function editar(Request $request)
-    {
-        try {
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $tipsoc = $request->input('tipsoc');
-
-            $mercurio14 = Mercurio14::where('tipopc', $tipopc)
-                ->where('coddoc', $coddoc)
-                ->where('tipsoc', $tipsoc)
-                ->first();
-
-            if (! $mercurio14) {
-                $mercurio14 = new Mercurio14;
-            }
-
-            $response = [
-                'success' => true,
-                'data' => $mercurio14->toArray()
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msg' => $e->getMessage()
-            ];
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
-        return $this->renderObject($response, false);
+
+        return redirect()
+            ->route('cajas.mercurio14.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function update(Request $request, string $tipopc, string $tipsoc, int $coddoc): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $tipsoc = $request->input('tipsoc');
-            $obliga = $request->input('obliga');
-            $nota = $request->input('nota');
-            $auto_generado = $request->input('auto_generado');
+        Mercurio14::where('tipopc', $tipopc)
+            ->where('tipsoc', $tipsoc)
+            ->where('coddoc', $coddoc)
+            ->firstOrFail();
 
-            DB::beginTransaction();
+        $data = $this->validated($request, $tipopc, $tipsoc, $coddoc);
+        $data['tipopc'] = $tipopc;
+        $data['tipsoc'] = $tipsoc;
+        $data['coddoc'] = $coddoc;
 
-            $mercurio14 = Mercurio14::firstOrNew([
-                'tipopc' => $tipopc,
-                'coddoc' => $coddoc,
-                'tipsoc' => $tipsoc,
+        $result = $this->service->guardar($data, true);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
+        }
+
+        return redirect()
+            ->route('cajas.mercurio14.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
+    }
+
+    public function destroy(string $tipopc, string $tipsoc, int $coddoc): RedirectResponse
+    {
+        $result = $this->service->borrar($tipopc, $tipsoc, $coddoc);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
+        }
+
+        return redirect()->back()->with('success', $result['msj']);
+    }
+
+    /**
+     * @return array{tipopc: string, tipsoc: string, coddoc: int, obliga: string, auto_generado: int, nota: ?string}
+     */
+    private function validated(
+        Request $request,
+        ?string $currentTipopc = null,
+        ?string $currentTipsoc = null,
+        ?int $currentCoddoc = null
+    ): array {
+        $isUpdate = $currentTipopc !== null && $currentTipsoc !== null && $currentCoddoc !== null;
+
+        $rules = [
+            'obliga' => 'required|in:S,N',
+            'auto_generado' => 'required|in:0,1',
+            'nota' => 'nullable|string|max:255',
+        ];
+
+        if ($isUpdate) {
+            $data = $request->validate($rules);
+        } else {
+            $data = $request->validate([
+                'tipopc' => [
+                    'required',
+                    'string',
+                    'size:2',
+                    'exists:mercurio09,tipopc',
+                ],
+                'tipsoc' => [
+                    'required',
+                    'string',
+                    'max:2',
+                    'exists:subsi54,tipsoc',
+                ],
+                'coddoc' => [
+                    'required',
+                    'integer',
+                    'exists:mercurio12,coddoc',
+                    Rule::unique('mercurio14', 'coddoc')
+                        ->where(fn ($query) => $query
+                            ->where('tipopc', $request->input('tipopc'))
+                            ->where('tipsoc', $request->input('tipsoc'))),
+                ],
+                ...$rules,
             ]);
-            $mercurio14->obliga = $obliga;
-            $mercurio14->nota = $nota;
-            $mercurio14->auto_generado = $auto_generado;
-
-            if (! $mercurio14->save()) {
-                parent::setLogger($mercurio14->getMessages());
-                DB::rollBack();
-                throw new DebugException('Error no se puede guardar el registro');
-            }
-
-            DB::commit();
-            $response = parent::successFunc('El registro se completo con éxito.');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc($e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function borrar(Request $request): JsonResponse
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $tipsoc = $request->input('tipsoc');
-
-            DB::beginTransaction();
-            $deleted = Mercurio14::where('tipopc', $tipopc)
-                ->where('coddoc', $coddoc)
-                ->where('tipsoc', $tipsoc)
-                ->delete();
-
-            if ($deleted == 0) {
-                throw new DebugException('Error no se puede borrar el registro, no está disponible.');
-            }
-
-            DB::commit();
-            $response = [
-                'success' => true,
-                'msj' => 'El registro se borro con éxito.'
-            ];
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage()
-            ];
         }
 
-        return response()->json($response);
+        return [
+            'tipopc' => $isUpdate ? $currentTipopc : (string) $data['tipopc'],
+            'tipsoc' => $isUpdate ? $currentTipsoc : (string) $data['tipsoc'],
+            'coddoc' => $isUpdate ? $currentCoddoc : (int) $data['coddoc'],
+            'obliga' => (string) $data['obliga'],
+            'auto_generado' => (int) $data['auto_generado'],
+            'nota' => $data['nota'] ?? null,
+        ];
     }
 }

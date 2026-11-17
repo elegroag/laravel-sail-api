@@ -4,81 +4,118 @@ namespace App\Services\Cajas;
 
 use App\Models\Mercurio02;
 use App\Services\Api\ApiSubsidio;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Mercurio02Service
 {
-    public function buscar(Request $request, int $cantidad_pagina)
+    /**
+     * @return LengthAwarePaginator<int, Mercurio02>
+     */
+    public function paginate(Request $request): LengthAwarePaginator
     {
-        $query = $this->buildQuery($request);
+        $perPage = max(1, min(100, (int) $request->query('per_page', 10)));
+        $query = Mercurio02::query();
 
-        return Mercurio02::whereRaw($query)->paginate($cantidad_pagina);
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
+            $query->where(function ($sub) use ($like) {
+                $sub->where('codcaj', 'like', $like)
+                    ->orWhere('nit', 'like', $like)
+                    ->orWhere('razsoc', 'like', $like)
+                    ->orWhere('sigla', 'like', $like)
+                    ->orWhere('email', 'like', $like);
+            });
+        }
+
+        return $query
+            ->orderBy('codcaj')
+            ->paginate($perPage)
+            ->appends($request->only(['q', 'per_page']));
     }
 
-    public function guardar(Request $request)
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{flag: bool, msg: string, msj: string}
+     */
+    public function guardar(array $data, ?string $originalCodcaj = null): array
     {
         try {
             DB::beginTransaction();
 
-            $codcaj = $request->input('codcaj');
-            $mercurio02 = Mercurio02::firstOrNew(['codcaj' => $codcaj]);
+            $key = $originalCodcaj ?: ($data['codcaj'] ?? null);
+            $mercurio02 = $key ? Mercurio02::find($key) : null;
+            $mercurio02 ??= new Mercurio02;
 
-            $mercurio02->fill($request->all());
+            $mercurio02->fill([
+                'codcaj' => $data['codcaj'] ?? $mercurio02->codcaj,
+                'nit' => $data['nit'] ?? null,
+                'razsoc' => $data['razsoc'] ?? null,
+                'sigla' => $data['sigla'] ?? null,
+                'email' => $data['email'] ?? null,
+                'direccion' => $data['direccion'] ?? null,
+                'telefono' => $data['telefono'] ?? null,
+                'codciu' => $data['codciu'] ?? null,
+                'pagweb' => $data['pagweb'] ?? null,
+                'pagfac' => $data['pagfac'] ?? null,
+                'pagtwi' => $data['pagtwi'] ?? null,
+                'pagyou' => $data['pagyou'] ?? null,
+            ]);
             $mercurio02->save();
 
             DB::commit();
 
-            return ['flag' => true, 'msg' => 'Operación realizada con éxito'];
+            return [
+                'flag' => true,
+                'msg' => 'Operación realizada con éxito',
+                'msj' => 'Operación realizada con éxito',
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
-            return ['flag' => false, 'msg' => 'No se pudo guardar/editar el registro: ' . $e->getMessage()];
+
+            return [
+                'flag' => false,
+                'msg' => 'No se pudo guardar/editar el registro: '.$e->getMessage(),
+                'msj' => 'No se pudo guardar/editar el registro: '.$e->getMessage(),
+            ];
         }
     }
 
-    public function editar()
+    /**
+     * @return array<string, string>
+     */
+    public function obtenerCiudades(): array
     {
-        $mercurio02 = Mercurio02::first();
-        if (!$mercurio02) {
-            return ['success' => false, 'data' => null];
-        }
+        try {
+            $apiRest = new ApiSubsidio;
+            $apiRest->send([
+                'servicio' => 'ComfacaAfilia',
+                'metodo' => 'listar_ciudades_departamentos',
+            ]);
 
-        return ['success' => true, 'data' => $mercurio02->toArray()];
-    }
+            $data = $apiRest->toArray();
+            $ciudades = $data['ciudades'] ?? [];
 
-    public function obtenerCiudades()
-    {
-        $apiRest = new ApiSubsidio();
-        $apiRest->send([
-            'servicio' => 'ComfacaAfilia',
-            'metodo' => 'listar_ciudades_departamentos',
-        ]);
-
-        $data = $apiRest->toArray();
-        $ciudades = $data['ciudades'] ?? [];
-
-        $_codciu = [];
-        if (is_array($ciudades)) {
-            foreach ($ciudades as $mcodciu) {
-                $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
+            $options = [];
+            if (is_array($ciudades)) {
+                foreach ($ciudades as $ciudad) {
+                    if (! is_array($ciudad) || empty($ciudad['codciu'])) {
+                        continue;
+                    }
+                    $options[(string) $ciudad['codciu']] = (string) ($ciudad['detciu'] ?? $ciudad['codciu']);
+                }
             }
+
+            return $options;
+        } catch (\Throwable $e) {
+            Log::warning('Mercurio02: no se pudieron cargar ciudades', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return [];
         }
-        return $_codciu;
-    }
-
-    private function buildQuery(Request $request): string
-    {
-        $filtro = $request->input('filtro');
-        $campo = $request->input('campo');
-        $query = '1=1';
-
-        if ($filtro && $campo) {
-            $query = "{$campo} LIKE '%{$filtro}%'";
-            session()->put('filter_mercurio02', $query);
-        } elseif (session()->has('filter_mercurio02')) {
-            $query = session('filter_mercurio02');
-        }
-
-        return $query;
     }
 }

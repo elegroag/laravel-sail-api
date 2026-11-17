@@ -2,258 +2,109 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Controller;
 use App\Models\Banner;
-use App\Models\Mercurio01;
-use Carbon\Carbon;
+use App\Services\Cajas\BannerService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class BannerController extends ApplicationController
+class BannerController extends Controller
 {
+    public function __construct(
+        protected BannerService $service
+    ) {}
 
-    protected $user;
-
-    protected $tipo;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function index()
-    {
-        return view('cajas.banners.index', [
-            'title' => 'Banners login',
-            'help' => 'Administra los banners promocionales que se muestran como Dialog en el login de Mercurio.',
+        return Inertia::render('Cajas/Banners/Index', [
+            'items' => [
+                'data' => $this->service->mapCollection($paginator->items()),
+                'meta' => [
+                    'pagination' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'from' => $paginator->firstItem(),
+                        'to' => $paginator->lastItem(),
+                        'total' => $paginator->total(),
+                    ],
+                ],
+            ],
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'estado' => (string) $request->query('estado', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function galeria()
+    public function store(Request $request): RedirectResponse
     {
-        try {
-            $mercurio01 = $this->resolveMercurio01();
+        $data = $this->validated($request);
+        $result = $this->service->guardar($data, null, $request->file('imagen'));
 
-            $galeria = Banner::orderByDesc('fecha_inicia')->orderByDesc('id')->get();
-
-            $data = $galeria->map(function ($item) use ($mercurio01) {
-                return $this->mapRecord($item, $mercurio01);
-            });
-
-            $response = parent::successFunc('Consulta exitosa');
-            $response['data'] = $data;
-
-            return $this->renderObject($response);
-        } catch (DebugException $e) {
-            return $this->renderObject(parent::errorFunc($e->getMessage()));
-        } catch (\Throwable $e) {
-            parent::setLogger($e->getMessage());
-
-            return $this->renderObject(parent::errorFunc('No se pudo cargar los banners.'));
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']])
+                ->withInput();
         }
+
+        return redirect()
+            ->route('cajas.banners.index')
+            ->with('success', $result['msj']);
     }
 
-    public function editar(Request $request)
+    public function update(Request $request, int $id): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $id = $request->input('id');
-            $mercurio01 = $this->resolveMercurio01();
+        Banner::findOrFail($id);
+        $data = $this->validated($request);
+        $result = $this->service->guardar($data, $id, $request->file('imagen'));
 
-            $banner = Banner::where('id', $id)->first();
-            if (! $banner) {
-                throw new DebugException('Registro no encontrado.');
-            }
-
-            return $this->renderObject($this->mapRecord($banner, $mercurio01), false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc($e->getMessage());
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']])
+                ->withInput();
         }
+
+        return redirect()
+            ->route('cajas.banners.index')
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function destroy(int $id): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            DB::beginTransaction();
+        $result = $this->service->borrar($id);
 
-            $mercurio01 = $this->resolveMercurio01();
-            $id = $request->input('id');
-            $isUpdate = ! empty($id);
-            $estado = $request->input('estado', 'A');
-            $urlImagen = trim((string) $request->input('url_imagen', ''));
-            $contentHtml = Banner::sanitizeHtml($request->input('content_html'));
-            $fechaInicia = $request->input('fecha_inicia');
-            $fechaFinaliza = $request->input('fecha_finaliza');
-
-            if (! in_array($estado, ['A', 'I'], true)) {
-                throw new DebugException('Estado no válido.');
-            }
-
-            if (empty($fechaInicia) || empty($fechaFinaliza)) {
-                throw new DebugException('Las fechas de inicio y finalización son requeridas.');
-            }
-
-            try {
-                $fechaIniciaCarbon = Carbon::parse($fechaInicia)->startOfDay();
-                $fechaFinalizaCarbon = Carbon::parse($fechaFinaliza)->startOfDay();
-            } catch (\Throwable $e) {
-                throw new DebugException('Formato de fecha no válido.');
-            }
-
-            if ($fechaFinalizaCarbon->lt($fechaIniciaCarbon)) {
-                throw new DebugException('La fecha de finalización debe ser mayor o igual a la de inicio.');
-            }
-
-            if ($isUpdate) {
-                $banner = Banner::where('id', $id)->first();
-                if (! $banner) {
-                    throw new DebugException('Registro no encontrado.');
-                }
-            } else {
-                $banner = new Banner;
-            }
-
-            $banner->setEstado($estado);
-            $banner->setContentHtml($contentHtml);
-            $banner->setFechaInicia($fechaIniciaCarbon->toDateString());
-            $banner->setFechaFinaliza($fechaFinalizaCarbon->toDateString());
-            $banner->setUrlImagen($urlImagen !== '' ? $urlImagen : null);
-
-            $hasFile = $request->hasFile('imagen') && $request->file('imagen')->isValid();
-
-            if ($hasFile) {
-                if (! $isUpdate) {
-                    // Guardar primero para obtener id y nombrar el archivo.
-                    if (! $banner->save()) {
-                        parent::setLogger($banner->getMessages());
-                        DB::rollBack();
-                        throw new DebugException('Error al guardar el banner.');
-                    }
-                }
-                $this->replaceImagen($request, $banner, $mercurio01, (int) $banner->getId(), $isUpdate);
-            } elseif (! $isUpdate && $urlImagen === '') {
-                throw new DebugException('Debe cargar una imagen o indicar una URL de imagen.');
-            } elseif ($isUpdate && empty($banner->getImagen()) && $urlImagen === '') {
-                throw new DebugException('El registro no tiene imagen asociada. Cargue un archivo o una URL.');
-            }
-
-            if (! $banner->save()) {
-                parent::setLogger($banner->getMessages());
-                DB::rollBack();
-                throw new DebugException('Error al guardar el banner.');
-            }
-
-            DB::commit();
-            $response = parent::successFunc($isUpdate ? 'Actualización terminada con éxito' : 'Creación terminada con éxito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage());
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']]);
         }
+
+        return redirect()
+            ->route('cajas.banners.index')
+            ->with('success', $result['msj']);
     }
 
-    public function borrar(Request $request)
+    /**
+     * @return array<string, mixed>
+     */
+    private function validated(Request $request): array
     {
-        try {
-            $this->setResponse('ajax');
-            $id = $request->input('id');
-
-            DB::beginTransaction();
-            $banner = Banner::where('id', $id)->first();
-
-            if ($banner) {
-                $archivo = $banner->getImagen();
-                $mercurio01 = $this->resolveMercurio01();
-
-                if (! empty($archivo)) {
-                    $filePath = public_path($mercurio01->getPath().'galeria/'.$archivo);
-                    if (file_exists($filePath)) {
-                        unlink($filePath);
-                    }
-                }
-                $banner->delete();
-            } else {
-                throw new DebugException('El registro a borrar no existe.');
-            }
-
-            DB::commit();
-            $response = parent::successFunc('Borrado con éxito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    protected function resolveMercurio01(): Mercurio01
-    {
-        $mercurio01 = Mercurio01::where('codapl', 'MO')->first();
-        if (! $mercurio01) {
-            $mercurio01 = Mercurio01::first();
-        }
-        if (! $mercurio01) {
-            throw new DebugException('Configuración básica no encontrada.');
-        }
-
-        return $mercurio01;
-    }
-
-    protected function mapRecord(Banner $item, Mercurio01 $mercurio01): array
-    {
-        $imageUrl = $item->resolveImageUrl($mercurio01);
-        $fechaInicia = $item->getFechaInicia();
-        $fechaFinaliza = $item->getFechaFinaliza();
-
-        return [
-            'id' => $item->getId(),
-            'content_html' => $item->getContentHtml(),
-            'imagen' => $imageUrl,
-            'imagen_nombre' => $item->getImagen(),
-            'url_imagen' => $item->getUrlImagen(),
-            'fecha_inicia' => $fechaInicia ? Carbon::parse($fechaInicia)->toDateString() : null,
-            'fecha_finaliza' => $fechaFinaliza ? Carbon::parse($fechaFinaliza)->toDateString() : null,
-            'estado' => $item->getEstado(),
-            'estado_label' => $item->getEstado() === 'A' ? 'Activo' : 'Inactivo',
-        ];
-    }
-
-    protected function replaceImagen(Request $request, Banner $banner, Mercurio01 $mercurio01, int $id, bool $isUpdate): void
-    {
-        $file = $request->file('imagen');
-        $extension = strtolower($file->getClientOriginalExtension());
-        if (! in_array($extension, ['jpg', 'jpeg', 'png'], true)) {
-            throw new DebugException('Formato de imagen no permitido. Use JPG, JPEG o PNG.');
-        }
-
-        $fileName = 'BANN_'.$id.'.'.$extension;
-        $destinationPath = public_path($mercurio01->getPath().'galeria');
-
-        if (! is_dir($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
-        }
-
-        if ($isUpdate) {
-            $previousFile = $banner->getImagen();
-            if (! empty($previousFile) && $previousFile !== $fileName) {
-                $previousPath = public_path($mercurio01->getPath().'galeria/'.$previousFile);
-                if (file_exists($previousPath)) {
-                    unlink($previousPath);
-                }
-            }
-        }
-
-        $file->move($destinationPath, $fileName);
-        $banner->setImagen($fileName);
+        return $request->validate([
+            'estado' => ['required', Rule::in(['A', 'I'])],
+            'fecha_inicia' => 'required|date',
+            'fecha_finaliza' => 'required|date|after_or_equal:fecha_inicia',
+            'url_imagen' => 'nullable|string|max:500',
+            'content_html' => 'nullable|string',
+            'imagen' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
+        ]);
     }
 }

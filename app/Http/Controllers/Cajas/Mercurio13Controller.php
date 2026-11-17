@@ -2,187 +2,141 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
-use App\Models\Mercurio09;
-use App\Models\Mercurio12;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio13;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
+use App\Services\Cajas\Mercurio13Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio13Controller extends ApplicationController
+class Mercurio13Controller extends Controller
 {
+    public function __construct(
+        protected Mercurio13Service $service
+    ) {}
 
-    protected $user;
-
-    protected $tipfun;
-
-    protected $query = '1=1';
-
-    protected $cantidad_pagina = 10;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session('user') ?? null;
-        $this->tipfun = session('tipfun') ?? null;
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function index()
-    {
-        $tipopc = ['' => 'Selecciona aquí...'] + Mercurio09::pluck('detalle', 'tipopc')->toArray();
-        $coddoc = ['' => 'Selecciona aquí...'] + Mercurio12::pluck('detalle', 'coddoc')->toArray();
-
-        return view('cajas.mercurio13.index', [
-            'title' => 'Documentos requeridos trabajadores',
-            'campo_filtro' => [
-                'tipopc' => 'Tipo servicio afiliación',
-                'coddoc' => 'Tipo documento',
+        $items = [
+            'data' => collect($paginator->items())->map(fn (Mercurio13 $row) => [
+                'tipopc' => $row->tipopc,
+                'coddoc' => (int) $row->coddoc,
+                'tipopc_detalle' => $row->mercurio09?->detalle,
+                'coddoc_detalle' => $row->mercurio12?->detalle,
+                'obliga' => $row->obliga,
+                'auto_generado' => (int) $row->auto_generado,
+                'nota' => $row->nota,
+            ])->values()->all(),
+            'meta' => [
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                    'total' => $paginator->total(),
+                ],
             ],
-            'tipopc' => $tipopc,
-            'coddoc' => $coddoc,
+        ];
+
+        return Inertia::render('Cajas/Mercurio13/Index', [
+            'items' => $items,
+            'tipopcOptions' => $this->service->opcionesTipopc(),
+            'coddocOptions' => $this->service->opcionesCoddoc(),
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function aplicarFiltro(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $this->cantidad_pagina = $request->input('numero', 10);
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-        return $this->buscar($request);
-    }
+        $data = $this->validated($request);
+        $result = $this->service->guardar($data, false);
 
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-        return $this->buscar($request);
-    }
-
-    public function showTabla($paginate)
-    {
-        return view('cajas.mercurio13._table', compact('paginate'))->render();
-    }
-
-    public function buscar(Request $request)
-    {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
-
-        $paginate = Paginate::execute(
-            Mercurio13::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
-
-        $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
-
-        return response()->json($response);
-    }
-
-    public function editar(Request $request)
-    {
-        try {
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $mercurio13 = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->first();
-            if (! $mercurio13) {
-                $mercurio13 = new Mercurio13;
-            }
-            $response = [
-                'success' => true,
-                'data' => $mercurio13->toArray(),
-                'msj' => 'El registro se completo con éxito.'
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request)
-            ];
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
-        return response()->json($response);
+
+        return redirect()
+            ->route('cajas.mercurio13.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function update(Request $request, string $tipopc, int $coddoc): RedirectResponse
     {
-        DB::beginTransaction();
-        try {
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $obliga = $request->input('obliga');
-            $auto_generado = $request->input('auto_generado');
-            $nota = $request->input('nota');
+        Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->firstOrFail();
 
-            $mercurio13 = Mercurio13::firstOrNew(['tipopc' => $tipopc, 'coddoc' => $coddoc]);
-            $mercurio13->obliga = $obliga;
-            $mercurio13->auto_generado = $auto_generado;
-            $mercurio13->nota = $nota;
-            $mercurio13->save();
-            DB::commit();
+        $data = $this->validated($request, $tipopc, $coddoc);
+        $data['tipopc'] = $tipopc;
+        $data['coddoc'] = $coddoc;
 
-            $salida = [
-                'success' => true,
-                'msj' => 'El registro se completo con éxito.'
-            ];
-            return response()->json($salida);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return $this->handleException($e, $request);
+        $result = $this->service->guardar($data, true);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio13.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function borrar(Request $request)
+    public function destroy(string $tipopc, int $coddoc): RedirectResponse
     {
-        DB::beginTransaction();
-        try {
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $deleted = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->delete();
-            if ($deleted == 0) {
-                throw new DebugException('Error no se puede borrar el registro, no está disponible.');
-            }
-            DB::commit();
-            $response = [
-                'success' => true,
-                'msj' => 'El registro se borro con éxito.'
-            ];
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request)
-            ];
+        $result = $this->service->borrar($tipopc, $coddoc);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
-        return response()->json($response);
+
+        return redirect()->back()->with('success', $result['msj']);
     }
 
-    public function infor(Request $request)
+    /**
+     * @return array{tipopc: string, coddoc: int, obliga: string, auto_generado: int, nota: ?string}
+     */
+    private function validated(Request $request, ?string $currentTipopc = null, ?int $currentCoddoc = null): array
     {
-        try {
-            $this->setResponse('ajax');
-            $tipopc = $request->input('tipopc');
-            $coddoc = $request->input('coddoc');
-            $mercurio13 = Mercurio13::where('tipopc', $tipopc)->where('coddoc', $coddoc)->first();
-            if (! $mercurio13) {
-                $mercurio13 = new Mercurio13;
-            }
-            $response = [
-                'success' => true,
-                'data' => $mercurio13->toArray()
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request)
-            ];
+        $isUpdate = $currentTipopc !== null && $currentCoddoc !== null;
+
+        $rules = [
+            'obliga' => 'required|in:S,N',
+            'auto_generado' => 'required|in:0,1',
+            'nota' => 'nullable|string|max:255',
+        ];
+
+        if ($isUpdate) {
+            $data = $request->validate($rules);
+        } else {
+            $data = $request->validate([
+                'tipopc' => [
+                    'required',
+                    'string',
+                    'size:2',
+                    'exists:mercurio09,tipopc',
+                ],
+                'coddoc' => [
+                    'required',
+                    'integer',
+                    'exists:mercurio12,coddoc',
+                    Rule::unique('mercurio13', 'coddoc')->where(fn ($query) => $query->where('tipopc', $request->input('tipopc'))),
+                ],
+                ...$rules,
+            ]);
         }
-        return response()->json($response);
+
+        return [
+            'tipopc' => $isUpdate ? $currentTipopc : (string) $data['tipopc'],
+            'coddoc' => $isUpdate ? $currentCoddoc : (int) $data['coddoc'],
+            'obliga' => (string) $data['obliga'],
+            'auto_generado' => (int) $data['auto_generado'],
+            'nota' => $data['nota'] ?? null,
+        ];
     }
 }

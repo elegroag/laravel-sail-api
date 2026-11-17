@@ -26,6 +26,16 @@ const CAJAS_INERTIA_PREFIXES = [
     '/cajas/menu-permission',
     '/cajas/formulario-dinamico',
     '/cajas/componente-dinamico',
+    '/cajas/mercurio01',
+    '/cajas/mercurio02',
+    '/cajas/mercurio06',
+    '/cajas/mercurio12',
+    '/cajas/mercurio13',
+    '/cajas/mercurio14',
+    '/cajas/gener42',
+    '/cajas/banners',
+    '/cajas/mercurio11',
+    '/cajas/mercurio09',
 ] as const;
 
 function normalizePath(url: string): string {

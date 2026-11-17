@@ -3,35 +3,60 @@
 namespace App\Services\Cajas;
 
 use App\Models\Mercurio01;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class Mercurio01Service
 {
-    public function buscar(Request $request, int $cantidad_pagina)
+    /**
+     * @return LengthAwarePaginator<int, Mercurio01>
+     */
+    public function paginate(Request $request): LengthAwarePaginator
     {
-        $query = $this->buildQuery($request);
+        $perPage = max(1, min(100, (int) $request->query('per_page', 10)));
+        $query = Mercurio01::query();
 
-        return Mercurio01::whereRaw($query)->paginate($cantidad_pagina);
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
+            $query->where(function ($sub) use ($like) {
+                $sub->where('codapl', 'like', $like)
+                    ->orWhere('email', 'like', $like)
+                    ->orWhere('path', 'like', $like)
+                    ->orWhere('ftpserver', 'like', $like);
+            });
+        }
+
+        return $query
+            ->orderBy('codapl')
+            ->paginate($perPage)
+            ->appends($request->only(['q', 'per_page']));
     }
 
-    public function guardar(Request $request)
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{flag: bool, msg: string, msj: string}
+     */
+    public function guardar(array $data, ?string $originalCodapl = null): array
     {
         try {
             DB::beginTransaction();
 
-            $codapl = $request->input('codapl');
-            $mercurio01 = Mercurio01::find($codapl) ?? new Mercurio01;
-            $mercurio01->fill($request->only([
-                'codapl',
-                'email',
-                'clave',
-                'path',
-                'ftpserver',
-                'pathserver',
-                'userserver',
-                'passserver',
-            ]));
+            $key = $originalCodapl ?: ($data['codapl'] ?? null);
+            $mercurio01 = $key ? Mercurio01::find($key) : null;
+            $mercurio01 ??= new Mercurio01;
+
+            $mercurio01->fill([
+                'codapl' => $data['codapl'] ?? $mercurio01->codapl,
+                'email' => $data['email'] ?? null,
+                'clave' => $data['clave'] ?? null,
+                'path' => $data['path'] ?? null,
+                'ftpserver' => $data['ftpserver'] ?? null,
+                'pathserver' => $data['pathserver'] ?? null,
+                'userserver' => $data['userserver'] ?? null,
+                'passserver' => $data['passserver'] ?? null,
+            ]);
             $mercurio01->save();
 
             DB::commit();
@@ -52,29 +77,19 @@ class Mercurio01Service
         }
     }
 
-    public function editar()
+    /**
+     * @return array{success: bool, data: array<string, mixed>|null}
+     */
+    public function editar(?string $codapl = null): array
     {
-        $mercurio01 = Mercurio01::first();
-        if (!$mercurio01) {
+        $mercurio01 = $codapl
+            ? Mercurio01::find($codapl)
+            : Mercurio01::first();
+
+        if (! $mercurio01) {
             return ['success' => false, 'data' => null];
         }
 
         return ['success' => true, 'data' => $mercurio01->toArray()];
-    }
-
-    private function buildQuery(Request $request): string
-    {
-        $filtro = $request->input('filtro');
-        $campo = $request->input('campo');
-        $query = '1=1';
-
-        if ($filtro && $campo) {
-            $query = "{$campo} LIKE '%{$filtro}%'";
-            session()->put('filter_mercurio01', $query);
-        } elseif (session()->has('filter_mercurio01')) {
-            $query = session('filter_mercurio01');
-        }
-
-        return $query;
     }
 }

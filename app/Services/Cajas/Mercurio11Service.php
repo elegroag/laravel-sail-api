@@ -3,104 +3,131 @@
 namespace App\Services\Cajas;
 
 use App\Models\Mercurio11;
-use App\Services\Utils\Paginate;
-use App\Services\Utils\QueryService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class Mercurio11Service
 {
-    protected $queryService;
-
-    public function __construct(QueryService $queryService)
+    /**
+     * @return LengthAwarePaginator<int, Mercurio11>
+     */
+    public function paginate(Request $request): LengthAwarePaginator
     {
-        $this->queryService = $queryService;
-    }
+        $perPage = max(1, min(100, (int) $request->query('per_page', 10)));
+        $query = Mercurio11::query();
 
-    public function buscar(Request $request, $cantidad_pagina = 10)
-    {
-        $query = $this->queryService->converQuery($request);
-        $pagina = $request->input('pagina', 1);
-
-        $paginate = Paginate::execute(
-            Mercurio11::whereRaw($query)->get(),
-            $pagina,
-            $cantidad_pagina
-        );
-
-        $response = [
-            'consulta' => view('cajas.mercurio11._table', compact('paginate'))->render(),
-            'query' => $query,
-            'paginate' => view('templates/paginate_traditional', compact('paginate'))->render(),
-        ];
-
-        return $response;
-    }
-
-    public function editar($codest)
-    {
-        $mercurio11 = Mercurio11::firstOrNew(['codest' => $codest]);
-        return [
-            'success' => true,
-            'data' => $mercurio11->toArray(),
-        ];
-    }
-
-    public function borrar($codest)
-    {
-        DB::beginTransaction();
-        try {
-            Mercurio11::where('codest', $codest)->delete();
-            DB::commit();
-            return [
-                'success' => true,
-                'msj' => 'Proceso completado con éxito.',
-            ];
-        } catch (\Exception $e) {
-            DB::rollback();
-            return [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
-        }
-    }
-
-    public function guardar(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'codest' => 'required|string|max:255',
-            'detalle' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return [
-                'success' => false,
-                'msj' => $validator->errors()->first(),
-            ];
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
+            $query->where(function ($sub) use ($like) {
+                $sub->where('codest', 'like', $like)
+                    ->orWhere('detalle', 'like', $like);
+            });
         }
 
-        DB::beginTransaction();
-        try {
-            $codest = $request->input('codest');
-            $detalle = $request->input('detalle');
+        return $query
+            ->orderBy('codest')
+            ->paginate($perPage)
+            ->appends($request->only(['q', 'per_page']));
+    }
 
-            Mercurio11::updateOrCreate(
-                ['codest' => $codest],
-                ['detalle' => $detalle]
-            );
+    /**
+     * @param  array{codest: string, detalle: string}  $data
+     * @return array{flag: bool, msg: string, msj: string}
+     */
+    public function guardar(array $data, ?string $originalCodest = null): array
+    {
+        try {
+            DB::beginTransaction();
+
+            $isUpdate = $originalCodest !== null;
+
+            if ($isUpdate) {
+                $row = Mercurio11::find($originalCodest);
+                if (! $row) {
+                    DB::rollBack();
+
+                    return [
+                        'flag' => false,
+                        'msg' => 'Registro no encontrado.',
+                        'msj' => 'Registro no encontrado.',
+                    ];
+                }
+
+                $row->fill([
+                    'detalle' => $data['detalle'],
+                ]);
+                $row->save();
+            } else {
+                if (Mercurio11::where('codest', $data['codest'])->exists()) {
+                    DB::rollBack();
+
+                    return [
+                        'flag' => false,
+                        'msg' => 'El código ya existe.',
+                        'msj' => 'El código ya existe.',
+                    ];
+                }
+
+                Mercurio11::create([
+                    'codest' => $data['codest'],
+                    'detalle' => $data['detalle'],
+                ]);
+            }
 
             DB::commit();
 
             return [
-                'success' => true,
-                'msj' => 'Proceso completado con éxito.',
+                'flag' => true,
+                'msg' => 'Operación realizada con éxito',
+                'msj' => 'Operación realizada con éxito',
             ];
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
+
             return [
-                'success' => false,
-                'msj' => $e->getMessage(),
+                'flag' => false,
+                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+                'msj' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * @return array{flag: bool, msg: string, msj: string}
+     */
+    public function borrar(string $codest): array
+    {
+        try {
+            DB::beginTransaction();
+
+            $row = Mercurio11::find($codest);
+            if (! $row) {
+                DB::rollBack();
+
+                return [
+                    'flag' => false,
+                    'msg' => 'El registro a borrar no existe.',
+                    'msj' => 'El registro a borrar no existe.',
+                ];
+            }
+
+            $row->delete();
+            DB::commit();
+
+            return [
+                'flag' => true,
+                'msg' => 'Borrado con éxito',
+                'msj' => 'Borrado con éxito',
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return [
+                'flag' => false,
+                'msg' => 'No se puede borrar el Registro: '.$e->getMessage(),
+                'msj' => 'No se puede borrar el Registro: '.$e->getMessage(),
             ];
         }
     }

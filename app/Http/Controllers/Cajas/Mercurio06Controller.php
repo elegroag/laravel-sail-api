@@ -2,316 +2,181 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio06;
-use App\Models\Mercurio28;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
+use App\Services\Cajas\Mercurio06Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio06Controller extends ApplicationController
+class Mercurio06Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio06Service $service
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected $user;
-
-    protected $tipo;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
-    }
+        $paginator = $this->service->paginate($request);
+        $camposTipo = trim((string) $request->query('campos_tipo', ''));
 
-    public function showTabla($paginate)
-    {
-        return view('cajas.mercurio06._table', compact('paginate'))->render();
-    }
-
-    public function aplicarFiltro(Request $request)
-    {
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-
-        return $this->buscar($request);
-    }
-
-    public function index()
-    {
-        $campo_field = [
-            'tipo' => 'Codigo',
-            'detalle' => 'Detalle',
+        $items = [
+            'data' => collect($paginator->items())->map(fn (Mercurio06 $row) => [
+                'tipo' => $row->tipo,
+                'detalle' => $row->detalle,
+            ])->values()->all(),
+            'meta' => [
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                    'total' => $paginator->total(),
+                ],
+            ],
         ];
 
-        return view('cajas.mercurio06.index', [
-            'title' => 'Gestión de Tipos Acceso',
-            'campo_filtro' => $campo_field,
+        return Inertia::render('Cajas/Mercurio06/Index', [
+            'items' => $items,
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+                'campos_tipo' => $camposTipo !== '' ? $camposTipo : null,
+            ],
+            'campos' => $camposTipo !== '' ? $this->service->listarCampos($camposTipo) : [],
+            'camposTipo' => $camposTipo !== '' ? $camposTipo : null,
         ]);
     }
 
-    public function buscar(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
+        $data = $this->validatedTipo($request);
+        $result = $this->service->guardarTipo($data);
 
-        $paginate = Paginate::execute(
-            Mercurio06::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
-
-        $html = $this->showTabla($paginate);
-
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
-
-        return $this->renderObject($response, false);
-    }
-
-    public function editar(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipo = $request->input('tipo');
-            $mercurio06 = Mercurio06::where('tipo', $tipo)->first();
-            if ($mercurio06 == false) {
-                $mercurio06 = new Mercurio06;
-            }
-
-            return $this->renderObject($mercurio06->toArray(), false);
-        } catch (DebugException $e) {
-            parent::setLogger($e->getMessage());
-            $response = parent::errorFunc('Error al obtener el registro');
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio06.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function borrar(Request $request)
+    public function update(Request $request, string $tipo): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $tipo = $request->input('tipo');
+        $existing = Mercurio06::findOrFail($tipo);
+        $data = $this->validatedTipo($request, $existing->tipo);
+        $result = $this->service->guardarTipo($data, $existing->tipo);
 
-            DB::beginTransaction();
-            Mercurio06::where('tipo', $tipo)->delete();
-            DB::commit();
-
-            $response = parent::successFunc('Borrado Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede Borrar el Registro');
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio06.index', $request->only(['q', 'per_page', 'campos_tipo']))
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function destroy(string $tipo): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $tipo = $request->input('tipo');
-            $detalle = $request->input('detalle');
+        $result = $this->service->borrarTipo($tipo);
 
-            DB::beginTransaction();
-
-            // Buscar si ya existe un registro con el mismo tipo
-            $mercurio06 = Mercurio06::where('tipo', $tipo)->first();
-
-            if (! $mercurio06) {
-                $mercurio06 = new Mercurio06;
-                $mercurio06->tipo = $tipo;
-            }
-
-            $mercurio06->detalle = $detalle;
-
-            if (! $mercurio06->save()) {
-                parent::setLogger($mercurio06->getMessages());
-                DB::rollBack();
-                throw new DebugException('Error al guardar el registro');
-            }
-
-            DB::commit();
-            $response = parent::successFunc('Operación exitosa');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se pudo guardar el registro: ' . $e->getMessage());
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
+
+        return redirect()->back()->with('success', $result['msj']);
     }
 
-    public function validePk(Request $request)
+    public function storeCampo(Request $request, string $tipo): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $tipo = $request->input('tipo');
-            $response = parent::successFunc('');
-            $l = Mercurio06::where('tipo', $tipo)->count();
-            if ($l > 0) {
-                $response = parent::errorFunc('El Registro ya se encuentra Digitado');
-            }
+        $data = $this->validatedCampo($request, $tipo);
+        Mercurio06::findOrFail($tipo);
+        $result = $this->service->guardarCampo($data);
 
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo validar la informacion');
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['campo_form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio06.index', array_merge(
+                $request->only(['q', 'per_page']),
+                ['campos_tipo' => $tipo]
+            ))
+            ->with('success', $result['msj']);
     }
 
-    public function validePkCampo(Request $request)
+    public function updateCampo(Request $request, string $tipo, string $campo): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $tipo = $request->input('tipo');
-            $campo = $request->input('campo_28');
-            $response = parent::successFunc('');
-            $l = Mercurio28::where('tipo', $tipo)->where('campo', $campo)->count();
-            if ($l > 0) {
-                $response = parent::errorFunc('El Registro ya se encuentra Digitado');
-            }
+        $data = $this->validatedCampo($request, $tipo, $campo);
+        Mercurio06::findOrFail($tipo);
+        $result = $this->service->guardarCampo($data, $campo);
 
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo validar la informacion');
-
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['campo_form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio06.index', array_merge(
+                $request->only(['q', 'per_page']),
+                ['campos_tipo' => $tipo]
+            ))
+            ->with('success', $result['msj']);
     }
 
-    public function campoView(Request $request)
+    public function destroyCampo(string $tipo, string $campo): RedirectResponse
     {
-        try {
-            $tipo = $request->input('tipo');
-            $response = '';
-            $mercurio28_collection = Mercurio28::where('tipo', $tipo)->get();
-            $response = [
-                'collection' => $mercurio28_collection,
-                'success' => true,
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo obtener la informacion'
-            ];
+        $result = $this->service->borrarCampo($tipo, $campo);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['campo_form' => $result['msj']]);
         }
-        return $this->renderObject($response, false);
+
+        return redirect()->back()->with('success', $result['msj']);
     }
 
-    public function guardarCampo(Request $request)
+    /**
+     * @return array{tipo: string, detalle: string}
+     */
+    private function validatedTipo(Request $request, ?string $currentTipo = null): array
     {
-        try {
-            DB::beginTransaction();
-            $tipo = $request->input('tipo');
-            $campo = $request->input('campo');
-            $detalle = $request->input('detalle');
-            $orden = $request->input('orden');
-
-            $mercurio28 = Mercurio28::where('tipo', $tipo)->where('campo', $campo)->first();
-
-            if (! $mercurio28) {
-                $mercurio28 = new Mercurio28;
-                $mercurio28->setTipo($tipo);
-                $mercurio28->setCampo($campo);
-            }
-
-            $mercurio28->setDetalle($detalle);
-            $mercurio28->setOrden($orden);
-
-            if (! $mercurio28->save()) {
-                DB::rollBack();
-                throw new DebugException('Error al guardar el campo');
-            }
-
-            DB::commit();
-
-            $response = [
-                'success' => true,
-                'msj' => 'Movimiento Realizado Con Exito'
-            ];
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento: ' . $e->getMessage()
-            ];
-        }
-        return $this->renderObject($response, false);
+        return $request->validate([
+            'tipo' => [
+                'required',
+                'string',
+                'size:2',
+                Rule::unique('mercurio06', 'tipo')->ignore($currentTipo, 'tipo'),
+            ],
+            'detalle' => 'required|string|max:40',
+        ]);
     }
 
-    public function editarCampo(Request $request)
+    /**
+     * @return array{tipo: string, campo: string, detalle: string, orden: int}
+     */
+    private function validatedCampo(Request $request, string $tipo, ?string $currentCampo = null): array
     {
-        try {
-            $tipo = $request->input('tipo');
-            $campo = $request->input('campo');
+        $data = $request->validate([
+            'campo' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('mercurio28', 'campo')
+                    ->where(fn ($query) => $query->where('tipo', $tipo))
+                    ->ignore($currentCampo, 'campo'),
+            ],
+            'detalle' => 'required|string|max:45',
+            'orden' => 'required|integer|min:0',
+        ]);
 
-            $mercurio28 = Mercurio28::where('tipo', $tipo)->where('campo', $campo)->first();
-            if ($mercurio28 == false) {
-                $mercurio28 = new Mercurio28;
-            }
-            $response = [
-                'success' => true,
-                'data' => $mercurio28->toArray()
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage()
-            ];
-        }
-        return $this->renderObject($response, false);
-    }
-
-    public function borrarCampo(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $tipo = $request->input('tipo');
-            $campo = $request->input('campo');
-
-            DB::beginTransaction();
-            Mercurio28::where('tipo', $tipo)->where('campo', $campo)->delete();
-            DB::commit();
-            $response = parent::successFunc('Movimiento Realizado Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se pudo realizar el movimiento');
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function reporte($format = 'P')
-    {
-        $this->setResponse('ajax');
-        $_fields = [];
-        $_fields['tipo'] = ['header' => 'Codigo', 'size' => '15', 'align' => 'C'];
-        $_fields['detalle'] = ['header' => 'Detalle', 'size' => '31', 'align' => 'C'];
-
-        $consultasOldServices = new GeneralService;
-        $file = $consultasOldServices->createReport('mercurio06', $_fields, $this->query, 'Tipos Acceso', $format);
-
-        return $this->renderObject($file, false);
+        return [
+            'tipo' => $tipo,
+            'campo' => $data['campo'],
+            'detalle' => $data['detalle'],
+            'orden' => (int) $data['orden'],
+        ];
     }
 }

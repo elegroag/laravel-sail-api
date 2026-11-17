@@ -48,7 +48,6 @@ const appModules = {
         'DashBoard',
         'Basicas',
         'DatosCaja',
-        'Firmas',
         'TipoAcceso',
         'Documentos',
         'Permisos',

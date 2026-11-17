@@ -1,19 +1,13 @@
 <?php
 
-// Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio14Controller;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio14')->group(function () {
-
-        Route::get('/index', [Mercurio14Controller::class, 'index']);
-        Route::post('/guardar', [Mercurio14Controller::class, 'guardar']);
-        Route::post('/borrar', [Mercurio14Controller::class, 'borrar']);
-        Route::post('/aplicar_filtro', [Mercurio14Controller::class, 'aplicarFiltro']);
-        Route::post('/valide-pk', [Mercurio14Controller::class, 'validePk']);
-        Route::post('/buscar', [Mercurio14Controller::class, 'buscar']);
-        Route::post('/editar/{tipo?}', [Mercurio14Controller::class, 'editar']);
-        Route::post('/change_cantidad_pagina', [Mercurio14Controller::class, 'changeCantidadPagina']);
+        Route::get('/index', [Mercurio14Controller::class, 'index'])->name('cajas.mercurio14.index');
+        Route::post('/', [Mercurio14Controller::class, 'store'])->name('cajas.mercurio14.store');
+        Route::put('/{tipopc}/{tipsoc}/{coddoc}', [Mercurio14Controller::class, 'update'])->name('cajas.mercurio14.update');
+        Route::delete('/{tipopc}/{tipsoc}/{coddoc}', [Mercurio14Controller::class, 'destroy'])->name('cajas.mercurio14.destroy');
     });
 });

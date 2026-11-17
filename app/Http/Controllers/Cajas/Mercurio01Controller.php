@@ -2,117 +2,113 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio01;
 use App\Services\Cajas\Mercurio01Service;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio01Controller extends ApplicationController
+class Mercurio01Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio01Service $service
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected $user;
-
-    protected $tipfun;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function index()
-    {
-        return view('cajas.mercurio01.index', [
-            'title' => 'Configuración basica',
-            'campo_filtro' => [
-                'codapl' => 'Aplicativo',
+        $items = [
+            'data' => collect($paginator->items())->map(fn (Mercurio01 $row) => [
+                'codapl' => $row->codapl,
+                'email' => $row->email,
+                'clave' => $row->clave,
+                'path' => $row->path,
+                'ftpserver' => $row->ftpserver,
+                'pathserver' => $row->pathserver,
+                'userserver' => $row->userserver,
+                'passserver' => $row->passserver,
+            ])->values()->all(),
+            'meta' => [
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                    'total' => $paginator->total(),
+                ],
+            ],
+        ];
+
+        return Inertia::render('Cajas/Mercurio01/Index', [
+            'items' => $items,
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
             ],
         ]);
     }
 
-    public function showTabla($paginate)
+    public function store(Request $request): RedirectResponse
     {
-        return view('cajas.mercurio01._tabla', [
-            'paginate' => $paginate,
-        ])->render();
-    }
+        $data = $this->validated($request);
 
-    public function aplicarFiltro(Request $request)
-    {
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
+        $result = $this->service->guardar($data);
 
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-
-        return $this->buscar($request);
-    }
-
-    public function buscar(Request $request)
-    {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
-        $paginate = Paginate::execute(
-            Mercurio01::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
-        $html = $this->showTabla($paginate);
-
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-        $response = [
-            'consulta' => $html,
-            'paginate' => $html_paginate,
-        ];
-
-        return $this->renderObject($response, false);
-    }
-
-    public function editar(Request $request)
-    {
-        $mercurio01 = Mercurio01::first();
-        if ($mercurio01 == false) {
-            $mercurio01 = new Mercurio01;
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']])
+                ->withInput();
         }
 
-        return $this->renderObject([
-            'success' => true,
-            'data' => $mercurio01->toArray(),
-        ], false);
+        return redirect()
+            ->route('cajas.mercurio01.index')
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function update(Request $request, string $codapl): RedirectResponse
     {
-        $this->setResponse('ajax');
-        $result = (new Mercurio01Service)->guardar($request);
+        $existing = Mercurio01::findOrFail($codapl);
+        $data = $this->validated($request, $existing->codapl);
 
-        return $this->renderObject([
-            'success' => $result['flag'],
-            'flag' => $result['flag'],
-            'msj' => $result['msj'],
-            'msg' => $result['msg'],
-        ], false);
+        $result = $this->service->guardar($data, $existing->codapl);
+
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']])
+                ->withInput();
+        }
+
+        return redirect()
+            ->route('cajas.mercurio01.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function borrarFiltro(Request $request)
+    /**
+     * @return array<string, mixed>
+     */
+    private function validated(Request $request, ?string $currentCodapl = null): array
     {
-        set_flashdata('filter_mercurio01', false, true);
-        set_flashdata('filter_params', false, true);
-
-        return $this->renderObject([
-            'success' => true,
-            'query' => get_flashdata_item('filter_mercurio01'),
-            'filter' => get_flashdata_item('filter_params'),
+        return $request->validate([
+            'codapl' => [
+                'required',
+                'string',
+                'size:2',
+                Rule::unique('mercurio01', 'codapl')->ignore($currentCodapl, 'codapl'),
+            ],
+            'email' => 'nullable|email|max:45',
+            'clave' => 'nullable|string|max:20',
+            'path' => 'required|string|max:45',
+            'ftpserver' => 'nullable|string|max:45',
+            'pathserver' => 'nullable|string|max:45',
+            'userserver' => 'nullable|string|max:45',
+            'passserver' => 'nullable|string|max:45',
         ]);
     }
 }

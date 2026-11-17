@@ -5,16 +5,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio11')->group(function () {
-        Route::get('/index', [Mercurio11Controller::class, 'index']);
-        Route::post('/buscar', [Mercurio11Controller::class, 'buscar']);
-        Route::post('/editar', [Mercurio11Controller::class, 'editar']);
-        Route::post('/borrar', [Mercurio11Controller::class, 'borrar']);
-        Route::post('/guardar', [Mercurio11Controller::class, 'guardar']);
-        Route::post('/valide-pk', [Mercurio11Controller::class, 'validePk']);
-        Route::get('/reporte/{format?}', [Mercurio11Controller::class, 'reporte']);
-
-        Route::post('/aplicar_filtro', [Mercurio11Controller::class, 'aplicarFiltro']);
-        Route::post('/change_cantidad_pagina', [Mercurio11Controller::class, 'changeCantidadPagina']);
-        Route::post('/borrar_filtro', [Mercurio11Controller::class, 'borrarFiltro']);
+        Route::get('/index', [Mercurio11Controller::class, 'index'])->name('cajas.mercurio11.index');
+        Route::post('/', [Mercurio11Controller::class, 'store'])->name('cajas.mercurio11.store');
+        Route::put('/{codest}', [Mercurio11Controller::class, 'update'])->name('cajas.mercurio11.update')->where('codest', '[A-Za-z0-9]{2}');
+        Route::delete('/{codest}', [Mercurio11Controller::class, 'destroy'])->name('cajas.mercurio11.destroy')->where('codest', '[A-Za-z0-9]{2}');
     });
 });

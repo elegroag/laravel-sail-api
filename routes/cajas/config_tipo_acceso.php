@@ -1,26 +1,17 @@
 <?php
 
-// Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\Mercurio06Controller;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/mercurio06')->group(function () {
-        Route::get('/index', [Mercurio06Controller::class, 'index']);
-        Route::post('/buscar', [Mercurio06Controller::class, 'buscar']);
-        Route::post('/editar/{tipo?}', [Mercurio06Controller::class, 'editar']);
+        Route::get('/index', [Mercurio06Controller::class, 'index'])->name('cajas.mercurio06.index');
+        Route::post('/', [Mercurio06Controller::class, 'store'])->name('cajas.mercurio06.store');
+        Route::put('/{tipo}', [Mercurio06Controller::class, 'update'])->name('cajas.mercurio06.update');
+        Route::delete('/{tipo}', [Mercurio06Controller::class, 'destroy'])->name('cajas.mercurio06.destroy');
 
-        Route::post('/borrar', [Mercurio06Controller::class, 'borrar']);
-        Route::post('/guardar', [Mercurio06Controller::class, 'guardar']);
-        Route::post('/valide-pk', [Mercurio06Controller::class, 'validePk']);
-        Route::post('/valide-pk-campo', [Mercurio06Controller::class, 'validePkCampo']);
-        Route::post('/campo_view', [Mercurio06Controller::class, 'campoView']);
-        Route::post('/guardar_campo', [Mercurio06Controller::class, 'guardarCampo']);
-        Route::post('/editar_campo', [Mercurio06Controller::class, 'editarCampo']);
-        Route::post('/borrar_campo', [Mercurio06Controller::class, 'borrarCampo']);
-        Route::post('/reporte/{format?}', [Mercurio06Controller::class, 'reporte']);
-
-        Route::post('/aplicar_filtro', [Mercurio06Controller::class, 'aplicarFiltro']);
-        Route::post('/change_cantidad_pagina', [Mercurio06Controller::class, 'changeCantidadPagina']);
+        Route::post('/{tipo}/campos', [Mercurio06Controller::class, 'storeCampo'])->name('cajas.mercurio06.campos.store');
+        Route::put('/{tipo}/campos/{campo}', [Mercurio06Controller::class, 'updateCampo'])->name('cajas.mercurio06.campos.update');
+        Route::delete('/{tipo}/campos/{campo}', [Mercurio06Controller::class, 'destroyCampo'])->name('cajas.mercurio06.campos.destroy');
     });
 });

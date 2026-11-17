@@ -4,6 +4,9 @@ import { Plus, Trash2 } from 'lucide-react';
 import { CajasMenuIcon } from '@/pages/Cajas/components/CajasMenuIcon';
 import { ParentItemPicker } from '@/pages/Cajas/Menu/components/ParentItemPicker';
 import {
+    cajasCardBodyClass,
+    cajasCardClass,
+    cajasCardHeaderClass,
     cajasCheckboxClass,
     cajasFormBtnPrimary,
     cajasFormBtnSecondary,
@@ -12,6 +15,7 @@ import {
     cajasFormSelectClass,
     cajasFormTextareaClass,
     cajasInputErrorClass,
+    cajasPageClass,
 } from '@/pages/Cajas/styles/cajas-classes';
 
 export type TipoOption = {
@@ -554,9 +558,9 @@ export function MenuFormShell({
     children,
 }: MenuFormShellProps) {
     return (
-        <div className="mx-auto w-full max-w-4xl p-2 md:p-4">
-            <div className="cajas-card">
-                <div className="cajas-card-header flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className={cajasPageClass}>
+            <section className={`${cajasCardClass} mx-auto max-w-4xl`}>
+                <div className={`${cajasCardHeaderClass} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
                     <div>
                         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
                         <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
@@ -566,7 +570,7 @@ export function MenuFormShell({
                     </Link>
                 </div>
 
-                <form onSubmit={onSubmit} className="cajas-card-body">
+                <form onSubmit={onSubmit} className={cajasCardBodyClass}>
                     {children}
 
                     <div className="mt-8 flex flex-col-reverse items-stretch justify-end gap-3 border-t border-border pt-5 sm:flex-row sm:items-center">
@@ -582,7 +586,7 @@ export function MenuFormShell({
                         </button>
                     </div>
                 </form>
-            </div>
+            </section>
         </div>
     );
 }

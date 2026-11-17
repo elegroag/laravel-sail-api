@@ -2,170 +2,137 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio02;
-use App\Services\Api\ApiSubsidio;
-use App\Services\Utils\Comman;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
+use App\Services\Cajas\Mercurio02Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio02Controller extends ApplicationController
+class Mercurio02Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio02Service $service
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected $user;
-
-    protected $tipfun;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function index()
-    {
-        if (Mercurio02::count() == 0) {
-            $this->setParamToView('buttons', ['N']);
-        }
+        $items = [
+            'data' => collect($paginator->items())->map(fn (Mercurio02 $row) => [
+                'codcaj' => $row->codcaj,
+                'nit' => $row->nit,
+                'razsoc' => $row->razsoc,
+                'sigla' => $row->sigla,
+                'email' => $row->email,
+                'direccion' => $row->direccion,
+                'telefono' => $row->telefono,
+                'codciu' => $row->codciu,
+                'pagweb' => $row->pagweb,
+                'pagfac' => $row->pagfac,
+                'pagtwi' => $row->pagtwi,
+                'pagyou' => $row->pagyou,
+            ])->values()->all(),
+            'meta' => [
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                    'total' => $paginator->total(),
+                ],
+            ],
+        ];
 
-        $apiRest = new ApiSubsidio();
-        $apiRest->send(
-            [
-                'servicio' => 'ComfacaAfilia',
-                'metodo' => 'listar_ciudades_departamentos',
-            ]
-        );
+        $ciudades = collect($this->service->obtenerCiudades())
+            ->map(fn (string $label, string $value) => [
+                'value' => $value,
+                'label' => $label,
+            ])
+            ->values()
+            ->all();
 
-        $data = $apiRest->toArray();
-        $data = $data['ciudades'];
-        $_codciu = [];
-        if (is_array($data)) {
-            foreach ($data as $mcodciu) {
-                $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
-            }
-        }
-
-        return view('cajas.mercurio02.index', [
-            'title' => 'Datos Caja',
-            'ciudades' => $_codciu,
-            'campo_filtro' => [
-                'codcaj' => 'Caja',
-                'nit' => 'Nit',
-                'razsoc' => 'Razon Social',
-            ]
+        return Inertia::render('Cajas/Mercurio02/Index', [
+            'items' => $items,
+            'ciudades' => $ciudades,
+            'canCreate' => Mercurio02::count() === 0,
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function showTabla($paginate)
+    public function store(Request $request): RedirectResponse
     {
-        return view('cajas.mercurio02._tabla', [
-            'paginate' => $paginate,
-        ])->render();
-    }
+        $data = $this->validated($request);
 
-    public function aplicarFiltro(Request $request)
-    {
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-
-        return $this->buscar($request);
-    }
-
-    public function buscar(Request $request)
-    {
-        $pagina = $request->input('pagina', 1);
-        $query = Mercurio02::whereRaw("{$this->query}");
-        $paginate = Paginate::execute($query->get(), $pagina, $this->cantidad_pagina);
-
-        $html = $this->showTabla($paginate);
-
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-
-        $response = [
-            'consulta' => $html,
-            'paginate' => $html_paginate,
-        ];
-
-        return $this->renderObject($response, false);
-    }
-
-    public function editar(Request $request)
-    {
-        $mercurio02 = Mercurio02::first();
-        if ($mercurio02 == false) {
-            $mercurio02 = new Mercurio02;
+        if (Mercurio02::count() > 0) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => 'Ya existe un registro de datos de caja. Edite el existente.'])
+                ->withInput();
         }
 
-        return $this->renderObject($mercurio02->toArray(), false);
+        $result = $this->service->guardar($data);
+
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']])
+                ->withInput();
+        }
+
+        return redirect()
+            ->route('cajas.mercurio02.index')
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function update(Request $request, string $codcaj): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
+        $existing = Mercurio02::findOrFail($codcaj);
+        $data = $this->validated($request, $existing->codcaj);
+        $result = $this->service->guardar($data, $existing->codcaj);
 
-            $codcaj = $request->input('codcaj');
-            $nit = $request->input('nit');
-            $razsoc = $request->input('razsoc');
-            $sigla = $request->input('sigla');
-            $email = $request->input('email');
-            $direccion = $request->input('direccion');
-            $telefono = $request->input('telefono');
-            $codciu = $request->input('codciu');
-            $pagweb = $request->input('pagweb');
-            $pagfac = $request->input('pagfac');
-            $pagtwi = $request->input('pagtwi');
-            $pagyou = $request->input('pagyou');
-
-            $response = DB::beginTransaction();
-            $mercurio02 = Mercurio02::firstOrNew(['codcaj' => $codcaj]);
-
-            $mercurio02->setCodcaj($codcaj);
-            $mercurio02->setNit($nit);
-            $mercurio02->setRazsoc($razsoc);
-            $mercurio02->setSigla($sigla);
-            $mercurio02->setEmail($email);
-            $mercurio02->setDireccion($direccion);
-            $mercurio02->setTelefono($telefono);
-            $mercurio02->setCodciu($codciu);
-            $mercurio02->setPagweb($pagweb);
-            $mercurio02->setPagfac($pagfac);
-            $mercurio02->setPagtwi($pagtwi);
-            $mercurio02->setPagyou($pagyou);
-
-            if (! $mercurio02->save()) {
-                DB::rollBack();
-                throw new DebugException('Error al guardar el registro');
-            }
-
-            DB::commit();
-
-            return $this->renderObject([
-                'flag' => true,
-                'msg' => 'Operación realizada con éxito',
-            ], false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-
-            return $this->renderObject([
-                'flag' => false,
-                'msg' => 'No se pudo guardar/editar el registro: '.$e->getMessage(),
-            ], false);
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']])
+                ->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio02.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validated(Request $request, ?string $currentCodcaj = null): array
+    {
+        return $request->validate([
+            'codcaj' => [
+                'required',
+                'string',
+                'max:6',
+                Rule::unique('mercurio02', 'codcaj')->ignore($currentCodcaj, 'codcaj'),
+            ],
+            'nit' => 'required|string|max:13',
+            'razsoc' => 'required|string|max:60',
+            'sigla' => 'required|string|max:30',
+            'email' => 'required|email|max:90',
+            'direccion' => 'required|string|max:90',
+            'telefono' => 'required|string|max:20',
+            'codciu' => 'required|string|max:5',
+            'pagweb' => 'required|string|max:45',
+            'pagfac' => 'nullable|string|max:45',
+            'pagtwi' => 'nullable|string|max:45',
+            'pagyou' => 'nullable|string|max:45',
+        ]);
     }
 }

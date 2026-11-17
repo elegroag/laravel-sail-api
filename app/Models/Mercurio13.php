@@ -42,6 +42,7 @@ class Mercurio13 extends ModelBase
         'coddoc',
         'obliga',
         'auto_generado',
+        'nota',
     ];
 
     /**

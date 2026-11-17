@@ -5,10 +5,9 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserMenuContent } from '@/components/userMenuContent';
 import { useInitials } from '@/hooks/useInitials';
 import { usePage } from '@inertiajs/react';
-import { ChevronDown } from 'lucide-react';
 import { type BreadcrumbItem as BreadcrumbItemType, type SharedData } from '@/types';
 
-export function AppSidebarHeader({ breadcrumbs = [], title, description }: { breadcrumbs?: BreadcrumbItemType[]; title?: string; description?: string }) {
+export function AppSidebarHeader({ breadcrumbs = [], title }: { breadcrumbs?: BreadcrumbItemType[]; title?: string; description?: string }) {
     const page = usePage<SharedData>();
     const auth = page.props.auth;
     const getInitials = useInitials();
@@ -19,9 +18,8 @@ export function AppSidebarHeader({ breadcrumbs = [], title, description }: { bre
                 <div className="flex items-center gap-2">
                     <SidebarTrigger className="-ml-1" />
                     {title && (
-                        <div className="items-center gap-3 min-w-0">
-                            <h1 className="text-base font-semibold text-neutral-800 truncate">{title}</h1>
-                            {description && <p className="hidden md:block text-sm text-white truncate">{description}</p>}
+                        <div className="min-w-0">
+                            <h1 className="text-base font-semibold text-white truncate">{title}</h1>
                         </div>
                     )}
                     <Breadcrumbs breadcrumbs={breadcrumbs} />
@@ -35,9 +33,8 @@ export function AppSidebarHeader({ breadcrumbs = [], title, description }: { bre
             <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
                 {title && (
-                    <div className="items-center gap-3 min-w-0">
-                        <h1 className="text-base font-semibold text-neutral-800 truncate">{title}</h1>
-                        {description && <p className="hidden md:block text-sm text-white truncate">{description}</p>}
+                    <div className="min-w-0">
+                        <h1 className="text-base font-semibold text-white truncate">{title}</h1>
                     </div>
                 )}
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
@@ -47,7 +44,8 @@ export function AppSidebarHeader({ breadcrumbs = [], title, description }: { bre
                 <DropdownMenuTrigger asChild>
                     <button
                         type="button"
-                        className="flex items-center gap-2 h-10 px-2 rounded-full hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 transition-colors"
+                        aria-label="Menú de usuario"
+                        className="flex size-10 items-center justify-center rounded-full hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 transition-colors"
                     >
                         <Avatar className="h-8 w-8 overflow-hidden rounded-full">
                             <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
@@ -55,10 +53,6 @@ export function AppSidebarHeader({ breadcrumbs = [], title, description }: { bre
                                 {getInitials(auth.user.name)}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="hidden md:inline text-sm font-medium text-neutral-800 max-w-[140px] truncate">
-                            {auth.user.name}
-                        </span>
-                        <ChevronDown className="hidden md:inline h-4 w-4 text-neutral-600" />
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">

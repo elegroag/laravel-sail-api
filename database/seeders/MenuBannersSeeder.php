@@ -30,10 +30,9 @@ class MenuBannersSeeder extends Seeder
 
         $opciones = json_encode([
             'index' => true,
-            'galeria' => true,
-            'editar' => true,
-            'guardar' => true,
-            'borrar' => true,
+            'store' => true,
+            'update' => true,
+            'destroy' => true,
         ]);
 
         MenuPermission::updateOrCreate(
