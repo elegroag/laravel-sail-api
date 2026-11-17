@@ -2399,7 +2399,13 @@ label.is-invalid {
 
 @media (max-width: 575.98px) {
     .compras-catalog > .card {
-        max-height: calc(100dvh - 6rem);
+        max-height: none;
+    }
+
+    .compras-catalog .card-body,
+    .compras-contenido {
+        min-height: 0;
+        overflow: visible;
     }
 
     .compras-grid {
@@ -2407,7 +2413,10 @@ label.is-invalid {
     }
 
     .compras-grid-scroll {
-        max-height: clamp(12rem, calc(100dvh - 22rem), 55vh);
+        flex: none;
+        max-height: none;
+        min-height: 0;
+        overflow: visible;
     }
 
     .compra-card__row {

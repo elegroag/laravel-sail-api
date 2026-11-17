@@ -18,7 +18,7 @@
                         Elija el beneficiario, seleccione un servicio y complete el pago de forma segura.
                     </p>
                 </div>
-                <div class="d-flex gap-2 align-self-start align-self-md-center">
+                <div class="d-flex flex-wrap gap-2 align-self-start align-self-md-center">
                     <a href="{{ route('servicios.compras-pendientes') }}" class="btn btn-sm servicios-catalog__btn-compras position-relative">
                         <i class="fas fa-clock me-1"></i> Pendientes de pago
                         @if (($pendientesCount ?? 0) > 0)

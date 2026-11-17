@@ -164,6 +164,8 @@ class CertiTrabajador
         CONCAT_WS(" ", subsi22.prinom, subsi22.segnom, subsi22.priape, subsi22.segape) as nomben,
         subsi23.fecafi,
         subsi23.fecpre,
+        subsi23.fecest,
+        subsi23.estado,
         IF(subsi22.giro = "S", "SI", "NO") as cuota_monetaria,
         subsi22.codgir,
         subsi41.detalle as motivo_no_giro,
@@ -174,15 +176,15 @@ class CertiTrabajador
             ELSE "OTRO"
         END as parent_detalle,
         CASE
-            WHEN subsi22.estado = "A" THEN "ACTIVO"
-            WHEN subsi22.estado = "B" THEN "INACTIVO"
-            WHEN subsi22.estado = "M" THEN "MUERTO"
+            WHEN subsi23.estado = "A" THEN "ACTIVO"
+            WHEN subsi23.estado = "B" THEN "INACTIVO"
+            WHEN subsi23.estado = "M" THEN "MUERTO"
             ELSE "OTRO"
         END as estado_detalle
         FROM subsi23
         INNER JOIN subsi22 ON subsi22.codben = subsi23.codben
         LEFT JOIN subsi41 ON subsi41.codgir = subsi22.codgir
-        WHERE subsi23.cedtra = ? AND subsi22.estado = ?', [$this->cedtra, 'A']);
+        WHERE subsi23.cedtra = ? AND subsi23.estado = ?', [$this->cedtra, 'A']);
 
         $legacy->disconnect();
 

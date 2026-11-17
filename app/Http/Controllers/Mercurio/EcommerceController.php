@@ -1181,7 +1181,7 @@ class EcommerceController extends ApplicationController
                 ->orderByDesc('fecha_precompra')
                 ->orderByDesc('id')
                 ->get()
-                ->map(fn (PrecompraServicio $precompra) => $this->serializarPrecompraHistorial($precompra));
+                ->map(fn(PrecompraServicio $precompra) => $this->serializarPrecompraHistorial($precompra));
 
             return response()->json([
                 'success' => true,
@@ -1244,7 +1244,7 @@ class EcommerceController extends ApplicationController
     }
 
     /**
-     * Precompras locales pagadas/vencidas/devolución que no aparecen en Subsidio
+     * Precompras locales pagadas/vencidas/devolución/desestimadas que no aparecen en Subsidio
      * (por ref_payco), para mostrarlas en la pestaña Mis compras.
      *
      * @param  list<string>  $refsSubsidio
@@ -1263,6 +1263,8 @@ class EcommerceController extends ApplicationController
                 EstadoPrecompra::PAGADO,
                 EstadoPrecompra::VENCIDA,
                 EstadoPrecompra::DEVOLUCION,
+                EstadoPrecompra::DESESTIMADO,
+                EstadoPrecompra::RECHAZADO,
             ])
             ->with('devolucion')
             ->orderByDesc('fecha_pago')
@@ -1277,7 +1279,7 @@ class EcommerceController extends ApplicationController
         }
 
         return $query->get()
-            ->map(fn (PrecompraServicio $precompra) => $this->serializarPrecompraHistorial($precompra))
+            ->map(fn(PrecompraServicio $precompra) => $this->serializarPrecompraHistorial($precompra))
             ->values()
             ->all();
     }
@@ -1293,7 +1295,7 @@ class EcommerceController extends ApplicationController
             'numero' => $precompra->numero,
             'codben' => $precompra->codben,
             'items' => $precompra->items ?? array_map(
-                static fn (string $codben) => ['codben' => $codben],
+                static fn(string $codben) => ['codben' => $codben],
                 $precompra->codbenList()
             ),
             'nota' => $precompra->nota,
@@ -1379,7 +1381,7 @@ class EcommerceController extends ApplicationController
                 $query->where('estado', $estado);
             }
 
-            $items = $query->get()->map(fn (DevolucionPrecompra $dev) => $this->serializarDevolucionAfiliado($dev));
+            $items = $query->get()->map(fn(DevolucionPrecompra $dev) => $this->serializarDevolucionAfiliado($dev));
 
             return response()->json([
                 'success' => true,
@@ -1683,9 +1685,11 @@ class EcommerceController extends ApplicationController
             }
 
             // No degradar una precompra ya pagada, vencida o en devolución
-            if ($precompraActualizable->isPagado()
+            if (
+                $precompraActualizable->isPagado()
                 || $precompraActualizable->isVencida()
-                || $precompraActualizable->isDevolucion()) {
+                || $precompraActualizable->isDevolucion()
+            ) {
                 return;
             }
 

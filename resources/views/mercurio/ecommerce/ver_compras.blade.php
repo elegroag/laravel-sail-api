@@ -754,7 +754,7 @@
         $('#subtitulo_vista').text(
             esHistorial
                 ? 'Consulte el estado local de cada precompra (pendiente, pagada, vencida, devolución, abandonada, rechazada o desestimada).'
-                : 'Compras en Subsidio y compras pagadas locales sin registro (vencidas o pendientes de grabar).'
+                : 'Compras en Subsidio y compras locales sin registro (pagadas, vencidas, desestimadas o en devolución).'
         );
         $('#loader_texto').text(
             esHistorial ? 'Consultando historial de precompras...' : 'Consultando compras realizadas...'

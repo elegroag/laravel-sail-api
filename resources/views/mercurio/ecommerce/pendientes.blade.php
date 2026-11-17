@@ -14,7 +14,7 @@
                         Retome el pago de sus compras abandonadas o desestímelas si ya no desea continuar.
                     </p>
                 </div>
-                <div class="d-flex gap-2 align-self-start align-self-md-center">
+                <div class="d-flex flex-wrap gap-2 align-self-start align-self-md-center">
                     <a href="{{ route('servicios.index') }}" class="btn btn-sm servicios-catalog__btn-compras">
                         <i class="fas fa-store me-1"></i> Volver al catálogo
                     </a>
