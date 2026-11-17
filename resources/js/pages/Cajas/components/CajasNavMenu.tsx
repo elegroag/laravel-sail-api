@@ -14,14 +14,57 @@ import { cajasSidebarMenuButtonClass, cajasSidebarSubMenuButtonClass } from '@/p
 import { type CajasMenuItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
 type CajasNavMenuProps = {
     items?: CajasMenuItem[];
 };
 
+/** Prefijos de rutas Cajas que responden con Inertia. Ampliar al migrar módulos. */
+const CAJAS_INERTIA_PREFIXES = [
+    '/cajas/menu',
+    '/cajas/menu-permission',
+    '/cajas/formulario-dinamico',
+    '/cajas/componente-dinamico',
+] as const;
+
 function normalizePath(url: string): string {
     return url.split('?')[0].replace(/\/$/, '') || '/';
 }
+
+function isInertiaHref(href: string): boolean {
+    if (!href || href === '#') {
+        return false;
+    }
+
+    const path = normalizePath(href);
+
+    return CAJAS_INERTIA_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+type MenuNavLinkProps = ComponentPropsWithoutRef<'a'> & {
+    href: string;
+};
+
+/** Reenvía className/ref de SidebarMenuButton asChild (Radix Slot). */
+const MenuNavLink = forwardRef<HTMLAnchorElement, MenuNavLinkProps>(function MenuNavLink(
+    { href, children, ...props },
+    ref,
+) {
+    if (isInertiaHref(href)) {
+        return (
+            <Link ref={ref} href={href} prefetch {...props}>
+                {children}
+            </Link>
+        );
+    }
+
+    return (
+        <a ref={ref} href={href} {...props}>
+            {children}
+        </a>
+    );
+});
 
 function isHrefActive(href: string, currentPath: string): boolean {
     if (!href || href === '#') {
@@ -56,10 +99,10 @@ function CajasNavMenuItem({ item, currentPath }: { item: CajasMenuItem; currentP
                     tooltip={{ children: item.title }}
                     className={cajasSidebarMenuButtonClass}
                 >
-                    <Link href={item.href} prefetch>
+                    <MenuNavLink href={item.href}>
                         <CajasMenuIcon icon={item.icon} color={item.color} />
                         <span>{item.title}</span>
-                    </Link>
+                    </MenuNavLink>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         );
@@ -91,9 +134,9 @@ function CajasNavMenuItem({ item, currentPath }: { item: CajasMenuItem; currentP
                                         isActive={childActive}
                                         className={cajasSidebarSubMenuButtonClass}
                                     >
-                                        <Link href={child.href} prefetch>
+                                        <MenuNavLink href={child.href}>
                                             <span>{child.title}</span>
-                                        </Link>
+                                        </MenuNavLink>
                                     </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
                             );
