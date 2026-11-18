@@ -1,28 +1,8 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaBeneficiarioController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Routing\SolicitudRoutes;
 
-Route::middleware(['cajas.auth'])->group(function () {
-    Route::prefix('/cajas/aprobacionben')->group(function () {
-        Route::get('/', function () {
-            return redirect('cajas/aprobacionben/index');
-        });
-
-        Route::get('/index', [ApruebaBeneficiarioController::class, 'index']);
-        Route::post('/filtrar', [ApruebaBeneficiarioController::class, 'aplicarFiltro']);
-        Route::post('/aprueba', [ApruebaBeneficiarioController::class, 'aprueba']);
-        Route::post('/devolver', [ApruebaBeneficiarioController::class, 'devolver']);
-        Route::post('/rechazar', [ApruebaBeneficiarioController::class, 'rechazar']);
-        Route::post('/reaprobar', [ApruebaBeneficiarioController::class, 'reaprobar']);
-        Route::post('/borrar-filtro', [ApruebaBeneficiarioController::class, 'borrarFiltro']);
-        Route::post('/infor', [ApruebaBeneficiarioController::class, 'infor']);
-        Route::post('/editar-formulario', [ApruebaBeneficiarioController::class, 'editarFormulario']);
-        Route::post('/editar-solicitud', [ApruebaBeneficiarioController::class, 'editarSolicitud']);
-        Route::post('/deshacer', [ApruebaBeneficiarioController::class, 'deshacer']);
-
-        Route::post('/aplicar_filtro/{estado?}', [ApruebaBeneficiarioController::class, 'aplicarFiltro']);
-        Route::post('/buscar/{estado?}', [ApruebaBeneficiarioController::class, 'buscar']);
-        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaBeneficiarioController::class, 'changeCantidadPagina']);
-    });
-});
+SolicitudRoutes::register('/cajas/aprobacionben', 'cajas.aprobacionben', ApruebaBeneficiarioController::class, [
+    'editar' => true, 'deshacer' => true, 'reaprobar' => true,
+]);

@@ -381,18 +381,11 @@ export function MenuItemFields({
                     description="Cómo se resolverá la navegación cuando el usuario seleccione el item."
                 />
                 <FieldRow>
-                    <Field
-                        label="Controller"
-                        htmlFor="controller"
-                        required
-                        error={errors.controller}
-                        className="md:col-span-3"
-                    >
+                    <Field label="Controller" htmlFor="controller" error={errors.controller} className="md:col-span-3">
                         <input
                             type="text"
                             name="controller"
                             id="controller"
-                            required
                             placeholder="Ej. ApruebaEmpresaController"
                             className={`${menuFormInputClass} ${inputErrorClass('controller')}`}
                             value={formData.controller}
@@ -400,12 +393,11 @@ export function MenuItemFields({
                         />
                     </Field>
 
-                    <Field label="Action" htmlFor="action" required error={errors.action} className="md:col-span-3">
+                    <Field label="Action" htmlFor="action" error={errors.action} className="md:col-span-3">
                         <input
                             type="text"
                             name="action"
                             id="action"
-                            required
                             placeholder="Ej. index"
                             className={`${menuFormInputClass} ${inputErrorClass('action')}`}
                             value={formData.action}

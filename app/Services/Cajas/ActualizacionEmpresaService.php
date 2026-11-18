@@ -69,12 +69,18 @@ class ActualizacionEmpresaService extends SolicitudAprobacionService
 
     protected function scope(Builder $query): Builder
     {
-        return $query->where('tipact', 'E');
+        return $query->where('tipact', $this->tipact());
     }
 
     protected function controlesVariant(): string
     {
         return ValidacionControlChecklist::VARIANT_EMPRESA;
+    }
+
+    /** Tipo de actualización dentro de Mercurio47 (también es el tipo de campo de Mercurio28). */
+    protected function tipact(): string
+    {
+        return 'E';
     }
 
     protected function notificaPorCorreo(): bool
@@ -161,7 +167,7 @@ class ActualizacionEmpresaService extends SolicitudAprobacionService
      */
     public function cambios(Model $solicitud): array
     {
-        $etiquetas = DB::table('mercurio28')->where('tipo', 'E')->pluck('detalle', 'campo');
+        $etiquetas = DB::table('mercurio28')->where('tipo', $this->tipact())->pluck('detalle', 'campo');
 
         return Mercurio33::query()
             ->where('actualizacion', $solicitud->getKey())
@@ -188,21 +194,22 @@ class ActualizacionEmpresaService extends SolicitudAprobacionService
         $this->registrarRespuesta($solicitud, 'X', $nota, $codest, null);
     }
 
-    private function registrarRespuesta(Model $solicitud, string $estado, string $nota, string $codest, ?string $camposCorregir): void
+    protected function registrarRespuesta(Model $solicitud, string $estado, string $nota, string $codest, ?string $camposCorregir): void
     {
         $hoy = Carbon::now()->toDateString();
         $id = $solicitud->getKey();
+        $tipopc = $this->tipopc();
 
-        DB::transaction(function () use ($solicitud, $estado, $nota, $codest, $camposCorregir, $hoy, $id) {
+        DB::transaction(function () use ($solicitud, $estado, $nota, $codest, $camposCorregir, $hoy, $id, $tipopc) {
             $solicitud->setAttribute('estado', $estado);
             $solicitud->setAttribute('codest', $codest);
             $solicitud->setAttribute('fecest', $hoy);
             $solicitud->save();
 
             $mercurio10 = Mercurio10::create([
-                'tipopc' => self::TIPOPC,
+                'tipopc' => $tipopc,
                 'numero' => $id,
-                'item' => (int) Mercurio10::where('tipopc', self::TIPOPC)->where('numero', $id)->max('item') + 1,
+                'item' => (int) Mercurio10::where('tipopc', $tipopc)->where('numero', $id)->max('item') + 1,
                 'estado' => $estado,
                 'nota' => $nota,
                 'codest' => $codest,

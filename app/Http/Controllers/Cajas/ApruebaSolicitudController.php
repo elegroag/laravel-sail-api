@@ -103,6 +103,7 @@ abstract class ApruebaSolicitudController extends Controller
             'seguimiento' => $this->detalle->seguimiento($this->tipopc, $id),
             'acciones' => $acciones,
             'sisu' => $sisu,
+            'sisuExtra' => $service->sisuExtra($solicitud),
             'motivos' => $this->detalle->motivos(),
             'camposCorregibles' => $this->detalle->camposCorregibles(),
             'aprobar' => $acciones['aprobar'] ? $service->aprobarFormulario($solicitud) : null,
@@ -319,6 +320,25 @@ abstract class ApruebaSolicitudController extends Controller
             'modulo' => $this->modulo(),
             'solicitud' => $service->resumen($solicitud),
             'resultado' => $service->aportes($solicitud),
+        ]);
+    }
+
+    public function validarMultiafiliacion(int $id): JsonResponse
+    {
+        $solicitud = $this->solicitudOrRedirect($id);
+
+        return response()->json($this->service()->validarMultiafiliacion($solicitud));
+    }
+
+    public function trayectoria(int $id): Response
+    {
+        $service = $this->service();
+        $solicitud = $this->solicitudOrRedirect($id);
+
+        return Inertia::render('Cajas/Solicitudes/pages/Trayectoria', [
+            'modulo' => $this->modulo(),
+            'solicitud' => $service->resumen($solicitud),
+            'resultado' => $service->trayectoria($solicitud),
         ]);
     }
 

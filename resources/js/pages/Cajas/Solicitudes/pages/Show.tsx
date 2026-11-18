@@ -21,7 +21,7 @@ import type {
 } from '@/pages/Cajas/Solicitudes/types';
 import { cajasCardBodyClass, cajasCardClass, cajasCardHeaderClass, cajasFormBtnSecondary, cajasPageClass } from '@/pages/Cajas/styles/cajas-classes';
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, Banknote, Pencil, Undo2 } from 'lucide-react';
+import { ArrowLeft, Banknote, Pencil, Route, Undo2 } from 'lucide-react';
 import { useState } from 'react';
 
 type Props = {
@@ -33,10 +33,30 @@ type Props = {
     seguimiento: SeguimientoItem[];
     acciones: Acciones;
     sisu: SisuInfo;
+    sisuExtra?: SisuInfo | null;
     motivos: Motivo[];
     camposCorregibles: CampoCorregible[];
     aprobar: AprobarSchema | null;
 };
+
+function SisuCard({ info, titulo }: { info: SisuInfo; titulo: string }) {
+    return (
+        <section className={cajasCardClass}>
+            <div className={cajasCardHeaderClass}>
+                <h2 className="text-foreground text-sm font-semibold">{info.titulo || titulo}</h2>
+            </div>
+            <div className={cajasCardBodyClass}>
+                {!info.consultado ? (
+                    <p className="text-muted-foreground text-sm">SISU no respondió; no fue posible verificar el registro.</p>
+                ) : !info.existe ? (
+                    <p className="text-muted-foreground text-sm">No se encontró un registro en SISU.</p>
+                ) : (
+                    <CamposTable rows={info.datos} />
+                )}
+            </div>
+        </section>
+    );
+}
 
 export default function Show({
     modulo,
@@ -47,6 +67,7 @@ export default function Show({
     seguimiento,
     acciones,
     sisu,
+    sisuExtra,
     motivos,
     camposCorregibles,
     aprobar,
@@ -90,6 +111,12 @@ export default function Show({
                             <Link href={`${base}/aportes`} className={cajasFormBtnSecondary}>
                                 <Banknote className="mr-1.5 size-4" />
                                 Aportes
+                            </Link>
+                        )}
+                        {acciones.trayectoria && (
+                            <Link href={`${base}/trayectoria`} className={cajasFormBtnSecondary}>
+                                <Route className="mr-1.5 size-4" />
+                                Trayectoria
                             </Link>
                         )}
                         {acciones.deshacer && (
@@ -136,22 +163,12 @@ export default function Show({
                     )}
 
                     {tab === 'solicitud' && (
-                        <div className={sisu.consultado && sisu.existe ? 'grid items-start gap-4 lg:grid-cols-2' : 'space-y-4'}>
+                        <div className="grid items-start gap-4 lg:grid-cols-2">
                             <SeccionesCard secciones={secciones} />
-                            <section className={cajasCardClass}>
-                                <div className={cajasCardHeaderClass}>
-                                    <h2 className="text-foreground text-sm font-semibold">Empresa en SISU</h2>
-                                </div>
-                                <div className={cajasCardBodyClass}>
-                                    {!sisu.consultado ? (
-                                        <p className="text-muted-foreground text-sm">SISU no respondió; no fue posible verificar el registro.</p>
-                                    ) : !sisu.existe ? (
-                                        <p className="text-muted-foreground text-sm">No se encontró un registro en SISU.</p>
-                                    ) : (
-                                        <CamposTable rows={sisu.datos} />
-                                    )}
-                                </div>
-                            </section>
+                            <div className="space-y-4">
+                                {sisu.habilitado !== false && <SisuCard info={sisu} titulo="Empresa en SISU" />}
+                                {sisuExtra && sisuExtra.habilitado !== false && <SisuCard info={sisuExtra} titulo="Empresa en SISU" />}
+                            </div>
                         </div>
                     )}
 
@@ -174,7 +191,12 @@ export default function Show({
                     {tab === 'aprobar' && aprobar && (
                         <section className={cajasCardClass}>
                             <div className={cajasCardBodyClass}>
-                                <AprobarSolicitudPanel action={`${base}/aprobar`} schema={aprobar} singular={modulo.singular} />
+                                <AprobarSolicitudPanel
+                                    action={`${base}/aprobar`}
+                                    schema={aprobar}
+                                    singular={modulo.singular}
+                                    multiUrl={acciones.multiafiliacion ? `${base}/validar-multiafiliacion` : undefined}
+                                />
                             </div>
                         </section>
                     )}

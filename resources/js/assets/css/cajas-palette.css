@@ -142,6 +142,34 @@
         color: #8392ab !important;
     }
 
+    .cajas-menu-icon.text-pink {
+        color: #ff69b4 !important;
+    }
+
+    .cajas-menu-icon.text-green {
+        color: #2e845f !important;
+    }
+
+    .cajas-menu-icon.text-yellow {
+        color: #ffd700 !important;
+    }
+
+    .cajas-menu-icon.text-default {
+        color: #a4babe !important;
+    }
+
+    .cajas-menu-icon.text-orange {
+        color: #ffa500 !important;
+    }
+
+    .cajas-menu-icon.text-red {
+        color: #dc5656 !important;
+    }
+
+    .cajas-menu-icon.text-purple {
+        color: #9a109a !important;
+    }
+
     .cajas-menu-icon {
         display: inline-block;
         width: 1rem;

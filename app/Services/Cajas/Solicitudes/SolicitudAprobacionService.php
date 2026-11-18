@@ -3,6 +3,7 @@
 namespace App\Services\Cajas\Solicitudes;
 
 use App\Exceptions\DebugException;
+use App\Models\Gener42;
 use App\Models\Mercurio06;
 use App\Models\Mercurio10;
 use App\Services\Api\ApiSubsidio;
@@ -76,7 +77,7 @@ abstract class SolicitudAprobacionService extends SolicitudListService
     abstract protected function aprobarCampos(): array;
 
     /**
-     * @return array{editar: bool, aportes: bool, deshacer: bool, reaprobar: bool}
+     * @return array{editar: bool, aportes: bool, deshacer: bool, reaprobar: bool, devolver?: bool, multiafiliacion?: bool, trayectoria?: bool}
      */
     abstract public function capacidades(): array;
 
@@ -110,6 +111,112 @@ abstract class SolicitudAprobacionService extends SolicitudListService
     protected function notaMin(): int
     {
         return 1;
+    }
+
+    /** Si el formulario de aprobación incluye el checklist de validaciones de control. */
+    protected function usaControles(): bool
+    {
+        return true;
+    }
+
+    /** Permiso de Gener42 requerido para aprobar (null: sin restricción adicional). */
+    protected function permisoAprobar(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Opciones de campos que dependen de la solicitud (clave `dinamico` en la definición del campo).
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    protected function opcionesDinamicas(Model $solicitud, string $clave): array
+    {
+        return [];
+    }
+
+    /**
+     * Servicio y parámetros del SISU para deshacer la afiliación.
+     *
+     * @return array{servicio: string, metodo: string, params: array<string, mixed>}
+     */
+    protected function deshacerSisu(Model $solicitud, string $metodo, string $nota): array
+    {
+        return [
+            'servicio' => 'ComfacaAfilia',
+            'metodo' => $metodo,
+            'params' => [
+                'cedtra' => $solicitud->getAttribute('cedtra'),
+                'coddoc' => $solicitud->getAttribute('tipdoc'),
+                'fecafi' => $solicitud->getAttribute('fecapr'),
+                'fecapr' => $solicitud->getAttribute('fecapr'),
+                'nota' => $nota,
+            ],
+        ];
+    }
+
+    /**
+     * Ejecuta el proceso de aprobación del módulo.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function procesarAprobacion(int $id, array $data): object
+    {
+        return (new ApruebaSolicitud)->main($this->calemp(), $id, $data);
+    }
+
+    /**
+     * Ejecuta un procesador `Aprueba*` que no pasa por ApruebaSolicitud::main.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function procesarDirecto(object $proceso, int $id, array $data): object
+    {
+        if (! $proceso->findSolicitud($id)) {
+            throw new DebugException('La solicitud no existe o no está disponible para continuar el proceso.', 404);
+        }
+        if (! $proceso->findSolicitante()) {
+            throw new DebugException('El solicitante no está disponible para continuar el proceso.', 501);
+        }
+        $proceso->procesar($data);
+
+        return $proceso;
+    }
+
+    /** Documento con el que se consultan los aportes en SISU. */
+    protected function aportesDocumento(Model $solicitud): string
+    {
+        return $this->sisuDocumento($solicitud);
+    }
+
+    /**
+     * Consulta si la persona ya está afiliada con otra empresa. Solo módulos con la capacidad `multiafiliacion`.
+     *
+     * @return array{multi: bool}
+     */
+    public function validarMultiafiliacion(Model $solicitud): array
+    {
+        return ['multi' => false];
+    }
+
+    /**
+     * Trayectoria laboral y salarios del trabajador en SISU. Solo módulos con la capacidad `trayectoria`.
+     *
+     * @return array{consultado: bool, trayectorias: list<array<string, string>>, salarios: list<array<string, string>>}
+     */
+    public function trayectoria(Model $solicitud): array
+    {
+        return ['consultado' => false, 'trayectorias' => [], 'salarios' => []];
+    }
+
+    /**
+     * Consulta adicional a SISU que se muestra junto a la ficha (p. ej. la empresa del trabajador).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function sisuExtra(Model $solicitud): ?array
+    {
+        return null;
     }
 
     /**
@@ -202,11 +309,13 @@ abstract class SolicitudAprobacionService extends SolicitudListService
         return [
             'editar' => $cap['editar'] && $estado === 'P',
             'aprobar' => $abierta,
-            'devolver' => $abierta,
+            'devolver' => $abierta && ($cap['devolver'] ?? true),
             'rechazar' => $abierta,
             'aportes' => $cap['aportes'] && $estado !== 'A',
             'deshacer' => $cap['deshacer'] && $estado === 'A',
             'reaprobar' => $cap['reaprobar'] && ($estado === 'A' || $afiliadoSisu),
+            'multiafiliacion' => ($cap['multiafiliacion'] ?? false) && $abierta,
+            'trayectoria' => (bool) ($cap['trayectoria'] ?? false),
         ];
     }
 
@@ -225,27 +334,34 @@ abstract class SolicitudAprobacionService extends SolicitudListService
         foreach ($this->aprobarCampos() as $campo) {
             $campo = array_merge(['type' => 'text', 'required' => true, 'search' => false, 'max' => null], $campo);
             if ($campo['type'] === 'select') {
-                $opciones = $campo['opciones'] ?? $this->opciones($cat[$campo['catalogo'] ?? $campo['name']] ?? []);
+                $opciones = $campo['opciones']
+                    ?? (isset($campo['dinamico']) ? $this->opcionesDinamicas($solicitud, $campo['dinamico']) : null)
+                    ?? $this->opciones($cat[$campo['catalogo'] ?? $campo['name']] ?? []);
+                if ($opciones === [] && isset($campo['fallback'])) {
+                    $opciones = $campo['fallback'];
+                }
                 if ($campo['name'] === 'codind' && $validos) {
                     $opciones = $this->filtrarIndices($opciones, $validos);
                 }
                 $campo['options'] = $opciones;
             }
             $defaults[$campo['name']] = $campo['default'] ?? '';
-            unset($campo['opciones'], $campo['catalogo'], $campo['default']);
+            unset($campo['opciones'], $campo['catalogo'], $campo['default'], $campo['dinamico'], $campo['fallback']);
             $campos[] = $campo;
         }
+
+        $claves = $this->usaControles() ? ValidacionControlChecklist::keysFor($this->controlesVariant()) : [];
 
         return [
             'campos' => $campos,
             'defaults' => array_merge($defaults, [
                 'fecapr' => Carbon::now()->toDateString(),
                 'nota_aprobar' => '',
-                'validaciones_control' => array_fill_keys(ValidacionControlChecklist::keysFor($this->controlesVariant()), true),
+                'validaciones_control' => array_fill_keys($claves, true),
             ]),
             'controles' => array_map(
                 fn (string $key) => ['key' => $key, 'label' => self::CONTROLES[$key]],
-                ValidacionControlChecklist::keysFor($this->controlesVariant())
+                $claves
             ),
             'catalogos_disponibles' => ! empty($cat),
             'dependencias' => $this->dependenciasAprobar(),
@@ -292,8 +408,10 @@ abstract class SolicitudAprobacionService extends SolicitudListService
         }
 
         $rules['nota_aprobar'] = ['required', 'string', 'min:'.$this->notaMin(), 'max:'.self::NOTA_MAX];
-        $rules['validaciones_control'] = ['required', 'array'];
-        $rules['validaciones_control.*'] = ['nullable'];
+        if ($this->usaControles()) {
+            $rules['validaciones_control'] = ['required', 'array'];
+            $rules['validaciones_control.*'] = ['nullable'];
+        }
 
         return $rules;
     }
@@ -323,18 +441,21 @@ abstract class SolicitudAprobacionService extends SolicitudListService
     {
         $solicitud = $this->findOrFail($id);
         $this->assertAbierta($solicitud);
+        $this->assertPermisoAprobar();
 
         $data['id'] = $id;
-        $data['feccap'] = $data['fecafi'] ?? $data['fecapr'];
-        $data['validaciones_control'] = array_map(
-            fn ($v) => ($v === true || $v === 'S' || $v === 1 || $v === '1' || $v === 'true') ? 'S' : 'N',
-            $data['validaciones_control']
-        );
+        $data['feccap'] = $data['fecafi'] ?? $data['fecapr'] ?? '';
+        if (isset($data['validaciones_control'])) {
+            $data['validaciones_control'] = array_map(
+                fn ($v) => ($v === true || $v === 'S' || $v === 1 || $v === '1' || $v === 'true') ? 'S' : 'N',
+                $data['validaciones_control']
+            );
+        }
         $data = array_merge($data, $this->aprobarFijos($solicitud, $data));
 
         DB::beginTransaction();
         try {
-            $proceso = (new ApruebaSolicitud)->main($this->calemp(), $id, $data);
+            $proceso = $this->procesarAprobacion($id, $data);
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -342,7 +463,7 @@ abstract class SolicitudAprobacionService extends SolicitudListService
         }
 
         try {
-            $proceso->enviarMail((string) ($data['actapr'] ?? ''), (string) $data['fecapr']);
+            $proceso->enviarMail((string) ($data['actapr'] ?? ''), (string) ($data['fecapr'] ?? ''));
 
             return true;
         } catch (\Throwable $e) {
@@ -418,17 +539,7 @@ abstract class SolicitudAprobacionService extends SolicitudListService
         }
 
         $api = new ApiSubsidio;
-        $api->send([
-            'servicio' => 'ComfacaAfilia',
-            'metodo' => $metodo,
-            'params' => [
-                'cedtra' => $solicitud->getAttribute('cedtra'),
-                'coddoc' => $solicitud->getAttribute('tipdoc'),
-                'fecafi' => $solicitud->getAttribute('fecapr'),
-                'fecapr' => $solicitud->getAttribute('fecapr'),
-                'nota' => $nota,
-            ],
-        ]);
+        $api->send($this->deshacerSisu($solicitud, $metodo, $nota));
 
         if ($api->isJson() === false) {
             throw new DebugException('Error al procesar el deshacer la aprobación en SisuWeb.', 501);
@@ -464,46 +575,88 @@ abstract class SolicitudAprobacionService extends SolicitudListService
     }
 
     /**
-     * Estado de la empresa en SISU. Nunca lanza: si el servicio falla retorna consultado=false.
+     * Registro principal de la solicitud en SISU. Nunca lanza: si el servicio falla retorna consultado=false.
      *
-     * @return array{consultado: bool, existe: bool, afiliada: bool, estado: ?string, datos: list<array{label: string, value: string}>}
+     * @return array{titulo: string, habilitado: bool, consultado: bool, existe: bool, afiliada: bool, estado: ?string, datos: list<array{label: string, value: string}>}
      */
     public function consultarSisu(Model $solicitud): array
     {
-        $vacio = ['consultado' => false, 'existe' => false, 'afiliada' => false, 'estado' => null, 'datos' => []];
-        $documento = $this->sisuDocumento($solicitud);
+        if (! $this->usaSisu()) {
+            return ['titulo' => '', 'habilitado' => false, 'consultado' => false, 'existe' => false, 'afiliada' => false, 'estado' => null, 'datos' => []];
+        }
+
+        return $this->consultarSisuRequest($this->sisuRequest($solicitud), $this->estadosAfiliada(), $this->sisuTitulo());
+    }
+
+    /**
+     * Servicio de SISU con el que se consulta el registro principal.
+     *
+     * @return array{servicio: string, metodo: string, params: mixed}
+     */
+    protected function sisuRequest(Model $solicitud): array
+    {
+        return [
+            'servicio' => 'ComfacaEmpresas',
+            'metodo' => 'informacion_empresa',
+            'params' => ['nit' => $this->sisuDocumento($solicitud)],
+        ];
+    }
+
+    /** Si el módulo consulta el registro de la solicitud en SISU. */
+    protected function usaSisu(): bool
+    {
+        return true;
+    }
+
+    /** @return list<string> */
+    protected function estadosAfiliada(): array
+    {
+        return ['A', 'S', 'D'];
+    }
+
+    protected function sisuTitulo(): string
+    {
+        return 'Empresa en SISU';
+    }
+
+    /**
+     * @param  array{servicio: string, metodo: string, params: mixed}  $request
+     * @param  list<string>  $estadosAfiliada
+     * @return array{titulo: string, habilitado: bool, consultado: bool, existe: bool, afiliada: bool, estado: ?string, datos: list<array{label: string, value: string}>}
+     */
+    protected function consultarSisuRequest(array $request, array $estadosAfiliada, string $titulo): array
+    {
+        $vacio = ['titulo' => $titulo, 'habilitado' => true, 'consultado' => false, 'existe' => false, 'afiliada' => false, 'estado' => null, 'datos' => []];
 
         try {
             $api = new ApiSubsidio;
-            $api->send([
-                'servicio' => 'ComfacaEmpresas',
-                'metodo' => 'informacion_empresa',
-                'params' => ['nit' => $documento],
-            ]);
+            $api->send($request);
             $out = $api->toArray();
         } catch (\Throwable $e) {
-            Log::warning('Aprobación de solicitud: SISU no disponible', ['documento' => $documento, 'error' => $e->getMessage()]);
+            Log::warning('Aprobación de solicitud: SISU no disponible', ['request' => $request['metodo'], 'error' => $e->getMessage()]);
 
             return $vacio;
         }
 
-        $empresa = $out['data'] ?? null;
-        if (! ($out['success'] ?? false) || ! is_array($empresa)) {
+        $registro = $out['data'] ?? null;
+        if (! ($out['success'] ?? false) || ! is_array($registro)) {
             return ['consultado' => true] + $vacio;
         }
 
-        $estado = isset($empresa['estado']) ? (string) $empresa['estado'] : null;
+        $estado = isset($registro['estado']) ? (string) $registro['estado'] : null;
         $datos = [];
-        foreach ($empresa as $key => $value) {
+        foreach ($registro as $key => $value) {
             if (is_scalar($value) && $value !== '' && count($datos) < 24) {
                 $datos[] = ['label' => strtoupper((string) $key), 'value' => (string) $value];
             }
         }
 
         return [
+            'titulo' => $titulo,
+            'habilitado' => true,
             'consultado' => true,
             'existe' => true,
-            'afiliada' => in_array($estado, ['A', 'S', 'D'], true),
+            'afiliada' => in_array($estado, $estadosAfiliada, true),
             'estado' => $estado,
             'datos' => $datos,
         ];
@@ -519,7 +672,7 @@ abstract class SolicitudAprobacionService extends SolicitudListService
             $api->send([
                 'servicio' => 'AportesEmpresas',
                 'metodo' => 'buscarAportesEmpresa',
-                'params' => $this->sisuDocumento($solicitud),
+                'params' => $this->aportesDocumento($solicitud),
             ]);
 
             if ($api->isJson() === false) {
@@ -621,6 +774,19 @@ abstract class SolicitudAprobacionService extends SolicitudListService
         $this->legacy()->rechazar($solicitud, $nota, $codest);
     }
 
+    protected function assertPermisoAprobar(): void
+    {
+        $permiso = $this->permisoAprobar();
+        if ($permiso === null) {
+            return;
+        }
+
+        $usuario = (string) (session('user')['usuario'] ?? '');
+        if (! Gener42::query()->where('permiso', $permiso)->where('usuario', $usuario)->exists()) {
+            throw new DebugException('El usuario no dispone de permisos de aprobación.', 403);
+        }
+    }
+
     protected function assertAbierta(Model $solicitud): void
     {
         if (in_array((string) $solicitud->getAttribute('estado'), self::ESTADOS_SIN_ACCION, true)) {
@@ -716,6 +882,56 @@ abstract class SolicitudAprobacionService extends SolicitudListService
         }
 
         return array_map(fn (string $codigo) => ['value' => $codigo, 'label' => $codigo], $validos);
+    }
+
+    /**
+     * Cada entrada: [atributo, catálogo|null, esFecha]. `null` como valor arma el nombre completo.
+     * Las filas cuyo atributo no existe en el modelo se omiten (p. ej. dirlab solo en independientes).
+     *
+     * @param  array<string, array<int, mixed>|null>  $mapa
+     * @return list<array{label: string, value: string}>
+     */
+    protected function camposDe(Model $solicitud, array $mapa): array
+    {
+        $atributos = $solicitud->getAttributes();
+        $pares = [];
+
+        foreach ($mapa as $label => $def) {
+            if ($def === null) {
+                $pares[$label] = $this->nombre($solicitud);
+
+                continue;
+            }
+
+            [$attr, $catalogo, $esFecha] = array_pad($def, 3, null);
+
+            if ($attr === '__estado') {
+                $pares[$label] = $this->estadoDetalle($solicitud);
+
+                continue;
+            }
+            if ($attr === '__tipo') {
+                $pares[$label] = $this->tipoAportante($solicitud);
+
+                continue;
+            }
+            if (! array_key_exists($attr, $atributos)) {
+                continue;
+            }
+
+            $valor = $atributos[$attr];
+            if ($esFecha) {
+                $valor = $this->fecha($valor);
+            } elseif ($catalogo === 'tippag') {
+                $valor = $this->etiqueta($this->pagos(), $valor);
+            } elseif ($catalogo !== null) {
+                $valor = $this->etiquetaCatalogo($catalogo, $valor);
+            }
+
+            $pares[$label] = $valor;
+        }
+
+        return $this->campos($pares);
     }
 
     /**

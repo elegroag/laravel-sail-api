@@ -2,310 +2,32 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
-use App\Models\Mercurio01;
-use App\Models\Mercurio07;
-use App\Models\Mercurio10;
-use App\Models\Mercurio11;
-use App\Models\Mercurio45;
-use App\Services\Aprueba\ApruebaCertificado;
-use App\Services\CajaServices\CertificadosServices;
-use App\Services\Srequest;
-use App\Services\Utils\Mercurio10Cierre;
-use App\Services\Utils\Pagination;
-use App\Services\Utils\SenderEmail;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+use App\Services\Cajas\AprobacionCertificadoService;
+use App\Services\Cajas\Solicitudes\SolicitudAprobacionService;
+use App\Services\Cajas\Solicitudes\SolicitudDetalleService;
 
-class ApruebaCertificadoController extends ApplicationController
+class ApruebaCertificadoController extends ApruebaSolicitudController
 {
-    protected $tipopc = '8';
+    protected string $tipopc = AprobacionCertificadoService::TIPOPC;
 
-
-    protected $user;
-
-    protected $tipfun;
-
-    public function __construct()
+    public function __construct(private readonly AprobacionCertificadoService $service, SolicitudDetalleService $detalle)
     {
-        $this->user = session('user');
-        $this->tipfun = session('tipfun');
+        parent::__construct($detalle);
     }
 
-    /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
-
-    public function aplicarFiltro(Request $request, string $estado = 'P')
+    protected function service(): SolicitudAprobacionService
     {
-        $cantidad_pagina = $request->input('numero', 10);
-        $usuario = $this->user['usuario'];
-
-        $pagination = new Pagination(
-            new Srequest(
-                [
-                    'cantidadPaginas' => $cantidad_pagina,
-                    'query' => "usuario='{$usuario}' and estado='{$estado}'",
-                    'estado' => $estado,
-                ]
-            )
-        );
-
-        $query = $pagination->filter(
-            $request->input('campo'),
-            $request->input('condi'),
-            $request->input('value')
-        );
-
-        set_flashdata('filter_certificado', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
-
-        $response = $pagination->render(new CertificadosServices);
-
-        return response()->json($response);
+        return $this->service;
     }
 
-    public function changeCantidadPagina(Request $request, string $estado = 'P')
+    protected function modulo(): array
     {
-        $this->buscar($request, $estado);
-    }
-
-    public function index()
-    {
-        $campo_field = [
-            'codben' => 'Cedula',
-            'nombre' => 'Primer Apellido',
+        return [
+            'titulo' => 'Aprobación de certificados',
+            'singular' => 'certificado',
+            'identificacion' => 'Cédula',
+            'nombre' => 'Beneficiario',
+            'busqueda' => 'Cédula, documento del beneficiario o certificado…',
         ];
-
-        return view('cajas.aprobacioncer.index', [
-            'campo_filtro' => $campo_field,
-            'filters' => get_flashdata_item('filter_params'),
-            'title' => 'Aprueba Certificado',
-            'mercurio11' => Mercurio11::all(),
-        ]);
-    }
-
-    public function buscar(Request $request, string $estado = 'P')
-    {
-        $pagina = $request->input('pagina', 1);
-        $cantidad_pagina = $request->input('numero', 10);
-        $usuario = $this->user['usuario'];
-
-        $pagination = new Pagination(
-            new Srequest(
-                [
-                    'cantidadPaginas' => $cantidad_pagina ?? 10,
-                    'query' => "usuario='{$usuario}' and estado='{$estado}'",
-                    'estado' => $estado ?? 'P',
-                    'pagina' => $pagina ?? 1,
-                ]
-            )
-        );
-
-        $query = $pagination->filter(
-            $request->input('campo'),
-            $request->input('condi'),
-            $request->input('value')
-        );
-
-        set_flashdata('filter_certificado', $query, true);
-        set_flashdata('filter_params', $pagination->filters, true);
-
-        $response = $pagination->render(new CertificadosServices);
-
-        return response()->json($response);
-    }
-
-    public function infor(Request $request)
-    {
-        try {
-            $id = $request->input('id');
-            if (! $id) {
-                throw new DebugException('Error no se puede identificar el identificador de la solicitud.', 501);
-            }
-            $mercurio45 = Mercurio45::where('id', $id)->first();
-            if (! $mercurio45) {
-                throw new DebugException('No se encontró la solicitud de certificado.', 404);
-            }
-            $html = view(
-                'cajas/aprobacioncer/tmp/consulta',
-                [
-                    'mercurio01' => Mercurio01::first(),
-                    'mercurio45' => $mercurio45,
-                ]
-            )->render();
-
-            $certificadoServices = new CertificadosServices;
-            $adjuntos = $certificadoServices->adjuntos($mercurio45);
-            $seguimiento = $certificadoServices->seguimiento($mercurio45);
-
-            $campos_disponibles = method_exists($mercurio45, 'CamposDisponibles')
-                ? $mercurio45->CamposDisponibles()
-                : [];
-            $response = [
-                'success' => true,
-                'data' => $mercurio45->toArray(),
-                'mercurio11' => Mercurio11::all(),
-                'consulta' => $html,
-                'adjuntos' => $adjuntos,
-                'seguimiento' => $seguimiento,
-                'campos_disponibles' => $campos_disponibles,
-            ];
-        } catch (DebugException $err) {
-            $response = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-            ];
-        }
-
-        return response()->json($response);
-    }
-
-    /**
-     * aprueba function
-     *
-     * @return void
-     */
-    public function aprueba(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            try {
-                $aprueba = new ApruebaCertificado;
-                $postData = $request->all();
-                $idSolicitud = $request->input('id');
-                $aprueba->findSolicitud($idSolicitud);
-                $aprueba->findSolicitante();
-                $aprueba->procesar($postData);
-                DB::commit();
-                $aprueba->enviarMail($request->input('actapr'));
-                $salida = [
-                    'success' => true,
-                    'msj' => 'El registro se completo con éxito',
-                ];
-            } catch (DebugException $err) {
-
-                DB::rollBack();
-                $salida = [
-                    'success' => false,
-                    'msj' => $err->getMessage(),
-                    'errors' => $err->render($request),
-                ];
-            }
-        } catch (\Exception $e) {
-            $salida = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-            ];
-        }
-
-        return response()->json($salida);
-    }
-
-    public function devolver(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'id' => 'required|integer',
-                'nota' => 'nullable|string|max:5000',
-                'codest' => 'required|string|max:10',
-                'campos_corregir' => 'sometimes|nullable',
-            ]);
-
-            $id = $validated['id'];
-            $nota = $validated['nota'] ?? null;
-            $codest = $validated['codest'];
-
-            $array_corregir = $request->input('campos_corregir', []);
-            $campos_corregir = is_array($array_corregir)
-                ? implode(';', array_filter($array_corregir))
-                : (string) ($array_corregir ?? '');
-
-            $mercurio45 = Mercurio45::where('id', $id)->first();
-            if (! $mercurio45) {
-                throw new DebugException('No se encontró la solicitud de certificado.', 404);
-            }
-
-            $certificadosServices = new CertificadosServices;
-            $certificadosServices->devolver($mercurio45, $nota, $codest, $campos_corregir);
-
-            $response = [
-                'success' => true,
-                'msj' => 'Movimiento realizado con exito',
-            ];
-        } catch (DebugException $err) {
-            $response = [
-                'success' => false,
-                'msj' => $err->getMessage(),
-                'errors' => $err->render($request),
-            ];
-        }
-
-        return response()->json($response);
-    }
-
-    public function rechazar(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-
-            $id = $request->input('id');
-            $nota = $request->input('nota');
-            $codest = $request->input('codest');
-            $today = Carbon::now();
-
-            $mercurio45 = Mercurio45::where('id', $id)->first();
-            $mercurio45->update([
-                'estado' => 'X',
-                'motivo' => $nota,
-                'codest' => $codest,
-                'fecest' => $today->format('Y-m-d H:i:s'),
-            ]);
-            $item = Mercurio10::whereRaw("tipopc='{$this->tipopc}' and numero='{$id}'")->max('item') + 1;
-            $mercurio10 = new Mercurio10;
-
-            $mercurio10->tipopc = $this->tipopc;
-            $mercurio10->numero = $id;
-            $mercurio10->item = $item;
-            $mercurio10->estado = 'X';
-            $mercurio10->nota = $nota;
-            $mercurio10->codest = $codest;
-            $mercurio10->fecsis = $today->format('Y-m-d H:i:s');
-            $mercurio10->save();
-
-            Mercurio10Cierre::aplicarCierreRespuesta($mercurio10);
-
-            $mercurio07 = Mercurio07::whereRaw("tipo='{$mercurio45->getTipo()}' and coddoc='{$mercurio45->getCoddoc()}' and documento = '{$mercurio45->getDocumento()}'")->first();
-            $body = 'Certificado rechazado no es valido';
-
-            $senderEmail = new SenderEmail(
-                new Srequest([
-                    'email_emisor' => $mercurio07->getEmail(),
-                    'email_clave' => $mercurio07->getClave(),
-                    'asunto' => 'Certificado rechazado',
-                ])
-            );
-
-            $senderEmail->send($mercurio07->getEmail(), $body);
-            DB::commit();
-            $response = [
-                'success' => true,
-                'msj' => 'El registro se completo con éxito',
-            ];
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage(),
-                'errors' => $e->render($request),
-            ];
-        }
-
-        return response()->json($response);
     }
 }

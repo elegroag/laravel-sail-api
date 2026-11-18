@@ -79,9 +79,13 @@ export type Acciones = {
     aportes: boolean;
     deshacer: boolean;
     reaprobar: boolean;
+    multiafiliacion: boolean;
+    trayectoria: boolean;
 };
 
 export type SisuInfo = {
+    titulo?: string;
+    habilitado?: boolean;
     consultado: boolean;
     existe: boolean;
     afiliada: boolean;

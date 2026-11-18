@@ -1,27 +1,8 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaConyugeController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Routing\SolicitudRoutes;
 
-Route::middleware(['cajas.auth'])->group(function () {
-    Route::prefix('/cajas/aprobacioncon')->group(function () {
-
-        Route::get('/', function () {
-            return redirect('cajas/aprobacioncon/index');
-        });
-
-        Route::get('/index', [ApruebaConyugeController::class, 'index']);
-        Route::post('/aplicar_filtro/{estado?}', [ApruebaConyugeController::class, 'aplicarFiltro']);
-        Route::post('/buscar/{estado?}', [ApruebaConyugeController::class, 'buscar']);
-        Route::post('/aprueba', [ApruebaConyugeController::class, 'aprueba']);
-        Route::post('/devolver', [ApruebaConyugeController::class, 'devolver']);
-        Route::post('/rechazar', [ApruebaConyugeController::class, 'rechazar']);
-        Route::post('/reaprobar', [ApruebaConyugeController::class, 'reaprobar']);
-        Route::post('/infor', [ApruebaConyugeController::class, 'infor']);
-        Route::post('/editar-formulario', [ApruebaConyugeController::class, 'editarFormulario']);
-        Route::post('/editar-solicitud', [ApruebaConyugeController::class, 'editarSolicitud']);
-        Route::post('/valida_conyuge', [ApruebaConyugeController::class, 'validaConyuge']);
-        Route::post('/borrar-filtro', [ApruebaConyugeController::class, 'borrarFiltro']);
-        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaConyugeController::class, 'changeCantidadPagina']);
-    });
-});
+SolicitudRoutes::register('/cajas/aprobacioncon', 'cajas.aprobacioncon', ApruebaConyugeController::class, [
+    'editar' => true, 'deshacer' => true, 'reaprobar' => true,
+]);

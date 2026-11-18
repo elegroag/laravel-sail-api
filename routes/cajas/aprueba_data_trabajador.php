@@ -1,18 +1,6 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaUpTrabajadorController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Routing\SolicitudRoutes;
 
-Route::middleware(['cajas.auth'])->group(function () {
-    Route::prefix('/cajas/actualizatra')->group(function () {
-        Route::get('/index', [ApruebaUpTrabajadorController::class, 'index']);
-        Route::post('/aplicar_filtro/{estado?}', [ApruebaUpTrabajadorController::class, 'aplicarFiltro']);
-        Route::post('/buscar/{estado?}', [ApruebaUpTrabajadorController::class, 'buscar']);
-        Route::post('/infor', [ApruebaUpTrabajadorController::class, 'infor']);
-        Route::post('/aprueba', [ApruebaUpTrabajadorController::class, 'aprueba']);
-        Route::post('/rechazar', [ApruebaUpTrabajadorController::class, 'rechazar']);
-        Route::post('/validar-multiafiliacion', [ApruebaUpTrabajadorController::class, 'validarMultiafiliacion']);
-        Route::post('/borrar-filtro', [ApruebaUpTrabajadorController::class, 'borrarFiltro']);
-        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaUpTrabajadorController::class, 'changeCantidadPagina']);
-    });
-});
+SolicitudRoutes::register('/cajas/actualizatra', 'cajas.actualizatra', ApruebaUpTrabajadorController::class, ['devolver' => false]);

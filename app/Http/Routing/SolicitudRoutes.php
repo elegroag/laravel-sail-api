@@ -11,7 +11,7 @@ class SolicitudRoutes
 {
     /**
      * @param  class-string  $controller
-     * @param  array{editar?: bool, aportes?: bool, deshacer?: bool, reaprobar?: bool}  $features
+     * @param  array{editar?: bool, aportes?: bool, deshacer?: bool, reaprobar?: bool, devolver?: bool, multiafiliacion?: bool, trayectoria?: bool}  $features
      */
     public static function register(string $path, string $name, string $controller, array $features = []): void
     {
@@ -44,9 +44,17 @@ class SolicitudRoutes
                     if ($features['reaprobar'] ?? false) {
                         Route::post('/reaprobar', [$controller, 'reaprobar'])->name('reaprobar');
                     }
+                    if ($features['multiafiliacion'] ?? false) {
+                        Route::post('/validar-multiafiliacion', [$controller, 'validarMultiafiliacion'])->name('validar_multiafiliacion');
+                    }
+                    if ($features['trayectoria'] ?? false) {
+                        Route::get('/trayectoria', [$controller, 'trayectoria'])->name('trayectoria');
+                    }
+                    if ($features['devolver'] ?? true) {
+                        Route::post('/devolver', [$controller, 'devolver'])->name('devolver');
+                    }
 
                     Route::post('/aprobar', [$controller, 'aprobar'])->name('aprobar');
-                    Route::post('/devolver', [$controller, 'devolver'])->name('devolver');
                     Route::post('/rechazar', [$controller, 'rechazar'])->name('rechazar');
                 });
             });

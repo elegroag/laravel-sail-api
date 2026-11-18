@@ -20,13 +20,17 @@ type Props = {
     action: string;
     schema: AprobarSchema;
     singular: string;
+    /** Si se indica, se valida la multiafiliación antes de aprobar y se pide una segunda confirmación. */
+    multiUrl?: string;
 };
 
 type Valores = Record<string, string>;
 
 const isVisible = (campo: AprobarCampo, valores: Valores) => !campo.show_if || campo.show_if.in.includes(valores[campo.show_if.field] ?? '');
 
-export default function AprobarSolicitudPanel({ action, schema, singular }: Props) {
+const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+export default function AprobarSolicitudPanel({ action, schema, singular, multiUrl }: Props) {
     const errors = usePage<FlashProps>().props.errors ?? {};
     const { validaciones_control: controlesInicial, nota_aprobar: notaInicial, ...camposInicial } = schema.defaults;
 
@@ -35,6 +39,7 @@ export default function AprobarSolicitudPanel({ action, schema, singular }: Prop
     const [nota, setNota] = useState(String(notaInicial ?? ''));
     const [confirming, setConfirming] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [multiafiliado, setMultiafiliado] = useState(false);
 
     const inputError = (name: string) => (errors[name] ? cajasInputErrorClass : '');
     const fieldError = (name: string) => errors[name] && <p className={cajasFormErrorClass}>{errors[name]}</p>;
@@ -53,7 +58,7 @@ export default function AprobarSolicitudPanel({ action, schema, singular }: Prop
         setConfirming(true);
     };
 
-    const handleConfirm = () => {
+    const enviar = () => {
         setProcessing(true);
         const payload: Record<string, string | Record<string, boolean>> = { validaciones_control: controles, nota_aprobar: nota.trim() };
         schema.campos.forEach((campo) => {
@@ -65,8 +70,35 @@ export default function AprobarSolicitudPanel({ action, schema, singular }: Prop
             onFinish: () => {
                 setProcessing(false);
                 setConfirming(false);
+                setMultiafiliado(false);
             },
         });
+    };
+
+    const handleConfirm = async () => {
+        if (!multiUrl) {
+            enviar();
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            const response = await fetch(multiUrl, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken(), Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            });
+            const data = (await response.json()) as { multi?: boolean };
+            if (data.multi) {
+                setProcessing(false);
+                setConfirming(false);
+                setMultiafiliado(true);
+                return;
+            }
+        } catch {
+            // Si la validación no responde se continúa con la aprobación, como en el flujo anterior.
+        }
+        enviar();
     };
 
     const renderCampo = (campo: AprobarCampo) => {
@@ -140,26 +172,28 @@ export default function AprobarSolicitudPanel({ action, schema, singular }: Prop
                     ))}
             </div>
 
-            <fieldset className="border-border rounded-lg border p-4">
-                <legend className="text-foreground px-1 text-sm font-semibold">Validaciones de control (auditoría)</legend>
-                <p className="text-muted-foreground mb-3 text-sm">
-                    Deje registro de las consultas realizadas, soporte requerido por entes de control. Todas son obligatorias.
-                </p>
-                <div className="space-y-2">
-                    {schema.controles.map(({ key, label }) => (
-                        <label key={key} className="text-foreground flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                className={cajasCheckboxClass}
-                                checked={Boolean(controles[key])}
-                                onChange={(e) => setControles((prev) => ({ ...prev, [key]: e.target.checked }))}
-                            />
-                            {label}
-                        </label>
-                    ))}
-                </div>
-                {fieldError('validaciones_control')}
-            </fieldset>
+            {schema.controles.length > 0 && (
+                <fieldset className="border-border rounded-lg border p-4">
+                    <legend className="text-foreground px-1 text-sm font-semibold">Validaciones de control (auditoría)</legend>
+                    <p className="text-muted-foreground mb-3 text-sm">
+                        Deje registro de las consultas realizadas, soporte requerido por entes de control. Todas son obligatorias.
+                    </p>
+                    <div className="space-y-2">
+                        {schema.controles.map(({ key, label }) => (
+                            <label key={key} className="text-foreground flex items-center gap-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    className={cajasCheckboxClass}
+                                    checked={Boolean(controles[key])}
+                                    onChange={(e) => setControles((prev) => ({ ...prev, [key]: e.target.checked }))}
+                                />
+                                {label}
+                            </label>
+                        ))}
+                    </div>
+                    {fieldError('validaciones_control')}
+                </fieldset>
+            )}
 
             <div>
                 <label htmlFor="ap-nota" className={cajasFormLabelClass}>
@@ -191,6 +225,15 @@ export default function AprobarSolicitudPanel({ action, schema, singular }: Prop
                 processing={processing}
                 onConfirm={handleConfirm}
                 onCancel={() => setConfirming(false)}
+            />
+            <ConfirmDialog
+                open={multiafiliado}
+                title="Multiafiliación"
+                description={`El ${singular} ya se encuentra afiliado con otra empresa. ¿Desea continuar con la aprobación?`}
+                confirmLabel="Continuar"
+                processing={processing}
+                onConfirm={enviar}
+                onCancel={() => setMultiafiliado(false)}
             />
         </form>
     );

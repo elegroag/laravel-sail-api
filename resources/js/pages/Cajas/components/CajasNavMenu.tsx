@@ -63,6 +63,11 @@ const CAJAS_INERTIA_PREFIXES = [
     '/cajas/aprobacionpen',
     '/cajas/aprobacionfac',
     '/cajas/actualizaemp',
+    '/cajas/aprobaciontra',
+    '/cajas/aprobacioncon',
+    '/cajas/aprobacionben',
+    '/cajas/aprobacioncer',
+    '/cajas/actualizatra',
 ] as const;
 
 function normalizePath(url: string): string {

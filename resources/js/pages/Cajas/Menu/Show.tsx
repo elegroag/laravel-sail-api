@@ -98,7 +98,10 @@ export default function Show({ menu_item, menu_tipos, parent = null }: Props) {
                     <div className={cajasCardBodyClass}>
                         <dl>
                             <DetailRow label="Título" value={menu_item.title} />
-                            <DetailRow label="Controller / Action" value={`${menu_item.controller} / ${menu_item.action}`} />
+                            <DetailRow
+                                label="Controller / Action"
+                                value={`${menu_item.controller || '—'} / ${menu_item.action || '—'}`}
+                            />
                             <DetailRow label="URL por defecto" value={menu_item.default_url || 'N/A'} />
                             <DetailRow label="Icono / Color" value={`${menu_item.icon || 'N/A'} / ${menu_item.color || 'N/A'}`} />
                             <DetailRow
@@ -106,7 +109,14 @@ export default function Show({ menu_item, menu_tipos, parent = null }: Props) {
                                 value={parent ? `#${parent.id} — ${parent.title}` : menu_item.parent_id ? `#${menu_item.parent_id}` : 'Raíz'}
                             />
                             <DetailRow label="Aplicación" value={menu_item.codapl} />
-                            <DetailRow label="Permiso" value={`${menu_item.controller}.${menu_item.action}`} />
+                            <DetailRow
+                                label="Permiso"
+                                value={
+                                    menu_item.controller && menu_item.action
+                                        ? `${menu_item.controller}.${menu_item.action}`
+                                        : '—'
+                                }
+                            />
                             {menu_item.nota && <DetailRow label="Nota" value={menu_item.nota} />}
                         </dl>
 

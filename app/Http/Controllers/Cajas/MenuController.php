@@ -15,7 +15,6 @@ use Inertia\Inertia;
 
 class MenuController extends Controller
 {
-
     protected mixed $user;
 
     protected mixed $tipfun;
@@ -100,8 +99,8 @@ class MenuController extends Controller
             'nota' => 'nullable|string',
             'parent_id' => 'nullable|integer',
             'codapl' => 'required|string|max:5',
-            'controller' => 'required|string|max:150',
-            'action' => 'required|string|max:150',
+            'controller' => 'nullable|string|max:150',
+            'action' => 'nullable|string|max:150',
             'tipos' => ['required', 'array', 'min:1'],
             'tipos.*.tipo' => ['required', 'string', 'max:5', Rule::exists('mercurio06', 'tipo')],
             'tipos.*.is_visible' => ['boolean'],
@@ -110,6 +109,8 @@ class MenuController extends Controller
 
         $tipos = $data['tipos'];
         unset($data['tipos']);
+        $data['controller'] = $data['controller'] ?: null;
+        $data['action'] = $data['action'] ?: null;
 
         $item = DB::transaction(function () use ($data, $tipos) {
             $item = MenuItem::create($data);
@@ -190,8 +191,8 @@ class MenuController extends Controller
             'nota' => 'nullable|string',
             'parent_id' => 'nullable|integer',
             'codapl' => 'required|string|max:5',
-            'controller' => 'required|string|max:150',
-            'action' => 'required|string|max:150',
+            'controller' => 'nullable|string|max:150',
+            'action' => 'nullable|string|max:150',
             'tipos' => ['required', 'array', 'min:1'],
             'tipos.*.tipo' => ['required', 'string', 'max:5', Rule::exists('mercurio06', 'tipo')],
             'tipos.*.is_visible' => ['boolean'],
@@ -200,6 +201,8 @@ class MenuController extends Controller
 
         $tipos = $data['tipos'];
         unset($data['tipos']);
+        $data['controller'] = $data['controller'] ?: null;
+        $data['action'] = $data['action'] ?: null;
 
         $item = MenuItem::findOrFail($id);
 
