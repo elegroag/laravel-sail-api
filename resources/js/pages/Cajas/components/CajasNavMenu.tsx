@@ -22,6 +22,7 @@ type CajasNavMenuProps = {
 
 /** Prefijos de rutas Cajas que responden con Inertia. Ampliar al migrar módulos. */
 const CAJAS_INERTIA_PREFIXES = [
+    '/cajas/login',
     '/cajas/menu',
     '/cajas/menu-permission',
     '/cajas/formulario-dinamico',

@@ -8,18 +8,18 @@ use App\Http\Controllers\Adapter\ApplicationController;
 use App\Library\Auth\AuthCajas;
 use App\Library\Auth\SessionCookies;
 use App\Models\Gener02;
-use App\Services\CajaServices\UsuarioServices;
-use App\Services\Utils\SenderEmail;
 use App\Services\CaptchaService;
+use App\Services\Utils\SenderEmail;
 use App\Services\View as ServicesView;
 use Exception;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AuthController extends ApplicationController
 {
-
     protected ?array $user = null;
 
     protected ?string $tipo = null;
@@ -30,48 +30,46 @@ class AuthController extends ApplicationController
         $this->tipo = session('tipo') ?? null;
     }
 
-    public function index()
+    public function index(): Response
     {
-        return view('cajas.auth.login');
+        return Inertia::render('Cajas/Auth/Login', [
+            'captchaUrl' => route('cajas.captcha.image'),
+        ]);
     }
 
-    public function authenticate(Request $request)
+    public function authenticate(Request $request): RedirectResponse|Response
     {
-        $user = $request->input('user');
-        $clave = $request->input('password');
+        $user = (string) $request->input('user', '');
+        $clave = (string) $request->input('password', '');
         $captcha = $request->input('captcha');
+
         try {
-            try {
-                if (! CaptchaService::verify($captcha)) {
-                    throw new AuthException('El codigo captcha es incorrecto o ha expirado.', 10);
-                }
-
-                $auth = new AuthCajas;
-                $auth->autenticar($user, $clave);
-
-                set_flashdata(
-                    'success',
-                    [
-                        'msj' => 'Bienvenido al sistema',
-                        'template' => 'tmp_bienvenida',
-                    ]
-                );
-
-                return redirect()->route('cajas.principal');
-            } catch (AuthException $err) {
-                set_flashdata('error', [
-                    'msj' => $err->getMessage(),
-                    'code' => $err->getCode(),
-                ]);
-                return redirect()->route('cajas.login');
+            if (! CaptchaService::verify(is_string($captcha) ? $captcha : null)) {
+                throw new AuthException('El codigo captcha es incorrecto o ha expirado.', 10);
             }
-        } catch (Exception $err) {
-            set_flashdata('error', [
-                'msj' => $err->getMessage() . ' ' . $err->getFile() . ' ' . $err->getLine(),
-                'code' => $err->getCode(),
-            ]);
 
-            return redirect()->route('cajas.login');
+            if (trim($user) === '') {
+                throw new AuthException('El campo usuario es un valor requerido.', 2);
+            }
+
+            if (trim($clave) === '') {
+                throw new AuthException('El campo clave es un valor requerido.', 3);
+            }
+
+            $auth = new AuthCajas;
+            $auth->autenticar($user, $clave);
+
+            session()->flash('success', 'Bienvenido al sistema');
+
+            return redirect()->route('cajas.principal');
+        } catch (AuthException $err) {
+            return $this->loginFailure($request, $err->getMessage(), $err->getCode());
+        } catch (Exception $err) {
+            return $this->loginFailure(
+                $request,
+                $err->getMessage().' '.$err->getFile().' '.$err->getLine(),
+                (int) $err->getCode()
+            );
         }
     }
 
@@ -103,7 +101,6 @@ class AuthController extends ApplicationController
         try {
             $fecha = now()->format('Y-m-d H:i:s');
             $cedula = $request->input('recovery_cedula');
-            $captcha = $request->input('captcha');
             $_usuario = $request->input('recovery_usuario');
 
             $gener02 = Gener02::where('cedtra', $cedula)->where('usuario', $_usuario)->whereIn('estado', ['A', 'B'])->first();
@@ -120,7 +117,6 @@ class AuthController extends ApplicationController
                 }
 
                 $nueva_clave = genera_clave(8);
-                // Migrado a Hash de Laravel
                 $hash = Hash::make($nueva_clave);
 
                 Gener02::where('cedtra', $cedula)->where('usuario', $_usuario)->update([
@@ -130,7 +126,6 @@ class AuthController extends ApplicationController
                     'intentos' => '0',
                 ]);
 
-                // TODO: Migrar a Mail de Laravel
                 $mensaje = view('login.tmp.mail_recovery', [
                     'assets' => asset('/'),
                     'nombre' => $nombre,
@@ -138,7 +133,6 @@ class AuthController extends ApplicationController
                     'clave' => $nueva_clave,
                 ])->render();
 
-                // TODO: Implementar Mail de Laravel
                 $senderEmail = new SenderEmail;
                 $senderEmail->send('Recuperar cuenta de acceso al sistema SISUWEB.', $mensaje, [$email]);
 
@@ -154,7 +148,7 @@ class AuthController extends ApplicationController
             ]);
         } catch (DebugException $err) {
             session()->flash('error', [
-                'msj' => $err->getMessage() . ' ' . $err->getFile() . ' ' . $err->getLine(),
+                'msj' => $err->getMessage().' '.$err->getFile().' '.$err->getLine(),
                 'code' => $err->getCode(),
             ]);
         }
@@ -169,7 +163,6 @@ class AuthController extends ApplicationController
             $user = $request->input('change_usuario');
             $clave_actual = $request->input('change_password');
             $clave_nueva = $request->input('change_nuevo_password');
-            $captcha = $request->input('captcha');
 
             if (! $user) {
                 throw new AuthException('El usuario es requerido para la autenticación.', 2);
@@ -236,7 +229,7 @@ class AuthController extends ApplicationController
             ]);
         } catch (\Exception $err) {
             set_flashdata('error', [
-                'msj' => $err->getMessage() . ' ' . $err->getFile() . ' ' . $err->getLine(),
+                'msj' => $err->getMessage().' '.$err->getFile().' '.$err->getLine(),
                 'code' => $err->getCode(),
             ]);
         }
@@ -251,9 +244,9 @@ class AuthController extends ApplicationController
         for ($i = 0; $i < $long; $i++) {
             $password .= substr($str, rand(0, 62), 1);
         }
+
         return $password;
     }
-
 
     public function fueraServicio()
     {
@@ -263,7 +256,6 @@ class AuthController extends ApplicationController
         $this->setParamToView('hora_finaliza', '11:30');
         $this->setParamToView('nota', $msj);
     }
-
 
     public function cambioCorreo()
     {
@@ -277,19 +269,33 @@ class AuthController extends ApplicationController
             ]);
         } catch (Exception $err) {
             session()->flash('error', [
-                'msj' => 'Error ' . $err->getMessage() . ' ' . basename($err->getFile()) . ' ' . $err->getLine(),
+                'msj' => 'Error '.$err->getMessage().' '.basename($err->getFile()).' '.$err->getLine(),
                 'code' => 500,
             ]);
         }
+
         return redirect()->route('cajas.principal');
     }
 
-    public function logout()
+    public function logout(): RedirectResponse
     {
         SessionCookies::destroyIdentity();
         session()->forget('user');
         session()->forget('tipfun');
         session()->forget('tipo');
-        return redirect('cajas/login');
+
+        return redirect()->route('cajas.login');
+    }
+
+    private function loginFailure(Request $request, string $message, int $code = 0): Response
+    {
+        return Inertia::render('Cajas/Auth/Login', [
+            'captchaUrl' => route('cajas.captcha.image'),
+            'authError' => $message,
+            'authErrorCode' => $code,
+            'old' => [
+                'user' => (string) $request->input('user', ''),
+            ],
+        ]);
     }
 }

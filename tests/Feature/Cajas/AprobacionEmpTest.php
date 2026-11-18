@@ -422,6 +422,18 @@ class AprobacionEmpTest extends TestCase
             ->assertSessionHas('error');
     }
 
+    public function test_archivo_adjunto_no_disponible_responde_json_en_ajax(): void
+    {
+        $id = $this->empresa();
+        $this->mock(SolicitudDetalleService::class, function ($mock): void {
+            $mock->shouldReceive('archivoAdjunto')->with('2', 1, '03')->andReturn(null);
+        });
+
+        $this->getJson("/cajas/aprobacionemp/{$id}/archivos/03")
+            ->assertNotFound()
+            ->assertJson(['message' => 'El archivo no está disponible.']);
+    }
+
     public function test_archivo_adjunto_se_sirve_en_linea(): void
     {
         $id = $this->empresa();

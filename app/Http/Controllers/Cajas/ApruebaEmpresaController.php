@@ -12,6 +12,7 @@ use App\Services\Cajas\Solicitudes\SolicitudListService;
 use App\Services\CajaServices\EditarSolicitudFormulario;
 use App\Services\CajaServices\EditarSolicitudService;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -93,11 +94,15 @@ class ApruebaEmpresaController extends Controller
         ]);
     }
 
-    public function archivo(Request $request, int $id, string $coddoc): BinaryFileResponse|RedirectResponse
+    public function archivo(Request $request, int $id, string $coddoc): BinaryFileResponse|JsonResponse|RedirectResponse
     {
         $this->solicitudOrRedirect($id);
         $archivo = $this->detalle->archivoAdjunto($this->tipopc, $id, $coddoc);
         if ($archivo === null) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'El archivo no está disponible.'], 404);
+            }
+
             return redirect()->route('cajas.aprobacionemp.show', ['id' => $id])->with('error', 'El archivo no está disponible.');
         }
 
