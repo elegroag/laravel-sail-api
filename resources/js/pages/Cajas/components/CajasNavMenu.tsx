@@ -53,6 +53,9 @@ const CAJAS_INERTIA_PREFIXES = [
     '/cajas/informe-solicitud',
     '/cajas/reporte-solicitudes-empresa',
     '/cajas/consulta-documento-solicitud',
+    '/cajas/reportesol',
+    '/cajas/reporte-oportunidad',
+    '/cajas/usuario',
 ] as const;
 
 function normalizePath(url: string): string {

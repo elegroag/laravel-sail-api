@@ -17,13 +17,18 @@ use App\Models\Mercurio32;
 use App\Models\Mercurio34;
 use App\Models\Mercurio36;
 use App\Services\CajaServices\UsuarioServices;
+use App\Services\Cajas\UsuarioExternoService;
 use App\Services\Srequest;
 use App\Services\Utils\Pagination;
 use App\Services\Utils\SenderEmail;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class UsuarioController extends Controller
 {
@@ -32,41 +37,113 @@ class UsuarioController extends Controller
     protected $tipfun;
 
     /**
-     * services variable
-     *
-     * @var Services
-     */
-    protected $services;
-
-    /**
      * pagination variable
      *
      * @var Pagination
      */
     protected $pagination;
 
-    public function __construct()
-    {
+    public function __construct(
+        protected UsuarioExternoService $usuarioExternoService
+    ) {
         $this->pagination = new Pagination;
         $this->user = session('user');
         $this->tipfun = session('tipfun');
     }
 
-    public function index()
+    public function index(Request $request): Response
     {
-        $campo_field = [
-            'documento' => 'Identificación',
-            'nombre' => 'Nombre usuario',
-            'tipo' => 'Tipo usuario',
-            'email' => 'Email',
-        ];
+        $filters = $this->usuarioExternoService->filtersFromRequest($request);
+        $paginator = $this->usuarioExternoService->paginate($request);
 
-        return view('cajas.usuario.index', [
-            'campo_filtro' => $campo_field,
-            'filters' => get_flashdata_item('filter_params'),
-            'title' => 'Perfil usuario',
-            'mercurio11' => [],
+        return Inertia::render('Cajas/Usuario/Index', [
+            'items' => [
+                'data' => $this->usuarioExternoService->mapRows($paginator->items()),
+                'meta' => [
+                    'pagination' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'from' => $paginator->firstItem(),
+                        'to' => $paginator->lastItem(),
+                        'total' => $paginator->total(),
+                    ],
+                ],
+            ],
+            'filters' => $filters,
+            'tipoOptions' => $this->usuarioExternoService->tipoOptions(),
+            'estadoOptions' => $this->usuarioExternoService->estadoOptions(),
         ]);
+    }
+
+    public function show(string $documento, string $tipo, string $coddoc): Response
+    {
+        $usuario = $this->usuarioExternoService->findOrFail($documento, $tipo, $coddoc);
+
+        return Inertia::render('Cajas/Usuario/Show', [
+            'usuario' => $this->usuarioExternoService->mapDetail($usuario),
+        ]);
+    }
+
+    public function edit(string $documento, string $tipo, string $coddoc): Response
+    {
+        $usuario = $this->usuarioExternoService->findOrFail($documento, $tipo, $coddoc);
+
+        return Inertia::render('Cajas/Usuario/Edit', [
+            'usuario' => $this->usuarioExternoService->mapDetail($usuario),
+            'options' => $this->usuarioExternoService->formOptions($usuario),
+        ]);
+    }
+
+    public function update(Request $request, string $documento, string $tipo, string $coddoc): RedirectResponse
+    {
+        try {
+            $result = $this->usuarioExternoService->update(
+                $documento,
+                $tipo,
+                $coddoc,
+                $request->all()
+            );
+
+            $usuario = $result['usuario'];
+            $clavePlana = $result['clave_plana'];
+
+            if ($clavePlana !== null && $clavePlana !== '') {
+                try {
+                    $this->notifyCambiarClave($clavePlana, $usuario);
+                } catch (Exception $e) {
+                    return redirect()
+                        ->route('cajas.usuario.show', [
+                            'documento' => $usuario->documento,
+                            'tipo' => $usuario->tipo,
+                            'coddoc' => $usuario->coddoc,
+                        ])
+                        ->with('success', 'Usuario actualizado. La clave cambió, pero no se pudo enviar el correo: '.$e->getMessage());
+                }
+            }
+
+            return redirect()
+                ->route('cajas.usuario.show', [
+                    'documento' => $usuario->documento,
+                    'tipo' => $usuario->tipo,
+                    'coddoc' => $usuario->coddoc,
+                ])
+                ->with('success', $clavePlana
+                    ? 'Usuario actualizado y nueva clave enviada al correo.'
+                    : 'Usuario actualizado correctamente.');
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (DebugException $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $e->getMessage()])
+                ->withInput();
+        } catch (Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => 'No se pudo actualizar el usuario: '.$e->getMessage()])
+                ->withInput();
+        }
     }
 
     /**

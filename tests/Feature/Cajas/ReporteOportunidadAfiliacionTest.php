@@ -54,10 +54,10 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                 ->andReturn($this->sampleDataset());
         });
 
-        $response = $this->post(route('cajas.reporte-oportunidad.exportar'), [
+        $response = $this->get(route('cajas.reporte-oportunidad.exportar', [
             'fecini' => '2026-03-01',
             'fecfin' => '2026-03-31',
-        ]);
+        ]));
 
         $response->assertOk();
         $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -113,11 +113,11 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                 ]]);
         });
 
-        $response = $this->post(route('cajas.reporte-oportunidad.exportar'), [
+        $response = $this->get(route('cajas.reporte-oportunidad.exportar', [
             'fecini' => '2026-03-01',
             'fecfin' => '2026-03-31',
             'tipafis' => [3],
-        ]);
+        ]));
 
         $response->assertOk();
 
@@ -168,11 +168,11 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                 ]]);
         });
 
-        $response = $this->post(route('cajas.reporte-oportunidad.exportar'), [
+        $response = $this->get(route('cajas.reporte-oportunidad.exportar', [
             'fecini' => '2026-04-01',
             'fecfin' => '2026-04-30',
             'tipafis' => [4],
-        ]);
+        ]));
 
         $response->assertOk();
 
@@ -217,11 +217,11 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                 ]]);
         });
 
-        $response = $this->post(route('cajas.reporte-oportunidad.exportar'), [
+        $response = $this->get(route('cajas.reporte-oportunidad.exportar', [
             'fecini' => '2026-05-01',
             'fecfin' => '2026-05-31',
             'tipafis' => [13],
-        ]);
+        ]));
 
         $response->assertOk();
 
@@ -250,11 +250,11 @@ class ReporteOportunidadAfiliacionTest extends TestCase
                 ->andReturn([$this->sampleDataset()[0]]);
         });
 
-        $response = $this->post(route('cajas.reporte-oportunidad.exportar'), [
+        $response = $this->get(route('cajas.reporte-oportunidad.exportar', [
             'fecini' => '2026-05-01',
             'fecfin' => '2026-05-31',
             'tipafis' => [1],
-        ]);
+        ]));
 
         $response->assertOk();
     }
@@ -276,7 +276,9 @@ class ReporteOportunidadAfiliacionTest extends TestCase
         $this->assertTrue(Route::has('cajas.reporte-oportunidad.exportar'));
 
         $route = Route::getRoutes()->getByName('cajas.reporte-oportunidad.exportar');
+        $this->assertNotNull($route);
         $this->assertContains('cajas.auth', $route->gatherMiddleware());
+        $this->assertContains('GET', $route->methods());
     }
 
     /**
