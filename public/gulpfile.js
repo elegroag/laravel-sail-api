@@ -56,7 +56,6 @@ const appModules = {
         'Oficinas',
         'Galeria',
         'Consulta',
-        'Empresas',
         'Inicio',
         'Trabajadores',
         'Conyuges',

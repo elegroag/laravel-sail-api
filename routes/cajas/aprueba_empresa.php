@@ -4,29 +4,29 @@ use App\Http\Controllers\Cajas\ApruebaEmpresaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['cajas.auth'])->group(function () {
-    Route::prefix('/cajas/aprobacionemp')->group(function () {
-
+    Route::prefix('/cajas/aprobacionemp')->name('cajas.aprobacionemp.')->group(function () {
         Route::get('/', function () {
-            return redirect('cajas/aprobacionemp/index');
+            return redirect()->route('cajas.aprobacionemp.index');
         });
-        Route::get('/index', [ApruebaEmpresaController::class, 'index']);
-        Route::get('/listar', [ApruebaEmpresaController::class, 'listar']);
-        Route::post('/buscar/{estado?}', [ApruebaEmpresaController::class, 'buscar']);
+        Route::get('/index', [ApruebaEmpresaController::class, 'index'])->name('index');
 
-        Route::post('/devolver', [ApruebaEmpresaController::class, 'devolver']);
-        Route::post('/rechazar', [ApruebaEmpresaController::class, 'rechazar']);
-        Route::post('/reaprobar', [ApruebaEmpresaController::class, 'reaprobar']);
-        Route::get('/opcional', [ApruebaEmpresaController::class, 'opcional']);
-        Route::post('/infor', [ApruebaEmpresaController::class, 'infor']);
-        Route::get('/editar/{id}', [ApruebaEmpresaController::class, 'editarView']);
-        Route::post('/editar', [ApruebaEmpresaController::class, 'editaEmpresa']);
-        Route::post('/editar-formulario', [ApruebaEmpresaController::class, 'editarFormulario']);
-        Route::post('/editar-solicitud', [ApruebaEmpresaController::class, 'editarSolicitud']);
-        Route::post('/aportes/{id?}', [ApruebaEmpresaController::class, 'aportes']);
+        // API JSON compartida con el resto de módulos de solicitudes
+        Route::post('/editar-formulario', [ApruebaEmpresaController::class, 'editarFormulario'])->name('editar_formulario');
+        Route::post('/editar-solicitud', [ApruebaEmpresaController::class, 'editarSolicitud'])->name('editar_solicitud');
 
-        Route::post('/aplicar_filtro/{estado?}', [ApruebaEmpresaController::class, 'aplicarFiltro']);
-        Route::post('/change_cantidad_pagina/{estado}', [ApruebaEmpresaController::class, 'changeCantidadPagina']);
-        Route::post('/aprueba', [ApruebaEmpresaController::class, 'aprueba']);
-        Route::post('/borrar-filtro', [ApruebaEmpresaController::class, 'borrarFiltro']);
+        Route::prefix('/{id}')->whereNumber('id')->group(function () {
+            Route::get('/', [ApruebaEmpresaController::class, 'show'])->name('show');
+            Route::get('/edit', [ApruebaEmpresaController::class, 'edit'])->name('edit');
+            Route::put('/', [ApruebaEmpresaController::class, 'update'])->name('update');
+            Route::get('/aportes', [ApruebaEmpresaController::class, 'aportes'])->name('aportes');
+            Route::get('/deshacer', [ApruebaEmpresaController::class, 'deshacerForm'])->name('deshacer_form');
+            Route::get('/archivos/{coddoc}', [ApruebaEmpresaController::class, 'archivo'])->name('archivo');
+
+            Route::post('/aprobar', [ApruebaEmpresaController::class, 'aprobar'])->name('aprobar');
+            Route::post('/devolver', [ApruebaEmpresaController::class, 'devolver'])->name('devolver');
+            Route::post('/rechazar', [ApruebaEmpresaController::class, 'rechazar'])->name('rechazar');
+            Route::post('/reaprobar', [ApruebaEmpresaController::class, 'reaprobar'])->name('reaprobar');
+            Route::post('/deshacer', [ApruebaEmpresaController::class, 'deshacer'])->name('deshacer');
+        });
     });
 });

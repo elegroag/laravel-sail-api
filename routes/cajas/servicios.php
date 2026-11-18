@@ -40,11 +40,9 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::get('/reporte/{format?}', [ConciliacionServiciosController::class, 'reporte'])->name('conciliacion-servicios.reporte');
     });
 
-    // Bandeja de solicitudes de devolución (Mercurio → Cajas)
+    // Bandeja de solicitudes de devolución (Mercurio → Cajas) — Inertia
     Route::prefix('/cajas/devolucion-servicios')->group(function () {
         Route::get('/index', [DevolucionServiciosController::class, 'index'])->name('devolucion-servicios.index');
-        Route::post('/buscar', [DevolucionServiciosController::class, 'buscar'])->name('devolucion-servicios.buscar');
-        Route::post('/change-cantidad-pagina', [DevolucionServiciosController::class, 'changeCantidadPagina'])->name('devolucion-servicios.change-cantidad-pagina');
         Route::post('/{id}/en-tramite', [DevolucionServiciosController::class, 'enTramite'])->whereNumber('id')->name('devolucion-servicios.en-tramite');
         Route::post('/{id}/aprobar', [DevolucionServiciosController::class, 'aprobar'])->whereNumber('id')->name('devolucion-servicios.aprobar');
         Route::post('/{id}/rechazar', [DevolucionServiciosController::class, 'rechazar'])->whereNumber('id')->name('devolucion-servicios.rechazar');
