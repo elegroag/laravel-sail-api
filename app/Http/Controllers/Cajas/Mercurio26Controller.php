@@ -2,256 +2,99 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
-use App\Models\Mercurio01;
-use App\Models\Mercurio26;
+use App\Http\Controllers\Controller;
+use App\Services\Cajas\Mercurio26Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio26Controller extends ApplicationController
+class Mercurio26Controller extends Controller
 {
+    public function __construct(
+        protected Mercurio26Service $service
+    ) {}
 
-    protected $user;
-
-    protected $tipo;
-
-    public function __construct()
+    public function index(): Response
     {
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
-    }
-
-    public function index()
-    {
-        return view('cajas.mercurio26.index', [
-            'title' => 'Galería',
+        return Inertia::render('Cajas/Mercurio26/Index', [
+            'items' => $this->service->listar(),
         ]);
     }
 
-    public function galeria()
+    public function store(Request $request): RedirectResponse
     {
-        try {
-            $mercurio01 = Mercurio01::first();
-            if (! $mercurio01) {
-                throw new DebugException('Configuración básica no encontrada.');
-            }
+        $tipo = $request->input('tipo');
 
-            $path = $mercurio01->publicUrl('galeria');
-            $galeria = Mercurio26::orderBy('orden', 'ASC')->get();
+        $data = $request->validate([
+            'tipo' => ['required', Rule::in(['F', 'V'])],
+            'nota' => 'nullable|string|max:255',
+            'archivo' => [
+                'required',
+                'file',
+                $tipo === 'V'
+                    ? 'mimetypes:video/mp4|max:20480'
+                    : 'mimes:jpg,jpeg,png|max:5120',
+            ],
+        ]);
 
-            $data = $galeria->map(function ($item) use ($path) {
-                return [
-                    'numero' => $item->numero,
-                    'archivo' => $path.'/'.$item->archivo,
-                    'tipo' => $item->tipo,
-                    'nota' => $item->nota,
-                ];
-            });
+        $result = $this->service->guardar(
+            [
+                'tipo' => $data['tipo'],
+                'nota' => $data['nota'] ?? null,
+            ],
+            $request->file('archivo')
+        );
 
-            $response = parent::successFunc('Consulta exitosa');
-            $response['data'] = $data;
-
-            return $this->renderObject($response);
-        } catch (DebugException $e) {
-            return $this->renderObject(parent::errorFunc($e->getMessage()));
-        } catch (\Throwable $e) {
-            parent::setLogger($e->getMessage());
-
-            return $this->renderObject(parent::errorFunc('No se pudo cargar la galería.'));
+        if (! $result['flag']) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => $result['msj']])
+                ->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio26.index')
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    public function destroy(int $numero): RedirectResponse
     {
-        try {
-            $validated = $request->validate([
-                'tipo' => 'required|in:F,V',
-                'nota' => 'nullable|string|max:500',
-                'archivo' => [
-                    'required',
-                    'file',
-                    $request->input('tipo') === 'V'
-                        ? 'mimetypes:video/mp4|max:20480'
-                        : 'mimes:jpg,jpeg,png|max:5120',
-                ],
-            ]);
+        $result = $this->service->borrar($numero);
 
-            DB::beginTransaction();
-
-            $numero = (Mercurio26::max('numero') ?? 0) + 1;
-            $orden = (Mercurio26::max('orden') ?? 0) + 1;
-            $tipo = $validated['tipo'];
-
-            $mercurio26 = new Mercurio26;
-            $mercurio26->setNumero($numero);
-            $mercurio26->setOrden($orden);
-            $mercurio26->setTipo($tipo);
-            $mercurio26->setEstado('A');
-            $mercurio26->setNota($validated['nota'] ?? '');
-
-            $mercurio01 = Mercurio01::first();
-            if (! $mercurio01) {
-                throw new DebugException('Configuración básica no encontrada.');
-            }
-
-            if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
-                throw new DebugException('No se ha subido ningún archivo o el archivo no es válido.');
-            }
-
-            $file = $request->file('archivo');
-            $extension = $file->getClientOriginalExtension();
-            $fileName = 'promo_'.$numero.'.'.$extension;
-            $destinationPath = public_path($mercurio01->getPath().'galeria');
-
-            if (! File::isDirectory($destinationPath)) {
-                File::makeDirectory($destinationPath, 0755, true);
-            }
-
-            $file->move($destinationPath, $fileName);
-            $mercurio26->setArchivo($fileName);
-
-            if (! $mercurio26->save()) {
-                parent::setLogger($mercurio26->getMessages());
-                DB::rollBack();
-                throw new DebugException('Error al guardar el registro de la galería.');
-            }
-
-            DB::commit();
-
-            return $this->renderObject(parent::successFunc('Creacion terminada Con Exito'));
-        } catch (ValidationException $e) {
-            $message = collect($e->errors())->flatten()->first() ?? 'Error de validación.';
-
-            return $this->renderObject(parent::errorFunc($message));
-        } catch (DebugException $e) {
-            DB::rollBack();
-
-            return $this->renderObject(parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage()));
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            parent::setLogger($e->getMessage());
-
-            return $this->renderObject(parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage()));
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
+
+        return redirect()
+            ->route('cajas.mercurio26.index')
+            ->with('success', $result['msj']);
     }
 
-    public function arriba(Request $request)
+    public function moveUp(int $numero): RedirectResponse
     {
-        try {
-            $numero = $request->input('numero');
+        $result = $this->service->mover($numero, 'up');
 
-            DB::beginTransaction();
-            $objetivo = Mercurio26::where('numero', $numero)->first();
-            if (! $objetivo) {
-                throw new DebugException('Registro no encontrado.');
-            }
-
-            $orden_obj = $objetivo->getOrden();
-            $minimo = Mercurio26::min('orden');
-
-            if ($orden_obj != $minimo) {
-                $superior = Mercurio26::where('orden', '<', $orden_obj)->orderBy('orden', 'desc')->first();
-                if ($superior) {
-                    $orden_sup = $superior->getOrden();
-                    $objetivo->orden = $orden_sup;
-                    $superior->orden = $orden_obj;
-                    $objetivo->save();
-                    $superior->save();
-                }
-            }
-            DB::commit();
-
-            return $this->renderObject(parent::successFunc('Ordenado Con Exito'));
-        } catch (DebugException $e) {
-            DB::rollBack();
-
-            return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            parent::setLogger($e->getMessage());
-
-            return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
+
+        return redirect()
+            ->route('cajas.mercurio26.index')
+            ->with('success', $result['msj']);
     }
 
-    public function abajo(Request $request)
+    public function moveDown(int $numero): RedirectResponse
     {
-        try {
-            $numero = $request->input('numero');
+        $result = $this->service->mover($numero, 'down');
 
-            DB::beginTransaction();
-            $objetivo = Mercurio26::where('numero', $numero)->first();
-            if (! $objetivo) {
-                throw new DebugException('Registro no encontrado.');
-            }
-
-            $orden_obj = $objetivo->getOrden();
-            $maximo = Mercurio26::max('orden');
-
-            if ($orden_obj != $maximo) {
-                $inferior = Mercurio26::where('orden', '>', $orden_obj)->orderBy('orden', 'asc')->first();
-                if ($inferior) {
-                    $orden_inf = $inferior->getOrden();
-                    $objetivo->orden = $orden_inf;
-                    $inferior->orden = $orden_obj;
-                    $objetivo->save();
-                    $inferior->save();
-                }
-            }
-            DB::commit();
-
-            return $this->renderObject(parent::successFunc('Ordenado Con Exito'));
-        } catch (DebugException $e) {
-            DB::rollBack();
-
-            return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            parent::setLogger($e->getMessage());
-
-            return $this->renderObject(parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage()));
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
-    }
 
-    public function borrar(Request $request)
-    {
-        try {
-            $numero = $request->input('numero');
-
-            DB::beginTransaction();
-            $mercurio26 = Mercurio26::where('numero', $numero)->first();
-
-            if (! $mercurio26) {
-                throw new DebugException('El registro a borrar no existe.');
-            }
-
-            $archivo = $mercurio26->getArchivo();
-            $mercurio01 = Mercurio01::first();
-
-            if ($mercurio01 && ! empty($archivo)) {
-                $filePath = public_path($mercurio01->getPath().'galeria/'.$archivo);
-                if (File::exists($filePath)) {
-                    File::delete($filePath);
-                }
-            }
-
-            $mercurio26->delete();
-
-            DB::commit();
-
-            return $this->renderObject(parent::successFunc('Borrado Con Exito'));
-        } catch (DebugException $e) {
-            DB::rollBack();
-
-            return $this->renderObject(parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage()));
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            parent::setLogger($e->getMessage());
-
-            return $this->renderObject(parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage()));
-        }
+        return redirect()
+            ->route('cajas.mercurio26.index')
+            ->with('success', $result['msj']);
     }
 }

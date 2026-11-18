@@ -2,557 +2,173 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
-use App\Models\Gener02;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio04;
-use App\Models\Mercurio05;
-use App\Models\Mercurio08;
-use App\Models\Mercurio09;
-use App\Services\Api\ApiSubsidio;
-use App\Services\Utils\Comman;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
-use Exception;
+use App\Services\Cajas\Mercurio04Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio04Controller extends ApplicationController
+class Mercurio04Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio04Service $service
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected ?array $user = null;
-
-    protected ?string $tipfun = null;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session('user')  ?? null;
-        $this->tipfun = session('tipfun') ?? null;
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function showTabla($paginate)
-    {
-        return view('cajas.mercurio04._table', compact('paginate'))->render();
-    }
-
-    public function aplicarFiltro(Request $request)
-    {
-        $this->setResponse('ajax');
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->setResponse('ajax');
-        $this->cantidad_pagina = $request->input('numero');
-        return $this->buscar($request);
-    }
-
-    public function index()
-    {
-        Log::info('Mercurio04Controller@index - Iniciando carga de vista oficinas');
-
-        try {
-            $campo_field = [
-                'codofi' => 'Codigo',
-                'detalle' => 'Detalle',
-            ];
-
-            Log::info('Mercurio04Controller@index - Llamando ApiSubsidio::send');
-
-            $ps = new ApiSubsidio();
-            $ps->send(
-                [
-                    'servicio' => 'ComfacaAfilia',
-                    'metodo' => 'listar_ciudades_departamentos',
-                    'params' => false,
-                ]
-            );
-            $out = $ps->toArray();
-
-            $_codciu = [];
-            if (!empty($out['success']) && !empty($out['ciudades'])) {
-                Log::info('Mercurio04Controller@index - Respuesta ApiSubsidio', ['ciudades_count' => count($out['ciudades'])]);
-                foreach ($out['ciudades'] as $mcodciu) {
-                    $_codciu[$mcodciu['codciu']] = $mcodciu['detciu'];
-                }
-            } else {
-                Log::warning('Mercurio04Controller@index - ApiSubsidio falló o sin ciudades', ['response' => $out]);
-            }
-
-            Log::info('Mercurio04Controller@index - Consultando Gener02');
-
-            $out = Gener02::where('estado', 'A')->get();
-            foreach ($out as $usuario) {
-                $usuarios[$usuario->usuario] = $usuario->nombre . ' (' . $usuario->usuario . ')';
-            }
-
-            Log::info('Mercurio04Controller@index - Consultando Mercurio09');
-
-            $out = Mercurio09::all();
-            foreach ($out as $tipopc) {
-                $tipopcs[$tipopc->tipopc] = $tipopc->detalle;
-            }
-
-            Log::info('Mercurio04Controller@index - Renderizando vista');
-
-            return view('cajas.mercurio04.index', [
-                'campo_filtro' => $campo_field,
-                'title' => 'Oficinas',
-                'ciudades' => $_codciu,
-                'principal' => ['S' => 'Sí', 'N' => 'No'],
-                'estados' => ['A' => 'Activo', 'I' => 'Inactivo'],
-                'usuarios' => $usuarios,
-                'tipopcs' => $tipopcs,
-            ]);
-        } catch (Exception $e) {
-            Log::error('Mercurio04Controller@index - Error 500', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
-        }
-    }
-
-    public function buscar(Request $request)
-    {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
-
-        $paginate = Paginate::execute(
-            Mercurio04::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
-
-        $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
-
-        $response = [
-            'consulta' => $html,
-            'query' => $this->query,
-            'paginate' => $html_paginate,
-        ];
-
-        return $this->renderObject($response, false);
-    }
-
-    public function editar(Request $request)
-    {
-        try {
-            $codofi = $request->input('codofi');
-            $mercurio04 = Mercurio04::where("codofi", $codofi)->first();
-            if ($mercurio04 == false) {
-                $mercurio04 = new Mercurio04;
-            }
-
-            return $this->renderObject($mercurio04->toArray(), false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-        }
-    }
-
-    public function borrar(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            try {
-                $this->setResponse('ajax');
-                $codofi = $request->input('codofi');
-
-                Mercurio04::whereRaw("codofi = '$codofi'")->delete();
-                DB::commit();
-                $response = [
-                    'success' => true,
-                    'msj' => 'Borrado Con Exito'
-                ];
-
-                return $this->renderObject($response);
-            } catch (DebugException $e) {
-                DB::rollBack();
-            }
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se puede Borrar el Registro ' . $e->getMessage()
-            ];
-            return $this->renderObject($response);
-        }
-    }
-
-    public function guardar(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $codofi = $request->input('codofi');
-            $detalle = $request->input('detalle');
-            $principal = $request->input('principal');
-            $estado = $request->input('estado');
-
-            if ($codofi === null || $codofi === '') {
-                return $this->renderObject([
-                    'flag' => false,
-                    'success' => false,
-                    'msg' => 'El campo codofi es obligatorio',
-                    'msj' => 'El campo codofi es obligatorio',
-                ]);
-            }
-
-            DB::beginTransaction();
-            $mercurio04 = Mercurio04::firstOrNew(['codofi' => $codofi]);
-            $mercurio04->setCodofi($codofi);
-            $mercurio04->setDetalle($detalle);
-            $mercurio04->setPrincipal($principal);
-            $mercurio04->setEstado($estado);
-
-            if (! $mercurio04->save()) {
-                DB::rollBack();
-                throw new DebugException('Error al guardar el registro');
-            }
-
-            DB::commit();
-
-            return $this->renderObject([
-                'flag' => true,
-                'success' => true,
-                'msg' => 'Operación realizada con éxito',
-                'msj' => 'Operación realizada con éxito',
-            ]);
-        } catch (DebugException $e) {
-            DB::rollBack();
-
-            return $this->renderObject([
-                'flag' => false,
-                'success' => false,
-                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
-                'msj' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return $this->renderObject([
-                'flag' => false,
-                'success' => false,
-                'msg' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
-                'msj' => 'No se puede guardar/editar el Registro: '.$e->getMessage(),
-            ]);
-        }
-    }
-
-    public function validePk(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $codofi = $request->input('codofi');
-            $response = 'El Registro ya se encuentra Digitado';
-            $l = Mercurio04::whereRaw("codofi = '$codofi'")->count();
-            if ($l > 0) {
-                $response = 'El Registro ya se encuentra Digitado';
-            }
-
-            return $this->renderObject([
-                'success' => true,
-                'msj' => $response
-            ]);
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo validar la informacion ' . $e->getMessage()
-            ];
-            return $this->renderObject($response);
-        }
-    }
-
-    public function reporte(Request $request, $format = 'P')
-    {
-        $this->setResponse('ajax');
-        $_fields = [];
-        $_fields['codofi'] = ['header' => 'Codigo', 'size' => '15', 'align' => 'C'];
-        $_fields['detalle'] = ['header' => 'Detalle', 'size' => '31', 'align' => 'C'];
-        $_fields['principal'] = ['header' => 'Principal', 'size' => '31', 'align' => 'C'];
-        $_fields['estado'] = ['header' => 'Estado', 'size' => '31', 'align' => 'C'];
-        $consultasOldServices = new GeneralService;
-        $file = $consultasOldServices->createReport('mercurio04', $_fields, $this->query, 'Oficinas', $format);
-
-        return $this->renderObject([
-            'success' => true,
-            'msj' => 'Reporte generado con éxito',
-            'file' => $file
+        return Inertia::render('Cajas/Mercurio04/Index', [
+            'items' => [
+                'data' => collect($paginator->items())->map(fn (Mercurio04 $row) => [
+                    'codofi' => (string) $row->codofi,
+                    'detalle' => (string) $row->detalle,
+                    'principal' => (string) $row->principal,
+                    'estado' => (string) $row->estado,
+                ])->values()->all(),
+                'meta' => [
+                    'pagination' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'from' => $paginator->firstItem(),
+                        'to' => $paginator->lastItem(),
+                        'total' => $paginator->total(),
+                    ],
+                ],
+            ],
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function validePkCiudad(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $codofi = $request->input('codofi');
-            $codciu = $request->input('codciu');
-            $response = 'El Registro ya se encuentra Digitado';
-            $l = Mercurio05::whereRaw("codofi = '$codofi' and codciu='$codciu'")->count();
-            if ($l > 0) {
-                $response = 'El Registro ya se encuentra Digitado';
-            }
+        $data = $this->validated($request);
+        $result = $this->service->guardar($data);
 
-            return $this->renderObject([
-                'success' => true,
-                'msj' => $response
-            ]);
-        } catch (DebugException $e) {
-            return $this->renderObject([
-                'success' => false,
-                'msj' => 'No se pudo validar la informacion ' . $e->getMessage()
-            ]);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio04.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function ciudadView(Request $request)
+    public function update(Request $request, string $codofi): RedirectResponse
     {
-        try {
-            $codofi = $request->input('codofi');
-            $mercurio05 = Mercurio05::whereRaw("codofi='{$codofi}'")->get();
-            $response = [
-                'success' => true,
-                'data' => $mercurio05->toArray()
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage()
-            ];
+        Mercurio04::findOrFail($codofi);
+        $data = $this->validated($request, $codofi);
+        $result = $this->service->guardar($data, $codofi);
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
-        return $this->renderObject($response);
+
+        return redirect()
+            ->route('cajas.mercurio04.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function guardarCiudad(Request $request)
+    public function destroy(string $codofi): RedirectResponse
     {
-        try {
+        $result = $this->service->borrar($codofi);
 
-            $this->setResponse('ajax');
-            $codofi = $request->input('codofi');
-            $codciu = $request->input('codciu');
-
-            DB::beginTransaction();
-            $mercurio05 = new Mercurio05;
-
-            $mercurio05->setCodofi($codofi);
-            $mercurio05->setCodciu($codciu);
-            if (! $mercurio05->save()) {
-                DB::rollBack();
-            }
-            DB::commit();
-            $response = [
-                'success' => true,
-                'msj' => 'Movimiento Realizado Con Exito'
-            ];
-            $response = [
-                'success' => true,
-                'msj' => $response
-            ];
-            return $this->renderObject($response);
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
-            ];
-
-            return $this->renderObject($response);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
+
+        return redirect()->back()->with('success', $result['msj']);
     }
 
-    public function editarCiudad(Request $request)
+    public function opciones(string $codofi): Response
     {
-        try {
-            try {
-                $this->setResponse('ajax');
-                $codofi = $request->input('codofi');
-                $codciu = $request->input('codciu');
+        $oficina = Mercurio04::findOrFail($codofi);
 
-                DB::beginTransaction();
-                $mercurio05 = Mercurio05::whereRaw("codofi='$codofi' and codciu = '$codciu'")->first();
-                if ($mercurio05 == false) {
-                    $mercurio05 = new Mercurio05;
-                }
-
-                return $this->renderObject($mercurio05->toArray());
-            } catch (DebugException $e) {
-                DB::rollBack();
-            }
-        } catch (DebugException $e) {
-
-            return $this->renderObject([
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
-            ]);
-        }
+        return Inertia::render('Cajas/Mercurio04/Opciones', [
+            'oficina' => [
+                'codofi' => (string) $oficina->codofi,
+                'detalle' => (string) $oficina->detalle,
+                'principal' => (string) $oficina->principal,
+                'estado' => (string) $oficina->estado,
+            ],
+            'tipopcOptions' => $this->service->opcionesTipopc(),
+            'usuarioOptions' => $this->service->opcionesUsuarios(),
+            'asignaciones' => $this->service->asignaciones($codofi),
+        ]);
     }
 
-    public function borrarCiudad(Request $request)
+    public function storeOpcion(Request $request, string $codofi): RedirectResponse
     {
-        try {
-            try {
-                $this->setResponse('ajax');
-                $codofi = $request->input('codofi');
-                $codciu = $request->input('codciu');
+        $data = $request->validate([
+            'tipopc' => 'required|string|max:2',
+            'usuario' => 'required|integer',
+        ]);
 
-                DB::beginTransaction();
-                Mercurio05::whereRaw("codofi='$codofi' and codciu='$codciu'")->delete();
-                DB::commit();
-                $response = 'Movimiento Realizado Con Exito';
+        $result = $this->service->guardarOpcion(
+            $codofi,
+            (string) $data['tipopc'],
+            (int) $data['usuario'],
+        );
 
-                return $this->renderObject([
-                    'success' => true,
-                    'msj' => 'Movimiento Realizado Con Exito'
-                ]);
-            } catch (DebugException $e) {
-                DB::rollBack();
-            }
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
-            ];
-
-            return $this->renderObject($response);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio04.opciones', ['codofi' => $codofi])
+            ->with('success', $result['msj']);
     }
 
-    public function validePkOpcion(Request $request)
+    public function destroyOpcion(Request $request, string $codofi): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $codofi = $request->input('codofi');
-            $tipopc = $request->input('tipopc');
-            $usuario = $request->input('usuario');
+        $data = $request->validate([
+            'tipopc' => 'required|string|max:2',
+            'usuario' => 'required|integer',
+        ]);
 
-            $l = Mercurio08::whereRaw("codofi='{$codofi}' AND tipopc='{$tipopc}' AND usuario='{$usuario}'")->count();
-            if ($l > 0) {
-                throw new DebugException('El Registro ya se encuentra digitado', 501);
-            }
-            $response = [
-                'flag' => true,
-                'msg' => 'Ok',
-                'success' => true,
-            ];
-        } catch (DebugException $e) {
-            $response = [
-                'flag' => false,
-                'msg' => $e->getMessage(),
-                'success' => false,
-            ];
+        $result = $this->service->borrarOpcion(
+            $codofi,
+            (string) $data['tipopc'],
+            (int) $data['usuario'],
+        );
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
 
-        return $this->renderObject($response, false);
+        return redirect()
+            ->route('cajas.mercurio04.opciones', ['codofi' => $codofi])
+            ->with('success', $result['msj']);
     }
 
-    public function opcionView(Request $request)
+    /**
+     * @return array{codofi: string, detalle: string, principal: string, estado: string}
+     */
+    private function validated(Request $request, ?string $currentCodofi = null): array
     {
-        try {
-            $codofi = $request->input('codofi');
-            $mercurio08 = Mercurio08::where("codofi", $codofi)->get();
-            $data = $mercurio08->map(function ($row) {
-                $arr = $row->toArray();
-                $mercurio09 = Mercurio09::where('tipopc', $row->tipopc)->first();
-                $gener02 = Gener02::where('usuario', $row->usuario)->first();
+        $isUpdate = $currentCodofi !== null;
 
-                $arr['tipopc_detalle'] = ($mercurio09) ? $mercurio09->detalle : '';
-                $arr['usuario_nombre'] = ($gener02) ? $gener02->nombre : '';
-                return $arr;
-            });
+        $data = $request->validate([
+            'codofi' => $isUpdate
+                ? ['nullable', 'string', 'max:2']
+                : ['required', 'string', 'min:1', 'max:2'],
+            'detalle' => 'required|string|max:45',
+            'principal' => ['required', Rule::in(['S', 'N'])],
+            'estado' => ['required', Rule::in(['A', 'I'])],
+        ]);
 
-            $response = [
-                'success' => true,
-                'data' => $data->toArray()
-            ];
-            return $this->renderObject($response);
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => $e->getMessage()
-            ];
-            return $this->renderObject($response);
-        }
-    }
-
-    public function guardarOpcion(Request $request)
-    {
-        try {
-            $codofi = $request->input('codofi');
-            $tipopc = $request->input('tipopc');
-            $usuario = $request->input('usuario');
-            DB::beginTransaction();
-
-            $mercurio08 = Mercurio08::whereRaw("codofi='{$codofi}' and tipopc='{$tipopc}' and usuario='{$usuario}'")->first();
-            if ($mercurio08 == false) {
-                $orden = Mercurio08::whereRaw(" codofi='{$codofi}' and tipopc='{$tipopc}'")->max('orden') + 1;
-                $mercurio08 = Mercurio08::create(
-                    [
-                        'order' => $orden,
-                        'codofi' => $codofi,
-                        'tipopc' => $tipopc,
-                        'usuario' => $usuario,
-                    ]
-                );
-            } else {
-                $mercurio08->update([
-                    'orden' => $mercurio08->orden + 1
-                ]);
-            }
-            DB::commit();
-            $response = [
-                'success' => true,
-                'msj' => 'Movimiento Realizado Con Exito'
-            ];
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
-            ];
-        } catch (Exception $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
-            ];
-        }
-        return response()->json($response);
-    }
-
-    public function borrarOpcion(Request $request)
-    {
-        try {
-            try {
-                $this->setResponse('ajax');
-                $codofi = $request->input('codofi');
-                $tipopc = $request->input('tipopc');
-                $usuario = $request->input('usuario');
-
-                DB::beginTransaction();
-                Mercurio08::whereRaw("codofi='$codofi' and tipopc='$tipopc' and usuario='$usuario'")->delete();
-                DB::commit();
-                $response = [
-                    'success' => true,
-                    'msj' => 'Movimiento Realizado Con Exito'
-                ];
-            } catch (DebugException $e) {
-                DB::rollBack();
-                $response = [
-                    'success' => false,
-                    'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
-                ];
-            }
-        } catch (DebugException $e) {
-            $response = [
-                'success' => false,
-                'msj' => 'No se pudo realizar el movimiento ' . $e->getMessage()
-            ];
-        }
-        return $this->renderObject($response);
+        return [
+            'codofi' => $isUpdate ? $currentCodofi : (string) $data['codofi'],
+            'detalle' => (string) $data['detalle'],
+            'principal' => (string) $data['principal'],
+            'estado' => (string) $data['estado'],
+        ];
     }
 }
