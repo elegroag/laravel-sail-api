@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/AppLayout';
 import CajasSearchSelect from '@/pages/Cajas/components/CajasSearchSelect';
+import ConfirmDialog from '@/pages/Cajas/Solicitudes/ConfirmDialog';
 import {
     cajasActionDangerClass,
     cajasActionLinkClass,
@@ -28,6 +29,7 @@ type Row = {
     controller: string | null;
     action: string | null;
     orden: number | null;
+    asignaciones: number;
 };
 
 type PaginationMeta = {
@@ -95,6 +97,8 @@ export default function Index({ items, filters, controllers, actions }: Props) {
     const [form, setForm] = useState<FormState>(emptyForm());
     const [processing, setProcessing] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<Row | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         setQ(filters.q);
@@ -224,13 +228,33 @@ export default function Index({ items, filters, controllers, actions }: Props) {
         }
     };
 
-    const handleDelete = (row: Row) => {
-        if (!confirm(`¿Eliminar la acción de módulo ${row.codigo}?`)) return;
+    const openDelete = (row: Row) => {
+        setDeleteTarget(row);
+    };
 
-        router.delete(`/cajas/gener40/${encodeURIComponent(row.codigo)}`, {
+    const cancelDelete = () => {
+        if (deleting) return;
+        setDeleteTarget(null);
+    };
+
+    const confirmDelete = () => {
+        if (!deleteTarget) return;
+
+        setDeleting(true);
+        router.delete(`/cajas/gener40/${encodeURIComponent(deleteTarget.codigo)}`, {
             preserveScroll: true,
+            onFinish: () => {
+                setDeleting(false);
+                setDeleteTarget(null);
+            },
         });
     };
+
+    const deleteDescription = deleteTarget
+        ? deleteTarget.asignaciones > 0
+            ? `Se eliminará la acción "${deleteTarget.codigo}" (${deleteTarget.detalle || 'sin detalle'}). También se revocarán ${deleteTarget.asignaciones} asignación(es) de usuarios en Gener42. Esta acción no se puede deshacer.`
+            : `¿Eliminar la acción de módulo "${deleteTarget.codigo}" (${deleteTarget.detalle || 'sin detalle'})? Esta acción no se puede deshacer.`
+        : '';
 
     const inputError = (field: string) => (formErrors[field] ? cajasInputErrorClass : '');
 
@@ -344,7 +368,7 @@ export default function Index({ items, filters, controllers, actions }: Props) {
                                                             <Pencil className="size-3.5" />
                                                             Editar
                                                         </button>
-                                                        <button type="button" onClick={() => handleDelete(row)} className={cajasActionDangerClass}>
+                                                        <button type="button" onClick={() => openDelete(row)} className={cajasActionDangerClass}>
                                                             <Trash2 className="size-3.5" />
                                                             Eliminar
                                                         </button>
@@ -411,6 +435,16 @@ export default function Index({ items, filters, controllers, actions }: Props) {
                     </div>
                 </section>
             </div>
+
+            <ConfirmDialog
+                open={deleteTarget !== null}
+                title="Eliminar acción de módulo"
+                description={deleteDescription}
+                confirmLabel={deleteTarget && deleteTarget.asignaciones > 0 ? 'Eliminar y revocar' : 'Eliminar'}
+                processing={deleting}
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+            />
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="sm:max-w-lg">

@@ -31,6 +31,7 @@ class Gener40Controller extends Controller
                     'controller' => $row->controller !== null && $row->controller !== '' ? (string) $row->controller : null,
                     'action' => $row->action !== null && $row->action !== '' ? (string) $row->action : null,
                     'orden' => $row->orden !== null ? (int) $row->orden : null,
+                    'asignaciones' => (int) ($row->asignaciones_count ?? 0),
                 ])->values()->all(),
                 'meta' => [
                     'pagination' => [

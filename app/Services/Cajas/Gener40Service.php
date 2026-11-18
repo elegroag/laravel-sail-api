@@ -31,6 +31,7 @@ class Gener40Service
         }
 
         return $query
+            ->withCount('asignaciones')
             ->orderByRaw('orden IS NULL')
             ->orderBy('orden')
             ->orderBy('codigo')
@@ -181,23 +182,22 @@ class Gener40Service
                 ];
             }
 
-            if (Gener42::query()->where('permiso', $codigo)->exists()) {
-                DB::rollBack();
-
-                return [
-                    'flag' => false,
-                    'msg' => 'No se puede borrar: el permiso está asignado a uno o más usuarios.',
-                    'msj' => 'No se puede borrar: el permiso está asignado a uno o más usuarios.',
-                ];
+            $asignaciones = Gener42::query()->where('permiso', $codigo)->count();
+            if ($asignaciones > 0) {
+                Gener42::query()->where('permiso', $codigo)->delete();
             }
 
             $row->delete();
             DB::commit();
 
+            $msj = $asignaciones > 0
+                ? "Borrado con éxito. Se revocaron {$asignaciones} asignación(es) de usuarios."
+                : 'Borrado con éxito';
+
             return [
                 'flag' => true,
-                'msg' => 'Borrado con éxito',
-                'msj' => 'Borrado con éxito',
+                'msg' => $msj,
+                'msj' => $msj,
             ];
         } catch (\Exception $e) {
             DB::rollBack();

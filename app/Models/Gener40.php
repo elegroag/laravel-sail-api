@@ -24,6 +24,11 @@ class Gener40 extends ModelBase
         'orden',
     ];
 
+    public function asignaciones()
+    {
+        return $this->hasMany(Gener42::class, 'permiso', 'codigo');
+    }
+
     // Getters/Setters para compatibilidad legacy
     public function setCodigo($codigo)
     {
