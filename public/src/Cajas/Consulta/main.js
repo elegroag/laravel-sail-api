@@ -134,45 +134,6 @@ $(() => {
             });
     }
 
-    function consulta_activacion_masiva() {
-        var validator = $('#form').validate({
-            rules: {
-                nit: {
-                    required: true
-                },
-                fecini: {
-                    required: true
-                },
-                fecfin: {
-                    required: true
-                },
-            },
-        });
-        if (!$('#form').valid()) {
-            return;
-        }
-        $.ajax({
-                type: 'POST',
-                url: Utils.getKumbiaURL($Kumbia.controller + '/consulta_activacion_masiva'),
-                data: {
-                    nit: $('#nit').val(),
-                    fecini: $('#fecini').val(),
-                    fecfin: $('#fecfin').val(),
-                },
-            })
-            .done(function(transport) {
-                var response = transport;
-                $('#consulta').html(response);
-            })
-            .fail(function(jqXHR, textStatus) {
-                alert('Request failed: ' + textStatus);
-            });
-    }
-
-    function descarga_activacion(element) {
-        window.open(Utils.getURL('temp/' + element.innerHTML));
-    }
-
     const MODAL_ID = 'modal_generic';
     const MODAL_DIALOG_ID = 'size_modal_generic';
     const MODAL_CONTENT_ID = 'show_modal_generic';

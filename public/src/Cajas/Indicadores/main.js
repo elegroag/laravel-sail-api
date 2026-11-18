@@ -110,45 +110,6 @@ const info = (tipopc, id) => {
         });
 }
 
-const consulta_activacion_masiva = () => {
-    var validator = $('#form').validate({
-        rules: {
-            nit: {
-                required: true
-            },
-            fecini: {
-                required: true
-            },
-            fecfin: {
-                required: true
-            },
-        },
-    });
-    if (!$('#form').valid()) {
-        return;
-    }
-    $.ajax({
-            type: 'POST',
-            url: Utils.getKumbiaURL($Kumbia.controller + '/consulta_activacion_masiva'),
-            data: {
-                nit: $('#nit').val(),
-                fecini: $('#fecini').val(),
-                fecfin: $('#fecfin').val(),
-            },
-        })
-        .done(function(transport) {
-            var response = transport;
-            $('#consulta').html(response);
-        })
-        .fail(function(jqXHR, textStatus) {
-            alert('Request failed: ' + textStatus);
-        });
-}
-
-const descarga_activacion = (element) => {
-    window.open(Utils.getURL('temp/' + element.innerHTML));
-}
-
 $(() => {
 
     flatpickr($('#fecini, #fecfin'), {
@@ -204,15 +165,5 @@ $(() => {
     $(document).on('click', '[data-toggle="info"]', function(e) {
         e.preventDefault();
         info();
-    });
-
-    $(document).on('click', '[data-toggle="consulta_activacion_masiva"]', function(e) {
-        e.preventDefault();
-        consulta_activacion_masiva();
-    });
-
-    $(document).on('click', '[data-toggle="descarga_activacion"]', function(e) {
-        e.preventDefault();
-        descarga_activacion();
     });
 });

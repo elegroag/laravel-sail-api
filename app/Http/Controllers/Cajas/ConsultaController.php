@@ -9,7 +9,6 @@ use App\Models\Mercurio07;
 use App\Models\Mercurio09;
 use App\Models\Mercurio30;
 use App\Models\Mercurio31;
-use App\Models\Mercurio46;
 use App\Services\Api\ApiSubsidio;
 use App\Services\Certificados\Certificado;
 use App\Services\Certificados\CertiTrabajador;
@@ -20,6 +19,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ConsultaController extends ApplicationController
 {
@@ -41,7 +42,7 @@ class ConsultaController extends ApplicationController
         ]);
     }
 
-    public function cargaLaboral()
+    public function cargaLaboral(): Response
     {
         $gener02 = Gener02::select('gener02.usuario', 'gener02.nombre', 'gener02.login')
             ->join('mercurio08', 'gener02.usuario', '=', 'mercurio08.usuario')
@@ -70,15 +71,49 @@ class ConsultaController extends ApplicationController
                     (string) $item['usuario'],
                     ['estado' => 'P']
                 );
-                $item['cantidad'] = $out['count'];
+                $item['cantidad'] = (int) ($out['count'] ?? 0);
 
                 return $item;
             });
 
-        return view('cajas.consulta.carga_laboral', [
-            'title' => 'Carga Laboral',
-            'gener02' => $gener02,
-            'mercurio09' => $mercurio09,
+        $asesores = $gener02->map(function ($asesor) use ($mercurio09) {
+            $items = collect($mercurio09)
+                ->filter(fn ($m09) => (string) $m09['usuario'] === (string) $asesor->usuario)
+                ->sortByDesc('cantidad')
+                ->values()
+                ->map(fn ($item) => [
+                    'tipopc' => (string) $item['tipopc'],
+                    'detalle' => (string) $item['detalle'],
+                    'dias' => $item['dias'] ?? null,
+                    'cantidad' => (int) $item['cantidad'],
+                ])
+                ->all();
+
+            $total = array_sum(array_column($items, 'cantidad'));
+
+            return [
+                'usuario' => (string) $asesor->usuario,
+                'nombre' => (string) $asesor->getNombre(),
+                'login' => (string) ($asesor->login ?? $asesor->getLogin()),
+                'items' => $items,
+                'total' => $total,
+                'tipos' => count($items),
+            ];
+        })
+            ->sortByDesc('total')
+            ->values()
+            ->all();
+
+        $totalPendientes = array_sum(array_column($asesores, 'total'));
+        $asesoresConCarga = count(array_filter($asesores, fn ($asesor) => $asesor['total'] > 0));
+
+        return Inertia::render('Cajas/Consulta/CargaLaboral', [
+            'asesores' => $asesores,
+            'summary' => [
+                'total_asesores' => count($asesores),
+                'asesores_con_carga' => $asesoresConCarga,
+                'total_pendientes' => $totalPendientes,
+            ],
         ]);
     }
 
@@ -128,16 +163,12 @@ class ConsultaController extends ApplicationController
                 $detalle = (string) optional(Mercurio09::find($tipopc))->detalle;
             }
 
-            $html = view('cajas.consulta._tabla_carga_laboral', [
-                'solicitudes' => $solicitudes,
-                'tipopc' => $tipopc,
-            ])->render();
-
             return response()->json([
                 'success' => true,
                 'detalle' => $detalle,
                 'count' => $solicitudes->count(),
-                'html' => $html,
+                'es_empresa' => in_array((string) (int) $tipopc, ['2', '5'], true),
+                'solicitudes' => $solicitudes,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -493,43 +524,6 @@ class ConsultaController extends ApplicationController
             'html' => $html,
             'success' => true,
         ]);
-    }
-
-    public function consultaActivacionMasivaView()
-    {
-        return view('cajas.consulta.activacion_masiva', [
-            'title' => 'Consulta Activacion Masiva',
-        ]);
-    }
-
-    public function consultaActivacionMasiva(Request $request)
-    {
-        $fecini = $request->input('fecini');
-        $fecfin = $request->input('fecfin');
-        $html = '';
-        $html = "<div class='table-responsive'> ";
-        $html .= "<table class='table'>";
-        $html .= '<tr>';
-        $html .= '<td>Id</td>';
-        $html .= '<td>Empresa</td>';
-        $html .= '<td>Fecha Cargue</td>';
-        $html .= '<td>Archivo</td>';
-        $html .= '</tr>';
-        $condi = " mercurio46.fecsis>='$fecini' and mercurio46.fecsis<='$fecfin' ";
-
-        $mercurio = Mercurio46::whereRaw($condi)->get();
-        foreach ($mercurio as $mmercurio) {
-            $html .= '<tr>';
-            $html .= "<td>{$mmercurio->getId()}</td>";
-            $html .= "<td>{$mmercurio->getNit()}</td>";
-            $html .= "<td>{$mmercurio->getFecsis()}</td>";
-            $html .= '<td>';
-            $html .= "<a href='#' onclick='descarga_activacion(this)'>".$mmercurio->getArchivo().'</a>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        return $this->renderObject(['consulta' => $html], false);
     }
 
     public function certificadoTrabajadorView()

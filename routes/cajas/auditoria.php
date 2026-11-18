@@ -1,15 +1,16 @@
 <?php
 
-// Importar facades y controlador necesarios
 use App\Http\Controllers\Cajas\AuditoriaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/auditoria')->group(function () {
+        Route::get('/', [AuditoriaController::class, 'index'])->name('auditoria');
         Route::get('/index', [AuditoriaController::class, 'index'])->name('auditoria.index');
-        Route::post('/consulta', [AuditoriaController::class, 'consultaAuditoria'])->name('auditoria.consulta');
+        Route::get('/{tipopc}/{id}', [AuditoriaController::class, 'show'])
+            ->whereNumber('id')
+            ->name('auditoria.show');
         Route::post('/reporte', [AuditoriaController::class, 'reporteAuditoria'])->name('auditoria.reporte');
         Route::post('/exportar', [AuditoriaController::class, 'exportarExcel'])->name('auditoria.exportar');
-        Route::post('/infor', [AuditoriaController::class, 'infor'])->name('auditoria.infor');
     });
 });
