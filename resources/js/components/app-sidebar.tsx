@@ -9,11 +9,11 @@ export function AppSidebar() {
     const { cajasMenu = [] } = usePage<SharedData>().props;
 
     return (
-        <Sidebar collapsible="icon" variant="inset" className="bg-cajas-bg text-cajas-text">
-            <SidebarHeader className="cajas-sidebar-header justify-center">
-                <SidebarMenu>
+        <Sidebar collapsible="icon" variant="inset" className="bg-cajas-bg text-cajas-text pr-0">
+            <SidebarHeader className="cajas-sidebar-header justify-center !pr-4">
+                <SidebarMenu className="items-center">
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild tooltip={{ children: 'Comfaca en línea' }}>
+                        <SidebarMenuButton size="lg" asChild tooltip={{ children: 'Comfaca en línea' }} className="justify-center">
                             <Link href="/cajas/principal" prefetch>
                                 <AppLogo />
                             </Link>
