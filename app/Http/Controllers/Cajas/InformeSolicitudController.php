@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Cajas\InformeSolicitudRequest;
 use App\Models\Mercurio09;
 use App\Services\Reports\InformeSolicitudPdfService;
@@ -10,40 +10,60 @@ use App\Support\AuditoriaSolicitudResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class InformeSolicitudController extends ApplicationController
+class InformeSolicitudController extends Controller
 {
     public function __construct(
         protected InformeSolicitudPdfService $informeSolicitudPdfService
     ) {}
 
-    public function index()
+    public function index(): InertiaResponse
     {
         $tipopcs = AuditoriaSolicitudResolver::tipopcsInforme();
         $labels = AuditoriaSolicitudResolver::labelsInforme();
 
         $mercurio09 = Mercurio09::whereIn('tipopc', $tipopcs)->get();
         if ($mercurio09->isEmpty()) {
-            $mercurio09 = collect($labels)->map(fn (string $detalle, string $tipopc) => (object) [
-                'tipopc' => $tipopc,
-                'detalle' => $detalle,
-            ]);
+            $tipopcOptions = collect($labels)
+                ->map(fn (string $detalle, string $tipopc) => [
+                    'value' => (string) $tipopc,
+                    'label' => $detalle,
+                ])
+                ->values()
+                ->all();
         } else {
-            $mercurio09 = $mercurio09->map(function ($item) use ($labels) {
+            $tipopcOptions = $mercurio09->map(function ($item) use ($labels) {
                 $key = (string) $item->tipopc;
-                if (isset($labels[$key]) && trim((string) $item->detalle) === '') {
-                    $item->detalle = $labels[$key];
+                $detalle = trim((string) $item->detalle);
+                if ($detalle === '' && isset($labels[$key])) {
+                    $detalle = $labels[$key];
                 }
 
-                return $item;
-            });
+                return [
+                    'value' => $key,
+                    'label' => $detalle !== '' ? $detalle : $key,
+                ];
+            })->values()->all();
         }
 
-        return view('cajas.informe_solicitud.index', [
+        $legacyFlash = function_exists('get_flashdata') ? get_flashdata() : null;
+        $flashError = null;
+        if (is_array($legacyFlash) && isset($legacyFlash['error'])) {
+            $flashError = is_array($legacyFlash['error'])
+                ? (string) ($legacyFlash['error']['msj'] ?? '')
+                : (string) $legacyFlash['error'];
+            $flashError = $flashError !== '' ? $flashError : null;
+        }
+
+        return Inertia::render('Cajas/InformeSolicitud/Index', [
             'title' => 'Informe de solicitud',
-            'mercurio09' => $mercurio09,
+            'tipopcOptions' => $tipopcOptions,
+            'pdfUrl' => route('cajas.informe-solicitud.pdf'),
+            'flashError' => $flashError,
         ]);
     }
 

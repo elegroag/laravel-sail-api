@@ -118,4 +118,12 @@ class InformeSolicitudTest extends TestCase
         $route = Route::getRoutes()->getByName('cajas.informe-solicitud.pdf');
         $this->assertContains('cajas.auth', $route->gatherMiddleware());
     }
+
+    public function test_index_es_get_inertia(): void
+    {
+        $index = Route::getRoutes()->getByName('cajas.informe-solicitud.index');
+        $this->assertNotNull($index);
+        $this->assertContains('GET', $index->methods());
+        $this->assertSame('index', $index->getActionMethod());
+    }
 }

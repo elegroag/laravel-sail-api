@@ -31,17 +31,11 @@ Route::middleware(['cajas.auth'])->group(function () {
     Route::prefix('/cajas/reporte-solicitudes-empresa')->group(function () {
         Route::get('/index', [ReporteSolicitudesEmpresaController::class, 'index'])
             ->name('cajas.reporte-solicitudes-empresa.index');
-
-        Route::post('/consultar', [ReporteSolicitudesEmpresaController::class, 'consultar'])
-            ->name('cajas.reporte-solicitudes-empresa.consultar');
     });
 
     Route::prefix('/cajas/consulta-documento-solicitud')->group(function () {
         Route::get('/index', [ConsultaDocumentoSolicitudController::class, 'index'])
             ->name('cajas.consulta-documento-solicitud.index');
-
-        Route::post('/consultar', [ConsultaDocumentoSolicitudController::class, 'consultar'])
-            ->name('cajas.consulta-documento-solicitud.consultar');
     });
 
     Route::prefix('/cajas/reporte-compras-servicios')->group(function () {
