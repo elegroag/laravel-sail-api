@@ -38,6 +38,7 @@ const CAJAS_INERTIA_PREFIXES = [
     '/cajas/mercurio09',
     '/cajas/mercurio04',
     '/cajas/mercurio26',
+    '/cajas/principal',
 ] as const;
 
 function normalizePath(url: string): string {
