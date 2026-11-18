@@ -3,162 +3,212 @@
 namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
+use App\Http\Controllers\Controller;
 use App\Services\Ecommerce\ConciliacionServiciosService;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Conciliación administrativa: precompras PA vs ventas en Subsidio (ref_payco).
  */
-class ConciliacionServiciosController extends ApplicationController
+class ConciliacionServiciosController extends Controller
 {
-    protected int $cantidad_pagina = 15;
-
-    public function index()
+    public function index(Request $request, ConciliacionServiciosService $service): Response
     {
         $hoy = now()->toDateString();
-
-        return view('cajas.conciliacion_servicios.index', [
-            'title' => 'Conciliación servicios vs Subsidio',
+        $defaults = [
             'fecha_inicio' => now()->startOfMonth()->toDateString(),
             'fecha_fin' => $hoy,
-            'filtro_estados' => ConciliacionServiciosService::ESTADOS,
-        ]);
-    }
+            'estado' => '',
+            'per_page' => 15,
+        ];
 
-    public function buscar(Request $request, ConciliacionServiciosService $service)
-    {
+        $queried = $request->boolean('queried');
+
+        $filters = [
+            'fecha_inicio' => (string) $request->query('fecha_inicio', $defaults['fecha_inicio']),
+            'fecha_fin' => (string) $request->query('fecha_fin', $defaults['fecha_fin']),
+            'estado' => (string) $request->query('estado', $defaults['estado']),
+            'per_page' => max(1, min(200, (int) $request->query('per_page', $defaults['per_page']))),
+        ];
+
+        $estadoOptions = collect(ConciliacionServiciosService::ESTADOS)
+            ->map(fn (string $label, string $value) => ['value' => $value, 'label' => $label])
+            ->values()
+            ->all();
+
+        $emptyResumen = collect(array_keys(ConciliacionServiciosService::ESTADOS))
+            ->mapWithKeys(fn (string $codigo) => [$codigo => 0])
+            ->all();
+
+        if (! $queried) {
+            return Inertia::render('Cajas/ConciliacionServicios/Index', [
+                'filters' => $filters,
+                'estadoOptions' => $estadoOptions,
+                'estadoLabels' => ConciliacionServiciosService::ESTADOS,
+                'resumen' => $emptyResumen,
+                'items' => [
+                    'data' => [],
+                    'meta' => [
+                        'pagination' => [
+                            'current_page' => 1,
+                            'last_page' => 1,
+                            'per_page' => $filters['per_page'],
+                            'from' => null,
+                            'to' => null,
+                            'total' => 0,
+                        ],
+                    ],
+                ],
+                'queried' => false,
+                'error' => null,
+            ]);
+        }
+
         try {
-            $data = $request->validate([
+            $request->validate([
                 'fecha_inicio' => 'required|date_format:Y-m-d',
                 'fecha_fin' => 'required|date_format:Y-m-d|after_or_equal:fecha_inicio',
                 'estado' => 'nullable|string',
-                'pagina' => 'nullable|integer|min:1',
-                'numero' => 'nullable|integer|min:1|max:200',
+                'page' => 'nullable|integer|min:1',
+                'per_page' => 'nullable|integer|min:1|max:200',
             ]);
 
-            $pagina = (int) ($data['pagina'] ?? 1);
-            if (! empty($data['numero'])) {
-                $this->cantidad_pagina = (int) $data['numero'];
-            }
+            $resultado = $service->conciliar($filters['fecha_inicio'], $filters['fecha_fin']);
+            $filas = $this->filtrarPorEstado($resultado['filas'], $filters['estado']);
+            $paginator = $this->paginateFilas($filas, $request, $filters['per_page']);
 
-            $resultado = $service->conciliar($data['fecha_inicio'], $data['fecha_fin']);
-            $filas = $this->filtrarPorEstado($resultado['filas'], $data['estado'] ?? '');
-            $paginate = Paginate::execute($filas, $pagina, $this->cantidad_pagina);
-            $consultasOldServices = new GeneralService;
-
-            $html = view('cajas.conciliacion_servicios._tabla', [
-                'paginate' => $paginate,
-            ])->render();
-
-            $resumenHtml = view('cajas.conciliacion_servicios._resumen', [
+            return Inertia::render('Cajas/ConciliacionServicios/Index', [
+                'filters' => $filters,
+                'estadoOptions' => $estadoOptions,
+                'estadoLabels' => ConciliacionServiciosService::ESTADOS,
                 'resumen' => $resultado['resumen'],
-            ])->render();
-
-            return $this->renderObject([
-                'consulta' => $html,
-                'paginate' => $consultasOldServices->showPaginate($paginate, $this->cantidad_pagina),
-                'resumen' => $resumenHtml,
-                'totales' => $resultado['resumen'],
-                'total_filas' => count($filas),
-            ], false);
+                'items' => [
+                    'data' => array_values($paginator->items()),
+                    'meta' => [
+                        'pagination' => [
+                            'current_page' => $paginator->currentPage(),
+                            'last_page' => $paginator->lastPage(),
+                            'per_page' => $paginator->perPage(),
+                            'from' => $paginator->firstItem(),
+                            'to' => $paginator->lastItem(),
+                            'total' => $paginator->total(),
+                        ],
+                    ],
+                ],
+                'queried' => true,
+                'error' => null,
+            ]);
         } catch (ValidationException $e) {
-            return $this->renderObject([
-                'success' => false,
-                'message' => 'Fechas inválidas',
-                'errors' => $e->errors(),
-            ], false);
+            throw $e;
         } catch (DebugException $e) {
-            return $this->renderObject([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'consulta' => '<div class="alert alert-danger mb-0">' . e($e->getMessage()) . '</div>',
-                'paginate' => '',
-                'resumen' => '',
-            ], false);
+            return Inertia::render('Cajas/ConciliacionServicios/Index', [
+                'filters' => $filters,
+                'estadoOptions' => $estadoOptions,
+                'estadoLabels' => ConciliacionServiciosService::ESTADOS,
+                'resumen' => $emptyResumen,
+                'items' => [
+                    'data' => [],
+                    'meta' => [
+                        'pagination' => [
+                            'current_page' => 1,
+                            'last_page' => 1,
+                            'per_page' => $filters['per_page'],
+                            'from' => null,
+                            'to' => null,
+                            'total' => 0,
+                        ],
+                    ],
+                ],
+                'queried' => true,
+                'error' => $e->getMessage(),
+            ]);
         } catch (\Throwable $e) {
-            return $this->renderObject([
-                'success' => false,
-                'message' => 'Error al conciliar: ' . $e->getMessage(),
-                'consulta' => '<div class="alert alert-danger mb-0">Error al conciliar: ' . e($e->getMessage()) . '</div>',
-                'paginate' => '',
-                'resumen' => '',
-            ], false);
+            return Inertia::render('Cajas/ConciliacionServicios/Index', [
+                'filters' => $filters,
+                'estadoOptions' => $estadoOptions,
+                'estadoLabels' => ConciliacionServiciosService::ESTADOS,
+                'resumen' => $emptyResumen,
+                'items' => [
+                    'data' => [],
+                    'meta' => [
+                        'pagination' => [
+                            'current_page' => 1,
+                            'last_page' => 1,
+                            'per_page' => $filters['per_page'],
+                            'from' => null,
+                            'to' => null,
+                            'total' => 0,
+                        ],
+                    ],
+                ],
+                'queried' => true,
+                'error' => 'Error al conciliar: '.$e->getMessage(),
+            ]);
         }
     }
 
-    public function reporte(Request $request, ConciliacionServiciosService $service, $format = 'csv')
+    public function reporte(Request $request, ConciliacionServiciosService $service, $format = 'csv'): StreamedResponse
     {
-        try {
-            $data = $request->validate([
-                'fecha_inicio' => 'required|date_format:Y-m-d',
-                'fecha_fin' => 'required|date_format:Y-m-d|after_or_equal:fecha_inicio',
-                'estado' => 'nullable|string',
-            ]);
+        $data = $request->validate([
+            'fecha_inicio' => 'required|date_format:Y-m-d',
+            'fecha_fin' => 'required|date_format:Y-m-d|after_or_equal:fecha_inicio',
+            'estado' => 'nullable|string',
+        ]);
 
-            $resultado = $service->conciliar($data['fecha_inicio'], $data['fecha_fin']);
-            $filas = $this->filtrarPorEstado($resultado['filas'], $data['estado'] ?? '');
+        $resultado = $service->conciliar($data['fecha_inicio'], $data['fecha_fin']);
+        $filas = $this->filtrarPorEstado($resultado['filas'], $data['estado'] ?? '');
+        $filename = 'conciliacion_servicios_'.date('Ymd_His').'.csv';
 
-            $filename = 'conciliacion_servicios_' . date('Ymd_His') . '.csv';
+        return new StreamedResponse(function () use ($filas) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, [
+                'Estado conciliación',
+                'Precompra ID',
+                'Documento',
+                'Beneficiario',
+                'Servicio',
+                'Apertura',
+                'Ref ePayco',
+                'Valor precompra',
+                'Fecha pago',
+                'Estado precompra',
+                'Venta marca',
+                'Venta documento',
+                'Venta fecha',
+                'Venta valor pago',
+                'Venta valor forma pago',
+            ], ';');
 
-            return new StreamedResponse(function () use ($filas) {
-                $handle = fopen('php://output', 'w');
-                fwrite($handle, "\xEF\xBB\xBF");
+            foreach ($filas as $fila) {
                 fputcsv($handle, [
-                    'Estado conciliación',
-                    'Precompra ID',
-                    'Documento',
-                    'Beneficiario',
-                    'Servicio',
-                    'Apertura',
-                    'Ref ePayco',
-                    'Valor precompra',
-                    'Fecha pago',
-                    'Estado precompra',
-                    'Venta marca',
-                    'Venta documento',
-                    'Venta fecha',
-                    'Venta valor pago',
-                    'Venta valor forma pago',
+                    $fila['estado_descripcion'],
+                    $fila['precompra_id'],
+                    $fila['documento'],
+                    $fila['codben'],
+                    $fila['codser'],
+                    $fila['numero'],
+                    $fila['ref_payco'],
+                    $fila['valor_precompra'],
+                    $fila['fecha_pago'],
+                    $fila['estado_precompra_desc'] ?? $fila['estado_precompra'],
+                    $fila['venta_marca'],
+                    $fila['venta_documento'],
+                    $fila['venta_fecha'],
+                    $fila['venta_valpago'],
+                    $fila['venta_valor_forma_pago'],
                 ], ';');
-
-                foreach ($filas as $fila) {
-                    fputcsv($handle, [
-                        $fila['estado_descripcion'],
-                        $fila['precompra_id'],
-                        $fila['documento'],
-                        $fila['codben'],
-                        $fila['codser'],
-                        $fila['numero'],
-                        $fila['ref_payco'],
-                        $fila['valor_precompra'],
-                        $fila['fecha_pago'],
-                        $fila['estado_precompra_desc'] ?? $fila['estado_precompra'],
-                        $fila['venta_marca'],
-                        $fila['venta_documento'],
-                        $fila['venta_fecha'],
-                        $fila['venta_valpago'],
-                        $fila['venta_valor_forma_pago'],
-                    ], ';');
-                }
-                fclose($handle);
-            }, 200, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            ]);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo generar el reporte: ' . $e->getMessage());
-
-            return $this->renderObject($response, false);
-        } catch (ValidationException $e) {
-            $response = parent::errorFunc('Fechas inválidas para el reporte');
-
-            return $this->renderObject($response, false);
-        }
+            }
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 
     /**
@@ -176,5 +226,28 @@ class ConciliacionServiciosController extends ApplicationController
             $filas,
             fn (array $fila) => ($fila['estado'] ?? '') === $estado
         ));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $filas
+     * @return LengthAwarePaginator<int, array<string, mixed>>
+     */
+    protected function paginateFilas(array $filas, Request $request, int $perPage): LengthAwarePaginator
+    {
+        $page = max(1, (int) $request->query('page', 1));
+        $total = count($filas);
+        $offset = ($page - 1) * $perPage;
+        $slice = array_slice($filas, $offset, $perPage);
+
+        return new LengthAwarePaginator(
+            $slice,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
     }
 }

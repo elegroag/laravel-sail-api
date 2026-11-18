@@ -172,4 +172,125 @@
         font-family: nucleoicons;
         font-size: 0.875rem;
     }
+
+    .cajas-choices {
+        @apply mt-1 w-full;
+        --choices-font-size-lg: 0.875rem;
+        --choices-font-size-md: 0.875rem;
+        --choices-font-size-sm: 0.8125rem;
+        --choices-text-color: var(--foreground);
+        --choices-keyline-color: var(--border);
+        --choices-bg-color: var(--card);
+        --choices-bg-color-dropdown: var(--card);
+        --choices-bg-color-disabled: color-mix(in srgb, var(--muted) 70%, var(--card));
+        --choices-primary-color: var(--cajas-border);
+        --choices-highlight-color: var(--cajas-border);
+        --choices-guttering: 0;
+    }
+
+    .cajas-choices .choices {
+        margin-bottom: 0;
+        font-size: 0.875rem;
+        overflow: visible;
+    }
+
+    .cajas-choices .choices.is-open,
+    .cajas-choices .choices.is-focused {
+        position: relative;
+        z-index: 80;
+    }
+
+    .cajas-choices .choices__inner {
+        @apply min-h-10 rounded-md border border-border bg-card text-sm text-foreground shadow-sm;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+        min-height: 2.5rem;
+        line-height: 1.25rem;
+        transition:
+            border-color var(--cajas-transition),
+            box-shadow var(--cajas-transition);
+    }
+
+    .cajas-choices .choices__list--single {
+        @apply p-0 text-foreground;
+        padding-right: 0;
+    }
+
+    .cajas-choices .choices__list--single .choices__item {
+        @apply text-foreground;
+    }
+
+    .cajas-choices .choices__placeholder {
+        @apply text-muted-foreground opacity-100;
+    }
+
+    .cajas-choices .choices.is-focused .choices__inner,
+    .cajas-choices .choices.is-open .choices__inner {
+        border-color: var(--cajas-border);
+        outline: none;
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--cajas-border) 35%, transparent);
+    }
+
+    .cajas-choices .choices[data-type*='select-one']::after {
+        border-color: color-mix(in srgb, var(--foreground) 55%, transparent) transparent transparent transparent;
+        right: 0.85rem;
+    }
+
+    .cajas-choices .choices[data-type*='select-one'].is-open::after {
+        border-color: transparent transparent color-mix(in srgb, var(--foreground) 55%, transparent);
+    }
+
+    .cajas-choices .choices__list--dropdown,
+    .cajas-choices .choices__list[aria-expanded] {
+        @apply rounded-md border border-border bg-card text-foreground;
+        top: calc(100% + 0.35rem);
+        margin-top: 0;
+        z-index: 90;
+        overflow: hidden;
+        box-shadow:
+            0 10px 15px -3px color-mix(in srgb, var(--foreground) 12%, transparent),
+            0 4px 6px -4px color-mix(in srgb, var(--foreground) 10%, transparent);
+    }
+
+    .cajas-choices .choices__list--dropdown .choices__list,
+    .cajas-choices .choices__list[aria-expanded] .choices__list {
+        max-height: 14rem;
+    }
+
+    .cajas-choices .choices[data-type*='select-one'] .choices__input {
+        @apply m-0 w-full rounded-none border-0 border-b border-border bg-card text-sm text-foreground;
+        padding: 0.625rem 0.75rem;
+    }
+
+    .cajas-choices .choices[data-type*='select-one'] .choices__input:focus {
+        outline: none;
+        border-color: var(--cajas-border);
+        box-shadow: inset 0 -1px 0 0 var(--cajas-border);
+    }
+
+    .cajas-choices .choices__input::placeholder {
+        @apply text-muted-foreground;
+    }
+
+    .cajas-choices .choices__item--choice {
+        @apply px-3 py-2 text-sm text-foreground;
+        transition: background-color var(--cajas-transition), color var(--cajas-transition);
+    }
+
+    .cajas-choices .choices__item--choice.is-highlighted {
+        background-color: color-mix(in srgb, var(--cajas-border) 14%, var(--card));
+        color: var(--foreground);
+    }
+
+    .cajas-choices .choices__item--selectable.is-selected {
+        background-color: color-mix(in srgb, var(--cajas-border) 20%, var(--card));
+        color: var(--foreground);
+        font-weight: 500;
+    }
+
+    .cajas-choices .choices__list--dropdown .choices__item--selectable,
+    .cajas-choices .choices__list[aria-expanded] .choices__item--selectable {
+        padding-right: 0.75rem;
+    }
 }

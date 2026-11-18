@@ -28,7 +28,7 @@ export const cajasCheckboxClass =
 
 export const cajasPageClass = 'space-y-4 p-4 md:p-6';
 
-export const cajasCardClass = 'overflow-hidden rounded-xl border border-border bg-card shadow-sm';
+export const cajasCardClass = 'rounded-xl border border-border bg-card shadow-sm';
 
 export const cajasCardHeaderClass = 'border-b border-border bg-muted/40 px-4 py-3 sm:px-5';
 

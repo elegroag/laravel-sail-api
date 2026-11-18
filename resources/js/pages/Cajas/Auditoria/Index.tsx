@@ -1,5 +1,7 @@
 import AppLayout from '@/layouts/AppLayout';
+import CajasDateField from '@/pages/Cajas/components/CajasDateField';
 import LoadingOverlay from '@/pages/Cajas/components/LoadingOverlay';
+import CajasSearchSelect from '@/pages/Cajas/components/CajasSearchSelect';
 import {
     cajasActionLinkClass,
     cajasCardBodyClass,
@@ -235,20 +237,13 @@ export default function Index({ tipopcOptions, filters, result, queried }: Props
                                 <label htmlFor="tipopc" className={cajasFormLabelClass}>
                                     Tipo opción
                                 </label>
-                                <select
+                                <CajasSearchSelect
                                     id="tipopc"
-                                    className={cajasFormSelectClass}
                                     value={tipopc}
+                                    options={tipopcOptions}
                                     disabled={processing}
-                                    onChange={(e) => setTipopc(e.target.value)}
-                                >
-                                    <option value="">Seleccione</option>
-                                    {tipopcOptions.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={setTipopc}
+                                />
                                 {formErrors.tipopc && <p className={cajasFormErrorClass}>{formErrors.tipopc}</p>}
                             </div>
 
@@ -256,14 +251,7 @@ export default function Index({ tipopcOptions, filters, result, queried }: Props
                                 <label htmlFor="fecini" className={cajasFormLabelClass}>
                                     Fecha inicial
                                 </label>
-                                <input
-                                    id="fecini"
-                                    type="date"
-                                    className={cajasFormInputClass}
-                                    value={fecini}
-                                    disabled={processing}
-                                    onChange={(e) => setFecini(e.target.value)}
-                                />
+                                <CajasDateField id="fecini" value={fecini} disabled={processing} onChange={setFecini} />
                                 {formErrors.fecini && <p className={cajasFormErrorClass}>{formErrors.fecini}</p>}
                             </div>
 
@@ -271,14 +259,7 @@ export default function Index({ tipopcOptions, filters, result, queried }: Props
                                 <label htmlFor="fecfin" className={cajasFormLabelClass}>
                                     Fecha final
                                 </label>
-                                <input
-                                    id="fecfin"
-                                    type="date"
-                                    className={cajasFormInputClass}
-                                    value={fecfin}
-                                    disabled={processing}
-                                    onChange={(e) => setFecfin(e.target.value)}
-                                />
+                                <CajasDateField id="fecfin" value={fecfin} disabled={processing} onChange={setFecfin} />
                                 {formErrors.fecfin && <p className={cajasFormErrorClass}>{formErrors.fecfin}</p>}
                             </div>
 

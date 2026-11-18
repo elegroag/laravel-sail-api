@@ -7,6 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import CajasDateField from '@/pages/Cajas/components/CajasDateField';
 import {
     cajasActionDangerClass,
     cajasActionLinkClass,
@@ -516,14 +517,13 @@ export default function Index({ items, filters }: Props) {
                                     <label htmlFor="fecha_inicia" className={cajasFormLabelClass}>
                                         Fecha inicia *
                                     </label>
-                                    <input
+                                    <CajasDateField
                                         id="fecha_inicia"
                                         name="fecha_inicia"
-                                        type="date"
                                         className={`${cajasFormInputClass} ${inputError('fecha_inicia')}`}
                                         value={form.fecha_inicia}
-                                        onChange={handleChange}
                                         required
+                                        onChange={(value) => setForm((prev) => ({ ...prev, fecha_inicia: value }))}
                                     />
                                     {formErrors.fecha_inicia && <p className={cajasFormErrorClass}>{formErrors.fecha_inicia}</p>}
                                 </div>
@@ -531,14 +531,13 @@ export default function Index({ items, filters }: Props) {
                                     <label htmlFor="fecha_finaliza" className={cajasFormLabelClass}>
                                         Fecha finaliza *
                                     </label>
-                                    <input
+                                    <CajasDateField
                                         id="fecha_finaliza"
                                         name="fecha_finaliza"
-                                        type="date"
                                         className={`${cajasFormInputClass} ${inputError('fecha_finaliza')}`}
                                         value={form.fecha_finaliza}
-                                        onChange={handleChange}
                                         required
+                                        onChange={(value) => setForm((prev) => ({ ...prev, fecha_finaliza: value }))}
                                     />
                                     {formErrors.fecha_finaliza && <p className={cajasFormErrorClass}>{formErrors.fecha_finaliza}</p>}
                                 </div>

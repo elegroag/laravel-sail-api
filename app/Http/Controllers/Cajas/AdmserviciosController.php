@@ -8,15 +8,16 @@ use App\Models\DevolucionPrecompra;
 use App\Models\PrecompraServicio;
 use App\Services\Api\ApiEpayco;
 use App\Services\Api\ApiSubsidio;
+use App\Services\Ecommerce\AdmserviciosService;
 use App\Services\Ecommerce\DevolucionPrecompraService;
 use App\Services\Ecommerce\EpaycoCuentaResolver;
 use App\Services\Ecommerce\EstadoPrecompra;
 use App\Services\Ecommerce\PrecompraVencimientoService;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -25,10 +26,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class AdmserviciosController extends ApplicationController
 {
-    protected $query = '1=1';
-
-    protected $cantidad_pagina = 10;
-
     protected $user;
 
     protected $tipo;
@@ -39,74 +36,34 @@ class AdmserviciosController extends ApplicationController
         $this->tipo = session()->has('tipo') ? session('tipo') : null;
     }
 
-    public function index()
+    public function index(Request $request, AdmserviciosService $service): Response
     {
-        $campo_field = [
-            'documento' => 'Documento',
-            'codser' => 'Servicio',
-            'numero' => 'Apertura',
-            'codben' => 'Beneficiario',
-            'estado' => 'Estado (PE, PA, DE, RE, AB, VE, DV)',
-            'ref_payco' => 'Referencia ePayco',
-            'valor' => 'Valor',
-            'fecha_precompra' => 'Fecha precompra',
-            'fecha_pago' => 'Fecha pago',
-        ];
+        $filters = $service->filtersFromRequest($request);
+        $paginator = $service->paginate($request);
 
-        return view('cajas.admservicios.index', [
-            'title' => 'Ventas de Servicios',
-            'campo_filtro' => $campo_field,
-            'filtro_estados' => EstadoPrecompra::DESCRIPCIONES,
+        $estadoOptions = collect(EstadoPrecompra::DESCRIPCIONES)
+            ->map(fn (string $label, string $value) => ['value' => $value, 'label' => $label])
+            ->values()
+            ->all();
+
+        return Inertia::render('Cajas/Admservicios/Index', [
+            'filters' => $filters,
+            'estadoOptions' => $estadoOptions,
+            'estadoLabels' => EstadoPrecompra::DESCRIPCIONES,
+            'items' => [
+                'data' => $service->mapRows($paginator->items()),
+                'meta' => [
+                    'pagination' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'from' => $paginator->firstItem(),
+                        'to' => $paginator->lastItem(),
+                        'total' => $paginator->total(),
+                    ],
+                ],
+            ],
         ]);
-    }
-
-    public function aplicarFiltro(Request $request)
-    {
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $numero = $request->input('numero');
-        if ($numero != '' && is_numeric($numero)) {
-            $this->cantidad_pagina = (int) $numero;
-        }
-
-        return $this->buscar($request);
-    }
-
-    public function buscar(Request $request)
-    {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
-        $numero = $request->input('numero');
-        if ($numero != '' && is_numeric($numero)) {
-            $this->cantidad_pagina = (int) $numero;
-        }
-
-        $paginate = Paginate::execute(
-            $this->queryPrecompras($request)->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
-
-        $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate, $this->cantidad_pagina);
-
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
-
-        return $this->renderObject($response, false);
-    }
-
-    public function showTabla($paginate)
-    {
-        return view('cajas.admservicios._tabla', [
-            'paginate' => $paginate,
-        ])->render();
     }
 
     /**
@@ -127,7 +84,7 @@ class AdmserviciosController extends ApplicationController
         }
 
         return view('cajas.admservicios.ver', [
-            'title' => 'Precompra #' . $precompra->id,
+            'title' => 'Precompra #'.$precompra->id,
             'precompra' => $precompra,
             'detalleHtml' => $this->renderDetalleHtml($precompra),
         ]);
@@ -158,7 +115,7 @@ class AdmserviciosController extends ApplicationController
         return $this->renderObject([
             'success' => true,
             'html' => $html,
-            'titulo' => 'Precompra #' . $precompra->id,
+            'titulo' => 'Precompra #'.$precompra->id,
         ]);
     }
 
@@ -258,7 +215,7 @@ class AdmserviciosController extends ApplicationController
                     'vencida' => ($vencimiento['marcada'] ?? false) === true,
                     'subsidio' => $guardado['resultado'] ?? null,
                     'html' => $this->renderDetalleHtml($precompraFresh),
-                    'titulo' => 'Precompra #' . $precompraFresh->id,
+                    'titulo' => 'Precompra #'.$precompraFresh->id,
                 ]);
             }
 
@@ -274,7 +231,7 @@ class AdmserviciosController extends ApplicationController
                 'registrada' => true,
                 'subsidio' => $guardado['resultado'] ?? null,
                 'html' => $this->renderDetalleHtml($precompra),
-                'titulo' => 'Precompra #' . $precompra->id,
+                'titulo' => 'Precompra #'.$precompra->id,
             ]);
         } catch (\Throwable $e) {
             Log::warning('Admservicios.registrarSubsidio: error', [
@@ -285,7 +242,7 @@ class AdmserviciosController extends ApplicationController
 
             return $this->renderObject([
                 'success' => false,
-                'msj' => 'Error al registrar en Subsidio: ' . $e->getMessage(),
+                'msj' => 'Error al registrar en Subsidio: '.$e->getMessage(),
                 'registrada' => false,
             ]);
         }
@@ -306,7 +263,7 @@ class AdmserviciosController extends ApplicationController
         }
 
         $data = $request->validate([
-            'motivo' => 'required|string|in:' . implode(',', array_keys(EstadoPrecompra::MOTIVOS_VENCIDA)),
+            'motivo' => 'required|string|in:'.implode(',', array_keys(EstadoPrecompra::MOTIVOS_VENCIDA)),
             'detalle' => 'nullable|string|max:1000',
         ]);
 
@@ -321,7 +278,7 @@ class AdmserviciosController extends ApplicationController
                 'success' => true,
                 'msj' => 'Precompra marcada como Vencida.',
                 'html' => $this->renderDetalleHtml($precompra),
-                'titulo' => 'Precompra #' . $precompra->id,
+                'titulo' => 'Precompra #'.$precompra->id,
             ]);
         } catch (\Throwable $e) {
             return $this->renderObject([
@@ -399,7 +356,7 @@ class AdmserviciosController extends ApplicationController
                 'success' => true,
                 'msj' => $okMessage,
                 'html' => $this->renderDetalleHtml($precompra),
-                'titulo' => 'Precompra #' . $precompra->id,
+                'titulo' => 'Precompra #'.$precompra->id,
             ]);
         } catch (\Throwable $e) {
             return $this->renderObject([
@@ -462,7 +419,7 @@ class AdmserviciosController extends ApplicationController
     protected function guardarVentaSubsidio(PrecompraServicio $precompra, string $refpago): array
     {
         $items = $precompra->codbenList();
-        $itemsPayload = array_map(static fn(string $codben) => ['codben' => $codben], $items);
+        $itemsPayload = array_map(static fn (string $codben) => ['codben' => $codben], $items);
         $codbenPrimero = $items[0] ?? ($precompra->codben ?: $precompra->documento);
 
         try {
@@ -525,7 +482,7 @@ class AdmserviciosController extends ApplicationController
 
             return [
                 'ok' => false,
-                'msg' => 'Error al guardar la venta: ' . $e->getMessage(),
+                'msg' => 'Error al guardar la venta: '.$e->getMessage(),
                 'resultado' => null,
             ];
         }
@@ -666,7 +623,7 @@ class AdmserviciosController extends ApplicationController
 
             $grupos = [];
             foreach ($candidatas as $fila) {
-                $clave = trim((string) ($fila['marca'] ?? '')) . '|' . trim((string) ($fila['documento'] ?? ''));
+                $clave = trim((string) ($fila['marca'] ?? '')).'|'.trim((string) ($fila['documento'] ?? ''));
                 $grupos[$clave][] = $fila;
             }
 
@@ -740,84 +697,58 @@ class AdmserviciosController extends ApplicationController
             return [
                 'consultado' => true,
                 'registrada' => false,
-                'msg' => 'Error al consultar Subsidio: ' . $e->getMessage(),
+                'msg' => 'Error al consultar Subsidio: '.$e->getMessage(),
                 'data' => null,
             ];
         }
     }
 
-    public function reporte(Request $request, $format = 'csv')
+    public function reporte(Request $request, AdmserviciosService $service, $format = 'csv'): StreamedResponse
     {
-        try {
-            $consultasOldServices = new GeneralService;
-            $this->query = $consultasOldServices->converQuery($request);
-            $precompras = $this->queryPrecompras($request)->get();
+        $precompras = $service->allForReport($request);
+        $filename = 'ventas_servicios_'.date('Ymd_His').'.csv';
 
-            $filename = 'ventas_servicios_' . date('Ymd_His') . '.csv';
-
-            return new StreamedResponse(function () use ($precompras) {
-                $handle = fopen('php://output', 'w');
-                // BOM para que Excel reconozca UTF-8
-                fwrite($handle, "\xEF\xBB\xBF");
+        return new StreamedResponse(function () use ($precompras, $service) {
+            $handle = fopen('php://output', 'w');
+            // BOM para que Excel reconozca UTF-8
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, [
+                'Id',
+                'Documento',
+                'Beneficiario',
+                'Servicio',
+                'Apertura',
+                'Valor',
+                'Estado',
+                'Referencia ePayco',
+                'Transaction ID',
+                'Approval code',
+                'Fecha precompra',
+                'Fecha pago',
+                'Motivo desestimacion',
+            ], ';');
+            foreach ($precompras as $precompra) {
+                $tx = $precompra->ultimaTransaccionEpayco;
                 fputcsv($handle, [
-                    'Id',
-                    'Documento',
-                    'Beneficiario',
-                    'Servicio',
-                    'Apertura',
-                    'Valor',
-                    'Estado',
-                    'Referencia ePayco',
-                    'Transaction ID',
-                    'Approval code',
-                    'Fecha precompra',
-                    'Fecha pago',
-                    'Motivo desestimacion',
+                    $precompra->id,
+                    $precompra->documento,
+                    $precompra->codben,
+                    $precompra->codser,
+                    $precompra->numero,
+                    $precompra->valor,
+                    $precompra->estado_descripcion,
+                    $precompra->ref_payco,
+                    $tx?->transaction_id,
+                    $tx?->approval_code,
+                    optional($precompra->fecha_precompra)->format('Y-m-d H:i'),
+                    optional($precompra->fecha_pago)->format('Y-m-d H:i'),
+                    $service->motivoTexto($precompra),
                 ], ';');
-                foreach ($precompras as $precompra) {
-                    $tx = $precompra->ultimaTransaccionEpayco;
-                    fputcsv($handle, [
-                        $precompra->id,
-                        $precompra->documento,
-                        $precompra->codben,
-                        $precompra->codser,
-                        $precompra->numero,
-                        $precompra->valor,
-                        $precompra->estado_descripcion,
-                        $precompra->ref_payco,
-                        $tx?->transaction_id,
-                        $tx?->approval_code,
-                        optional($precompra->fecha_precompra)->format('Y-m-d H:i'),
-                        optional($precompra->fecha_pago)->format('Y-m-d H:i'),
-                        trim(($precompra->motivo_desestimacion ?? '') . ' ' . ($precompra->detalle_desestimacion ?? '')),
-                    ], ';');
-                }
-                fclose($handle);
-            }, 200, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            ]);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc('No se pudo generar el reporte: ' . $e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    /**
-     * Query base de precompras con el filtro dinamico y el chip de estado.
-     */
-    protected function queryPrecompras(Request $request)
-    {
-        $builder = PrecompraServicio::with('ultimaTransaccionEpayco')
-            ->whereRaw("{$this->query}")
-            ->orderByDesc('id');
-
-        $estado = $request->input('estado');
-        if ($estado != '' && array_key_exists($estado, EstadoPrecompra::DESCRIPCIONES)) {
-            $builder->where('estado', $estado);
-        }
-
-        return $builder;
+            }
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 }

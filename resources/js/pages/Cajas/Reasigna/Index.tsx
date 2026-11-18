@@ -7,7 +7,9 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/AppLayout';
+import CajasDateField from '@/pages/Cajas/components/CajasDateField';
 import LoadingOverlay from '@/pages/Cajas/components/LoadingOverlay';
+import CajasSearchSelect from '@/pages/Cajas/components/CajasSearchSelect';
 import {
     cajasActionLinkClass,
     cajasCardBodyClass,
@@ -292,39 +294,25 @@ export default function Index({
                                         <label htmlFor="tipopc" className={cajasFormLabelClass}>
                                             Tipo opción
                                         </label>
-                                        <select
+                                        <CajasSearchSelect
                                             id="tipopc"
-                                            className={cajasFormSelectClass}
                                             value={tipopc}
+                                            options={tipopcOptions}
                                             disabled={processing}
-                                            onChange={(e) => setTipopc(e.target.value)}
-                                        >
-                                            <option value="">Seleccione</option>
-                                            {tipopcOptions.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>
-                                                    {opt.label}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={setTipopc}
+                                        />
                                     </div>
                                     <div>
                                         <label htmlFor="usuario" className={cajasFormLabelClass}>
                                             Usuario
                                         </label>
-                                        <select
+                                        <CajasSearchSelect
                                             id="usuario"
-                                            className={cajasFormSelectClass}
                                             value={usuario}
+                                            options={usuariosByTipopc[tipopc] ?? usuariosOptions}
                                             disabled={processing}
-                                            onChange={(e) => setUsuario(e.target.value)}
-                                        >
-                                            <option value="">Seleccione</option>
-                                            {(usuariosByTipopc[tipopc] ?? usuariosOptions).map((opt) => (
-                                                <option key={opt.value} value={opt.value}>
-                                                    {opt.label}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={setUsuario}
+                                        />
                                     </div>
                                     <div className="flex items-end">
                                         <button type="submit" className={cajasFormBtnPrimary} disabled={processing}>
@@ -481,73 +469,50 @@ export default function Index({
                                     <label htmlFor="tipopc_proceso" className={cajasFormLabelClass}>
                                         Tipo opción
                                     </label>
-                                    <select
+                                    <CajasSearchSelect
                                         id="tipopc_proceso"
-                                        className={cajasFormSelectClass}
                                         value={proceso.tipopc}
+                                        options={tipopcMasivoOptions}
                                         disabled={processing}
-                                        onChange={(e) => setProceso((prev) => ({ ...prev, tipopc: e.target.value }))}
-                                    >
-                                        <option value="">Seleccione</option>
-                                        {tipopcMasivoOptions.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>
-                                                {opt.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={(value) => setProceso((prev) => ({ ...prev, tipopc: value }))}
+                                    />
                                     {formErrors.tipopc && <p className={cajasFormErrorClass}>{formErrors.tipopc}</p>}
                                 </div>
                                 <div>
                                     <label htmlFor="usuori" className={cajasFormLabelClass}>
                                         Usuario origen
                                     </label>
-                                    <select
+                                    <CajasSearchSelect
                                         id="usuori"
-                                        className={cajasFormSelectClass}
                                         value={proceso.usuori}
+                                        options={usuariosByTipopc[proceso.tipopc] ?? usuariosOptions}
                                         disabled={processing}
-                                        onChange={(e) => setProceso((prev) => ({ ...prev, usuori: e.target.value }))}
-                                    >
-                                        <option value="">Seleccione</option>
-                                        {(usuariosByTipopc[proceso.tipopc] ?? usuariosOptions).map((opt) => (
-                                            <option key={opt.value} value={opt.value}>
-                                                {opt.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={(value) => setProceso((prev) => ({ ...prev, usuori: value }))}
+                                    />
                                     {formErrors.usuori && <p className={cajasFormErrorClass}>{formErrors.usuori}</p>}
                                 </div>
                                 <div>
                                     <label htmlFor="usudes" className={cajasFormLabelClass}>
                                         Usuario destino
                                     </label>
-                                    <select
+                                    <CajasSearchSelect
                                         id="usudes"
-                                        className={cajasFormSelectClass}
                                         value={proceso.usudes}
+                                        options={usuariosByTipopc[proceso.tipopc] ?? usuariosOptions}
                                         disabled={processing}
-                                        onChange={(e) => setProceso((prev) => ({ ...prev, usudes: e.target.value }))}
-                                    >
-                                        <option value="">Seleccione</option>
-                                        {(usuariosByTipopc[proceso.tipopc] ?? usuariosOptions).map((opt) => (
-                                            <option key={opt.value} value={opt.value}>
-                                                {opt.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={(value) => setProceso((prev) => ({ ...prev, usudes: value }))}
+                                    />
                                     {formErrors.usudes && <p className={cajasFormErrorClass}>{formErrors.usudes}</p>}
                                 </div>
                                 <div>
                                     <label htmlFor="fecini" className={cajasFormLabelClass}>
                                         Fecha inicial
                                     </label>
-                                    <input
+                                    <CajasDateField
                                         id="fecini"
-                                        type="date"
-                                        className={cajasFormInputClass}
                                         value={proceso.fecini}
                                         disabled={processing}
-                                        onChange={(e) => setProceso((prev) => ({ ...prev, fecini: e.target.value }))}
+                                        onChange={(value) => setProceso((prev) => ({ ...prev, fecini: value }))}
                                     />
                                     {formErrors.fecini && <p className={cajasFormErrorClass}>{formErrors.fecini}</p>}
                                 </div>
@@ -555,13 +520,11 @@ export default function Index({
                                     <label htmlFor="fecfin" className={cajasFormLabelClass}>
                                         Fecha final
                                     </label>
-                                    <input
+                                    <CajasDateField
                                         id="fecfin"
-                                        type="date"
-                                        className={cajasFormInputClass}
                                         value={proceso.fecfin}
                                         disabled={processing}
-                                        onChange={(e) => setProceso((prev) => ({ ...prev, fecfin: e.target.value }))}
+                                        onChange={(value) => setProceso((prev) => ({ ...prev, fecfin: value }))}
                                     />
                                     {formErrors.fecfin && <p className={cajasFormErrorClass}>{formErrors.fecfin}</p>}
                                 </div>
@@ -593,19 +556,7 @@ export default function Index({
                             <label htmlFor="usuario_rea" className={cajasFormLabelClass}>
                                 Lista de usuarios disponibles
                             </label>
-                            <select
-                                id="usuario_rea"
-                                className={cajasFormSelectClass}
-                                value={usuarioRea}
-                                onChange={(e) => setUsuarioRea(e.target.value)}
-                            >
-                                <option value="">Seleccione</option>
-                                {modalUsuarios.map((opt) => (
-                                    <option key={opt.value} value={opt.value}>
-                                        {opt.label}
-                                    </option>
-                                ))}
-                            </select>
+                            <CajasSearchSelect id="usuario_rea" value={usuarioRea} options={modalUsuarios} onChange={setUsuarioRea} />
                         </div>
                         <DialogFooter>
                             <button type="button" className={cajasFormBtnSecondary} onClick={() => setDialogOpen(false)} disabled={processing}>

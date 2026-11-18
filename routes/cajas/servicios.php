@@ -24,9 +24,6 @@ Route::middleware(['cajas.auth'])->group(function () {
     // Consulta administrativa de ventas/precompras de servicios del portal
     Route::prefix('/cajas/admservicios')->group(function () {
         Route::get('/index', [AdmserviciosController::class, 'index'])->name('admservicios.index');
-        Route::post('/aplicar-filtro', [AdmserviciosController::class, 'aplicarFiltro'])->name('admservicios.aplicar-filtro');
-        Route::post('/change-cantidad-pagina', [AdmserviciosController::class, 'changeCantidadPagina'])->name('admservicios.change-cantidad-pagina');
-        Route::post('/buscar', [AdmserviciosController::class, 'buscar'])->name('admservicios.buscar');
         Route::get('/ver/{id}', [AdmserviciosController::class, 'ver'])->whereNumber('id')->name('admservicios.ver');
         Route::post('/detalle/{id}', [AdmserviciosController::class, 'detalle'])->name('admservicios.detalle');
         Route::post('/registrar-subsidio/{id}', [AdmserviciosController::class, 'registrarSubsidio'])->name('admservicios.registrar-subsidio');
@@ -40,7 +37,6 @@ Route::middleware(['cajas.auth'])->group(function () {
     // Conciliación precompras PA vs ventas Subsidio
     Route::prefix('/cajas/conciliacion-servicios')->group(function () {
         Route::get('/index', [ConciliacionServiciosController::class, 'index'])->name('conciliacion-servicios.index');
-        Route::post('/buscar', [ConciliacionServiciosController::class, 'buscar'])->name('conciliacion-servicios.buscar');
         Route::get('/reporte/{format?}', [ConciliacionServiciosController::class, 'reporte'])->name('conciliacion-servicios.reporte');
     });
 
@@ -54,4 +50,3 @@ Route::middleware(['cajas.auth'])->group(function () {
         Route::post('/{id}/rechazar', [DevolucionServiciosController::class, 'rechazar'])->whereNumber('id')->name('devolucion-servicios.rechazar');
     });
 });
-

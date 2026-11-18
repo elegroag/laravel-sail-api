@@ -2,302 +2,96 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
-use App\Models\Mercurio01;
-use App\Models\Mercurio53;
+use App\Http\Controllers\Controller;
+use App\Services\Cajas\Mercurio53Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio53Controller extends ApplicationController
+class Mercurio53Controller extends Controller
 {
+    public function __construct(
+        protected Mercurio53Service $service
+    ) {}
 
-    protected $user;
-
-    protected $tipo;
-
-    public function __construct()
+    public function index(): Response
     {
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
-    }
-
-    public function index()
-    {
-        return view('cajas.mercurio53.index', [
-            'title' => 'Destacadas',
-            'help' => 'Esta opcion permite manejar las imagenes destacadas.',
+        return Inertia::render('Cajas/Mercurio53/Index', [
+            'items' => $this->service->listar(),
         ]);
     }
 
-    public function galeria()
+    public function store(Request $request): RedirectResponse
     {
-        try {
-            $mercurio01 = $this->resolveMercurio01();
+        $request->validate([
+            'archivo' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
+        ]);
 
-            $galeria = Mercurio53::orderBy('orden', 'ASC')->get();
+        $result = $this->service->crear($request->file('archivo'));
 
-            $data = $galeria->map(function ($item) use ($mercurio01) {
-                if (empty($item->getUrl()) && ! empty($item->getArchivo())) {
-                    $this->syncImageUrl($item, $mercurio01);
-                    $item->save();
-                }
-
-                return $this->mapRecord($item, $mercurio01);
-            });
-
-            $response = parent::successFunc('Consulta exitosa');
-            $response['data'] = $data;
-
-            return $this->renderObject($response);
-        } catch (DebugException $e) {
-            return $this->renderObject(parent::errorFunc($e->getMessage()));
-        } catch (\Throwable $e) {
-            parent::setLogger($e->getMessage());
-
-            return $this->renderObject(parent::errorFunc('No se pudo cargar las imágenes destacadas.'));
-        }
-    }
-
-    public function editar(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $numero = $request->input('numero');
-            $mercurio01 = $this->resolveMercurio01();
-
-            $mercurio53 = Mercurio53::where('numero', $numero)->first();
-            if (! $mercurio53) {
-                throw new DebugException('Registro no encontrado.');
-            }
-
-            return $this->renderObject($this->mapRecord($mercurio53, $mercurio01), false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc($e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function guardar(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            DB::beginTransaction();
-
-            $mercurio01 = $this->resolveMercurio01();
-            $numero = $request->input('numero');
-            $isUpdate = ! empty($numero);
-
-            if ($isUpdate) {
-                $mercurio53 = Mercurio53::where('numero', $numero)->first();
-                if (! $mercurio53) {
-                    throw new DebugException('Registro no encontrado.');
-                }
-            } else {
-                $numero = (Mercurio53::max('numero') ?? 0) + 1;
-                $mercurio53 = new Mercurio53;
-                $mercurio53->setNumero($numero);
-                $mercurio53->setOrden((Mercurio53::max('orden') ?? 0) + 1);
-            }
-
-            if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
-                $this->replaceArchivo($request, $mercurio53, $mercurio01, (int) $numero, $isUpdate);
-            } elseif (! $isUpdate) {
-                throw new DebugException('No se ha subido ningún archivo o el archivo no es válido.');
-            } elseif (empty($mercurio53->getArchivo())) {
-                throw new DebugException('El registro no tiene imagen asociada.');
-            }
-
-            $this->syncImageUrl($mercurio53, $mercurio01);
-
-            if (! $mercurio53->save()) {
-                parent::setLogger($mercurio53->getMessages());
-                DB::rollBack();
-                throw new DebugException('Error al guardar la imagen destacada.');
-            }
-
-            DB::commit();
-            $response = parent::successFunc($isUpdate ? 'Actualización terminada con éxito' : 'Creacion terminada Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede guardar el Registro: '.$e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function arriba(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $numero = $request->input('numero');
-
-            DB::beginTransaction();
-            $objetivo = Mercurio53::where('numero', $numero)->first();
-            if (! $objetivo) {
-                throw new DebugException('Registro no encontrado.');
-            }
-
-            $orden_obj = $objetivo->getOrden();
-            $minimo = Mercurio53::min('orden');
-
-            if ($orden_obj != $minimo) {
-                $superior = Mercurio53::where('orden', '<', $orden_obj)->orderBy('orden', 'desc')->first();
-                if ($superior) {
-                    $orden_sup = $superior->getOrden();
-                    $objetivo->orden = $orden_sup;
-                    $superior->orden = $orden_obj;
-                    $objetivo->save();
-                    $superior->save();
-                }
-            }
-            DB::commit();
-            $response = parent::successFunc('Ordenado Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function abajo(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $numero = $request->input('numero');
-
-            DB::beginTransaction();
-            $objetivo = Mercurio53::where('numero', $numero)->first();
-            if (! $objetivo) {
-                throw new DebugException('Registro no encontrado.');
-            }
-
-            $orden_obj = $objetivo->getOrden();
-            $maximo = Mercurio53::max('orden');
-
-            if ($orden_obj != $maximo) {
-                $inferior = Mercurio53::where('orden', '>', $orden_obj)->orderBy('orden', 'asc')->first();
-                if ($inferior) {
-                    $orden_inf = $inferior->getOrden();
-                    $objetivo->orden = $orden_inf;
-                    $inferior->orden = $orden_obj;
-                    $objetivo->save();
-                    $inferior->save();
-                }
-            }
-            DB::commit();
-            $response = parent::successFunc('Ordenado Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede Ordenar el Registro: '.$e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    public function borrar(Request $request)
-    {
-        try {
-            $this->setResponse('ajax');
-            $numero = $request->input('numero');
-
-            DB::beginTransaction();
-            $mercurio53 = Mercurio53::where('numero', $numero)->first();
-
-            if ($mercurio53) {
-                $archivo = $mercurio53->getArchivo();
-                $mercurio01 = Mercurio01::first();
-
-                if ($mercurio01 && ! empty($archivo)) {
-                    $filePath = public_path($mercurio01->getPath().'galeria/'.$archivo);
-                    if (file_exists($filePath)) {
-                        unlink($filePath);
-                    }
-                }
-                $mercurio53->delete();
-            } else {
-                throw new DebugException('El registro a borrar no existe.');
-            }
-
-            DB::commit();
-            $response = parent::successFunc('Borrado Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede Borrar el Registro: '.$e->getMessage());
-
-            return $this->renderObject($response, false);
-        }
-    }
-
-    protected function resolveMercurio01(): Mercurio01
-    {
-        $mercurio01 = Mercurio01::where('codapl', 'MO')->get()->first();
-        if (! $mercurio01) {
-            throw new DebugException('Configuración básica no encontrada.');
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
 
-        return $mercurio01;
+        return redirect()
+            ->route('cajas.mercurio53.index')
+            ->with('success', $result['msj']);
     }
 
-    protected function mapRecord(Mercurio53 $item, Mercurio01 $mercurio01): array
+    public function update(Request $request, int $numero): RedirectResponse
     {
-        $archivo = $item->getArchivo();
-        $imageUrl = $this->buildImageUrl($mercurio01, $archivo);
+        $request->validate([
+            'archivo' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
+        ]);
 
-        return [
-            'numero' => $item->getNumero(),
-            'orden' => $item->getOrden(),
-            'url' => $item->getUrl() ?: $imageUrl,
-            'archivo' => $imageUrl,
-            'archivo_nombre' => $archivo,
-        ];
-    }
+        $result = $this->service->actualizar($numero, $request->file('archivo'));
 
-    protected function syncImageUrl(Mercurio53 $mercurio53, Mercurio01 $mercurio01): void
-    {
-        $imageUrl = $this->buildImageUrl($mercurio01, $mercurio53->getArchivo());
-        if ($imageUrl !== '') {
-            $mercurio53->setUrl($imageUrl);
-        }
-    }
-
-    protected function buildImageUrl(Mercurio01 $mercurio01, ?string $fileName): string
-    {
-        if (empty($fileName)) {
-            return '';
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
 
-        return $mercurio01->dominioUrl('galeria/'.$fileName);
+        return redirect()
+            ->route('cajas.mercurio53.index')
+            ->with('success', $result['msj']);
     }
 
-    protected function replaceArchivo(Request $request, Mercurio53 $mercurio53, Mercurio01 $mercurio01, int $numero, bool $isUpdate): void
+    public function destroy(int $numero): RedirectResponse
     {
-        $file = $request->file('archivo');
-        $extension = $file->getClientOriginalExtension();
-        $fileName = 'ME53_'.$numero.'.'.$extension;
-        $destinationPath = public_path($mercurio01->getPath().'galeria');
+        $result = $this->service->borrar($numero);
 
-        if ($isUpdate) {
-            $previousFile = $mercurio53->getArchivo();
-            if (! empty($previousFile) && $previousFile !== $fileName) {
-                $previousPath = public_path($mercurio01->getPath().'galeria/'.$previousFile);
-                if (file_exists($previousPath)) {
-                    unlink($previousPath);
-                }
-            }
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
         }
 
-        $file->move($destinationPath, $fileName);
-        $mercurio53->setArchivo($fileName);
+        return redirect()
+            ->route('cajas.mercurio53.index')
+            ->with('success', $result['msj']);
+    }
+
+    public function moveUp(int $numero): RedirectResponse
+    {
+        $result = $this->service->mover($numero, 'up');
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
+        }
+
+        return redirect()
+            ->route('cajas.mercurio53.index')
+            ->with('success', $result['msj']);
+    }
+
+    public function moveDown(int $numero): RedirectResponse
+    {
+        $result = $this->service->mover($numero, 'down');
+
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']]);
+        }
+
+        return redirect()
+            ->route('cajas.mercurio53.index')
+            ->with('success', $result['msj']);
     }
 }

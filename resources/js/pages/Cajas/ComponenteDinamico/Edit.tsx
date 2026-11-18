@@ -1,5 +1,6 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/AppLayoutTemplate';
+import CajasDateField from '@/pages/Cajas/components/CajasDateField';
 import type { Componente, DataSourceItem } from '@/types/cajas';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -582,13 +583,15 @@ export default function Edit({ componente }: Props) {
                                     <label htmlFor="date_max" className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
                                         Fecha máxima
                                     </label>
-                                    <input
-                                        type="date"
-                                        name="date_max"
+                                    <CajasDateField
                                         id="date_max"
+                                        name="date_max"
                                         className={`mt-1 rounded-md border-gray-300 shadow-sm focus:border-cajas-border focus:ring-cajas-border sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 block w-full ${errors.date_max ? 'border-red-300' : ''}`}
                                         value={data.date_max}
-                                        onChange={handleChange}
+                                        onChange={(value) => {
+                                            setData('date_max', value);
+                                            clearErrors();
+                                        }}
                                     />
                                 </div>
                             )}

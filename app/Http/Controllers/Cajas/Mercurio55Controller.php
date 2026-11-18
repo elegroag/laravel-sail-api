@@ -4,19 +4,18 @@ namespace App\Http\Controllers\Cajas;
 
 use App\Exceptions\DebugException;
 use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
 use App\Models\Mercurio51;
 use App\Models\Mercurio55;
 use App\Services\Utils\GeneralService;
 use App\Services\Utils\Paginate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Mercurio55Controller extends ApplicationController
 {
     protected $query = '1=1';
 
     protected $cantidad_pagina = 10;
-
 
     protected $user;
 
@@ -53,9 +52,6 @@ class Mercurio55Controller extends ApplicationController
             $html .= "<td>{$tipoDetalle}</td>";
             $html .= "<td>{$estadoDetalle}</td>";
             $html .= "<td class='table-actions'>";
-            $html .= "<a href='/mercurio56/index/{$mtable->codare}' class='table-action btn btn-xs btn-primary' title='Archivos'>";
-            $html .= "<i class='fas fa-images'></i>";
-            $html .= '</a>';
             $html .= "<a href='#!' class='table-action btn btn-xs btn-primary' title='Editar' data-cid='{$mtable->codare}' data-toggle='editar'>";
             $html .= "<i class='fas fa-user-edit text-white'></i>";
             $html .= '</a>';
@@ -205,7 +201,7 @@ class Mercurio55Controller extends ApplicationController
             return $this->renderObject($response, false);
         } catch (DebugException $e) {
             DB::rollBack();
-            $response = parent::errorFunc('No se puede guardar/editar el Registro: ' . $e->getMessage());
+            $response = parent::errorFunc('No se puede guardar/editar el Registro: '.$e->getMessage());
 
             return $this->renderObject($response, false);
         }

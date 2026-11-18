@@ -38,10 +38,18 @@ const CAJAS_INERTIA_PREFIXES = [
     '/cajas/mercurio09',
     '/cajas/mercurio04',
     '/cajas/mercurio26',
+    '/cajas/mercurio50',
+    '/cajas/mercurio53',
+    '/cajas/mercurio57',
     '/cajas/principal',
     '/cajas/auditoria',
     '/cajas/reasigna',
     '/cajas/consulta/carga_laboral',
+    '/cajas/consulta/indicadores',
+    '/cajas/consulta/certificado_trabajador',
+    '/cajas/conciliacion-servicios',
+    '/cajas/admservicios/index',
+    '/cajas/reporte-compras-servicios',
 ] as const;
 
 function normalizePath(url: string): string {

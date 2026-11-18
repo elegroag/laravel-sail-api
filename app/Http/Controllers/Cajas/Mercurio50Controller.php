@@ -2,133 +2,130 @@
 
 namespace App\Http\Controllers\Cajas;
 
-use App\Exceptions\DebugException;
-use App\Http\Controllers\Adapter\ApplicationController;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use App\Models\Mercurio50;
-use App\Services\Utils\GeneralService;
-use App\Services\Utils\Paginate;
+use App\Services\Cajas\Mercurio50Service;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class Mercurio50Controller extends ApplicationController
+class Mercurio50Controller extends Controller
 {
-    protected $query = '1=1';
+    public function __construct(
+        protected Mercurio50Service $service
+    ) {}
 
-    protected $cantidad_pagina = 10;
-
-
-    protected $user;
-
-    protected $tipo;
-
-    public function __construct()
+    public function index(Request $request): Response
     {
-        $this->user = session()->has('user') ? session('user') : null;
-        $this->tipo = session()->has('tipo') ? session('tipo') : null;
-    }
+        $paginator = $this->service->paginate($request);
 
-    public function showTabla($paginate)
-    {
-        return view('cajas.mercurio50._tabla', compact('paginate'))->render();
-    }
+        $items = [
+            'data' => collect($paginator->items())->map(fn (Mercurio50 $row) => [
+                'codapl' => (string) $row->codapl,
+                'webser' => $row->webser,
+                'path' => $row->path,
+                'urlonl' => $row->urlonl,
+                'puncom' => $row->puncom,
+            ])->values()->all(),
+            'meta' => [
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                    'total' => $paginator->total(),
+                ],
+            ],
+        ];
 
-    public function aplicarFiltro(Request $request)
-    {
-        $consultasOldServices = new GeneralService;
-        $this->query = $consultasOldServices->converQuery($request);
-
-        return $this->buscar($request);
-    }
-
-    public function changeCantidadPagina(Request $request)
-    {
-        $this->cantidad_pagina = $request->input('numero');
-
-        return $this->buscar($request);
-    }
-
-    public function index()
-    {
-        return view('cajas.mercurio50.index', [
-            'title' => 'Basica',
-            'showNewButton' => Mercurio50::count() == 0,
+        return Inertia::render('Cajas/Mercurio50/Index', [
+            'items' => $items,
+            'canCreate' => Mercurio50::count() === 0,
+            'filters' => [
+                'q' => (string) $request->query('q', ''),
+                'per_page' => (int) $request->query('per_page', 10),
+            ],
         ]);
     }
 
-    public function buscar(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $pagina = ($request->input('pagina') == '') ? 1 : $request->input('pagina');
+        $data = $this->validated($request);
 
-        $paginate = Paginate::execute(
-            Mercurio50::whereRaw("{$this->query}")->get(),
-            $pagina,
-            $this->cantidad_pagina
-        );
+        if (Mercurio50::count() > 0) {
+            return redirect()
+                ->back()
+                ->withErrors(['form' => 'Ya existe una configuración básica. Edite el registro existente.'])
+                ->withInput();
+        }
 
-        $html = $this->showTabla($paginate);
-        $consultasOldServices = new GeneralService;
-        $html_paginate = $consultasOldServices->showPaginate($paginate);
+        $result = $this->service->crear($data);
 
-        $response['consulta'] = $html;
-        $response['paginate'] = $html_paginate;
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
+        }
 
-        return $this->renderObject($response, false);
+        return redirect()
+            ->route('cajas.mercurio50.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function editar(Request $request)
+    public function update(Request $request, string $codapl): RedirectResponse
     {
-        try {
-            $this->setResponse('ajax');
-            $mercurio50 = Mercurio50::first();
-            if ($mercurio50 == false) {
-                $mercurio50 = new Mercurio50;
-            }
+        Mercurio50::where('codapl', $codapl)->firstOrFail();
 
-            return $this->renderObject($mercurio50->toArray(), false);
-        } catch (DebugException $e) {
-            $response = parent::errorFunc('Error al obtener el registro');
+        $data = $this->validated($request, $codapl);
+        $result = $this->service->actualizar($codapl, $data);
 
-            return $this->renderObject($response, false);
+        if (! $result['flag']) {
+            return redirect()->back()->withErrors(['form' => $result['msj']])->withInput();
         }
+
+        return redirect()
+            ->route('cajas.mercurio50.index', $request->only(['q', 'per_page']))
+            ->with('success', $result['msj']);
     }
 
-    public function guardar(Request $request)
+    /**
+     * @return array{codapl: string, webser: ?string, path: ?string, urlonl: ?string, puncom: ?string}
+     */
+    private function validated(Request $request, ?string $currentCodapl = null): array
     {
-        try {
-            $this->setResponse('ajax');
-            $codapl = $request->input('codapl');
-            $webser = $request->input('webser');
-            $path = $request->input('path');
-            $urlonl = $request->input('urlonl');
-            $puncom = $request->input('puncom');
+        $isUpdate = $currentCodapl !== null;
 
-            DB::beginTransaction();
-            $mercurio50 = Mercurio50::first();
-            if (! $mercurio50) {
-                $mercurio50 = new Mercurio50;
-            }
+        $rules = [
+            'webser' => 'nullable|string|max:50',
+            'path' => 'nullable|string|max:45',
+            'urlonl' => 'nullable|string|max:60',
+            'puncom' => 'nullable|integer',
+        ];
 
-            $mercurio50->setCodapl($codapl);
-            $mercurio50->setWebser($webser);
-            $mercurio50->setPath($path);
-            $mercurio50->setUrlonl($urlonl);
-            $mercurio50->setPuncom($puncom);
+        if ($isUpdate) {
+            $validated = $request->validate($rules);
 
-            if (! $mercurio50->save()) {
-                parent::setLogger($mercurio50->getMessages());
-                DB::rollBack();
-                throw new DebugException('Error al guardar el registro');
-            }
-
-            DB::commit();
-            $response = parent::successFunc('Creacion Con Exito');
-
-            return $this->renderObject($response, false);
-        } catch (DebugException $e) {
-            DB::rollBack();
-            $response = parent::errorFunc('No se puede guardar/editar el Registro: '.$e->getMessage());
-
-            return $this->renderObject($response, false);
+            return [
+                'codapl' => $currentCodapl,
+                'webser' => $validated['webser'] ?? null,
+                'path' => $validated['path'] ?? null,
+                'urlonl' => $validated['urlonl'] ?? null,
+                'puncom' => isset($validated['puncom']) ? (string) $validated['puncom'] : null,
+            ];
         }
+
+        $validated = $request->validate([
+            ...$rules,
+            'codapl' => ['required', 'string', 'size:2', Rule::unique('mercurio50', 'codapl')],
+        ]);
+
+        return [
+            'codapl' => $validated['codapl'],
+            'webser' => $validated['webser'] ?? null,
+            'path' => $validated['path'] ?? null,
+            'urlonl' => $validated['urlonl'] ?? null,
+            'puncom' => isset($validated['puncom']) ? (string) $validated['puncom'] : null,
+        ];
     }
 }
