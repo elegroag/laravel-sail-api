@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Library\Auth\SessionCookies;
+use App\Models\Gener42;
 use App\Models\MenuItem;
 use Closure;
 use Illuminate\Http\Request;
@@ -134,7 +135,7 @@ class CajasAuthenticated
         $this->actionMethod = $request->route()->getActionMethod();
         $tipfun = session('tipfun');
 
-        // Verificar si el tipfun tiene permiso para la acción
+        // Permiso por rol (tipfun) vía menú
         $hasPermission = MenuItem::select(
             DB::raw('menu_permissions.opciones')
         )
@@ -142,26 +143,71 @@ class CajasAuthenticated
             ->where('menu_items.controller', $this->controller)
             ->where('menu_permissions.tipfun', $tipfun);
 
-        if (! $hasPermission->exists()) {
-            return false; // No autorizado
-        }
-        $permisos = $hasPermission->first();
-        $request->attributes->set('opciones', json_decode($permisos->opciones ?? '{}', true));
+        if ($hasPermission->exists()) {
+            $permisos = $hasPermission->first();
+            $request->attributes->set('opciones', json_decode($permisos->opciones ?? '{}', true));
+            $request->attributes->set('auth_via', 'menu');
 
-        return true; // Autorizado
+            return true;
+        }
+
+        // Permiso puntual por usuario: Gener42 → Gener40 (controller + action)
+        if ($this->hasGener42Permission()) {
+            $request->attributes->set('opciones', []);
+            $request->attributes->set('auth_via', 'gener42');
+
+            return true;
+        }
+
+        return false;
     }
 
     public function validOption(Request $request): bool
     {
         $opciones = $request->attributes->get('opciones');
-        if (is_array($opciones)) {
-            if (array_key_exists(strtolower($this->actionMethod), $opciones)) {
-                if ($opciones[strtolower($this->actionMethod)] == false) {
-                    return false;
-                }
-            }
+        $actionKey = strtolower((string) $this->actionMethod);
+        $deniedByMenu = is_array($opciones)
+            && array_key_exists($actionKey, $opciones)
+            && $opciones[$actionKey] == false;
+
+        if ($deniedByMenu) {
+            return $this->hasGener42Permission();
+        }
+
+        if ($request->attributes->get('auth_via') === 'gener42') {
+            return $this->hasGener42Permission();
         }
 
         return true;
+    }
+
+    /**
+     * Usuario con Gener42 cuyo Gener40 coincide con controller + action actuales.
+     */
+    protected function hasGener42Permission(): bool
+    {
+        $usuario = $this->resolveUsuario();
+        if ($usuario === '' || $this->controller === null || $this->actionMethod === null) {
+            return false;
+        }
+
+        return Gener42::query()
+            ->join('gener40', 'gener40.codigo', '=', 'gener42.permiso')
+            ->where('gener42.usuario', $usuario)
+            ->where('gener40.controller', $this->controller)
+            ->where('gener40.action', $this->actionMethod)
+            ->exists();
+    }
+
+    protected function resolveUsuario(): string
+    {
+        $user = session('user');
+        if (is_array($user) && filled($user['usuario'] ?? null)) {
+            return (string) $user['usuario'];
+        }
+
+        $usuario = session('usuario');
+
+        return filled($usuario) ? (string) $usuario : '';
     }
 }

@@ -19,6 +19,8 @@ class Gener40 extends ModelBase
     protected $fillable = [
         'codigo',
         'detalle',
+        'controller',
+        'action',
         'orden',
     ];
 

@@ -34,6 +34,7 @@ const CAJAS_INERTIA_PREFIXES = [
     '/cajas/mercurio13',
     '/cajas/mercurio14',
     '/cajas/gener42',
+    '/cajas/gener40',
     '/cajas/banners',
     '/cajas/mercurio11',
     '/cajas/mercurio09',
@@ -165,7 +166,7 @@ function CajasNavMenuItem({ item, currentPath }: { item: CajasMenuItem; currentP
                     </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <SidebarMenuSub className="mx-1 border-cajas-border/40 px-1 py-0.5">
+                    <SidebarMenuSub className="mx-1 gap-1.5 border-cajas-border/40 px-1 py-0.5">
                         {children.map((child) => {
                             const childActive = child.isActive || isHrefActive(child.href, currentPath);
 
@@ -201,7 +202,7 @@ export function CajasNavMenu({ items = [] }: CajasNavMenuProps) {
     return (
         <SidebarGroup className="p-1">
             <SidebarGroupLabel className="h-6 px-0.5 text-cajas-text/70">Menú</SidebarGroupLabel>
-            <SidebarMenu className="gap-px">
+            <SidebarMenu className="gap-1">
                 {items.map((item) => (
                     <CajasNavMenuItem key={item.id} item={item} currentPath={currentPath} />
                 ))}

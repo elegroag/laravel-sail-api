@@ -128,6 +128,7 @@ require __DIR__.'/cajas/documento_empleador.php';
 require __DIR__.'/cajas/documento_trabajador.php';
 require __DIR__.'/cajas/estados_rechazo.php';
 require __DIR__.'/cajas/permisos_user.php';
+require __DIR__.'/cajas/gener40.php';
 require __DIR__.'/cajas/servicios.php';
 require __DIR__.'/cajas/notificaciones.php';
 require __DIR__.'/cajas/archivo_areas.php';

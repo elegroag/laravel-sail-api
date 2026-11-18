@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/AppLayout';
+import CajasSearchSelect from '@/pages/Cajas/components/CajasSearchSelect';
 import {
     cajasCardBodyClass,
     cajasCardClass,
@@ -9,7 +10,6 @@ import {
     cajasFormErrorClass,
     cajasFormInputClass,
     cajasFormLabelClass,
-    cajasFormSelectClass,
     cajasPageClass,
 } from '@/pages/Cajas/styles/cajas-classes';
 import { router, usePage } from '@inertiajs/react';
@@ -240,19 +240,16 @@ export default function Index({ usuarios, usuario, asignados, disponibles }: Pro
                             <label htmlFor="usuario" className={cajasFormLabelClass}>
                                 Usuario
                             </label>
-                            <select
+                            <CajasSearchSelect
                                 id="usuario"
-                                className={cajasFormSelectClass}
                                 value={selectedUsuario}
-                                onChange={(e) => handleUsuarioChange(e.target.value)}
-                            >
-                                <option value="">Seleccione un usuario</option>
-                                {usuarios.map((opt) => (
-                                    <option key={String(opt.value)} value={String(opt.value)}>
-                                        {opt.label}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Seleccione un usuario"
+                                options={usuarios.map((opt) => ({
+                                    value: String(opt.value),
+                                    label: opt.label,
+                                }))}
+                                onChange={handleUsuarioChange}
+                            />
                         </div>
 
                         {(formErrors.form || formErrors.usuario || formErrors.permisos) && (

@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Gener40;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Gener40>
+ * @extends Factory<Gener40>
  */
 class Gener40Factory extends Factory
 {
@@ -31,6 +32,8 @@ class Gener40Factory extends Factory
         return [
             'codigo' => $codigo,
             'detalle' => $detalle,
+            'controller' => $this->faker->optional()->randomElement(['Gener40Controller', 'Gener42Controller', 'MenuController']),
+            'action' => $this->faker->optional()->randomElement(['index', 'store', 'update', 'destroy']),
             'orden' => $orden,
         ];
     }
