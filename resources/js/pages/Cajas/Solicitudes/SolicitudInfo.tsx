@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import EstadoBadge from '@/pages/Cajas/Solicitudes/EstadoBadge';
-import type { AdjuntoItem, Campo, Seccion, SeguimientoItem } from '@/pages/Cajas/Solicitudes/types';
+import type { AdjuntoItem, Cambio, Campo, Seccion, SeguimientoItem } from '@/pages/Cajas/Solicitudes/types';
 import {
     cajasActionLinkClass,
     cajasCardBodyClass,
@@ -24,6 +24,31 @@ export function CamposTable({ rows }: { rows: Campo[] }) {
                         <tr key={`${row.label}-${index}`} className="border-border/70 border-b last:border-b-0">
                             <th className="bg-muted/30 text-muted-foreground w-[35%] px-4 py-2.5 text-left font-medium">{row.label}</th>
                             <td className="text-foreground whitespace-pre-wrap px-4 py-2.5">{row.value || '—'}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+export function CambiosTable({ rows }: { rows: Cambio[] }) {
+    return (
+        <div className="border-border overflow-x-auto rounded-lg border">
+            <table className="min-w-full text-left text-sm">
+                <thead className="border-border bg-muted/40 text-muted-foreground border-b text-xs uppercase tracking-wide">
+                    <tr>
+                        <th className="px-4 py-3 font-medium">Campo</th>
+                        <th className="px-4 py-3 font-medium">Valor anterior</th>
+                        <th className="px-4 py-3 font-medium">Valor nuevo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((row) => (
+                        <tr key={row.campo} className="border-border/70 border-b last:border-b-0">
+                            <td className="px-4 py-2.5 font-medium">{row.label}</td>
+                            <td className="text-muted-foreground whitespace-pre-wrap break-all px-4 py-2.5">{row.anterior || '—'}</td>
+                            <td className="text-foreground whitespace-pre-wrap break-all px-4 py-2.5">{row.nuevo || '—'}</td>
                         </tr>
                     ))}
                 </tbody>

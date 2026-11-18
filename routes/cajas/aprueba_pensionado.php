@@ -1,26 +1,8 @@
 <?php
 
 use App\Http\Controllers\Cajas\ApruebaPensionadoController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Routing\SolicitudRoutes;
 
-Route::middleware(['cajas.auth'])->group(function () {
-    Route::prefix('/cajas/aprobacionpen')->group(function () {
-        Route::get('/index', [ApruebaPensionadoController::class, 'index']);
-        Route::post('/aplicar_filtro/{estado?}', [ApruebaPensionadoController::class, 'aplicarFiltro']);
-        Route::post('/buscar/{estado?}', [ApruebaPensionadoController::class, 'buscar']);
-        Route::post('/infor', [ApruebaPensionadoController::class, 'infor']);
-        Route::post('/aprueba', [ApruebaPensionadoController::class, 'aprueba']);
-        Route::post('/devolver', [ApruebaPensionadoController::class, 'devolver']);
-        Route::post('/rechazar', [ApruebaPensionadoController::class, 'rechazar']);
-        Route::post('/reaprobar', [ApruebaPensionadoController::class, 'reaprobar']);
-        Route::post('/borrar-filtro', [ApruebaPensionadoController::class, 'borrarFiltro']);
-        Route::get('/buscar-en-sisu/{id}/{nit}', [ApruebaPensionadoController::class, 'buscarEnSisuView']);
-        Route::get('/editar/{id}', [ApruebaPensionadoController::class, 'editarView']);
-        Route::post('/editar', [ApruebaPensionadoController::class, 'editaEmpresa']);
-        Route::post('/editar-formulario', [ApruebaPensionadoController::class, 'editarFormulario']);
-        Route::post('/editar-solicitud', [ApruebaPensionadoController::class, 'editarSolicitud']);
-        Route::get('/aportes/{id}', [ApruebaPensionadoController::class, 'aportes']);
-        Route::post('/deshacer', [ApruebaPensionadoController::class, 'deshacer']);
-        Route::post('/change_cantidad_pagina/{estado?}', [ApruebaPensionadoController::class, 'changeCantidadPagina']);
-    });
-});
+SolicitudRoutes::register('/cajas/aprobacionpen', 'cajas.aprobacionpen', ApruebaPensionadoController::class, [
+    'editar' => true, 'aportes' => true, 'deshacer' => true, 'reaprobar' => true,
+]);

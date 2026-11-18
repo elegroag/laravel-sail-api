@@ -39,6 +39,17 @@ abstract class SolicitudListService
     abstract protected function showUrl(Model $row): string;
 
     /**
+     * Restricción adicional de la consulta (p. ej. un subtipo dentro de la misma tabla).
+     *
+     * @param  Builder<Model>  $query
+     * @return Builder<Model>
+     */
+    protected function scope(Builder $query): Builder
+    {
+        return $query;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     abstract protected function extraRow(Model $row): array;
@@ -81,7 +92,7 @@ abstract class SolicitudListService
     public function counts(string $usuario): array
     {
         $model = $this->modelClass();
-        $raw = $model::query()
+        $raw = $this->scope($model::query())
             ->where(function (Builder $q) use ($usuario) {
                 $q->where('usuario', $usuario)->orWhere('estado', 'T');
             })
@@ -133,7 +144,7 @@ abstract class SolicitudListService
     protected function baseQuery(array $filters, string $usuario): Builder
     {
         $model = $this->modelClass();
-        $query = $model::query()->where('estado', $filters['estado']);
+        $query = $this->scope($model::query())->where('estado', $filters['estado']);
 
         if ($filters['estado'] !== 'T') {
             $query->where('usuario', $usuario);

@@ -95,3 +95,36 @@ export type FlashProps = {
     flash?: { success?: string | null; error?: string | null };
     errors?: Record<string, string>;
 };
+
+export type ModuloInfo = {
+    titulo: string;
+    singular: string;
+    identificacion: string;
+    nombre: string;
+    busqueda: string;
+    baseUrl?: string;
+};
+
+export type Cambio = { campo: string; label: string; anterior: string; nuevo: string };
+
+export type AprobarCampo = {
+    name: string;
+    label: string;
+    type: 'select' | 'text' | 'number' | 'date';
+    required: boolean;
+    search: boolean;
+    max: number | null;
+    min?: number;
+    options?: SelectOption[];
+    show_if?: { field: string; in: string[] };
+    required_if?: { field: string; in: string[] };
+};
+
+export type AprobarSchema = {
+    campos: AprobarCampo[];
+    defaults: Record<string, string | Record<string, boolean>>;
+    controles: { key: string; label: string }[];
+    catalogos_disponibles: boolean;
+    dependencias: Record<string, Record<string, Record<string, string>>>;
+    nota_max: number;
+};

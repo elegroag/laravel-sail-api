@@ -28,6 +28,7 @@ type Props = {
     identificacionLabel: string;
     nombreLabel: string;
     searchPlaceholder: string;
+    showRecepcion?: boolean;
 };
 
 const paginationButtonClass =
@@ -51,6 +52,7 @@ export default function SolicitudesList({
     identificacionLabel,
     nombreLabel,
     searchPlaceholder,
+    showRecepcion = true,
 }: Props) {
     const pagination = items.meta.pagination;
     const [q, setQ] = useState(filters.q);
@@ -176,7 +178,7 @@ export default function SolicitudesList({
                                 <thead className="border-border bg-muted/40 text-muted-foreground border-b text-xs uppercase tracking-wide">
                                     <tr>
                                         <th className="px-4 py-3 font-medium">Días</th>
-                                        <th className="px-4 py-3 font-medium">Recepción</th>
+                                        {showRecepcion && <th className="px-4 py-3 font-medium">Recepción</th>}
                                         <th className="px-4 py-3 font-medium">{identificacionLabel}</th>
                                         <th className="px-4 py-3 font-medium">{nombreLabel}</th>
                                         <th className="px-4 py-3 font-medium">Estado</th>
@@ -187,7 +189,7 @@ export default function SolicitudesList({
                                 <tbody>
                                     {items.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="text-muted-foreground px-4 py-8 text-center">
+                                            <td colSpan={showRecepcion ? 7 : 6} className="text-muted-foreground px-4 py-8 text-center">
                                                 No hay registros que mostrar.
                                             </td>
                                         </tr>
@@ -200,7 +202,7 @@ export default function SolicitudesList({
                                                         {row.dias}
                                                     </span>
                                                 </td>
-                                                <td className="whitespace-nowrap px-4 py-3">{row.recepcion}</td>
+                                                {showRecepcion && <td className="whitespace-nowrap px-4 py-3">{row.recepcion}</td>}
                                                 <td className="whitespace-nowrap px-4 py-3 font-medium">{row.identificacion}</td>
                                                 <td className="px-4 py-3">{row.nombre || '—'}</td>
                                                 <td className="whitespace-nowrap px-4 py-3">
