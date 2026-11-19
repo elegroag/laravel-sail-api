@@ -297,13 +297,31 @@ class ApruebaEmpresaController extends Controller
         return redirect()->route('cajas.aprobacionemp.show', ['id' => $id])->with('success', $resultado['msj']);
     }
 
-    public function aportes(int $id): Response
+    public function aportes(Request $request, int $id): Response
     {
         $solicitud = $this->solicitudOrRedirect($id);
 
         return Inertia::render('Cajas/AprobacionEmp/Aportes', [
             'solicitud' => $this->resumen($solicitud),
-            'resultado' => $this->service->aportes($solicitud),
+            'resultado' => $this->service->aportes($solicitud, [
+                'page' => (int) $request->query('page', 1),
+                'per_page' => (int) $request->query('per_page', AprobacionEmpresaService::APORTES_DEFAULT_PER_PAGE),
+                'refresh' => $request->boolean('refresh'),
+            ]),
+        ]);
+    }
+
+    public function cartera(Request $request, int $id): Response
+    {
+        $solicitud = $this->solicitudOrRedirect($id);
+
+        return Inertia::render('Cajas/AprobacionEmp/Cartera', [
+            'solicitud' => $this->resumen($solicitud),
+            'resultado' => $this->service->cartera($solicitud, [
+                'page' => (int) $request->query('page', 1),
+                'per_page' => (int) $request->query('per_page', AprobacionEmpresaService::APORTES_DEFAULT_PER_PAGE),
+                'refresh' => $request->boolean('refresh'),
+            ]),
         ]);
     }
 

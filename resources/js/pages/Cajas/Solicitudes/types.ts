@@ -27,6 +27,8 @@ export type SolicitudFilters = {
     estado: string;
     q: string;
     per_page: number;
+    fecini: string;
+    fecfin: string;
 };
 
 export type EstadoOption = {
@@ -77,6 +79,7 @@ export type Acciones = {
     devolver: boolean;
     rechazar: boolean;
     aportes: boolean;
+    cartera?: boolean;
     deshacer: boolean;
     reaprobar: boolean;
     multiafiliacion: boolean;

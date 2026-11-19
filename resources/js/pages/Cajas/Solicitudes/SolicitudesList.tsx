@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/AppLayout';
+import CajasDateField from '@/pages/Cajas/components/CajasDateField';
 import LoadingOverlay from '@/pages/Cajas/components/LoadingOverlay';
 import EstadoBadge from '@/pages/Cajas/Solicitudes/EstadoBadge';
 import FlashMessages from '@/pages/Cajas/Solicitudes/FlashMessages';
@@ -56,11 +57,15 @@ export default function SolicitudesList({
 }: Props) {
     const pagination = items.meta.pagination;
     const [q, setQ] = useState(filters.q);
+    const [fecini, setFecini] = useState(filters.fecini ?? '');
+    const [fecfin, setFecfin] = useState(filters.fecfin ?? '');
     const [navigating, setNavigating] = useState(false);
 
     useEffect(() => {
         setQ(filters.q);
-    }, [filters.q]);
+        setFecini(filters.fecini ?? '');
+        setFecfin(filters.fecfin ?? '');
+    }, [filters.q, filters.fecini, filters.fecfin]);
 
     const pageNumbers = useMemo(() => {
         const last = pagination.last_page;
@@ -82,7 +87,19 @@ export default function SolicitudesList({
         });
     };
 
-    const applySearch = () => visit({ estado: filters.estado, q: q.trim(), per_page: filters.per_page, page: 1 });
+    const filterParams = (overrides: Partial<Record<string, string | number>> = {}) => ({
+        estado: filters.estado,
+        q: q.trim(),
+        per_page: filters.per_page,
+        fecini,
+        fecfin,
+        page: 1,
+        ...overrides,
+    });
+
+    const applySearch = () => visit(filterParams());
+
+    const hasActiveFilters = filters.q !== '' || q !== '' || (filters.fecini ?? '') !== '' || fecini !== '' || (filters.fecfin ?? '') !== '' || fecfin !== '';
 
     return (
         <AppLayout title={title}>
@@ -101,7 +118,7 @@ export default function SolicitudesList({
                                         type="button"
                                         role="tab"
                                         aria-selected={active}
-                                        onClick={() => visit({ estado: option.value, q: q.trim(), per_page: filters.per_page, page: 1 })}
+                                        onClick={() => visit(filterParams({ estado: option.value }))}
                                         className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
                                             active
                                                 ? 'border-cajas-border bg-cajas-border/10 text-foreground'
@@ -115,8 +132,8 @@ export default function SolicitudesList({
                             })}
                         </div>
 
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                            <div className="flex-1">
+                        <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+                            <div className="min-w-[14rem] flex-1">
                                 <label htmlFor="q" className={cajasFormLabelClass}>
                                     Buscar
                                 </label>
@@ -135,7 +152,23 @@ export default function SolicitudesList({
                                     />
                                 </div>
                             </div>
-                            <div>
+                            <div className="w-full sm:w-40">
+                                <label htmlFor="fecini" className={cajasFormLabelClass}>
+                                    Fecha solicitud desde
+                                </label>
+                                <div className="mt-1">
+                                    <CajasDateField id="fecini" value={fecini} onChange={setFecini} />
+                                </div>
+                            </div>
+                            <div className="w-full sm:w-40">
+                                <label htmlFor="fecfin" className={cajasFormLabelClass}>
+                                    Fecha solicitud hasta
+                                </label>
+                                <div className="mt-1">
+                                    <CajasDateField id="fecfin" value={fecfin} onChange={setFecfin} />
+                                </div>
+                            </div>
+                            <div className="w-full sm:w-28">
                                 <label htmlFor="per_page" className={cajasFormLabelClass}>
                                     Por página
                                 </label>
@@ -143,7 +176,7 @@ export default function SolicitudesList({
                                     id="per_page"
                                     className={cajasFormSelectClass}
                                     value={filters.per_page}
-                                    onChange={(e) => visit({ estado: filters.estado, q: filters.q, per_page: Number(e.target.value), page: 1 })}
+                                    onChange={(e) => visit(filterParams({ q: filters.q, per_page: Number(e.target.value) }))}
                                 >
                                     {perPageOptions.map((n) => (
                                         <option key={n} value={n}>
@@ -156,12 +189,14 @@ export default function SolicitudesList({
                                 <button type="button" onClick={applySearch} className={cajasFormBtnSecondary}>
                                     Buscar
                                 </button>
-                                {(filters.q !== '' || q !== '') && (
+                                {hasActiveFilters && (
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setQ('');
-                                            visit({ estado: filters.estado, q: '', per_page: filters.per_page, page: 1 });
+                                            setFecini('');
+                                            setFecfin('');
+                                            visit(filterParams({ q: '', fecini: '', fecfin: '' }));
                                         }}
                                         className={cajasFormBtnSecondary}
                                     >

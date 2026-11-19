@@ -10,6 +10,7 @@ use App\Services\Cajas\AprobacionEmpresaService;
 use App\Services\Cajas\Solicitudes\SolicitudDetalleService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -126,7 +127,7 @@ class AprobacionEmpTest extends TestCase
     public function test_rutas_registradas_y_protegidas(): void
     {
         foreach ([
-            'index', 'show', 'edit', 'update', 'aportes', 'deshacer_form', 'archivo',
+            'index', 'show', 'edit', 'update', 'aportes', 'cartera', 'deshacer_form', 'archivo',
             'aprobar', 'devolver', 'rechazar', 'reaprobar', 'deshacer', 'editar_formulario', 'editar_solicitud',
         ] as $name) {
             $route = Route::getRoutes()->getByName("cajas.aprobacionemp.{$name}");
@@ -169,9 +170,49 @@ class AprobacionEmpTest extends TestCase
     public function test_filtros_invalidos_se_normalizan(): void
     {
         $filters = app(AprobacionEmpresaService::class)
-            ->filtersFromRequest(Request::create('/', 'GET', ['estado' => 'Z', 'per_page' => 7, 'q' => '  abc ']));
+            ->filtersFromRequest(Request::create('/', 'GET', [
+                'estado' => 'Z',
+                'per_page' => 7,
+                'q' => '  abc ',
+                'fecini' => 'no-fecha',
+                'fecfin' => '2026-99-99',
+            ]));
 
-        $this->assertSame(['estado' => 'P', 'q' => 'abc', 'per_page' => 10], $filters);
+        $this->assertSame([
+            'estado' => 'P',
+            'q' => 'abc',
+            'per_page' => 10,
+            'fecini' => '',
+            'fecfin' => '',
+        ], $filters);
+    }
+
+    public function test_filtros_de_fecha_intercambian_rango_invertido(): void
+    {
+        $filters = app(AprobacionEmpresaService::class)
+            ->filtersFromRequest(Request::create('/', 'GET', [
+                'fecini' => '2026-03-10',
+                'fecfin' => '2026-01-01',
+            ]));
+
+        $this->assertSame('2026-01-01', $filters['fecini']);
+        $this->assertSame('2026-03-10', $filters['fecfin']);
+    }
+
+    public function test_listado_filtra_por_rango_de_fecsol(): void
+    {
+        $dentro = $this->empresa(['nit' => '100', 'fecsol' => '2026-02-15']);
+        $this->empresa(['nit' => '200', 'fecsol' => '2026-01-05']);
+        $this->empresa(['nit' => '300', 'fecsol' => '2026-03-20']);
+
+        $service = app(AprobacionEmpresaService::class);
+        $lista = $service->paginate($service->filtersFromRequest(Request::create('/', 'GET', [
+            'estado' => 'P',
+            'fecini' => '2026-02-01',
+            'fecfin' => '2026-02-28',
+        ])), 'u1');
+
+        $this->assertSame([$dentro], collect($lista->items())->pluck('id')->all());
     }
 
     public function test_fila_del_listado_expone_urls_y_alerta(): void
@@ -257,7 +298,9 @@ class AprobacionEmpTest extends TestCase
 
         $aprobada = $service->acciones(new Mercurio30(['estado' => 'A']), false);
         $this->assertTrue($aprobada['deshacer'] && $aprobada['reaprobar']);
-        $this->assertFalse($aprobada['aprobar'] || $aprobada['editar'] || $aprobada['aportes']);
+        $this->assertFalse($aprobada['aprobar'] || $aprobada['editar'] || $aprobada['aportes'] || $aprobada['cartera']);
+
+        $this->assertTrue($pendiente['cartera'] && $pendiente['aportes']);
 
         $temporal = $service->acciones(new Mercurio30(['estado' => 'T']), true);
         $this->assertFalse($temporal['aprobar'] || $temporal['devolver'] || $temporal['rechazar']);
@@ -449,5 +492,134 @@ class AprobacionEmpTest extends TestCase
         $response->assertOk();
         $this->assertStringContainsString('inline; filename="rut.pdf"', $response->headers->get('Content-Disposition'));
         @unlink($path);
+    }
+
+    public function test_aportes_pagina_desde_cache_sin_volver_a_sisu(): void
+    {
+        $id = $this->empresa(['nit' => '900555666']);
+        $solicitud = Mercurio30::query()->findOrFail($id);
+        $service = app(AprobacionEmpresaService::class);
+
+        $rows = [];
+        for ($i = 1; $i <= 30; $i++) {
+            $rows[] = [
+                'perapo' => '202601',
+                'fecrec' => '2026-01-15',
+                'fecsis' => '2026-01-16',
+                'cedtra' => (string) (1000 + $i),
+                'codsuc' => '001',
+                'numero' => $i,
+                'valapo' => 1000 * $i,
+                'valnom' => 2000 * $i,
+            ];
+        }
+
+        Cache::put($service->aportesCacheKey('900555666'), [
+            'success' => true,
+            'msj' => '',
+            'aportes' => $rows,
+        ], now()->addMinutes(10));
+
+        $page1 = $service->aportes($solicitud, ['page' => 1, 'per_page' => 10]);
+        $this->assertTrue($page1['from_cache']);
+        $this->assertTrue($page1['success']);
+        $this->assertCount(10, $page1['aportes']);
+        $this->assertSame(30, $page1['pagination']['total']);
+        $this->assertSame(1, $page1['pagination']['current_page']);
+        $this->assertSame(3, $page1['pagination']['last_page']);
+        $this->assertSame(1, $page1['aportes'][0]['numero']);
+
+        $page2 = $service->aportes($solicitud, ['page' => 2, 'per_page' => 10]);
+        $this->assertTrue($page2['from_cache']);
+        $this->assertSame(11, $page2['aportes'][0]['numero']);
+        $this->assertSame(11, $page2['pagination']['from']);
+        $this->assertSame(20, $page2['pagination']['to']);
+    }
+
+    public function test_aportes_index_expone_paginacion_desde_cache(): void
+    {
+        $id = $this->empresa(['nit' => '900777888']);
+        $service = app(AprobacionEmpresaService::class);
+
+        Cache::put($service->aportesCacheKey('900777888'), [
+            'success' => true,
+            'msj' => '',
+            'aportes' => [
+                ['perapo' => '202601', 'fecrec' => '', 'fecsis' => '', 'cedtra' => '1', 'codsuc' => '001', 'numero' => 1, 'valapo' => 10, 'valnom' => 20],
+                ['perapo' => '202602', 'fecrec' => '', 'fecsis' => '', 'cedtra' => '2', 'codsuc' => '001', 'numero' => 2, 'valapo' => 10, 'valnom' => 20],
+            ],
+        ], now()->addMinutes(10));
+
+        $response = $this->get("/cajas/aprobacionemp/{$id}/aportes?per_page=10", $this->inertiaHeaders(
+            'Cajas/AprobacionEmp/Aportes',
+            'solicitud,resultado'
+        ));
+
+        $response->assertOk()
+            ->assertJsonPath('component', 'Cajas/AprobacionEmp/Aportes')
+            ->assertJsonPath('props.resultado.from_cache', true)
+            ->assertJsonPath('props.resultado.pagination.total', 2)
+            ->assertJsonPath('props.resultado.pagination.current_page', 1)
+            ->assertJsonCount(2, 'props.resultado.aportes');
+    }
+
+    public function test_cartera_pagina_desde_cache_sin_volver_a_sisu(): void
+    {
+        $id = $this->empresa(['nit' => '900444333']);
+        $solicitud = Mercurio30::query()->findOrFail($id);
+        $service = app(AprobacionEmpresaService::class);
+
+        $rows = [];
+        for ($i = 1; $i <= 25; $i++) {
+            $rows[] = [
+                'codsuc' => $i <= 12 ? '001' : '002',
+                'periodo' => '2026'.str_pad((string) (($i % 12) + 1), 2, '0', STR_PAD_LEFT),
+                'valcar' => 1000 * $i,
+            ];
+        }
+
+        Cache::put($service->carteraCacheKey('900444333'), [
+            'success' => true,
+            'msj' => '',
+            'rows' => $rows,
+        ], now()->addMinutes(10));
+
+        $page1 = $service->cartera($solicitud, ['page' => 1, 'per_page' => 10]);
+        $this->assertTrue($page1['from_cache']);
+        $this->assertCount(10, $page1['rows']);
+        $this->assertSame(25, $page1['pagination']['total']);
+        $this->assertSame(3, $page1['pagination']['last_page']);
+
+        $page2 = $service->cartera($solicitud, ['page' => 2, 'per_page' => 10]);
+        $this->assertTrue($page2['from_cache']);
+        $this->assertSame(11, $page2['pagination']['from']);
+        $this->assertSame($rows[10]['periodo'], $page2['rows'][0]['periodo']);
+    }
+
+    public function test_cartera_index_expone_paginacion_desde_cache(): void
+    {
+        $id = $this->empresa(['nit' => '900222111']);
+        $service = app(AprobacionEmpresaService::class);
+
+        Cache::put($service->carteraCacheKey('900222111'), [
+            'success' => true,
+            'msj' => '',
+            'rows' => [
+                ['codsuc' => '001', 'periodo' => '202601', 'valcar' => 15000],
+                ['codsuc' => '001', 'periodo' => '202602', 'valcar' => 8000],
+            ],
+        ], now()->addMinutes(10));
+
+        $response = $this->get("/cajas/aprobacionemp/{$id}/cartera?per_page=10", $this->inertiaHeaders(
+            'Cajas/AprobacionEmp/Cartera',
+            'solicitud,resultado'
+        ));
+
+        $response->assertOk()
+            ->assertJsonPath('component', 'Cajas/AprobacionEmp/Cartera')
+            ->assertJsonPath('props.resultado.from_cache', true)
+            ->assertJsonPath('props.resultado.pagination.total', 2)
+            ->assertJsonCount(2, 'props.resultado.rows')
+            ->assertJsonPath('props.resultado.rows.0.codsuc', '001');
     }
 }

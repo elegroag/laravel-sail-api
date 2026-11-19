@@ -15,6 +15,7 @@ use App\Services\Utils\Mercurio10Cierre;
 use App\Services\Utils\NotifyEmailServices;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -26,6 +27,10 @@ class AprobacionEmpresaService extends SolicitudListService
     public const TIPOPC = '2';
 
     public const ESTADOS_SIN_ACCION = ['A', 'T'];
+
+    public const APORTES_DEFAULT_PER_PAGE = 25;
+
+    public const APORTES_CACHE_TTL_MINUTES = 10;
 
     private ?array $catalogos = null;
 
@@ -92,6 +97,7 @@ class AprobacionEmpresaService extends SolicitudListService
             'devolver' => $abierta,
             'rechazar' => $abierta,
             'aportes' => $estado !== 'A',
+            'cartera' => $estado !== 'A',
             'deshacer' => $estado === 'A',
             'reaprobar' => $estado === 'A' || $afiliadoSisu,
         ];
@@ -106,7 +112,7 @@ class AprobacionEmpresaService extends SolicitudListService
     {
         $cat = $this->catalogos();
         $tipo = Mercurio06::query()->where('tipo', $s->tipo)->first();
-        $lookup = fn (string $key, mixed $code) => $this->etiqueta($cat[$key] ?? [], $code);
+        $lookup = fn(string $key, mixed $code) => $this->etiqueta($cat[$key] ?? [], $code);
 
         return [
             [
@@ -276,7 +282,7 @@ class AprobacionEmpresaService extends SolicitudListService
         $data['id'] = $id;
         $data['feccap'] = $data['fecafi'];
         $data['validaciones_control'] = array_map(
-            fn ($v) => ($v === true || $v === 'S' || $v === 1 || $v === '1' || $v === 'true') ? 'S' : 'N',
+            fn($v) => ($v === true || $v === 'S' || $v === 1 || $v === '1' || $v === 'true') ? 'S' : 'N',
             $data['validaciones_control']
         );
 
@@ -453,16 +459,91 @@ class AprobacionEmpresaService extends SolicitudListService
     }
 
     /**
+     * Consulta aportes en SISU, cachea el dataset completo y pagina en memoria.
+     *
+     * @param  array{page?: int, per_page?: int, refresh?: bool}  $filtros
+     * @return array{success: bool, msj: string, from_cache: bool, aportes: list<array<string, mixed>>, pagination: array<string, int|null>, per_page_options: list<int>}
+     */
+    public function aportes(Mercurio30 $solicitud, array $filtros = []): array
+    {
+        $page = max(1, (int) ($filtros['page'] ?? 1));
+        $perPage = (int) ($filtros['per_page'] ?? self::APORTES_DEFAULT_PER_PAGE);
+        if (! in_array($perPage, self::PER_PAGE_OPTIONS, true)) {
+            $perPage = self::APORTES_DEFAULT_PER_PAGE;
+        }
+        $refresh = (bool) ($filtros['refresh'] ?? false);
+
+        $nit = (string) $solicitud->getNit();
+        $cacheKey = $this->aportesCacheKey($nit);
+        $fromCache = false;
+
+        if ($refresh || ! Cache::has($cacheKey)) {
+            $payload = $this->fetchAportesFromSisu($solicitud);
+            if ($payload['success']) {
+                Cache::put($cacheKey, $payload, now()->addMinutes(self::APORTES_CACHE_TTL_MINUTES));
+            } else {
+                Cache::forget($cacheKey);
+            }
+        } else {
+            $cached = Cache::get($cacheKey);
+            if (is_array($cached) && isset($cached['aportes']) && is_array($cached['aportes'])) {
+                $payload = [
+                    'success' => (bool) ($cached['success'] ?? true),
+                    'msj' => (string) ($cached['msj'] ?? ''),
+                    'aportes' => $cached['aportes'],
+                ];
+                $fromCache = true;
+            } else {
+                $payload = $this->fetchAportesFromSisu($solicitud);
+                if ($payload['success']) {
+                    Cache::put($cacheKey, $payload, now()->addMinutes(self::APORTES_CACHE_TTL_MINUTES));
+                }
+            }
+        }
+
+        /** @var list<array<string, mixed>> $allRows */
+        $allRows = $payload['aportes'];
+        $total = count($allRows);
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $lastPage);
+        $offset = ($page - 1) * $perPage;
+        $pageRows = array_values(array_slice($allRows, $offset, $perPage));
+        $from = $total === 0 ? null : $offset + 1;
+        $to = $total === 0 ? null : min($offset + $perPage, $total);
+
+        return [
+            'success' => (bool) $payload['success'],
+            'msj' => (string) $payload['msj'],
+            'from_cache' => $fromCache,
+            'aportes' => $pageRows,
+            'pagination' => [
+                'current_page' => $page,
+                'last_page' => $lastPage,
+                'per_page' => $perPage,
+                'from' => $from,
+                'to' => $to,
+                'total' => $total,
+            ],
+            'per_page_options' => self::PER_PAGE_OPTIONS,
+        ];
+    }
+
+    public function aportesCacheKey(string $nit): string
+    {
+        return 'cajas:aprobacionemp:aportes:'.trim($nit);
+    }
+
+    /**
      * @return array{success: bool, msj: string, aportes: list<array<string, mixed>>}
      */
-    public function aportes(Mercurio30 $solicitud): array
+    private function fetchAportesFromSisu(Mercurio30 $solicitud): array
     {
         try {
             $api = new ApiSubsidio;
             $api->send([
                 'servicio' => 'AportesEmpresas',
                 'metodo' => 'buscarAportesEmpresa',
-                'params' => $solicitud->getNit(),
+                'params' => ['nit' => $solicitud->getNit()],
             ]);
 
             if ($api->isJson() === false) {
@@ -491,6 +572,143 @@ class AprobacionEmpresaService extends SolicitudListService
             'success' => (bool) ($out['success'] ?? false),
             'msj' => (string) ($out['message'] ?? ''),
             'aportes' => $filas,
+        ];
+    }
+
+    /**
+     * Consulta cartera / mora presunta en SISU, cachea el dataset y pagina en memoria.
+     *
+     * @param  array{page?: int, per_page?: int, refresh?: bool}  $filtros
+     * @return array{success: bool, msj: string, from_cache: bool, rows: list<array<string, mixed>>, pagination: array<string, int|null>, per_page_options: list<int>}
+     */
+    public function cartera(Mercurio30 $solicitud, array $filtros = []): array
+    {
+        $page = max(1, (int) ($filtros['page'] ?? 1));
+        $perPage = (int) ($filtros['per_page'] ?? self::APORTES_DEFAULT_PER_PAGE);
+        if (! in_array($perPage, self::PER_PAGE_OPTIONS, true)) {
+            $perPage = self::APORTES_DEFAULT_PER_PAGE;
+        }
+        $refresh = (bool) ($filtros['refresh'] ?? false);
+
+        $nit = (string) $solicitud->getNit();
+        $cacheKey = $this->carteraCacheKey($nit);
+        $fromCache = false;
+
+        if ($refresh || ! Cache::has($cacheKey)) {
+            $payload = $this->fetchCarteraFromSisu($solicitud);
+            if ($payload['success']) {
+                Cache::put($cacheKey, $payload, now()->addMinutes(self::APORTES_CACHE_TTL_MINUTES));
+            } else {
+                Cache::forget($cacheKey);
+            }
+        } else {
+            $cached = Cache::get($cacheKey);
+            if (is_array($cached) && isset($cached['rows']) && is_array($cached['rows'])) {
+                $payload = [
+                    'success' => (bool) ($cached['success'] ?? true),
+                    'msj' => (string) ($cached['msj'] ?? ''),
+                    'rows' => $cached['rows'],
+                ];
+                $fromCache = true;
+            } else {
+                $payload = $this->fetchCarteraFromSisu($solicitud);
+                if ($payload['success']) {
+                    Cache::put($cacheKey, $payload, now()->addMinutes(self::APORTES_CACHE_TTL_MINUTES));
+                }
+            }
+        }
+
+        /** @var list<array<string, mixed>> $allRows */
+        $allRows = $payload['rows'];
+        $total = count($allRows);
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $lastPage);
+        $offset = ($page - 1) * $perPage;
+        $pageRows = array_values(array_slice($allRows, $offset, $perPage));
+        $from = $total === 0 ? null : $offset + 1;
+        $to = $total === 0 ? null : min($offset + $perPage, $total);
+
+        return [
+            'success' => (bool) $payload['success'],
+            'msj' => (string) $payload['msj'],
+            'from_cache' => $fromCache,
+            'rows' => $pageRows,
+            'pagination' => [
+                'current_page' => $page,
+                'last_page' => $lastPage,
+                'per_page' => $perPage,
+                'from' => $from,
+                'to' => $to,
+                'total' => $total,
+            ],
+            'per_page_options' => self::PER_PAGE_OPTIONS,
+        ];
+    }
+
+    public function carteraCacheKey(string $nit): string
+    {
+        return 'cajas:aprobacionemp:cartera:'.trim($nit);
+    }
+
+    /**
+     * @return array{success: bool, msj: string, rows: list<array<string, mixed>>}
+     */
+    private function fetchCarteraFromSisu(Mercurio30 $solicitud): array
+    {
+        try {
+            $api = new ApiSubsidio;
+            $api->send([
+                'servicio' => 'AportesEmpresas',
+                'metodo' => 'cartera_mora_presunta_by_nit',
+                'params' => ['nit' => $solicitud->getNit()],
+            ]);
+
+            if ($api->isJson() === false) {
+                return ['success' => false, 'msj' => 'Error procesando la consulta de cartera.', 'rows' => []];
+            }
+
+            $out = $api->toArray();
+        } catch (\Throwable $e) {
+            Log::warning('Aprobación empresa: error consultando cartera', ['id' => $solicitud->id, 'error' => $e->getMessage()]);
+
+            return ['success' => false, 'msj' => 'No fue posible consultar la cartera en SISU.', 'rows' => []];
+        }
+
+        $cartera = $out['data']['cartera'] ?? [];
+        if (! is_array($cartera)) {
+            $cartera = [];
+        }
+
+        $filas = [];
+        foreach ($cartera as $codsuc => $periodos) {
+            if (! is_array($periodos)) {
+                continue;
+            }
+            foreach ($periodos as $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $filas[] = [
+                    'codsuc' => (string) ($row['codsuc'] ?? $codsuc),
+                    'periodo' => (string) ($row['periodo'] ?? ''),
+                    'valcar' => $row['valcar'] ?? 0,
+                ];
+            }
+        }
+
+        usort($filas, function (array $a, array $b): int {
+            $bySuc = strcmp((string) $a['codsuc'], (string) $b['codsuc']);
+            if ($bySuc !== 0) {
+                return $bySuc;
+            }
+
+            return strcmp((string) $a['periodo'], (string) $b['periodo']);
+        });
+
+        return [
+            'success' => (bool) ($out['success'] ?? false),
+            'msj' => (string) ($out['message'] ?? $out['msj'] ?? ''),
+            'rows' => array_values($filas),
         ];
     }
 

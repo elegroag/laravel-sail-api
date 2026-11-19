@@ -18,7 +18,7 @@ import type {
 } from '@/pages/Cajas/Solicitudes/types';
 import { cajasCardBodyClass, cajasCardClass, cajasCardHeaderClass, cajasFormBtnSecondary, cajasPageClass } from '@/pages/Cajas/styles/cajas-classes';
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, Banknote, Pencil, Undo2 } from 'lucide-react';
+import { ArrowLeft, Banknote, Pencil, Undo2, Wallet } from 'lucide-react';
 import { useState } from 'react';
 
 type Props = {
@@ -71,6 +71,12 @@ export default function Show({ solicitud, secciones, adjuntos, seguimiento, acci
                             <Link href={`${base}/aportes`} className={cajasFormBtnSecondary}>
                                 <Banknote className="mr-1.5 size-4" />
                                 Aportes
+                            </Link>
+                        )}
+                        {acciones.cartera && (
+                            <Link href={`${base}/cartera`} className={cajasFormBtnSecondary}>
+                                <Wallet className="mr-1.5 size-4" />
+                                Cartera
                             </Link>
                         )}
                         {acciones.deshacer && (

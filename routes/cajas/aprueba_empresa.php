@@ -19,6 +19,7 @@ Route::middleware(['cajas.auth'])->group(function () {
             Route::get('/edit', [ApruebaEmpresaController::class, 'edit'])->name('edit');
             Route::put('/', [ApruebaEmpresaController::class, 'update'])->name('update');
             Route::get('/aportes', [ApruebaEmpresaController::class, 'aportes'])->name('aportes');
+            Route::get('/cartera', [ApruebaEmpresaController::class, 'cartera'])->name('cartera');
             Route::get('/deshacer', [ApruebaEmpresaController::class, 'deshacerForm'])->name('deshacer_form');
             Route::get('/archivos/{coddoc}', [ApruebaEmpresaController::class, 'archivo'])->name('archivo');
 

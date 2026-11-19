@@ -55,7 +55,7 @@ abstract class SolicitudListService
     abstract protected function extraRow(Model $row): array;
 
     /**
-     * @return array{estado: string, q: string, per_page: int}
+     * @return array{estado: string, q: string, per_page: int, fecini: string, fecfin: string}
      */
     public function filtersFromRequest(Request $request): array
     {
@@ -69,15 +69,24 @@ abstract class SolicitudListService
             $perPage = 10;
         }
 
+        $fecini = $this->normalizeFecha((string) $request->query('fecini', ''));
+        $fecfin = $this->normalizeFecha((string) $request->query('fecfin', ''));
+
+        if ($fecini !== '' && $fecfin !== '' && $fecfin < $fecini) {
+            [$fecini, $fecfin] = [$fecfin, $fecini];
+        }
+
         return [
             'estado' => $estado,
             'q' => trim((string) $request->query('q', '')),
             'per_page' => $perPage,
+            'fecini' => $fecini,
+            'fecfin' => $fecfin,
         ];
     }
 
     /**
-     * @param  array{estado: string, q: string, per_page: int}  $filters
+     * @param  array{estado: string, q: string, per_page: int, fecini: string, fecfin: string}  $filters
      */
     public function paginate(array $filters, string $usuario): LengthAwarePaginator
     {
@@ -139,7 +148,7 @@ abstract class SolicitudListService
     }
 
     /**
-     * @param  array{estado: string, q: string, per_page: int}  $filters
+     * @param  array{estado: string, q: string, per_page: int, fecini: string, fecfin: string}  $filters
      */
     protected function baseQuery(array $filters, string $usuario): Builder
     {
@@ -159,9 +168,33 @@ abstract class SolicitudListService
             });
         }
 
+        if (($filters['fecini'] ?? '') !== '') {
+            $query->whereDate('fecsol', '>=', $filters['fecini']);
+        }
+
+        if (($filters['fecfin'] ?? '') !== '') {
+            $query->whereDate('fecsol', '<=', $filters['fecfin']);
+        }
+
         return $query
             ->orderBy('fecsol', $filters['estado'] === 'P' ? 'asc' : 'desc')
             ->orderBy($query->getModel()->getKeyName(), 'asc');
+    }
+
+    protected function normalizeFecha(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+
+        try {
+            $fecha = Carbon::createFromFormat('Y-m-d', $value);
+
+            return $fecha && $fecha->format('Y-m-d') === $value ? $value : '';
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     protected function diasHabiles(Model $row): int
